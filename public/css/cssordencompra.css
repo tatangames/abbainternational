@@ -1,0 +1,25 @@
+input {
+    border-width:1px;  border:none;
+}
+.ordenInput{
+    display: block;
+}
+.table-body{
+    width: 100%;
+}
+.table-head{
+    width: 100%;
+}
+.table-head td{
+    font-family:Arial, sans-serif; font-size:14px;
+}
+.table-body td{
+    font-family:Arial, sans-serif; font-size:14px;
+}
+
+@page *{
+          margin-top: 18.30cm;
+          margin-bottom: 2.54cm;
+          margin-left: 3.175cm;
+          margin-right: 3.175cm;
+      }
