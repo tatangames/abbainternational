@@ -53,13 +53,17 @@ class ApiRegistroController extends Controller
             return ['success' => 1, 'mensaje' => 'Correo ya registrado'];
         }
 
-
         $usuario = new Usuarios();
+        $usuario->id_iglesia = $request->iglesia;
+        $usuario->id_genero = $request->genero;
         $usuario->nombre = $request->nombre;
         $usuario->apellido = $request->apellido;
+        $usuario->edad = $request->edad;
         $usuario->correo = $request->correo;
         $usuario->password = Hash::make($request->password);
         $usuario->version_registro = $request->version;
+        $usuario->recibir_notificacion = 1;
+        $usuario->onesignal = $request->onesignal;
 
         if($usuario->save()){
             return ['success' => 2, 'id' => $usuario->id];
