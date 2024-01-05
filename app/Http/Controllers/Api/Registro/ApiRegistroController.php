@@ -7,6 +7,7 @@ use App\Models\Usuarios;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Carbon\Carbon;
 
 class ApiRegistroController extends Controller
 {
@@ -53,17 +54,20 @@ class ApiRegistroController extends Controller
             return ['success' => 1, 'mensaje' => 'Correo ya registrado'];
         }
 
+        $fecha = Carbon::now('America/El_Salvador');
+
         $usuario = new Usuarios();
         $usuario->id_iglesia = $request->iglesia;
         $usuario->id_genero = $request->genero;
         $usuario->nombre = $request->nombre;
         $usuario->apellido = $request->apellido;
-        $usuario->edad = $request->edad;
+        $usuario->fecha_nacimiento = $request->edad;
         $usuario->correo = $request->correo;
         $usuario->password = Hash::make($request->password);
         $usuario->version_registro = $request->version;
         $usuario->recibir_notificacion = 1;
         $usuario->onesignal = $request->onesignal;
+        $usuario->fecha_registro = $fecha;
 
         if($usuario->save()){
             return ['success' => 2, 'id' => $usuario->id];
