@@ -21,8 +21,7 @@ return new class extends Migration
             $table->string('correo', 100);
             $table->string('password', 255);
             $table->string('version_registro', 100);
-            $table->boolean('recibir_notificacion');
-            $table->string('onesignal')->nullable();
+
             $table->date('fecha_nacimiento');
             $table->dateTime('fecha_registro');
 

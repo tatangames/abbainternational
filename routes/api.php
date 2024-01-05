@@ -16,6 +16,24 @@ Route::post('app/registro/usuario', [ApiRegistroController::class,'registroUsuar
 
 Route::post('app/solicitar/informacion/perfil', [ApiPerfilController::class,'informacionPerfilUsuario']);
 
+Route::post('app/solicitar/listado/opcion/perfil', [ApiPerfilController::class,'informacionAjustes']);
+
+Route::post('app/actualizar/perfil/usuario', [ApiPerfilController::class,'actualizarPerfilUsuario']);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

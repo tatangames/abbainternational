@@ -5,9 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class RefranLogin extends Model
+class UsuarioNotificaciones extends Model
 {
     use HasFactory;
-    protected $table = 'refran_login';
+    protected $table = 'usuario_notificaciones';
     public $timestamps = false;
 }
