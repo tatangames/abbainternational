@@ -20,8 +20,8 @@ return new class extends Migration
             $table->string('apellido', 50);
             $table->string('correo', 100);
             $table->string('password', 255);
+            $table->string('codigo_pass', 10)->nullable();
             $table->string('version_registro', 100);
-
             $table->date('fecha_nacimiento');
             $table->dateTime('fecha_registro');
 

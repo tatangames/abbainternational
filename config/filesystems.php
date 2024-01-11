@@ -61,6 +61,11 @@ return [
             'root' => storage_path('app/public/archivos'),
         ],
 
+        'archivospublic' => [
+            'driver' => 'local',
+            'root' => storage_path('app/public/archivospublic'),
+        ],
+
     ],
 
     /*

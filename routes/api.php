@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\Sistema\ApiSistemaController;
 use App\Http\Controllers\Api\Registro\ApiRegistroController;
 use App\Http\Controllers\Api\Perfil\ApiPerfilController;
+use App\Http\Controllers\Api\Correo\ApiCorreoController;
 
 
 
@@ -20,7 +21,9 @@ Route::post('app/solicitar/listado/opcion/perfil', [ApiPerfilController::class,'
 
 Route::post('app/actualizar/perfil/usuario', [ApiPerfilController::class,'actualizarPerfilUsuario']);
 
+Route::post('app/solicitar/codigo/contrasena', [ApiCorreoController::class,'enviarCorreoRecuperacion']);
 
+Route::post('app/verificar/codigo/recuperacion', [ApiCorreoController::class,'verificarCodigoRecuperacion']);
 
 
 
