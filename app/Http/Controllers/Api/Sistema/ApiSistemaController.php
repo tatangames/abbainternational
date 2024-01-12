@@ -9,17 +9,7 @@ use Illuminate\Http\Request;
 class ApiSistemaController extends Controller
 {
 
-    public function refranLogin()
-    {
 
-        $infoRefran = RefranLogin::where('id', 1)->first();
-
-        return ['success' => 1,
-            'refran' => $infoRefran->refran,
-            'salmo' => $infoRefran->salmo
-            ];
-
-    }
 
 
 }

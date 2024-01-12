@@ -6,48 +6,20 @@ use App\Http\Controllers\Controller;
 use App\Models\UsuarioNotificaciones;
 use App\Models\Usuarios;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
+use Tymon\JWTAuth\Exceptions\JWTException;
+use Tymon\JWTAuth\Facades\JWTAuth;
+
 
 class ApiRegistroController extends Controller
 {
 
-    public function loginUsuario(Request $request)
-    {
-        $rules = array(
-            'correo' => 'required',
-            'password' => 'required',
-        );
 
-        $validator = Validator::make($request->all(), $rules );
-
-        if ( $validator->fails()){
-            return ['success' => 0];
-        }
-
-        if($infoUsuario = Usuarios::where('correo', $request->correo)->first()){
-
-            if (Hash::check($request->password, $infoUsuario->password)) {
-
-                return ['success' => 1,
-                    'id' => strval($infoUsuario->id),
-                    'mensaje' => "Inicio de sesion correctamente",
-                ];
-
-            }else{
-                // contraseña incorrecta
-
-                return ['success' => 2, 'mensaje' => "Contrasena incorrecta"];
-            }
-
-        } else {
-
-            return ['success' => 2, 'mensaje' => "Correo no encontrado"];
-        }
-    }
 
 
     public function registroUsuario(Request $request)

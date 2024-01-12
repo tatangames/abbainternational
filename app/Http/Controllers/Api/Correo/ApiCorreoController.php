@@ -53,6 +53,9 @@ class ApiCorreoController extends Controller
                 $codigo .= mt_rand(0, 9);
             }
 
+            Usuarios::where('id', $info->id)->update(['codigo_pass' => $codigo]);
+
+
             $dataWeb = ["codigo" => $codigo,
                 "usuario" => $info->nombre . " " . $info->apellido,
                 "recuperar_password" => $dataIdioma[self::IDIOMA_ID_1],
@@ -90,12 +93,12 @@ class ApiCorreoController extends Controller
             return ['success' => 0, 'msj' => "validación incorrecta"];
         }
 
-        if($info = Usuarios::where('correo', $request->correo)
+        if($infoUsuario = Usuarios::where('correo', $request->correo)
             ->where('codigo_pass', $request->codigo)
             ->first()){
 
             return ['success' => 1,
-                'id' => $info->id,
+                'id' => strval($infoUsuario->id),
                 'msj' => 'verificado'
             ];
 
@@ -104,12 +107,36 @@ class ApiCorreoController extends Controller
                 'msj' => "codigo no coincide"
             ];
         }
-
-
-
     }
 
 
+    public function actualizarNuevaPasswordReseteo(Request $request)
+    {
+
+        $rules = array(
+            'id' => 'required',
+            'password' => 'required'
+        );
+
+        $validator = Validator::make($request->all(), $rules);
+        if ( $validator->fails()){
+            return ['success' => 0, 'msj' => "validación incorrecta"];
+        }
+
+
+        if(Usuarios::where('id', $request->id)->first()){
+
+            Usuarios::where('id', $request->id)->update([
+                'password' => Hash::make($request->password)
+            ]);
+
+            return ['success' => 1];
+        }else{
+            return ['success' => 2];
+        }
+
+
+    }
 
 
 
