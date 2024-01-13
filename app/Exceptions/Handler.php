@@ -16,7 +16,7 @@ class Handler extends ExceptionHandler
 
     public function render($request, Throwable $exception)
     {
-        if ($exception instanceof TokenInvalidException) {
+        /*if ($exception instanceof TokenInvalidException) {
             return response()->json(['error' => 'Token no válido'], 401);
         }
 
@@ -26,7 +26,21 @@ class Handler extends ExceptionHandler
 
         // Añade manejo para otras excepciones relacionadas con JWT si es necesario
         if ($exception instanceof JWTException) {
-            return response()->json(['error' => 'Error al procesar el token'], 401);
+            return response()->json(['error' => 'Error al procesar el token Handle'], 401);
+        }*/
+
+        // Si la excepción es TokenInvalidException y la solicitud es una API
+        if ($exception instanceof TokenInvalidException && $request->is('api/*')) {
+            return response()->json(['error' => 'Token no válidox'], 401);
+        }
+
+        // Si la excepción es UnauthorizedHttpException y la solicitud es una API
+        if ($exception instanceof UnauthorizedHttpException && $request->is('api/*')) {
+            return response()->json(['error' => 'No autorizado Handler'], 401);
+        }
+
+        if ($exception instanceof JWTException && $request->is('api/*')) {
+            return response()->json(['error' => 'Error al procesar el token Handle'], 401);
         }
 
         return parent::render($request, $exception);
