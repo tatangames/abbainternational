@@ -60,7 +60,8 @@ class ApiRegistroController extends Controller
         }catch(\Throwable $e){
             Log::info('Error Registro Usuario ' . $e);
             DB::rollback();
-            return ['success' => 99];
+            return ['success' => 99,
+                'error' => $e];
         }
 
 

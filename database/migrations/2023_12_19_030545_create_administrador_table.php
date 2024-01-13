@@ -14,8 +14,12 @@ return new class extends Migration
         Schema::create('administrador', function (Blueprint $table) {
             $table->id();
             $table->string('nombre', 50);
-            $table->string('usuario', 50);
+            $table->string('usuario', 50)->unique();
             $table->string('password', 255);
+
+            $table->string('correo', 100)->nullable();
+            $table->string('token_correo', 100)->nullable();
+            $table->dateTime('token_fecha')->nullable();
         });
     }
 

@@ -17,6 +17,9 @@ class AdministradorSeeder extends Seeder
             'nombre' => 'Jonathan',
             'usuario' => 'jonathan',
             'password' => bcrypt('1234'),
+            'correo' => null,
+            'token_correo' => null,
+            'token_fecha' => null
         ])->assignRole('Admin');
     }
 }
