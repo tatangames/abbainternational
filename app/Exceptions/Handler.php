@@ -65,7 +65,7 @@ class Handler extends ExceptionHandler
     {
         $this->reportable(function (Throwable $e) {
 
-            $this->renderable(function(TokenInvalidException $e, $request){
+            /*$this->renderable(function(TokenInvalidException $e, $request){
                 return Response::json(['error'=>'Invalid token'],401);
             });
             $this->renderable(function (TokenExpiredException $e, $request) {
@@ -74,7 +74,7 @@ class Handler extends ExceptionHandler
 
             $this->renderable(function (JWTException $e, $request) {
                 return Response::json(['error'=>'Token not parsed'],401);
-            });
+            });*/
 
 
         });
