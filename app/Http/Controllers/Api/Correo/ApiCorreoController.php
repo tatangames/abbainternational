@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
 use DateTime;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class ApiCorreoController extends Controller
 {
@@ -24,8 +25,6 @@ class ApiCorreoController extends Controller
 
     const IDIOMA_ID_3 = 3; // se ha solicitado un codigo de recuperacion de contrasena
     const IDIOMA_ID_4 = 4; // su codigo de recuperacion es
-
-
 
 
 
@@ -65,8 +64,8 @@ class ApiCorreoController extends Controller
             ];
 
 
-            //Mail::to($request->correo)
-             //   ->send(new CorreoPasswordMail($dataWeb, $dataIdioma[self::IDIOMA_ID_1]));
+            Mail::to($request->correo)
+                ->send(new CorreoPasswordMail($dataWeb, $dataIdioma[self::IDIOMA_ID_1]));
 
             return ['success' => 2,
                 'msj' => 'código enviado'
@@ -110,9 +109,9 @@ class ApiCorreoController extends Controller
     }
 
 
+    // actualizar perfil utilizando token
     public function actualizarNuevaPasswordReseteo(Request $request)
     {
-
         $rules = array(
             'id' => 'required',
             'password' => 'required'
@@ -123,19 +122,26 @@ class ApiCorreoController extends Controller
             return ['success' => 0, 'msj' => "validación incorrecta"];
         }
 
+        // sacar usuario del token
+        $tokenApi = $request->header('Authorization');
 
-        if(Usuarios::where('id', $request->id)->first()){
+        if ($userToken = JWTAuth::user($tokenApi)) {
+            if(Usuarios::where('id', $userToken->id)->first()){
 
-            Usuarios::where('id', $request->id)->update([
-                'password' => Hash::make($request->password)
-            ]);
+                Usuarios::where('id', $userToken->id)->update([
+                    'password' => Hash::make($request->password)
+                ]);
 
-            return ['success' => 1];
+                // usuario cambio password
+                return ['success' => 1];
+            }else{
+                // usuario no encontrado
+                return ['success' => 2];
+            }
         }else{
+            // usuario no encontrado
             return ['success' => 2];
         }
-
-
     }
 
 

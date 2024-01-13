@@ -10,6 +10,9 @@ class VerificarToken
 {
     public function handle($request, Closure $next)
     {
+
+        // VERIFICAR QUE TOKEN SEA VALIDO
+
         try {
             // Intenta verificar el token
             JWTAuth::parseToken()->authenticate();

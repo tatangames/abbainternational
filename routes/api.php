@@ -16,25 +16,30 @@ Route::post('app/login', [ApiLoginController::class,'loginUsuario']);
 // registro de usuario
 Route::post('app/registro/usuario', [ApiRegistroController::class,'registroUsuario']);
 
-
-Route::post('app/solicitar/listado/opcion/perfil', [ApiPerfilController::class,'informacionAjustes']);
-
-Route::post('app/actualizar/perfil/usuario', [ApiPerfilController::class,'actualizarPerfilUsuario']);
-
+// solicitar codigo segun correo
 Route::post('app/solicitar/codigo/contrasena', [ApiCorreoController::class,'enviarCorreoRecuperacion']);
 
+// verificar codigo y retornar token
 Route::post('app/verificar/codigo/recuperacion', [ApiCorreoController::class,'verificarCodigoRecuperacion']);
-
-Route::post('app/actualizar/nueva/contrasena/reseteo', [ApiCorreoController::class,'actualizarNuevaPasswordReseteo']);
-
-
-
 
 
 
 Route::middleware('verificarToken')->group(function () {
 
+    // actualizar perfil utilizando token
+    Route::post('app/actualizar/nueva/contrasena/reseteo', [ApiCorreoController::class,'actualizarNuevaPasswordReseteo']);
+
+
+    // cuabre se abre fragment ajustes
+    Route::post('app/solicitar/listado/opcion/perfil', [ApiPerfilController::class,'informacionAjustes']);
+
+    // informacion de mi perfil
     Route::post('app/solicitar/informacion/perfil', [ApiPerfilController::class,'informacionPerfilUsuario']);
+
+    // actualizar datos de mi perfil
+    Route::post('app/actualizar/perfil/usuario', [ApiPerfilController::class,'actualizarPerfilUsuario']);
+
+
 
 
 });

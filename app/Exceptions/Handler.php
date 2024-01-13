@@ -18,23 +18,30 @@ class Handler extends ExceptionHandler
     {
 
 
-
-
         // **** API ****
 
         // Si la excepción es TokenInvalidException y la solicitud es una API
         if ($exception instanceof TokenInvalidException && $request->is('api/*')) {
-            return response()->json(['error' => 'Token no válidox'], 401);
+            return response()->json(
+                ['success' => -1,
+                    'error' => 'Token no es valido'
+
+                ], 401);
         }
 
         // Si la excepción es UnauthorizedHttpException y la solicitud es una API
         if ($exception instanceof UnauthorizedHttpException && $request->is('api/*')) {
-            return response()->json(['error' => 'No autorizado Handler'], 401);
+            return response()->json(
+                ['success' => -2,
+                    'error' => 'Token no es valido'
+
+                ], 401);
         }
 
         if ($exception instanceof JWTException && $request->is('api/*')) {
             return response()->json(
-                ['error' => 'Error al procesar el token Handle'
+                ['success' => -3,
+                 'error' => 'Token no es valido'
 
                 ], 401);
         }
