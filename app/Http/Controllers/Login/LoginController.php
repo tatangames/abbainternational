@@ -21,7 +21,7 @@ class LoginController extends Controller
     public function login(Request $request){
 
         $rules = array(
-            'usuario' => 'required',
+            'email' => 'required',
             'password' => 'required',
         );
 
@@ -31,12 +31,27 @@ class LoginController extends Controller
             return ['success' => 0];
         }
 
-        // si ya habia iniciado sesion, redireccionar
-        if (Auth::check()) {
+        //$credentials = $request->only('email', 'password');
+
+
+        $credentials = request()->only('email', 'password');
+        if (Auth::guard('admin')->attempt($credentials)) {
+            //return redirect()->route('admin.index');
             return ['success'=> 1, 'ruta'=> route('admin.panel')];
+        } else {
+            return ['success' => 2];
         }
 
-        if(Administrador::where('usuario', $request->usuario)->first()){
+
+
+
+        if (Auth::attempt($credentials)) {
+            // Autenticación exitosa
+            return ['success'=> 1, 'ruta'=> route('admin.panel')];
+        }
+        return ['success' => 2]; // password incorrecta
+
+       /* if(Administrador::where('usuario', $request->usuario)->first()){
             if(Auth::attempt(['usuario' => $request->usuario, 'password' => $request->password])) {
 
                 return ['success'=> 1, 'ruta'=> route('admin.panel')];
@@ -45,7 +60,7 @@ class LoginController extends Controller
             }
         }else{
             return ['success' => 3]; // usuario no encontrado
-        }
+        }*/
     }
 
     public function logout(Request $request){

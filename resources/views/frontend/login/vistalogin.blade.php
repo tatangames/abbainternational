@@ -78,7 +78,7 @@
                             <p class="text-center lead">Repuestos de Bodega Eléctrica</p>
                             <form>
                                 <label style="margin-top: 10px" class="font-500">Usuario</label>
-                                <input class="form-control form-control-lg mb-3" id="usuario" autocomplete="off" type="text">
+                                <input class="form-control form-control-lg mb-3" id="email" autocomplete="off" type="text">
                                 <label class="font-500">Contraseña</label>
                                 <input class="form-control form-control-lg" id="password" type="password">
 
@@ -113,23 +113,23 @@
     // inicio de sesion
     function login() {
 
-        var usuario = document.getElementById('usuario').value;
+        var correo = document.getElementById('email').value;
         var password = document.getElementById('password').value;
 
-        if(usuario === ''){
-            toastr.error('usuario es requerido');
+        if(correo === ''){
+            toastr.error('Correo es requerido');
             return;
         }
 
         if(password === ''){
-            toastr.error('contraseña es requerida');
+            toastr.error('Contraseña es requerida');
             return;
         }
 
         openLoading();
 
         let formData = new FormData();
-        formData.append('usuario', usuario);
+        formData.append('email', correo);
         formData.append('password', password);
 
 

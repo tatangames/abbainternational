@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Auth;
 class ControlRolController extends Controller
 {
     public function __construct(){
-        $this->middleware('auth');
+        $this->middleware('auth:admin');
     }
 
     public function indexRedireccionamiento(){

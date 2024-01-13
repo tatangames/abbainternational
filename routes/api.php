@@ -13,8 +13,7 @@ use App\Http\Controllers\Api\Registro\ApiLoginController;
 // inicio de sesion
 Route::post('app/login', [ApiLoginController::class,'loginUsuario']);
 
-
-
+// registro de usuario
 Route::post('app/registro/usuario', [ApiRegistroController::class,'registroUsuario']);
 
 
@@ -34,7 +33,6 @@ Route::post('app/actualizar/nueva/contrasena/reseteo', [ApiCorreoController::cla
 
 
 Route::middleware('verificarToken')->group(function () {
-    // Rutas protegidas por el middleware de verificar token
 
     Route::post('app/solicitar/informacion/perfil', [ApiPerfilController::class,'informacionPerfilUsuario']);
 

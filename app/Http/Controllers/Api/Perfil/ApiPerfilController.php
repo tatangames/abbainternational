@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
+use Illuminate\Support\Facades\Auth;
+
 
 class ApiPerfilController extends Controller
 {
@@ -21,11 +23,19 @@ class ApiPerfilController extends Controller
     public function informacionPerfilUsuario(Request $request)
     {
 
+        $token = $request->header('Authorization');
+
+        $user = JWTAuth::toUser($token);
+
+        //$usuario = JWTAuth::authenticate($token);
+
+        return [$user];
+
         try {
             // Intenta obtener el usuario autenticado
             if ($usuario = JWTAuth::user()) {
                 // El token es válido y se ha encontrado un usuario
-                return response()->json(['usuario' => $usuario->nombre]);
+                return response()->json(['usuario' => $usuario]);
             } else {
                 // El token es válido, pero no se encontró un usuario (puede ser un token de acceso inválido)
                 return response()->json(['error' => 'Usuario no encontrado'], 404);

@@ -38,7 +38,7 @@ class ApiLoginController extends Controller
 
                     return ['success' => 1,
                         'id' => strval($infoUsuario->id),
-                        'tokenapi' => $token,
+                        'token' => $token,
                         'mensaje' => "Inicio de sesion correctamente",
                     ];
 
