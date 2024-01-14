@@ -26,7 +26,7 @@ class ApiCorreoController extends Controller
     const IDIOMA_ID_3 = 3; // se ha solicitado un codigo de recuperacion de contrasena
     const IDIOMA_ID_4 = 4; // su codigo de recuperacion es
 
-
+    const IDIOMA_ID_5 = 5; // si usted no realizo esta solicitud, puede ignorar este mensaje
 
 
     // solicitud de codigo de recuperacion de contrasena
@@ -60,9 +60,9 @@ class ApiCorreoController extends Controller
                 "recuperar_password" => $dataIdioma[self::IDIOMA_ID_1],
                 "hola" => $dataIdioma[self::IDIOMA_ID_2],
                 "se_ha_solicitado" => $dataIdioma[self::IDIOMA_ID_3],
-                "su_codigo_de" => $dataIdioma[self::IDIOMA_ID_4]
+                "su_codigo_de" => $dataIdioma[self::IDIOMA_ID_4],
+                "si_usted_no_realizo" => $dataIdioma[self::IDIOMA_ID_5]
             ];
-
 
             Mail::to($request->correo)
                 ->send(new CorreoPasswordMail($dataWeb, $dataIdioma[self::IDIOMA_ID_1]));
@@ -96,9 +96,12 @@ class ApiCorreoController extends Controller
             ->where('codigo_pass', $request->codigo)
             ->first()){
 
+            // crear un token del usuario encontrado
+            $token = JWTAuth::fromUser($infoUsuario);
+
             return ['success' => 1,
-                'id' => strval($infoUsuario->id),
-                'msj' => 'verificado'
+                'msj' => 'verificado',
+                'token' => $token
             ];
 
         }else{
@@ -113,7 +116,6 @@ class ApiCorreoController extends Controller
     public function actualizarNuevaPasswordReseteo(Request $request)
     {
         $rules = array(
-            'id' => 'required',
             'password' => 'required'
         );
 
@@ -126,18 +128,14 @@ class ApiCorreoController extends Controller
         $tokenApi = $request->header('Authorization');
 
         if ($userToken = JWTAuth::user($tokenApi)) {
-            if(Usuarios::where('id', $userToken->id)->first()){
 
-                Usuarios::where('id', $userToken->id)->update([
-                    'password' => Hash::make($request->password)
-                ]);
+            Usuarios::where('id', $userToken->id)->update([
+                'password' => Hash::make($request->password)
+            ]);
 
-                // usuario cambio password
-                return ['success' => 1];
-            }else{
-                // usuario no encontrado
-                return ['success' => 2];
-            }
+            // usuario cambio password
+            return ['success' => 1];
+
         }else{
             // usuario no encontrado
             return ['success' => 2];
@@ -171,6 +169,7 @@ class ApiCorreoController extends Controller
         $msj2 = "";
         $msj3 = "";
         $msj4 = "";
+        $msj5 = "";
 
         $datosIdioma = new IdiomaCentral();
         $allTextos = $datosIdioma->retornarTextos($tipoIdioma);
@@ -191,13 +190,18 @@ class ApiCorreoController extends Controller
             if(self::IDIOMA_ID_4 == $dato->id){
                 $msj4 = $dato->texto;
             }
+
+            if(self::IDIOMA_ID_5 == $dato->id){
+                $msj5 = $dato->texto;
+            }
         }
 
 
         return [self::IDIOMA_ID_1 => $msj1,
             self::IDIOMA_ID_2 => $msj2,
             self::IDIOMA_ID_3 => $msj3,
-            self::IDIOMA_ID_4 => $msj4
+            self::IDIOMA_ID_4 => $msj4,
+            self::IDIOMA_ID_5 => $msj5
         ];
     }
 

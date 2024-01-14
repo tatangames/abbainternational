@@ -23,21 +23,25 @@ Route::post('app/solicitar/codigo/contrasena', [ApiCorreoController::class,'envi
 Route::post('app/verificar/codigo/recuperacion', [ApiCorreoController::class,'verificarCodigoRecuperacion']);
 
 
+Route::post('app/solicitar/listado/opcion/perfil', [ApiPerfilController::class,'informacionAjustes']);
+
 
 Route::middleware('verificarToken')->group(function () {
 
-    // actualizar perfil utilizando token
+    // actualizar nueva contrasena en vista login
     Route::post('app/actualizar/nueva/contrasena/reseteo', [ApiCorreoController::class,'actualizarNuevaPasswordReseteo']);
 
-
-    // cuabre se abre fragment ajustes
-    Route::post('app/solicitar/listado/opcion/perfil', [ApiPerfilController::class,'informacionAjustes']);
+    // cuando se abre fragment ajustes
 
     // informacion de mi perfil
     Route::post('app/solicitar/informacion/perfil', [ApiPerfilController::class,'informacionPerfilUsuario']);
 
     // actualizar datos de mi perfil
     Route::post('app/actualizar/perfil/usuario', [ApiPerfilController::class,'actualizarPerfilUsuario']);
+
+    // actualizar contrasena cuando ya inicio sesion
+    Route::post('app/actualizar/contrasena', [ApiPerfilController::class,'actualizarPassword']);
+
 
 
 

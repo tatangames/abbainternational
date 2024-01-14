@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Perfil;
 use App\Http\Controllers\Controller;
 use App\Models\Usuarios;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
@@ -15,56 +16,57 @@ class ApiPerfilController extends Controller
 {
 
 
-
+    // informacion de mi perfil
     public function informacionPerfilUsuario(Request $request)
     {
 
-        $token = $request->header('Authorization');
+        $rules = array(
+            'iduser' => 'required',
+        );
 
-        $user = JWTAuth::toUser($token);
-
-        //$usuario = JWTAuth::authenticate($token);
-
-        return [$user];
-
-        try {
-            // Intenta obtener el usuario autenticado
-            if ($usuario = JWTAuth::user()) {
-                // El token es válido y se ha encontrado un usuario
-                return response()->json(['usuario' => $usuario]);
-            } else {
-                // El token es válido, pero no se encontró un usuario (puede ser un token de acceso inválido)
-                return response()->json(['error' => 'Usuario no encontrado'], 404);
-            }
-        } catch (JWTException $e) {
-            // Captura excepciones relacionadas con JWT
-            return response()->json(['error' => 'Error al procesar el token'], 500);
+        $validator = Validator::make($request->all(), $rules);
+        if ( $validator->fails()){
+            return ['success' => 0];
         }
 
 
+        // sacar usuario del token
+        $tokenApi = $request->header('Authorization');
 
-        return "entraa";
+        if ($userToken = JWTAuth::user($tokenApi)) {
 
-        if($info = Usuarios::where('id', $request->iduser)->first()){
-
-            $fechaNac = date("d-m-Y", strtotime($info->fecha_nacimiento));
+            $fechaNac = date("d-m-Y", strtotime($userToken->fecha_nacimiento));
 
             return ['success' => 1,
-                'nombre' => $info->nombre,
-                'apellido' => $info->apellido,
+                'nombre' => $userToken->nombre,
+                'apellido' => $userToken->apellido,
                 'fecha_nacimiento' => $fechaNac,
-                'correo' => $info->correo,
-                'fecha_nac_raw' => $info->fecha_nacimiento
+                'correo' => $userToken->correo,
+                'fecha_nac_raw' => $userToken->fecha_nacimiento
             ];
+        }else{
+            return ['success' => 2];
         }
-
-        return ['success' => 2];
     }
 
-
+    // cuabre se abre fragment ajustes
     public function informacionAjustes(Request $request){
 
-        if($info = Usuarios::where('id', $request->iduser)->first()){
+        $rules = array(
+            'iduser' => 'required',
+        );
+
+        $validator = Validator::make($request->all(), $rules);
+        if ( $validator->fails()){
+            return ['success' => 0];
+        }
+
+        // sacar usuario del token
+        $tokenApi = $request->header('Authorization');
+
+        if ($userToken = JWTAuth::user($tokenApi)) {
+
+            $info = Usuarios::where('id', $userToken->id)->first();
 
             $primeraLetra = substr($info->nombre, 0, 1);
 
@@ -72,13 +74,14 @@ class ApiPerfilController extends Controller
                 'letra' => $primeraLetra,
                 'nombre' => $info->nombre . " " . $info->apellido,
             ];
-        }
 
-        return ['success' => 2];
+        }else{
+            return ['success' => 2];
+        }
     }
 
 
-
+    // actualizar datos de mi perfil
     public function actualizarPerfilUsuario(Request $request){
 
         $rules = array(
@@ -94,14 +97,68 @@ class ApiPerfilController extends Controller
             return ['success' => 0];
         }
 
-        if(Usuarios::where('correo', $request->correo)
-            ->where('id', '!=', $request->iduser)->first()){
-            return ['success' => 1, 'mensaje' => 'Correo ya registrado'];
+        // sacar usuario del token
+        $tokenApi = $request->header('Authorization');
+
+        if ($userToken = JWTAuth::user($tokenApi)) {
+
+            if(Usuarios::where('correo', $request->correo)
+                ->where('id', '!=', $userToken->id)->first()){
+                return ['success' => 1, 'mensaje' => 'Correo ya registrado'];
+            }
+
+            // actualizar
+
+            Usuarios::where('id', $userToken->id)
+                ->update([
+                    'nombre' => $request->nombre,
+                    'apellido' => $request->apellido,
+                    'fecha_nacimiento' => $request->fechanac,
+                    'correo' => $request->correo
+                    ]);
+
+            return ['success' => 2];
+
+        }else{
+            return ['success' => 99];
+        }
+    }
+
+
+    // actualizar perfil utilizando token
+    public function actualizarPassword(Request $request)
+    {
+        $rules = array(
+            'password' => 'required'
+        );
+
+        $validator = Validator::make($request->all(), $rules);
+        if ( $validator->fails()){
+            return ['success' => 0, 'msj' => "validación incorrecta"];
         }
 
+        // sacar usuario del token
+        $tokenApi = $request->header('Authorization');
 
-        return ['success' => 2];
+        if ($userToken = JWTAuth::user($tokenApi)) {
+
+            Usuarios::where('id', $userToken->id)->update([
+                'password' => Hash::make($request->password)
+            ]);
+
+            // usuario cambio password
+            return ['success' => 1];
+
+        }else{
+            // usuario no encontrado
+            return ['success' => 2];
+        }
     }
+
+
+
+
+
 
 
 }

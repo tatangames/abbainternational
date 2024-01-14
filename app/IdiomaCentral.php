@@ -15,8 +15,6 @@ class IdiomaCentral
         else if($tipoIdioma == 1){ // ingles
             $arrayTextos = IdiomaSistema::select('id', 'ingles AS texto')->get();
         }
-
-
         else{
             $arrayTextos = IdiomaSistema::select('id', 'espanol AS texto')->get();
         }
