@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\Registro\ApiRegistroController;
 use App\Http\Controllers\Api\Perfil\ApiPerfilController;
 use App\Http\Controllers\Api\Correo\ApiCorreoController;
 use App\Http\Controllers\Api\Registro\ApiLoginController;
+use App\Http\Controllers\Api\Planes\ApiPlanesController;
 
 
 
@@ -41,6 +42,11 @@ Route::middleware('verificarToken')->group(function () {
 
     // actualizar contrasena cuando ya inicio sesion
     Route::post('app/actualizar/contrasena', [ApiPerfilController::class,'actualizarPassword']);
+
+
+
+    // buscar planes que no esten agregados a mi usuario
+    Route::post('app/buscar/planes/nuevos', [ApiPlanesController::class,'buscarPlanesNoAgregados']);
 
 
 
