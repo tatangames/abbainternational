@@ -49,6 +49,12 @@ Route::middleware('verificarToken')->group(function () {
     // ver informacion de un plan para poder seleccionarlo
     Route::post('app/plan/seleccionado/informacion', [ApiPlanesController::class,'informacionPlanSeleccionado']);
 
+    // selecciona un plan para iniciarlo
+    Route::post('app/plan/nuevo/seleccionar', [ApiPlanesController::class,'iniciarPlanNuevo']);
+
+
+    // devuelve lista de planes que no he seleccionado aun, por id contenedor
+    Route::post('app/plan/listado/planes/contenedor', [ApiPlanesController::class,'listadoPlanesContenedor']);
 
 });
 

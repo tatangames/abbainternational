@@ -7,19 +7,18 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * TEXTOS SEGUN IDIOMAS PARA LOS PLANES
+     * Run the migrations.
      */
     public function up(): void
     {
-        Schema::create('planes_textos', function (Blueprint $table) {
+        Schema::create('planes_contenedor_textos', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('id_planes')->unsigned();
+            $table->bigInteger('id_planes_contenedor')->unsigned();
             $table->bigInteger('id_idioma_planes')->unsigned();
-            $table->string('titulo', 150);
-            $table->string('subtitulo', 50)->nullable();
-            $table->text('descripcion')->nullable();
 
-            $table->foreign('id_planes')->references('id')->on('planes');
+            $table->string('titulo', 75);
+
+            $table->foreign('id_planes_contenedor')->references('id')->on('planes_contenedor');
             $table->foreign('id_idioma_planes')->references('id')->on('idioma_planes');
         });
     }
@@ -29,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('planes_textos');
+        Schema::dropIfExists('planes_contenedor_textos');
     }
 };

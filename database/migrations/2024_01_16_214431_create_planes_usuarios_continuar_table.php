@@ -7,16 +7,17 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * AQUI ESTA EL USUARIO Y SUS PLANES INICIADOS
+     * SOLO HABRA 1 REGISTRO POR USUARIO, UTILIZADO PARA MOSTRAR AL USAURIO
+     * CUAL FUE EL ULTIMO PLAN QUE REALIZO ALGO
      */
     public function up(): void
     {
-        Schema::create('planes_usuarios', function (Blueprint $table) {
+        Schema::create('planes_usuarios_continuar', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('id_usuario')->unsigned();
+            $table->bigInteger('id_usuarios')->unsigned();
             $table->bigInteger('id_planes')->unsigned();
-            $table->dateTime('fecha');
-            $table->foreign('id_usuario')->references('id')->on('usuarios');
+
+            $table->foreign('id_usuarios')->references('id')->on('usuarios');
             $table->foreign('id_planes')->references('id')->on('planes');
         });
     }
@@ -26,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('planes_usuarios');
+        Schema::dropIfExists('planes_usuarios_continuar');
     }
 };

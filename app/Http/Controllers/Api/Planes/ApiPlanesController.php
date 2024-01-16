@@ -5,10 +5,13 @@ namespace App\Http\Controllers\Api\Planes;
 use App\Http\Controllers\Controller;
 use App\Models\Planes;
 use App\Models\PlanesContenedor;
+use App\Models\PlanesContenedorTextos;
 use App\Models\PlanesTextos;
 use App\Models\PlanesUsuarios;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
@@ -85,7 +88,7 @@ class ApiPlanesController extends Controller
     }
 
     // RETORNA POR TITULO Y SUS PLANES DISPONIBLES POR USUARIO
-    private function retornoPlanesNoElegidos($arraybuscar, $idusuario, $idiomaApp){
+    private function retornoPlanesNoElegidos($arraybuscar, $idusuario, $idiomaTextos){
 
         // todos los planes de mi usuario
         $arrayId = PlanesUsuarios::where('id_usuario', $idusuario)
@@ -101,7 +104,7 @@ class ApiPlanesController extends Controller
         }
 
         $planesContenedor = PlanesContenedor::whereIn('id', $pilaIdContenedor)
-            ->orderBy('titulo')
+            ->orderBy('posicion', 'ASC')
             ->get();
 
         $resultsBloque = array();
@@ -110,13 +113,19 @@ class ApiPlanesController extends Controller
         foreach ($planesContenedor as $dato){
             array_push($resultsBloque, $dato);
 
+
+            // obtener el titulo segun idioma
+            $tituloContenedor = $this->retornoTituloContenedorPlan($idiomaTextos, $dato->id);
+            $dato->titulo = $tituloContenedor;
+
+
             // obtener todos los planes NO elegido por el usuario
             $arrayPlanes = Planes::whereNotIn('id', $arrayId)
                 ->where('id_planes_contenedor', $dato->id)
                 ->get();
 
             foreach ($arrayPlanes as $item){
-                $arrayRaw = $this->retornoTituloPlan($idiomaApp, $item->id);
+                $arrayRaw = $this->retornoTituloPlan($idiomaTextos, $item->id);
                 $item->titulo = $arrayRaw['titulo'];
                 $item->subtitulo = $arrayRaw['subtitulo'];
             }
@@ -126,6 +135,28 @@ class ApiPlanesController extends Controller
         }
 
         return $planesContenedor;
+    }
+
+
+    // RETORNO DE TITULO DEL CONTENEDOR DEL PLAN SEGUN IDIOMA
+    private function retornoTituloContenedorPlan($idiomaTextos, $idContenedor){
+
+        // si encuentra idioma solicitado
+        if($infoPlanContenedorTexto = PlanesContenedorTextos::where('id_planes_contenedor', $idContenedor)
+            ->where('id_idioma_planes', $idiomaTextos)
+            ->first()){
+
+            return $infoPlanContenedorTexto->titulo;
+
+        }else{
+            // si no encuentra sera por defecto español
+
+            $infoPlanContenedorTexto = PlanesContenedorTextos::where('id_planes_contenedor', $idContenedor)
+                ->where('id_idioma_planes', 1)
+                ->first();
+
+            return $infoPlanContenedorTexto->titulo;
+        }
     }
 
 
@@ -169,32 +200,133 @@ class ApiPlanesController extends Controller
             return ['success' => 0, 'msj' => "validación incorrecta"];
         }
 
-
         if($infoPlan = Planes::where('id', $request->idplan)->first()){
 
             $idiomaTextos = $this->reseteoIdiomaTextos($request->idiomaplan);
 
             $titulo = "";
             $subtitulo = null;
+            $descripcion = null;
 
             if($infoPlanTextos = PlanesTextos::where('id_planes', $request->idplan)
                 ->where('id_idioma_planes', $idiomaTextos)
                 ->first()){
                 $titulo = $infoPlanTextos->titulo;
                 $subtitulo = $infoPlanTextos->subtitulo;
+                $descripcion = $infoPlanTextos->descripcion;
             }
 
             return ['success' => 1,
-                'imagen' => $infoPlan->imagen,
+                'imagen' => $infoPlan->imagenportada,
                 'titulo' => $titulo,
-                'subtitulo' => $subtitulo
+                'subtitulo' => $subtitulo,
+                'descripcion' => $descripcion
                 ];
         }else{
             return ['success' => 99];
         }
-
     }
 
+
+    // devuelve lista de planes que no he seleccionado aun, por id contenedor
+    public function listadoPlanesContenedor(Request $request){
+
+        $rules = array(
+            'idiomaplan' => 'required',
+            'iduser' => 'required',
+            'idcontenedor' => 'required'
+        );
+
+        $validator = Validator::make($request->all(), $rules);
+        if ( $validator->fails()){
+            return ['success' => 0, 'msj' => "validación incorrecta"];
+        }
+
+        $tokenApi = $request->header('Authorization');
+
+        // idioma, segun el usuario
+        $idiomaTextos = $this->reseteoIdiomaTextos($request->idiomaplan);
+
+        if ($userToken = JWTAuth::user($tokenApi)) {
+
+            // todos los planes de mi usuario
+            $arrayId = PlanesUsuarios::where('id_usuario', $userToken->id)
+                ->select('id_planes')
+                ->get();
+
+            $hayInfo = 0;
+
+            // todos los planes del contenedor, menos seleccionados por el usuario
+            $arrayPlanes = Planes::whereNotIn('id', $arrayId)
+                ->where('id_planes_contenedor', $request->idcontenedor)
+                ->get();
+
+            if ($arrayPlanes->isNotEmpty()) {
+                $hayInfo = 1;
+
+                foreach ($arrayPlanes as $item){
+                    $arrayRaw = $this->retornoTituloPlan($idiomaTextos, $item->id);
+                    $item->titulo = $arrayRaw['titulo'];
+                    $item->subtitulo = $arrayRaw['subtitulo'];
+                }
+            }
+
+            return [
+                'success' => 1,
+                'listaplanes' => $arrayPlanes,
+                'hayinfo' => $hayInfo
+            ];
+        }else{
+            return ['success' => 99];
+        }
+    }
+
+
+    // selecciona un plan para iniciarlo
+    public function iniciarPlanNuevo(Request $request){
+        $rules = array(
+            'idplan' => 'required',
+            'iduser' => 'required',
+        );
+
+        $validator = Validator::make($request->all(), $rules);
+        if ( $validator->fails()){
+            return ['success' => 0, 'msj' => "validación incorrecta"];
+        }
+
+        $tokenApi = $request->header('Authorization');
+
+        if ($userToken = JWTAuth::user($tokenApi)) {
+
+            if(PlanesUsuarios::where('id_usuario', $userToken->id)
+                ->where('id_planes', $request->idplan)->first()){
+
+                // ya estaba agregado
+                return ['success' => 1,
+                    'msg' => 'plan ya estaba registrado'];
+            }else{
+                DB::beginTransaction();
+
+                try {
+
+                    $nuevoPlan = new PlanesUsuarios();
+                    $nuevoPlan->id_usuario = $userToken->id;
+                    $nuevoPlan->id_planes = $request->idplan;
+                    $nuevoPlan->fecha = Carbon::now('America/El_Salvador');
+                    $nuevoPlan->save();
+
+                    DB::commit();
+                    return ['success' => 2];
+
+                }catch(\Throwable $e){
+                    DB::rollback();
+                    return ['success' => 99];
+                }
+            }
+        }else{
+            return ['success' => 99];
+        }
+    }
 
 
 }
