@@ -16,6 +16,7 @@ return new class extends Migration
             $table->bigInteger('id_planes_contenedor')->unsigned();
 
             $table->string('imagen', 100);
+            $table->boolean('visible');
 
             // para mostrar o no la barra de progreso, el calculo se hace a codigo
             $table->boolean('barra_progreso');

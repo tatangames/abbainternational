@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('planes_contenedor', function (Blueprint $table) {
             $table->id();
             $table->string('titulo', 100);
+            $table->boolean('visible');
         });
     }
 

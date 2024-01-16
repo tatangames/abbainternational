@@ -43,13 +43,11 @@ Route::middleware('verificarToken')->group(function () {
     // actualizar contrasena cuando ya inicio sesion
     Route::post('app/actualizar/contrasena', [ApiPerfilController::class,'actualizarPassword']);
 
-
-
     // buscar planes que no esten agregados a mi usuario
     Route::post('app/buscar/planes/nuevos', [ApiPlanesController::class,'buscarPlanesNoAgregados']);
 
-
-
+    // ver informacion de un plan para poder seleccionarlo
+    Route::post('app/plan/seleccionado/informacion', [ApiPlanesController::class,'informacionPlanSeleccionado']);
 
 
 });

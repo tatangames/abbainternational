@@ -30,10 +30,13 @@ class ApiPlanesController extends Controller
 
         $tokenApi = $request->header('Authorization');
 
+        // idioma, segun el usuario
+        $idiomaTextos = $this->reseteoIdiomaTextos($request->idiomaplan);
+
         if ($userToken = JWTAuth::user($tokenApi)) {
 
 
-            $arrayContenedor = PlanesContenedor::all();
+            $arrayContenedor = PlanesContenedor::where('visible', 1)->get();
 
             // todos los planes de mi usuario
             $arrayId = PlanesUsuarios::where('id_usuario', $userToken->id)
@@ -45,9 +48,10 @@ class ApiPlanesController extends Controller
 
                 $hayInfo = 0;
 
-                // obtener todos los planes NO elegido por el usuario
+                // obtener todos los planes NO elegido por el usuario y sean visible
                 $arrayPlanes = Planes::whereNotIn('id', $arrayId)
                     ->where('id_planes_contenedor', $dato->id)
+                    ->where('visible', 1)
                     ->get();
 
                 if ($arrayPlanes->isNotEmpty()) {
@@ -59,7 +63,7 @@ class ApiPlanesController extends Controller
 
 
             // EVITAR LOS TITULOS VACIOS
-            $arrayPlanesValidos = $this->retornoPlanesNoElegidos($arrayContenedor, $userToken->id, $request->idiomaplan);
+            $arrayPlanesValidos = $this->retornoPlanesNoElegidos($arrayContenedor, $userToken->id, $idiomaTextos);
 
             return [
                 'success' => 1,
@@ -70,12 +74,15 @@ class ApiPlanesController extends Controller
         }
     }
 
+    // COMO IDIOMATEXTOS DEVUELVE 0 POR DEFECTO, Y EL ID 1 ES MINIMO EN LA BASE DE DATOS
+    private function reseteoIdiomaTextos($idiomatextos)
+    {
+        if($idiomatextos == 0){
+            $idiomatextos = 1;
+        }
 
-
-
-
-
-
+        return $idiomatextos;
+    }
 
     // RETORNA POR TITULO Y SUS PLANES DISPONIBLES POR USUARIO
     private function retornoPlanesNoElegidos($arraybuscar, $idusuario, $idiomaApp){
@@ -147,6 +154,46 @@ class ApiPlanesController extends Controller
         }
     }
 
+
+
+    // ver informacion de un plan para poder seleccionarlo
+    public function informacionPlanSeleccionado(Request $request)
+    {
+        $rules = array(
+            'idiomaplan' => 'required',
+            'idplan' => 'required'
+        );
+
+        $validator = Validator::make($request->all(), $rules);
+        if ( $validator->fails()){
+            return ['success' => 0, 'msj' => "validación incorrecta"];
+        }
+
+
+        if($infoPlan = Planes::where('id', $request->idplan)->first()){
+
+            $idiomaTextos = $this->reseteoIdiomaTextos($request->idiomaplan);
+
+            $titulo = "";
+            $subtitulo = null;
+
+            if($infoPlanTextos = PlanesTextos::where('id_planes', $request->idplan)
+                ->where('id_idioma_planes', $idiomaTextos)
+                ->first()){
+                $titulo = $infoPlanTextos->titulo;
+                $subtitulo = $infoPlanTextos->subtitulo;
+            }
+
+            return ['success' => 1,
+                'imagen' => $infoPlan->imagen,
+                'titulo' => $titulo,
+                'subtitulo' => $subtitulo
+                ];
+        }else{
+            return ['success' => 99];
+        }
+
+    }
 
 
 
