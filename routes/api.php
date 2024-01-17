@@ -56,6 +56,16 @@ Route::middleware('verificarToken')->group(function () {
     // devuelve lista de planes que no he seleccionado aun, por id contenedor
     Route::post('app/plan/listado/planes/contenedor', [ApiPlanesController::class,'listadoPlanesContenedor']);
 
+    // devuelve mis planes que he seleccionado, habra algunos que pasaran a 'completados' pero
+    // se verificaran dinamicamente
+    Route::post('app/plan/listado/misplanes', [ApiPlanesController::class,'listadoMisPlanes']);
+
+
+
+
+
+
+
 });
 
 

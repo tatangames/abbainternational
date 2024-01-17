@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * Contenedor de los Planes, esto seria el Titulo superior
      */
     public function up(): void
     {

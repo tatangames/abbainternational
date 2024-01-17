@@ -7,14 +7,13 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * esto seran los items de cada cajita
      */
     public function up(): void
     {
-        Schema::create('refran_login', function (Blueprint $table) {
+        Schema::create('planes_block_detalle', function (Blueprint $table) {
             $table->id();
-            $table->string('refran', 600);
-            $table->string('salmo', 300);
+            $table->timestamps();
         });
     }
 
@@ -23,6 +22,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('refran_login');
+        Schema::dropIfExists('planes_block_detalle');
     }
 };

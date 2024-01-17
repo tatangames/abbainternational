@@ -7,15 +7,13 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * TODOS LOS IDIOMAS PARA MENSAJES DEL SISTEMA
-     * serian columnas que se agregaran para un nuevo idioma
+     * Esto contiene las cajitas que muestran el devocional de cada dia
      */
     public function up(): void
     {
-        Schema::create('idioma_sistema', function (Blueprint $table) {
+        Schema::create('planes_bloques', function (Blueprint $table) {
             $table->id();
-            $table->string('espanol', 300);
-            $table->string('ingles', 300);
+            $table->timestamps();
         });
     }
 
@@ -24,6 +22,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('idioma_sistema');
+        Schema::dropIfExists('planes_bloques');
     }
 };

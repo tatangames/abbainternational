@@ -7,15 +7,14 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * TODOS LOS IDIOMAS PARA MENSAJES DEL SISTEMA
-     * serian columnas que se agregaran para un nuevo idioma
+     * esto seran los diferentes idiomas de los textos de las cajitas, cada vez que se crea un idioma nuevo
+     * aparecera en vista web el bloque de idioma faltante por agregar
      */
     public function up(): void
     {
-        Schema::create('idioma_sistema', function (Blueprint $table) {
+        Schema::create('planes_block_deta_textos', function (Blueprint $table) {
             $table->id();
-            $table->string('espanol', 300);
-            $table->string('ingles', 300);
+            $table->timestamps();
         });
     }
 
@@ -24,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('idioma_sistema');
+        Schema::dropIfExists('planes_block_deta_textos');
     }
 };

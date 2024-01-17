@@ -8,6 +8,7 @@ use App\Models\PlanesContenedor;
 use App\Models\PlanesContenedorTextos;
 use App\Models\PlanesTextos;
 use App\Models\PlanesUsuarios;
+use App\Models\PlanesUsuariosContinuar;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -160,7 +161,7 @@ class ApiPlanesController extends Controller
     }
 
 
-    // RETORNO DE TITULO DEL PLAN SEGUN IDIOMA
+    // RETORNO DE NOMBRE, SUBTITULO DEL PLAN SEGUN IDIOMA
     private function retornoTituloPlan($idiomaplan, $idplan){
 
             // si encuentra idioma solicitado
@@ -327,6 +328,100 @@ class ApiPlanesController extends Controller
             return ['success' => 99];
         }
     }
+
+
+    // devuelve mis planes que he seleccionado, habra algunos que pasaran a 'completados' pero
+    // se verificaran dinamicamente
+    public function listadoMisPlanes(Request $request)
+    {
+
+        $rules = array(
+            'idiomaplan' => 'required',
+            'iduser' => 'required',
+        );
+
+        $validator = Validator::make($request->all(), $rules);
+        if ( $validator->fails()){
+            return ['success' => 0, 'msj' => "validación incorrecta"];
+        }
+
+        $tokenApi = $request->header('Authorization');
+
+        $idiomaTextos = $this->reseteoIdiomaTextos($request->idiomaplan);
+
+        if ($userToken = JWTAuth::user($tokenApi)) {
+
+            $idPlanContinuar = 0;
+            $arrayContinuar = null;
+            $haycontinuar = 0;
+            if($infoContinuar = PlanesUsuariosContinuar::where('id_usuarios', $userToken->id)->first()){
+                $haycontinuar = 1;
+
+                $idPlanContinuar = $infoContinuar->id_planes;
+
+                // plan ultimo para continuar
+                $arrayContinuar = PlanesUsuariosContinuar::where('id_usuarios', $userToken->id)
+                    ->take(1) // por seguridad tomar solo 1
+                    ->get();
+
+                foreach ($arrayContinuar as $dato){
+                    $titulosRaw = $this->retornoTituloPlan($idiomaTextos, $dato->id_planes);
+
+                    $dato->titulo = $titulosRaw['titulo'];
+                    $dato->subtitulo = $titulosRaw['subtitulo'];
+
+                    $infoP = Planes::where('id', $dato->id_planes)->first();
+                    $dato->imagen = $infoP->imagen;
+                    $dato->imagenportada = $infoP->imagenportada;
+                    $dato->barra_progreso = $infoP->barra_progreso;
+                }
+            }
+
+            // obtener todos los planes menos el de Continuar
+           $arrayPlanesUser = PlanesUsuarios::where('id_usuario', $userToken->id)
+               ->whereNotIn('id_planes', [$idPlanContinuar])
+               ->get();
+
+            foreach ($arrayPlanesUser as $dato){
+
+                $titulosRaw = $this->retornoTituloPlan($idiomaTextos, $dato->id_planes);
+
+                $dato->titulo = $titulosRaw['titulo'];
+                $dato->subtitulo = $titulosRaw['subtitulo'];
+
+                $infoP = Planes::where('id', $dato->id_planes)->first();
+                $dato->imagen = $infoP->imagen;
+                $dato->imagenportada = $infoP->imagenportada;
+                $dato->barra_progreso = $infoP->barra_progreso;
+            }
+
+            $datosOrdenados = $arrayPlanesUser->sortBy('titulo')->values();
+
+            $hayinfo = 0;
+            if ($arrayContinuar->isNotEmpty()) {
+                $hayinfo = 1;
+            }
+
+            if ($datosOrdenados->isNotEmpty()) {
+                $hayinfo = 1;
+            }
+
+
+            return ['success' => 1,
+                'haycontinuar' => $haycontinuar,
+                'listacontinuar' => $arrayContinuar,
+                'listaplanes' => $datosOrdenados,
+                'hayinfo' => $hayinfo
+
+            ];
+
+        }else{
+            return ['success' => 99];
+        }
+
+    }
+
+
 
 
 }

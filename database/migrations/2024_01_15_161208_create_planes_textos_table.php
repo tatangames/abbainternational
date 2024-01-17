@@ -8,6 +8,8 @@ return new class extends Migration
 {
     /**
      * TEXTOS SEGUN IDIOMAS PARA LOS PLANES
+     * en vista web aparecera un bloque para completar el idioma nuevo
+     * si fue registrado
      */
     public function up(): void
     {

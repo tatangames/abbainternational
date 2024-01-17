@@ -7,7 +7,8 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * cada vez que se crea un idioma, en vista web aparecera el idioma faltante
+     * para poder completar el texto en idioma nuevo
      */
     public function up(): void
     {
