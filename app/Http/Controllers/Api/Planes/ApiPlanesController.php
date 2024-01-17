@@ -379,6 +379,7 @@ class ApiPlanesController extends Controller
                     $dato->imagen = $infoP->imagen;
                     $dato->imagenportada = $infoP->imagenportada;
                     $dato->barra_progreso = $infoP->barra_progreso;
+                    $dato->idplan = $infoP->id;
                 }
             }
 
@@ -398,6 +399,7 @@ class ApiPlanesController extends Controller
                 $dato->imagen = $infoP->imagen;
                 $dato->imagenportada = $infoP->imagenportada;
                 $dato->barra_progreso = $infoP->barra_progreso;
+                $dato->idplan = $infoP->id;
             }
 
             $datosOrdenados = $arrayPlanesUser->sortBy('titulo')->values();

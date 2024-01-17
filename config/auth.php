@@ -101,7 +101,10 @@ return [
             'provider' => 'users',
             'table' => 'password_resets',
             'expire' => 60,
-            'throttle' => 60,
+            'throttle' => [
+                'max_attempts' => 1000000, // Ajusta el número máximo de intentos permitidos
+                'decay_minutes' => 1, // Ajusta el tiempo durante el cual se bloquea
+            ],
         ],
     ],
 
