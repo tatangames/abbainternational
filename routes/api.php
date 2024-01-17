@@ -60,6 +60,8 @@ Route::middleware('verificarToken')->group(function () {
     // se verificaran dinamicamente
     Route::post('app/plan/listado/misplanes', [ApiPlanesController::class,'listadoMisPlanes']);
 
+    // devuelve informacion del plan a continuar, todos el bloque
+    Route::post('app/plan/misplanes/informacion/bloque', [ApiPlanesController::class,'informacionBloqueMiPlan']);
 
 
 

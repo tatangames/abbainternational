@@ -3,18 +3,24 @@
 namespace App\Http\Controllers\Api\Planes;
 
 use App\Http\Controllers\Controller;
+use App\Models\Iglesias;
 use App\Models\Planes;
+use App\Models\PlanesBlockDetalle;
+use App\Models\PlanesBlockDetaTextos;
+use App\Models\PlanesBloques;
 use App\Models\PlanesContenedor;
 use App\Models\PlanesContenedorTextos;
 use App\Models\PlanesTextos;
 use App\Models\PlanesUsuarios;
 use App\Models\PlanesUsuariosContinuar;
+use App\Models\ZonaHoraria;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use DateTime;
 
 class ApiPlanesController extends Controller
 {
@@ -334,7 +340,6 @@ class ApiPlanesController extends Controller
     // se verificaran dinamicamente
     public function listadoMisPlanes(Request $request)
     {
-
         $rules = array(
             'idiomaplan' => 'required',
             'iduser' => 'required',
@@ -398,30 +403,164 @@ class ApiPlanesController extends Controller
             $datosOrdenados = $arrayPlanesUser->sortBy('titulo')->values();
 
             $hayinfo = 0;
-            if ($arrayContinuar->isNotEmpty()) {
+            if ($arrayContinuar != null && $arrayContinuar->isNotEmpty() ) {
                 $hayinfo = 1;
             }
 
-            if ($datosOrdenados->isNotEmpty()) {
+            if ($arrayPlanesUser != null && $datosOrdenados->isNotEmpty()) {
                 $hayinfo = 1;
             }
 
 
             return ['success' => 1,
                 'haycontinuar' => $haycontinuar,
+                'hayinfo' => $hayinfo,
                 'listacontinuar' => $arrayContinuar,
                 'listaplanes' => $datosOrdenados,
-                'hayinfo' => $hayinfo
-
             ];
 
         }else{
             return ['success' => 99];
         }
+    }
 
+    // devuelve informacion del plan a continuar, todos el bloque
+    public function informacionBloqueMiPlan(Request $request){
+
+        $rules = array(
+            'idiomaplan' => 'required',
+            'iduser' => 'required',
+            'idplan' => 'required'
+        );
+
+        $validator = Validator::make($request->all(), $rules);
+        if ( $validator->fails()){
+            return ['success' => 0, 'msj' => "validación incorrecta"];
+        }
+
+        $tokenApi = $request->header('Authorization');
+
+        $idiomaTextos = $this->reseteoIdiomaTextos($request->idiomaplan);
+
+        if ($userToken = JWTAuth::user($tokenApi)) {
+
+            $infoPlan = Planes::where('id', $request->idplan)->first();
+
+            // obtener zona horaria
+            $infoIglesia = Iglesias::where('id', $userToken->id_iglesia)->first();
+            $zonaHoraria = ZonaHoraria::where('id', $infoIglesia->id_zona_horaria)->first();
+
+
+            // obtener todos los bloques ordenados por fecha
+            $arrayBloques = PlanesBloques::where('id_planes', $request->idplan)
+                ->where('visible', 1)
+                ->orderBy('fecha_inicio', 'ASC')
+                ->get();
+
+            $contador = 0;
+             $resultsBloque = array();
+             $index = 0;
+
+
+            foreach ($arrayBloques as $dato){
+                array_push($resultsBloque, $dato);
+
+                $contador++;
+                $dato->abreviatura = $this->retorno3LetrasFechasIdioma($idiomaTextos, $dato->fecha_inicio);
+                $dato->contador = $contador;
+
+                // fecha inicio del bloque
+                $fecha1 = Carbon::parse($dato->fecha_inicio);
+
+                // fecha-horario actual segun usuario zona horaria
+                $fecha2 = Carbon::parse(now(), $zonaHoraria->zona);
+
+                if($fecha1->isSameDay($fecha2)){
+                    $dato->mismodia = 1;
+                }else{
+                    $dato->mismodia = 0;
+                }
+
+                // para mostrar o no el bloque, OSEA ESPERAR FECHA PARA QUE APAREZCA
+                // SETEAR ESPERAR_FECHA PARA MOSTRAR BLOQUE
+                if($dato->esperar_fecha == 1){
+
+                    //gte: mayor o igual
+                    if($fecha2->gte($fecha1)){
+                        // SET
+                        $dato->esperar_fecha = 0;
+                    }
+                }
+
+                // agregar detalle bloques
+                $arrayDetaBloque = PlanesBlockDetalle::where('id_planes_bloques', $dato->id)
+                    ->orderBy('posicion', 'ASC')
+                    ->get();
+
+
+                foreach ($arrayDetaBloque as $datoArr){
+                    $datoArr->titulo = $this->retornoTituloBloquesTextos($idiomaTextos, $datoArr->id);
+                }
+
+                $resultsBloque[$index]->detalle = $arrayDetaBloque;
+                $index++;
+            }
+
+
+            return ['success' => 1,
+                'portada' => $infoPlan->imagenportada,
+                'listado' => $arrayBloques,
+
+                ];
+        }else{
+            return ['success' => 99];
+        }
     }
 
 
+    // RETORNA TITULO DEL BLOQUE DETALLE TEXTOS
+    private function retornoTituloBloquesTextos($idiomaTextos, $idBlockDetalle){
+
+        if($infoTituloTexto = PlanesBlockDetaTextos::where('id_planes_block_detalle', $idBlockDetalle)
+            ->where('id_idioma_planes', $idiomaTextos)
+            ->first()){
+
+            return $infoTituloTexto->titulo;
+
+        }else{
+            // si no encuentra sera por defecto español
+
+            $infoTituloTexto = PlanesBlockDetaTextos::where('id_planes_block_detalle', $idBlockDetalle)
+                ->where('id_idioma_planes', 1)
+                ->first();
+
+            return $infoTituloTexto->titulo;
+        }
+    }
+
+
+
+    // RETORNA 3 PRIMERAS LETRAS PARA LOS BLOQUES DE LOS PLANES
+    private function retorno3LetrasFechasIdioma($idiomaTextos, $fecha){
+
+        $dateTime = new DateTime($fecha);
+
+        if($idiomaTextos == 1){ // espanol
+
+            $intlDateFormatter = new \IntlDateFormatter('es_ES', \IntlDateFormatter::NONE, \IntlDateFormatter::NONE, null, null, 'MMM');
+            $intlDateFormatter->setPattern('MMM d');
+        }
+        else if($idiomaTextos == 2){ // ingles
+            $intlDateFormatter = new \IntlDateFormatter('en_US', \IntlDateFormatter::NONE, \IntlDateFormatter::NONE, null, null, 'MMM');
+            $intlDateFormatter->setPattern('MMM d');
+        }else{
+            // defecto: espanol
+            $intlDateFormatter = new \IntlDateFormatter('es_ES', \IntlDateFormatter::NONE, \IntlDateFormatter::NONE, null, null, 'MMM');
+            $intlDateFormatter->setPattern('MMM d');
+        }
+
+        return $intlDateFormatter->format($dateTime);
+    }
 
 
 }

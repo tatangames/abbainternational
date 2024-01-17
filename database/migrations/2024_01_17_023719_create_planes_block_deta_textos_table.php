@@ -14,7 +14,13 @@ return new class extends Migration
     {
         Schema::create('planes_block_deta_textos', function (Blueprint $table) {
             $table->id();
-            $table->timestamps();
+            $table->bigInteger('id_planes_block_detalle')->unsigned();
+            $table->bigInteger('id_idioma_planes')->unsigned();
+            $table->string('titulo');
+
+
+            $table->foreign('id_planes_block_detalle')->references('id')->on('planes_block_detalle');
+            $table->foreign('id_idioma_planes')->references('id')->on('idioma_planes');
         });
     }
 
