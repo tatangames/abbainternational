@@ -500,7 +500,6 @@ class ApiPlanesController extends Controller
                 }
 
 
-
                 // agregar detalle bloques
                 $arrayDetaBloque = PlanesBlockDetalle::where('id_planes_bloques', $dato->id)
                     ->orderBy('posicion', 'ASC')
@@ -522,10 +521,27 @@ class ApiPlanesController extends Controller
 
 
             if ($arrayBloques->isNotEmpty() && $hayDiaActual == 0) {
-                // Obtener el último elemento del array
-                $ultimoElemento = $arrayBloques->last();
-                $idUltimoBloque = $ultimoElemento->id;
+
+                $encontroBloque = true;
+
+                // encontrar cual es el siguiente bloque que deberia cargarse
+                foreach ($arrayBloques as $bloque){
+                    $fecha1 = Carbon::parse($bloque->fecha_inicio);
+                    $fecha2 = Carbon::parse(now(), $zonaHoraria->zona);
+
+                    if($fecha1->gte($fecha2)){
+                        $idUltimoBloque = $bloque->id;
+                        $encontroBloque = false;
+                        break;
+                    }
+                }
+
+                if($encontroBloque){
+                    $ultimoElemento = $arrayBloques->last();
+                    $idUltimoBloque = $ultimoElemento->id;
+                }
             }
+
 
 
             return ['success' => 1,
