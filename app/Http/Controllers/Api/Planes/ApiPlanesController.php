@@ -464,6 +464,10 @@ class ApiPlanesController extends Controller
              $index = 0;
 
 
+            // con esto se conoce si hay un dia con informacion para Hoy, sino se tomara el ultimo
+            // en la aplicacion
+            $hayDiaActual = 0;
+
             foreach ($arrayBloques as $dato){
                 array_push($resultsBloque, $dato);
 
@@ -479,6 +483,7 @@ class ApiPlanesController extends Controller
 
                 if($fecha1->isSameDay($fecha2)){
                     $dato->mismodia = 1;
+                    $hayDiaActual = 1;
                 }else{
                     $dato->mismodia = 0;
                 }
@@ -493,6 +498,8 @@ class ApiPlanesController extends Controller
                         $dato->esperar_fecha = 0;
                     }
                 }
+
+
 
                 // agregar detalle bloques
                 $arrayDetaBloque = PlanesBlockDetalle::where('id_planes_bloques', $dato->id)
@@ -509,9 +516,24 @@ class ApiPlanesController extends Controller
             }
 
 
+            // Para comparar en la aplicacion que sino hay info para este dia, este id sera el bloque que se
+            // le cambiara el estilo
+            $idUltimoBloque = 0;
+
+
+            if ($arrayBloques->isNotEmpty() && $hayDiaActual == 0) {
+                // Obtener el último elemento del array
+                $ultimoElemento = $arrayBloques->last();
+                $idUltimoBloque = $ultimoElemento->id;
+            }
+
+
             return ['success' => 1,
                 'portada' => $infoPlan->imagenportada,
+                'haydiaactual' => $hayDiaActual,
+                'idultimobloque' => $idUltimoBloque,
                 'listado' => $arrayBloques,
+
 
                 ];
         }else{
