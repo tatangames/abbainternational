@@ -16,7 +16,6 @@ return new class extends Migration
             $table->id();
 
             $table->bigInteger('id_planes_bloques')->unsigned();
-            $table->boolean('completado');
             $table->integer('posicion');
 
             $table->foreign('id_planes_bloques')->references('id')->on('planes_bloques');

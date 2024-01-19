@@ -7,6 +7,7 @@ use App\Models\Iglesias;
 use App\Models\Planes;
 use App\Models\PlanesBlockDetalle;
 use App\Models\PlanesBlockDetaTextos;
+use App\Models\PlanesBlockDetaUsuario;
 use App\Models\PlanesBloques;
 use App\Models\PlanesContenedor;
 use App\Models\PlanesContenedorTextos;
@@ -508,6 +509,19 @@ class ApiPlanesController extends Controller
 
                 foreach ($arrayDetaBloque as $datoArr){
                     $datoArr->titulo = $this->retornoTituloBloquesTextos($idiomaTextos, $datoArr->id);
+
+                    // saber si esta check para mi usuario
+                    if($infoDeta = PlanesBlockDetaUsuario::where('id_usuario', $userToken->id)
+                    ->where('id_planes_block_deta', $datoArr->id)
+                    ->first()){
+                        if($infoDeta->completado == 1){
+                            $datoArr->completado = 1;
+                        }else{
+                            $datoArr->completado = 0;
+                        }
+                    }else{
+                        $datoArr->completado = 0;
+                    }
                 }
 
                 $resultsBloque[$index]->detalle = $arrayDetaBloque;
@@ -601,6 +615,65 @@ class ApiPlanesController extends Controller
 
         return $intlDateFormatter->format($dateTime);
     }
+
+
+    // actualizar el check de cada plan
+    public function actualizarCheckBloqueMiPlan(Request $request)
+    {
+
+        $rules = array(
+            'iduser' => 'required',
+            'idblockdeta' => 'required',
+            'valor' => 'required'
+        );
+
+        $validator = Validator::make($request->all(), $rules);
+        if ( $validator->fails()){
+            return ['success' => 0, 'msj' => "validación incorrecta"];
+        }
+
+        $tokenApi = $request->header('Authorization');
+
+        if ($userToken = JWTAuth::user($tokenApi)) {
+
+            // si existe, solo actualizar
+            if($idinfo = PlanesBlockDetaUsuario::where('id_usuario', $userToken->id)
+                ->where('id_planes_block_deta', $request->idblockdeta)
+                ->first()){
+
+                PlanesBlockDetaUsuario::where('id', $idinfo->id)
+                    ->update([
+                        'completado' => $request->valor,
+                    ]);
+
+                return ['success' => 1];
+            }else{
+
+                // se debera crear
+                DB::beginTransaction();
+
+                try {
+
+                    $detalle = new PlanesBlockDetaUsuario();
+                    $detalle->id_usuario = $userToken->id;
+                    $detalle->id_planes_block_deta = $request->idblockdeta;
+                    $detalle->completado = 1;
+                    $detalle->save();
+
+                    DB::commit();
+                    return ['success' => 1];
+
+                }catch(\Throwable $e){
+                    DB::rollback();
+                    return ['success' => 99];
+                }
+            }
+        }else{
+            return ['success' => 99];
+        }
+    }
+
+
 
 
 }

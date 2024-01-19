@@ -63,6 +63,10 @@ Route::middleware('verificarToken')->group(function () {
     // devuelve informacion del plan a continuar, todos el bloque
     Route::post('app/plan/misplanes/informacion/bloque', [ApiPlanesController::class,'informacionBloqueMiPlan']);
 
+    // actualizar el check de cada plan
+    Route::post('app/plan/misplanes/actualizar/check', [ApiPlanesController::class,'actualizarCheckBloqueMiPlan']);
+
+
 
 
 
