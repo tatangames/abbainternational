@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Api\Planes;
 
 use App\Http\Controllers\Controller;
+use App\Models\BloqueCuestionario;
+use App\Models\BloqueCuestionarioTextos;
+use App\Models\BloquePreguntas;
 use App\Models\Iglesias;
 use App\Models\Planes;
 use App\Models\PlanesBlockDetalle;
@@ -522,6 +525,18 @@ class ApiPlanesController extends Controller
                     }else{
                         $datoArr->completado = 0;
                     }
+
+                    // verificar si tiene preguntas, o alguna activa para mostrarlas
+                    $hayPreguntas = 0;
+                    $arrayPreguntas = BloquePreguntas::where('id_plan_block_detalle', $datoArr->id)
+                        ->where('visible', 1)
+                        ->count();
+
+                    if($arrayPreguntas > 0){
+                        $hayPreguntas = 1;
+                    }
+
+                    $datoArr->tiene_preguntas = $hayPreguntas;
                 }
 
                 $resultsBloque[$index]->detalle = $arrayDetaBloque;
@@ -555,7 +570,6 @@ class ApiPlanesController extends Controller
                     $idUltimoBloque = $ultimoElemento->id;
                 }
             }
-
 
 
             return ['success' => 1,
@@ -674,6 +688,69 @@ class ApiPlanesController extends Controller
     }
 
 
+    public function informacionCuestionarioBloque(Request $request){
+
+        $rules = array(
+            'iduser' => 'required',
+            'idblockdeta' => 'required',
+            'idioma' => 'required'
+        );
+
+        $validator = Validator::make($request->all(), $rules);
+        if ( $validator->fails()){
+            return ['success' => 0,
+                'msj' => "validación incorrecta"
+            ];
+        }
+
+        $tokenApi = $request->header('Authorization');
+
+        if ($userToken = JWTAuth::user($tokenApi)) {
+
+            $idiomaTextos = $this->reseteoIdiomaTextos($request->idiomaplan);
+
+            // comprueba que al menos haya un cuestionario disponible
+            if($info = BloqueCuestionarioTextos::where('id_bloque_detalle', $request->idblockdeta)
+                ->first()){
+
+                $titulo = $this->retornoTituloCuestionarioIdioma($info->id, $idiomaTextos);
+
+                return ['success' => 1,
+                       'titulo' => $titulo,
+                ];
+            }else{
+
+                return ['success' => 2,
+                    'msg' => "No hay cuestionario"
+                    ];
+            }
+
+
+        }else{
+            return ['success' => 99];
+        }
+    }
+
+
+    private function retornoTituloCuestionarioIdioma($idBlockDeta, $idiomaTexto){
+
+        if($infoTituloTexto = BloqueCuestionarioTextos::where('id_bloque_detalle', $idBlockDeta)
+            ->where('id_idioma_planes', $idiomaTexto)
+            ->first()){
+
+            return $infoTituloTexto->texto;
+
+        }else{
+            // si no encuentra sera por defecto español
+
+            $infoTituloTexto = BloqueCuestionarioTextos::where('id_bloque_detalle', $idBlockDeta)
+                ->where('id_idioma_planes', 1)
+                ->first();
+
+            return $infoTituloTexto->texto;
+        }
+
+    }
 
 
 }

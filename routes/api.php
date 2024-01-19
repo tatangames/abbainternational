@@ -66,7 +66,8 @@ Route::middleware('verificarToken')->group(function () {
     // actualizar el check de cada plan
     Route::post('app/plan/misplanes/actualizar/check', [ApiPlanesController::class,'actualizarCheckBloqueMiPlan']);
 
-
+    // informacion de un cuestionario y sus preguntas de un bloque detalle
+    Route::post('app/plan/misplanes/cuestionario/bloque', [ApiPlanesController::class,'informacionCuestionarioBloque']);
 
 
 
