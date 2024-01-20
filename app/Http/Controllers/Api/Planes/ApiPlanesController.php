@@ -80,8 +80,14 @@ class ApiPlanesController extends Controller
             // EVITAR LOS TITULOS VACIOS
             $arrayPlanesValidos = $this->retornoPlanesNoElegidos($arrayContenedor, $userToken->id, $idiomaTextos);
 
+            $haydatos = 0;
+            if ($arrayPlanesValidos->isNotEmpty()) {
+                $haydatos = 1;
+            }
+
             return [
                 'success' => 1,
+                'hayinfo' => $haydatos,
                 'listado' => $arrayPlanesValidos,
                 ];
         }else{
@@ -383,7 +389,6 @@ class ApiPlanesController extends Controller
                     $infoP = Planes::where('id', $dato->id_planes)->first();
                     $dato->imagen = $infoP->imagen;
                     $dato->imagenportada = $infoP->imagenportada;
-                    $dato->barra_progreso = $infoP->barra_progreso;
                     $dato->idplan = $infoP->id;
                 }
             }
@@ -403,7 +408,6 @@ class ApiPlanesController extends Controller
                 $infoP = Planes::where('id', $dato->id_planes)->first();
                 $dato->imagen = $infoP->imagen;
                 $dato->imagenportada = $infoP->imagenportada;
-                $dato->barra_progreso = $infoP->barra_progreso;
                 $dato->idplan = $infoP->id;
             }
 
@@ -422,7 +426,7 @@ class ApiPlanesController extends Controller
             return ['success' => 1,
                 'haycontinuar' => $haycontinuar,
                 'hayinfo' => $hayinfo,
-                'listacontinuar' => $arrayContinuar,
+                'listacontinuar' => $arrayContinuar, // no usa barra progreso
                 'listaplanes' => $datosOrdenados,
             ];
 
@@ -784,6 +788,9 @@ class ApiPlanesController extends Controller
             if($info = BloquePreguntas::where('id_plan_block_detalle', $request->idblockdeta)
                 ->first()){
 
+                $titulop = $this->retornoTituloPrincipalPreguntaTextoIdioma($request->idblockdeta, $idiomaTextos);
+
+
                 $arrayBloque = BloquePreguntas::where('id_plan_block_detalle', $request->idblockdeta)
                     ->where('visible', 1)
                     ->orderBy('posicion')
@@ -796,7 +803,8 @@ class ApiPlanesController extends Controller
 
 
                 return ['success' => 1,
-                    'listado' => $arrayBloque,
+                    'titulop' => $titulop,
+                    'listado' => $arrayBloque
                 ];
             }else{
 
@@ -812,6 +820,27 @@ class ApiPlanesController extends Controller
     }
 
 
+    // RETORNA TITULO PRINCIPAL QUE SE MUESTRA 1 SOLA VEZ PARA BLOQUE PREGUNTAS
+
+    private function retornoTituloPrincipalPreguntaTextoIdioma($idBlockDeta, $idiomaTexto){
+
+        if($infoTituloTexto = PlanesBlockDetaTextos::where('id_planes_block_detalle', $idBlockDeta)
+            ->where('id_idioma_planes', $idiomaTexto)
+            ->first()){
+
+            return $infoTituloTexto->titulop;
+
+        }else{
+            // si no encuentra sera por defecto español
+
+            $infoTituloTexto = PlanesBlockDetaTextos::where('id_planes_block_detalle', $idBlockDeta)
+                ->where('id_idioma_planes', 1)
+                ->first();
+
+            return $infoTituloTexto->titulop;
+        }
+
+    }
 
 
 
