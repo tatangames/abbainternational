@@ -69,8 +69,8 @@ Route::middleware('verificarToken')->group(function () {
     // informacion de un cuestionario y sus preguntas de un bloque detalle
     Route::post('app/plan/misplanes/cuestionario/bloque', [ApiPlanesController::class,'informacionCuestionarioBloque']);
 
-
-
+    // informacion de preguntas de un bloque detalle
+    Route::post('app/plan/misplanes/preguntas/bloque', [ApiPlanesController::class,'informacionPreguntasBloque']);
 
 
 });

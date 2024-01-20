@@ -17,6 +17,7 @@ return new class extends Migration
 
             $table->boolean('visible');
             $table->integer('posicion');
+            $table->boolean('requerido');
 
             $table->foreign('id_plan_block_detalle')->references('id')->on('planes_block_detalle');
         });

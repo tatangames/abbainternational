@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\BloqueCuestionario;
 use App\Models\BloqueCuestionarioTextos;
 use App\Models\BloquePreguntas;
+use App\Models\BloquePreguntasTextos;
 use App\Models\Iglesias;
 use App\Models\Planes;
 use App\Models\PlanesBlockDetalle;
@@ -467,7 +468,6 @@ class ApiPlanesController extends Controller
              $resultsBloque = array();
              $index = 0;
 
-
             // con esto se conoce si hay un dia con informacion para Hoy, sino se tomara el ultimo
             // en la aplicacion
             $hayDiaActual = 0;
@@ -511,6 +511,8 @@ class ApiPlanesController extends Controller
 
 
                 foreach ($arrayDetaBloque as $datoArr){
+
+
                     $datoArr->titulo = $this->retornoTituloBloquesTextos($idiomaTextos, $datoArr->id);
 
                     // saber si esta check para mi usuario
@@ -530,12 +532,12 @@ class ApiPlanesController extends Controller
                     $hayPreguntas = 0;
                     $arrayPreguntas = BloquePreguntas::where('id_plan_block_detalle', $datoArr->id)
                         ->where('visible', 1)
+                        ->orderBy('posicion', 'ASC')
                         ->count();
 
-                    if($arrayPreguntas > 0){
+                    if ($arrayPreguntas > 0) {
                         $hayPreguntas = 1;
                     }
-
                     $datoArr->tiene_preguntas = $hayPreguntas;
                 }
 
@@ -584,7 +586,6 @@ class ApiPlanesController extends Controller
             return ['success' => 99];
         }
     }
-
 
     // RETORNA TITULO DEL BLOQUE DETALLE TEXTOS
     private function retornoTituloBloquesTextos($idiomaTextos, $idBlockDetalle){
@@ -688,6 +689,7 @@ class ApiPlanesController extends Controller
     }
 
 
+    // informacion de un cuestionario y sus preguntas de un bloque detalle
     public function informacionCuestionarioBloque(Request $request){
 
         $rules = array(
@@ -749,8 +751,92 @@ class ApiPlanesController extends Controller
 
             return $infoTituloTexto->texto;
         }
+    }
+
+
+
+
+
+    // informacion de preguntas de un bloque detalle
+    public function informacionPreguntasBloque(Request $request)
+    {
+
+        $rules = array(
+            'iduser' => 'required',
+            'idblockdeta' => 'required',
+            'idioma' => 'required'
+        );
+
+        $validator = Validator::make($request->all(), $rules);
+        if ( $validator->fails()){
+            return ['success' => 0,
+                'msj' => "validación incorrecta"
+            ];
+        }
+
+        $tokenApi = $request->header('Authorization');
+
+        if ($userToken = JWTAuth::user($tokenApi)) {
+
+            $idiomaTextos = $this->reseteoIdiomaTextos($request->idiomaplan);
+
+            // comprueba que al menos haya un cuestionario disponible
+            if($info = BloquePreguntas::where('id_plan_block_detalle', $request->idblockdeta)
+                ->first()){
+
+                $arrayBloque = BloquePreguntas::where('id_plan_block_detalle', $request->idblockdeta)
+                    ->where('visible', 1)
+                    ->orderBy('posicion')
+                    ->get();
+
+                foreach ($arrayBloque as $dato){
+                    $titulo = $this->retornoTituloPreguntaTextoIdioma($dato->id, $idiomaTextos);
+                    $dato->titulo = $titulo;
+                }
+
+
+                return ['success' => 1,
+                    'listado' => $arrayBloque,
+                ];
+            }else{
+
+                return ['success' => 2,
+                    'msg' => "No hay preguntas"
+                ];
+            }
+
+
+        }else{
+            return ['success' => 99];
+        }
+    }
+
+
+
+
+
+
+    // RETORNO DE TITULO DE PREGUNTA SEGUN IDIOMA
+    private function retornoTituloPreguntaTextoIdioma($idPregunta, $idiomaTexto){
+
+        if($infoTituloTexto = BloquePreguntasTextos::where('id_bloque_preguntas', $idPregunta)
+            ->where('id_idioma_planes', $idiomaTexto)
+            ->first()){
+
+            return $infoTituloTexto->texto;
+
+        }else{
+            // si no encuentra sera por defecto español
+
+            $infoTituloTexto = BloquePreguntasTextos::where('id_bloque_preguntas', $idPregunta)
+                ->where('id_idioma_planes', 1)
+                ->first();
+
+            return $infoTituloTexto->texto;
+        }
 
     }
+
 
 
 }
