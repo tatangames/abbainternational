@@ -22,6 +22,8 @@ use App\Models\PlanesUsuariosContinuar;
 use App\Models\ZonaHoraria;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
@@ -1184,42 +1186,15 @@ class ApiPlanesController extends Controller
         }
     }
 
-    public function getListado(Request $request){
 
-        $tokenApi = $request->header('Authorization');
-        if ($userToken = JWTAuth::user($tokenApi)) {
-
-            Log::info("ENTRAAA 1");
-
-            $page = $request->input('page', 1);
-            $limit = $request->input('limit', 10);
-
-
-            $arrayPlanUsuario = PlanesUsuarios::where('id_usuario', $userToken->id)
-                ->select('id_planes')
-                ->paginate($limit, ['*'], 'page', $page);
-
-            $contador = 0;
-            foreach ($arrayPlanUsuario as $dato) {
-                $contador++;
-                $dato->contador = $contador;
-            }
-
-            //return response()->json($arrayPlanUsuario);
-
-            return ['success' => 1,
-                'hayinfo' => 1,
-                'listaplanes' => $arrayPlanUsuario,
-            ];
-        }
-    }
-
+    // informacion de todos los planes completados
     public function listadoMisPlanesCompletados(Request $request)
     {
         $rules = array(
             'idiomaplan' => 'required',
             'iduser' => 'required',
-            'page' => 'required'
+            'page' => 'required',
+            'limit' => 'required'
         );
 
         $validator = Validator::make($request->all(), $rules);
@@ -1232,36 +1207,6 @@ class ApiPlanesController extends Controller
         $idiomaTextos = $this->reseteoIdiomaTextos($request->idiomaplan);
 
         if ($userToken = JWTAuth::user($tokenApi)) {
-
-
-            // EJEMPLO
-
-
-            $arrayPlanUsuario = PlanesUsuarios::where('id_usuario', $userToken->id)
-                ->select('id_planes')
-                ->paginate($request->page);
-
-            $contador = 0;
-            foreach ($arrayPlanUsuario as $dato){
-                $contador++;
-                $dato->contador = $contador;
-            }
-
-
-
-            return ['success' => 1,
-                'hayinfo' => 1,
-                'listaplanes' => $arrayPlanUsuario,
-            ];
-
-
-
-
-
-
-
-
-
 
 
             $arrayPlanUsuario = PlanesUsuarios::where('id_usuario', $userToken->id)
@@ -1315,10 +1260,17 @@ class ApiPlanesController extends Controller
             }
 
 
-            // obtener todos los planes menos el de Continuar
+            $page = $request->input('page', 1);
+            $limit = $request->input('limit', 10);
+
             $arrayPlanesUser = PlanesUsuarios::where('id_usuario', $userToken->id)
                 ->whereIn('id_planes', $pilaIdPlanComplet)
-                ->get();
+                ->paginate($limit, ['*'], 'page', $page);
+
+            $hayinfo = 0;
+            if ($arrayPlanesUser->hasPages()) {
+                $hayinfo = 1;
+            }
 
 
             foreach ($arrayPlanesUser as $dato){
@@ -1334,19 +1286,191 @@ class ApiPlanesController extends Controller
                 $dato->idplan = $infoP->id;
             }
 
+            // PROCESO DE ORDENAR POR TITULO
 
-            $datosOrdenados = $arrayPlanesUser->sortBy('titulo')->values();
+            // Obtener los resultados como un array
+            $resultadosArray = $arrayPlanesUser->items();
 
-            $hayinfo = 0;
-            if ($datosOrdenados != null && $datosOrdenados->isNotEmpty()) {
-                $hayinfo = 1;
-            }
+            // Ordenar el array por el campo 'nombre'
+            usort($resultadosArray, function ($a, $b) {
+                return strcmp($a['titulo'], $b['titulo']);
+            });
+
+            // Configurar la paginación para el array ordenado
+            $porPagina = $limit; // Número de elementos por página
+            $paginaActual = Paginator::resolveCurrentPage($page) ?: 1;
+            $itemsPaginaActual = array_slice($resultadosArray, ($paginaActual - 1) * $porPagina, $porPagina);
+
+            // Crear un objeto LengthAwarePaginator para manejar la paginación
+            $paginador = new LengthAwarePaginator($itemsPaginaActual, count($resultadosArray), $porPagina, $paginaActual, [
+                'path' => Paginator::resolveCurrentPath(),
+            ]);
+
 
             return ['success' => 1,
                 'hayinfo' => $hayinfo,
-                'listaplanes' => $datosOrdenados,
+                'listaplanes' => $paginador,
             ];
 
+        }else{
+            return ['success' => 99];
+        }
+    }
+
+
+    // devuelve informacion del plan a continuar, todos el bloque pero esto solo es vista
+    public function informacionBloqueMiPlanVista(Request $request){
+
+        $rules = array(
+            'idiomaplan' => 'required',
+            'iduser' => 'required',
+            'idplan' => 'required'
+        );
+
+        $validator = Validator::make($request->all(), $rules);
+        if ( $validator->fails()){
+            return ['success' => 0, 'msj' => "validación incorrecta"];
+        }
+
+        $tokenApi = $request->header('Authorization');
+
+        $idiomaTextos = $this->reseteoIdiomaTextos($request->idiomaplan);
+
+        if ($userToken = JWTAuth::user($tokenApi)) {
+
+            if(!Planes::where('id', $request->idplan)->first()){
+                return ['success' => 99];
+            }
+
+            $infoPlan = Planes::where('id', $request->idplan)->first();
+
+            // obtener zona horaria
+            $infoIglesia = Iglesias::where('id', $userToken->id_iglesia)->first();
+            $zonaHoraria = ZonaHoraria::where('id', $infoIglesia->id_zona_horaria)->first();
+
+
+            // obtener todos los bloques ordenados por fecha
+            $arrayBloques = PlanesBloques::where('id_planes', $request->idplan)
+                ->where('visible', 1)
+                ->orderBy('fecha_inicio', 'ASC')
+                ->get();
+
+            $contador = 0;
+            $resultsBloque = array();
+            $index = 0;
+
+            // con esto se conoce si hay un dia con informacion para Hoy, sino se tomara el ultimo
+            // en la aplicacion
+            $hayDiaActual = 0;
+
+            foreach ($arrayBloques as $dato){
+                array_push($resultsBloque, $dato);
+
+                $contador++;
+                $dato->abreviatura = $this->retorno3LetrasFechasIdioma($idiomaTextos, $dato->fecha_inicio);
+                $dato->contador = $contador;
+
+                // fecha inicio del bloque
+                $fecha1 = Carbon::parse($dato->fecha_inicio);
+
+                // fecha-horario actual segun usuario zona horaria
+                $fecha2 = Carbon::parse(now(), $zonaHoraria->zona);
+
+                if($fecha1->isSameDay($fecha2)){
+                    $dato->mismodia = 1;
+                    $hayDiaActual = 1;
+                }else{
+                    $dato->mismodia = 0;
+                }
+
+                // para mostrar o no el bloque, OSEA ESPERAR FECHA PARA QUE APAREZCA
+                // SETEAR ESPERAR_FECHA PARA MOSTRAR BLOQUE
+                if($dato->esperar_fecha == 1){
+
+                    //gte: mayor o igual
+                    if($fecha2->gte($fecha1)){
+                        // SET
+                        $dato->esperar_fecha = 0;
+                    }
+                }
+
+
+                // agregar detalle bloques
+                $arrayDetaBloque = PlanesBlockDetalle::where('id_planes_bloques', $dato->id)
+                    ->orderBy('posicion', 'ASC')
+                    ->get();
+
+
+                foreach ($arrayDetaBloque as $datoArr){
+
+
+                    $datoArr->titulo = $this->retornoTituloBloquesTextos($idiomaTextos, $datoArr->id);
+
+                    // saber si esta check para mi usuario
+                    if($infoDeta = PlanesBlockDetaUsuario::where('id_usuario', $userToken->id)
+                        ->where('id_planes_block_deta', $datoArr->id)
+                        ->first()){
+                        if($infoDeta->completado == 1){
+                            $datoArr->completado = 1;
+                        }else{
+                            $datoArr->completado = 0;
+                        }
+                    }else{
+                        $datoArr->completado = 0;
+                    }
+
+                    // verificar si tiene preguntas, o alguna activa para mostrarlas
+                    $hayPreguntas = 0;
+                    $arrayPreguntas = BloquePreguntas::where('id_plan_block_detalle', $datoArr->id)
+                        ->where('visible', 1)
+                        ->orderBy('posicion', 'ASC')
+                        ->count();
+
+                    if ($arrayPreguntas > 0) {
+                        $hayPreguntas = 1;
+                    }
+                    $datoArr->tiene_preguntas = $hayPreguntas;
+                }
+
+                $resultsBloque[$index]->detalle = $arrayDetaBloque;
+                $index++;
+            }
+
+
+            // Para comparar en la aplicacion que sino hay info para este dia, este id sera el bloque que se
+            // le cambiara el estilo
+            $idUltimoBloque = 0;
+
+
+            if ($arrayBloques->isNotEmpty() && $hayDiaActual == 0) {
+
+                $encontroBloque = true;
+
+                // encontrar cual es el siguiente bloque que deberia cargarse
+                foreach ($arrayBloques as $bloque){
+                    $fecha1 = Carbon::parse($bloque->fecha_inicio);
+                    $fecha2 = Carbon::parse(now(), $zonaHoraria->zona);
+
+                    if($fecha1->gte($fecha2)){
+                        $idUltimoBloque = $bloque->id;
+                        $encontroBloque = false;
+                        break;
+                    }
+                }
+
+                if($encontroBloque){
+                    $ultimoElemento = $arrayBloques->last();
+                    $idUltimoBloque = $ultimoElemento->id;
+                }
+            }
+
+
+            return ['success' => 1,
+                'portada' => $infoPlan->imagenportada,
+                'haydiaactual' => $hayDiaActual,
+                'idultimobloque' => $idUltimoBloque,
+                'listado' => $arrayBloques,
+            ];
         }else{
             return ['success' => 99];
         }

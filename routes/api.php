@@ -79,7 +79,10 @@ Route::middleware('verificarToken')->group(function () {
     Route::post('app/plan/misplanes/preguntas/usuario/actualizar', [ApiPlanesController::class,'actualizarPreguntasUsuarioPlan']);
 
     // informacion de todos los planes completados
-    Route::post('app/plan/misplanes/completados', [ApiPlanesController::class,'getListado']);
+    Route::post('app/plan/misplanes/completados', [ApiPlanesController::class,'listadoMisPlanesCompletados']);
+
+    // devuelve informacion del plan a continuar, todos el bloque pero esto solo es vista
+    Route::post('app/plan/misplanes/info/bloque/vista', [ApiPlanesController::class,'informacionBloqueMiPlanVista']);
 
 
 
