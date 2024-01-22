@@ -7,6 +7,7 @@ use App\Models\BloqueCuestionario;
 use App\Models\BloqueCuestionarioTextos;
 use App\Models\BloquePreguntas;
 use App\Models\BloquePreguntasTextos;
+use App\Models\BloquePreguntasUsuarios;
 use App\Models\Iglesias;
 use App\Models\Planes;
 use App\Models\PlanesBlockDetalle;
@@ -325,12 +326,16 @@ class ApiPlanesController extends Controller
             }else{
                 DB::beginTransaction();
 
+                $infoIglesia = Iglesias::where('id', $userToken->id_iglesia)->first();
+                $infoZonaHoraria = ZonaHoraria::where('id', $infoIglesia->id_zona_horaria)->first();
+                $zonaHoraria = $infoZonaHoraria->zona;
+
                 try {
 
                     $nuevoPlan = new PlanesUsuarios();
                     $nuevoPlan->id_usuario = $userToken->id;
                     $nuevoPlan->id_planes = $request->idplan;
-                    $nuevoPlan->fecha = Carbon::now('America/El_Salvador');
+                    $nuevoPlan->fecha = Carbon::now($zonaHoraria);
                     $nuevoPlan->save();
 
                     DB::commit();
@@ -370,9 +375,66 @@ class ApiPlanesController extends Controller
             $idPlanContinuar = 0;
             $arrayContinuar = null;
             $haycontinuar = 0;
-            if($infoContinuar = PlanesUsuariosContinuar::where('id_usuarios', $userToken->id)->first()){
-                $haycontinuar = 1;
 
+
+
+            $arrayPlanUsuario = PlanesUsuarios::where('id_usuario', $userToken->id)
+                ->select('id_planes')
+                ->get();
+
+
+
+            foreach ($arrayPlanUsuario as $dato){
+
+                $arrayPlanBloque = PlanesBloques::where('id_planes', $dato->id_planes)->get();
+                $planCompletado = 1;
+
+                if($arrayPlanBloque != null && $arrayPlanBloque->isNotEmpty()){
+                    foreach ($arrayPlanBloque as $rec){ // cada bloque
+
+                        // buscar el detalle de ese bloque
+                        $arrayListado = PlanesBlockDetalle::where('id_planes_bloques', $rec->id)->get();
+
+                        foreach ($arrayListado as $datoLista){
+
+                            if($detauser = PlanesBlockDetaUsuario::where('id_usuario', $userToken->id)
+                                ->where('id_planes_block_deta', $datoLista->id)
+                                ->first()){
+                                // si encontro, verificar si esta completo
+                                if($detauser->completado == 0){
+                                    $planCompletado = 0;
+                                    break;
+                                }
+                            }else{
+                                // no encontrado, asi que retornar
+                                $planCompletado = 0;
+                                break;
+                            }
+                        }
+                    }
+                }else{
+                    $planCompletado = 0;
+                }
+
+                $dato->plancompletado = $planCompletado;
+            }
+
+
+            // obtener los planes que no esten completados
+            $pilaIdPlanNoComplet = array();
+
+            foreach ($arrayPlanUsuario as $item){
+                if($item->plancompletado == 0){
+                    array_push($pilaIdPlanNoComplet, $item->id_planes);
+                }
+            }
+
+
+            // filtrar plan continuar, aunque haya, evitar el completados
+            if($infoContinuar = PlanesUsuariosContinuar::where('id_usuarios', $userToken->id)
+                ->whereIn('id_planes', $pilaIdPlanNoComplet)
+                ->first()){
+                $haycontinuar = 1;
                 $idPlanContinuar = $infoContinuar->id_planes;
 
                 // plan ultimo para continuar
@@ -393,10 +455,17 @@ class ApiPlanesController extends Controller
                 }
             }
 
+
+            // quiero evitar el plan continuar, haya o no haya
+         //   array_push($pilaIdPlanNoComplet, $idPlanContinuar);
+
+
             // obtener todos los planes menos el de Continuar
            $arrayPlanesUser = PlanesUsuarios::where('id_usuario', $userToken->id)
+               ->whereIn('id_planes', $pilaIdPlanNoComplet)
                ->whereNotIn('id_planes', [$idPlanContinuar])
                ->get();
+
 
             foreach ($arrayPlanesUser as $dato){
 
@@ -411,6 +480,7 @@ class ApiPlanesController extends Controller
                 $dato->idplan = $infoP->id;
             }
 
+
             $datosOrdenados = $arrayPlanesUser->sortBy('titulo')->values();
 
             $hayinfo = 0;
@@ -418,7 +488,7 @@ class ApiPlanesController extends Controller
                 $hayinfo = 1;
             }
 
-            if ($arrayPlanesUser != null && $datosOrdenados->isNotEmpty()) {
+            if ($datosOrdenados != null && $datosOrdenados->isNotEmpty()) {
                 $hayinfo = 1;
             }
 
@@ -643,7 +713,8 @@ class ApiPlanesController extends Controller
         $rules = array(
             'iduser' => 'required',
             'idblockdeta' => 'required',
-            'valor' => 'required'
+            'valor' => 'required',
+            'idplan' => 'required'
         );
 
         $validator = Validator::make($request->all(), $rules);
@@ -655,38 +726,88 @@ class ApiPlanesController extends Controller
 
         if ($userToken = JWTAuth::user($tokenApi)) {
 
-            // si existe, solo actualizar
-            if($idinfo = PlanesBlockDetaUsuario::where('id_usuario', $userToken->id)
-                ->where('id_planes_block_deta', $request->idblockdeta)
-                ->first()){
+            DB::beginTransaction();
 
-                PlanesBlockDetaUsuario::where('id', $idinfo->id)
-                    ->update([
-                        'completado' => $request->valor,
-                    ]);
+            try {
 
-                return ['success' => 1];
-            }else{
 
-                // se debera crear
-                DB::beginTransaction();
+                // EL USUARIO PUEDE GUARDAR AUNQUE NO HAYA CONTESTADO PREGUNTAS, PORQUE PUEDE
+                // HABER DEVOCIONALES QUE NO LLEVEN PREGUNTAS
 
-                try {
+
+                $planCompletado = 1;
+
+                // si existe, solo actualizar
+                if($idinfo = PlanesBlockDetaUsuario::where('id_usuario', $userToken->id)
+                    ->where('id_planes_block_deta', $request->idblockdeta)
+                    ->first()){
+
+                    PlanesBlockDetaUsuario::where('id', $idinfo->id)
+                        ->update([
+                            'completado' => $request->valor,
+                        ]);
+
+                }else{
+
+                    // se debera crear
 
                     $detalle = new PlanesBlockDetaUsuario();
                     $detalle->id_usuario = $userToken->id;
                     $detalle->id_planes_block_deta = $request->idblockdeta;
                     $detalle->completado = 1;
                     $detalle->save();
-
-                    DB::commit();
-                    return ['success' => 1];
-
-                }catch(\Throwable $e){
-                    DB::rollback();
-                    return ['success' => 99];
                 }
+
+
+
+
+                // VERIFICA SI TODAS LAS CASILLAS DE TODOS LOS BLOQUES ESTAN COMPLETOS
+                $arrayPlanBloque = PlanesBloques::where('id_planes', $request->idplan)->get();
+
+                foreach ($arrayPlanBloque as $dato){
+
+                    // buscar el detalle de cada bloque
+                    $arrayListado = PlanesBlockDetalle::where('id_planes_bloques', $dato->id)->get();
+
+                    foreach ($arrayListado as $datoLista){
+
+
+                        if($detauser = PlanesBlockDetaUsuario::where('id_usuario', $userToken->id)
+                            ->where('id_planes_block_deta', $datoLista->id)
+                            ->first()){
+                            // si encontro, verificar si esta completo
+                            if($detauser->completado == 0){
+                                $planCompletado = 0;
+                                break;
+                            }
+                        }else{
+                            // no encontrado, asi que retornar
+                            $planCompletado = 0;
+                            break;
+                        }
+                    }
+                }
+
+
+                $infoBlockDeta = PlanesBlockDetalle::where('id', $request->idblockdeta)->first();
+                $infoPlanesBloques = PlanesBloques::where('id', $infoBlockDeta->id_planes_bloques)->first();
+
+                // colocar plan continuar por defecto
+                $this->retornoActualizarPlanUsuarioContinuar($userToken->id, $infoPlanesBloques->id_planes);
+
+
+
+                DB::commit();
+                return ['success' => 1,
+                    'plancompletado' => $planCompletado
+                ];
+
+            }catch(\Throwable $e){
+                Log::info("error" . $e);
+                DB::rollback();
+                return ['success' => 99];
             }
+
         }else{
             return ['success' => 99];
         }
@@ -784,11 +905,15 @@ class ApiPlanesController extends Controller
 
             $idiomaTextos = $this->reseteoIdiomaTextos($request->idiomaplan);
 
-            // comprueba que al menos haya un cuestionario disponible
-            if($info = BloquePreguntas::where('id_plan_block_detalle', $request->idblockdeta)
+            // comprueba que al menos haya una pregunta disponible
+            if($infoBloquePre = BloquePreguntas::where('id_plan_block_detalle', $request->idblockdeta)
+                ->where('visible', 1)
                 ->first()){
 
-                $titulop = $this->retornoTituloPrincipalPreguntaTextoIdioma($request->idblockdeta, $idiomaTextos);
+                $arrayTiPre = $this->retornoTituloPrincipalPreguntaTextoIdioma($request->idblockdeta, $idiomaTextos);
+
+                $titulop = $arrayTiPre['titulo'];
+                $descripcionp = $arrayTiPre['descripcion'];
 
 
                 $arrayBloque = BloquePreguntas::where('id_plan_block_detalle', $request->idblockdeta)
@@ -799,11 +924,32 @@ class ApiPlanesController extends Controller
                 foreach ($arrayBloque as $dato){
                     $titulo = $this->retornoTituloPreguntaTextoIdioma($dato->id, $idiomaTextos);
                     $dato->titulo = $titulo;
+
+
+                    $texto = "";
+                    // buscar texto de la pregunta contestada si existe
+                    if($detaPre = BloquePreguntasUsuarios::where('id_bloque_preguntas', $dato->id)
+                        ->where('id_usuarios', $userToken->id)
+                        ->first()){
+                        $texto = $detaPre->texto;
+                    }
+
+                    $dato->texto = $texto;
                 }
 
 
+                // verificar si hay preguntas ya guardadas
+                $hayrespuesta = 0;
+                if(BloquePreguntasUsuarios::where('id_bloque_preguntas', $infoBloquePre->id)
+                    ->where('id_usuarios', $userToken->id)
+                    ->first()){
+                    $hayrespuesta = 1;
+                }
+
                 return ['success' => 1,
                     'titulop' => $titulop,
+                    'descripcionp' => $descripcionp,
+                    'hayrespuesta' => $hayrespuesta,
                     'listado' => $arrayBloque
                 ];
             }else{
@@ -828,7 +974,8 @@ class ApiPlanesController extends Controller
             ->where('id_idioma_planes', $idiomaTexto)
             ->first()){
 
-            return $infoTituloTexto->titulop;
+            return ['titulo' => $infoTituloTexto->titulop,
+                'descripcion' => $infoTituloTexto->descripcionp];
 
         }else{
             // si no encuentra sera por defecto español
@@ -837,7 +984,8 @@ class ApiPlanesController extends Controller
                 ->where('id_idioma_planes', 1)
                 ->first();
 
-            return $infoTituloTexto->titulop;
+            return ['titulo' => $infoTituloTexto->titulop,
+                'descripcion' => $infoTituloTexto->descripcionp];
         }
 
     }
@@ -865,6 +1013,177 @@ class ApiPlanesController extends Controller
         }
 
     }
+
+
+
+    // guardar las preguntas del usuario segun plan, guardara las que vienen y en actualizar
+    // se verifica si existe o no para update o crearla
+    public function guardarPreguntasUsuarioPlan(Request $request)
+    {
+        $rules = array(
+            'iduser' => 'required',
+            'idblockdeta' => 'required'
+        );
+
+        $validator = Validator::make($request->all(), $rules);
+        if ( $validator->fails()){
+            return ['success' => 0,
+                'msj' => "validación incorrecta"
+            ];
+        }
+
+        $tokenApi = $request->header('Authorization');
+
+        if ($userToken = JWTAuth::user($tokenApi)) {
+
+
+            $infoIglesia = Iglesias::where('id', $userToken->id_iglesia)->first();
+            $infoZonaHoraria = ZonaHoraria::where('id', $infoIglesia->id_zona_horaria)->first();
+            $zonaHoraria = $infoZonaHoraria->zona;
+
+            DB::beginTransaction();
+
+            try {
+
+                if ($request->has('idpregunta')) {
+
+                    foreach ($request->idpregunta as $clave => $valor) {
+
+                        if(BloquePreguntasUsuarios::where('id_bloque_preguntas', $clave)
+                            ->where('id_usuarios', $userToken->id)->first()){
+
+                            // no guardar porque ya existe
+                        }else{
+                            $pregunta = new BloquePreguntasUsuarios();
+                            $pregunta->id_bloque_preguntas = $clave;
+                            $pregunta->id_usuarios = $userToken->id;
+                            $pregunta->texto = $valor['txtpregunta'];
+                            $pregunta->fecha = Carbon::now($zonaHoraria);
+                            $pregunta->fecha_actualizo = null;
+                            $pregunta->save();
+                        }
+                    }
+                }
+
+                // setear plan continuar
+                $infoBlockDeta = PlanesBlockDetalle::where('id', $request->idblockdeta)->first();
+                $infoPlanesBloques = PlanesBloques::where('id', $infoBlockDeta->id_planes_bloques)->first();
+
+                // colocar plan continuar por defecto
+                $this->retornoActualizarPlanUsuarioContinuar($userToken->id, $infoPlanesBloques->id_planes);
+
+
+                DB::commit();
+                return ['success' => 1];
+
+            }catch(\Throwable $e){
+                DB::rollback();
+                return ['success' => 99];
+            }
+
+        }else{
+            return ['success' => 99];
+        }
+    }
+
+
+    // actualizar preguntas
+    public function actualizarPreguntasUsuarioPlan(Request $request)
+    {
+        $rules = array(
+            'iduser' => 'required',
+            'idblockdeta' => 'required'
+        );
+
+        $validator = Validator::make($request->all(), $rules);
+        if ( $validator->fails()){
+            return ['success' => 0,
+                'msj' => "validación incorrecta"
+            ];
+        }
+
+        $tokenApi = $request->header('Authorization');
+
+        if ($userToken = JWTAuth::user($tokenApi)) {
+
+            $infoIglesia = Iglesias::where('id', $userToken->id_iglesia)->first();
+            $infoZonaHoraria = ZonaHoraria::where('id', $infoIglesia->id_zona_horaria)->first();
+            $zonaHoraria = $infoZonaHoraria->zona;
+
+            DB::beginTransaction();
+
+            try {
+
+                if ($request->has('idpregunta')) {
+
+                    foreach ($request->idpregunta as $clave => $valor) {
+
+                        if(BloquePreguntasUsuarios::where('id_bloque_preguntas', $clave)
+                            ->where('id_usuarios', $userToken->id)->first()){
+
+                            // actualizar la preguntas
+                            BloquePreguntasUsuarios::where('id', $clave)
+                                ->update([
+                                    'texto' => $valor['txtpregunta'],
+                                    'fecha_actualizo' => Carbon::now($zonaHoraria)
+                                ]);
+
+                        }else{
+                            $pregunta = new BloquePreguntasUsuarios();
+                            $pregunta->id_bloque_preguntas = $clave;
+                            $pregunta->id_usuarios = $userToken->id;
+                            $pregunta->texto = $valor['txtpregunta'];
+                            $pregunta->fecha = Carbon::now($zonaHoraria);
+                            $pregunta->fecha_actualizo = null;
+                            $pregunta->save();
+                        }
+                    }
+                }
+
+                // setear plan continuar
+                $infoBlockDeta = PlanesBlockDetalle::where('id', $request->idblockdeta)->first();
+                $infoPlanesBloques = PlanesBloques::where('id', $infoBlockDeta->id_planes_bloques)->first();
+
+                // colocar plan continuar por defecto
+                $this->retornoActualizarPlanUsuarioContinuar($userToken->id, $infoPlanesBloques->id_planes);
+
+
+                DB::commit();
+                return ['success' => 1];
+
+            }catch(\Throwable $e){
+                Log::info("error: " . $e);
+                DB::rollback();
+                return ['success' => 99];
+            }
+
+        }else{
+            return ['success' => 99];
+        }
+    }
+
+
+
+    private function retornoActualizarPlanUsuarioContinuar($iduser, $idplan)
+    {
+        if($idPlanUser = PlanesUsuariosContinuar::where('id_usuarios', $iduser)
+            ->first()){
+            // solo actualizar
+
+            PlanesUsuariosContinuar::where('id', $idPlanUser->id)
+                ->update([
+                    'id_planes' => $idplan,
+                ]);
+        }
+        else{
+            // crear
+            $dato = new PlanesUsuariosContinuar();
+            $dato->id_usuarios = $iduser;
+            $dato->id_planes = $idplan;
+            $dato->save();
+        }
+    }
+
 
 
 

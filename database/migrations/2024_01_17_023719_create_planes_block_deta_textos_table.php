@@ -16,10 +16,14 @@ return new class extends Migration
             $table->id();
             $table->bigInteger('id_planes_block_detalle')->unsigned();
             $table->bigInteger('id_idioma_planes')->unsigned();
+
+            // nombre que va debajo del bloque
             $table->string('titulo', 100);
 
-            // titulo que va en la pregunta
-            $table->string('titulop', 150)->nullable();
+            // titulo que va arriba de bloque preguntas
+            $table->text('titulop')->nullable();
+            // descripcion abajo de ese titulo
+            $table->text('descripcionp')->nullable();
 
             $table->foreign('id_planes_block_detalle')->references('id')->on('planes_block_detalle');
             $table->foreign('id_idioma_planes')->references('id')->on('idioma_planes');

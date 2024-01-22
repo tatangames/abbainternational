@@ -66,11 +66,20 @@ Route::middleware('verificarToken')->group(function () {
     // actualizar el check de cada plan
     Route::post('app/plan/misplanes/actualizar/check', [ApiPlanesController::class,'actualizarCheckBloqueMiPlan']);
 
-    // informacion de un cuestionario y sus preguntas de un bloque detalle
+    // informacion de un cuestionario de un bloque detalle
     Route::post('app/plan/misplanes/cuestionario/bloque', [ApiPlanesController::class,'informacionCuestionarioBloque']);
 
     // informacion de preguntas de un bloque detalle
     Route::post('app/plan/misplanes/preguntas/bloque', [ApiPlanesController::class,'informacionPreguntasBloque']);
+
+    // guardar las preguntas del usuario segun plan
+    Route::post('app/plan/misplanes/preguntas/usuario/guardar', [ApiPlanesController::class,'guardarPreguntasUsuarioPlan']);
+
+    // actualizar preguntas
+    Route::post('app/plan/misplanes/preguntas/usuario/actualizar', [ApiPlanesController::class,'actualizarPreguntasUsuarioPlan']);
+
+
+
 
 
 });

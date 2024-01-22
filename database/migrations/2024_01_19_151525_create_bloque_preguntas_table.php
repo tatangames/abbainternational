@@ -14,12 +14,14 @@ return new class extends Migration
         Schema::create('bloque_preguntas', function (Blueprint $table) {
             $table->id();
             $table->bigInteger('id_plan_block_detalle')->unsigned();
+            $table->bigInteger('id_imagen_pregunta')->unsigned();
 
             $table->boolean('visible');
             $table->integer('posicion');
             $table->boolean('requerido');
 
             $table->foreign('id_plan_block_detalle')->references('id')->on('planes_block_detalle');
+            $table->foreign('id_imagen_pregunta')->references('id')->on('imagen_preguntas');
         });
     }
 
