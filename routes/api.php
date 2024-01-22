@@ -78,7 +78,8 @@ Route::middleware('verificarToken')->group(function () {
     // actualizar preguntas
     Route::post('app/plan/misplanes/preguntas/usuario/actualizar', [ApiPlanesController::class,'actualizarPreguntasUsuarioPlan']);
 
-
+    // informacion de todos los planes completados
+    Route::post('app/plan/misplanes/completados', [ApiPlanesController::class,'getListado']);
 
 
 

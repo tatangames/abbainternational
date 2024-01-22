@@ -1184,6 +1184,174 @@ class ApiPlanesController extends Controller
         }
     }
 
+    public function getListado(Request $request){
+
+        $tokenApi = $request->header('Authorization');
+        if ($userToken = JWTAuth::user($tokenApi)) {
+
+            Log::info("ENTRAAA 1");
+
+            $page = $request->input('page', 1);
+            $limit = $request->input('limit', 10);
+
+
+            $arrayPlanUsuario = PlanesUsuarios::where('id_usuario', $userToken->id)
+                ->select('id_planes')
+                ->paginate($limit, ['*'], 'page', $page);
+
+            $contador = 0;
+            foreach ($arrayPlanUsuario as $dato) {
+                $contador++;
+                $dato->contador = $contador;
+            }
+
+            //return response()->json($arrayPlanUsuario);
+
+            return ['success' => 1,
+                'hayinfo' => 1,
+                'listaplanes' => $arrayPlanUsuario,
+            ];
+        }
+    }
+
+    public function listadoMisPlanesCompletados(Request $request)
+    {
+        $rules = array(
+            'idiomaplan' => 'required',
+            'iduser' => 'required',
+            'page' => 'required'
+        );
+
+        $validator = Validator::make($request->all(), $rules);
+        if ( $validator->fails()){
+            return ['success' => 0, 'msj' => "validación incorrecta"];
+        }
+
+        $tokenApi = $request->header('Authorization');
+
+        $idiomaTextos = $this->reseteoIdiomaTextos($request->idiomaplan);
+
+        if ($userToken = JWTAuth::user($tokenApi)) {
+
+
+            // EJEMPLO
+
+
+            $arrayPlanUsuario = PlanesUsuarios::where('id_usuario', $userToken->id)
+                ->select('id_planes')
+                ->paginate($request->page);
+
+            $contador = 0;
+            foreach ($arrayPlanUsuario as $dato){
+                $contador++;
+                $dato->contador = $contador;
+            }
+
+
+
+            return ['success' => 1,
+                'hayinfo' => 1,
+                'listaplanes' => $arrayPlanUsuario,
+            ];
+
+
+
+
+
+
+
+
+
+
+
+            $arrayPlanUsuario = PlanesUsuarios::where('id_usuario', $userToken->id)
+                ->select('id_planes')
+                ->get();
+
+
+            foreach ($arrayPlanUsuario as $dato){
+
+                $arrayPlanBloque = PlanesBloques::where('id_planes', $dato->id_planes)->get();
+                $planCompletado = 1;
+
+                if($arrayPlanBloque != null && $arrayPlanBloque->isNotEmpty()){
+                    foreach ($arrayPlanBloque as $rec){ // cada bloque
+
+                        // buscar el detalle de ese bloque
+                        $arrayListado = PlanesBlockDetalle::where('id_planes_bloques', $rec->id)->get();
+
+                        foreach ($arrayListado as $datoLista){
+
+                            if($detauser = PlanesBlockDetaUsuario::where('id_usuario', $userToken->id)
+                                ->where('id_planes_block_deta', $datoLista->id)
+                                ->first()){
+                                // si encontro, verificar si esta completo
+                                if($detauser->completado == 0){
+                                    $planCompletado = 0;
+                                    break;
+                                }
+                            }else{
+                                // no encontrado, asi que retornar
+                                $planCompletado = 0;
+                                break;
+                            }
+                        }
+                    }
+                }else{
+                    $planCompletado = 0;
+                }
+
+                $dato->plancompletado = $planCompletado;
+            }
+
+
+            // obtener los planes completados
+            $pilaIdPlanComplet = array();
+
+            foreach ($arrayPlanUsuario as $item){
+                if($item->plancompletado == 1){
+                    array_push($pilaIdPlanComplet, $item->id_planes);
+                }
+            }
+
+
+            // obtener todos los planes menos el de Continuar
+            $arrayPlanesUser = PlanesUsuarios::where('id_usuario', $userToken->id)
+                ->whereIn('id_planes', $pilaIdPlanComplet)
+                ->get();
+
+
+            foreach ($arrayPlanesUser as $dato){
+
+                $titulosRaw = $this->retornoTituloPlan($idiomaTextos, $dato->id_planes);
+
+                $dato->titulo = $titulosRaw['titulo'];
+                $dato->subtitulo = $titulosRaw['subtitulo'];
+
+                $infoP = Planes::where('id', $dato->id_planes)->first();
+                $dato->imagen = $infoP->imagen;
+                $dato->imagenportada = $infoP->imagenportada;
+                $dato->idplan = $infoP->id;
+            }
+
+
+            $datosOrdenados = $arrayPlanesUser->sortBy('titulo')->values();
+
+            $hayinfo = 0;
+            if ($datosOrdenados != null && $datosOrdenados->isNotEmpty()) {
+                $hayinfo = 1;
+            }
+
+            return ['success' => 1,
+                'hayinfo' => $hayinfo,
+                'listaplanes' => $datosOrdenados,
+            ];
+
+        }else{
+            return ['success' => 99];
+        }
+    }
+
 
 
 
