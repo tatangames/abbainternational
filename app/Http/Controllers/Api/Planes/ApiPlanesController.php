@@ -14,6 +14,7 @@ use App\Models\PlanesBlockDetalle;
 use App\Models\PlanesBlockDetaTextos;
 use App\Models\PlanesBlockDetaUsuario;
 use App\Models\PlanesBloques;
+use App\Models\PlanesBloquesTextos;
 use App\Models\PlanesContenedor;
 use App\Models\PlanesContenedorTextos;
 use App\Models\PlanesTextos;
@@ -578,6 +579,14 @@ class ApiPlanesController extends Controller
                         $dato->esperar_fecha = 0;
                     }
                 }
+
+                $textoPersonalizado = "";
+                // buscar si tiene texto personalizado, para no mostrar la fecha
+                if($dato->texto_personalizado == 1){
+                    $textoPersonalizado = $this->retornoTextoPersonalizadoPlan($idiomaTextos, $dato->id_planes);
+                }
+
+                $dato->textopersonalizado = $textoPersonalizado;
 
 
                 // agregar detalle bloques
@@ -1395,6 +1404,15 @@ class ApiPlanesController extends Controller
                 }
 
 
+                $textoPersonalizado = "";
+                // buscar si tiene texto personalizado, para no mostrar la fecha
+                if($dato->texto_personalizado == 1){
+                    $textoPersonalizado = $this->retornoTextoPersonalizadoPlan($idiomaTextos, $dato->id_planes);
+                }
+
+                $dato->textopersonalizado = $textoPersonalizado;
+
+
                 // agregar detalle bloques
                 $arrayDetaBloque = PlanesBlockDetalle::where('id_planes_bloques', $dato->id)
                     ->orderBy('posicion', 'ASC')
@@ -1475,6 +1493,30 @@ class ApiPlanesController extends Controller
             return ['success' => 99];
         }
     }
+
+
+    private function retornoTextoPersonalizadoPlan($idiomaPlan, $idPlan)
+    {
+        if($info = PlanesBloquesTextos::where('id_planes_bloques', $idPlan)
+            ->where('id_idioma_planes', $idiomaPlan)
+            ->first()){
+
+            return $info->titulo;
+
+        }else{
+            // si no encuentra sera por defecto español
+
+            if($info = PlanesBloquesTextos::where('id_planes_bloques', $idPlan)
+                ->where('id_idioma_planes', 1)
+                ->first()){
+                return $info->titulo;
+            }else{
+                return "";
+            }
+        }
+    }
+
+
 
 
 

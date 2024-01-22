@@ -86,6 +86,8 @@ Route::middleware('verificarToken')->group(function () {
 
 
 
+
+
 });
 
 

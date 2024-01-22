@@ -21,6 +21,10 @@ return new class extends Migration
             // esto oculta al usuario
             $table->boolean('visible');
 
+            // desea cambiar en vez de mostrar la fecha en el bloque, un texto
+            // personalizado
+            $table->boolean('texto_personalizado');
+
             // esto hace que cuando usuario toque una cajita, verificar si puede
             // ver el contenido, sino deberar esperar la fecha de inicio
             $table->boolean('esperar_fecha');
