@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\Perfil\ApiPerfilController;
 use App\Http\Controllers\Api\Correo\ApiCorreoController;
 use App\Http\Controllers\Api\Registro\ApiLoginController;
 use App\Http\Controllers\Api\Planes\ApiPlanesController;
+use App\Http\Controllers\Api\Inicio\ApiInicioController;
 
 
 
@@ -83,6 +84,17 @@ Route::middleware('verificarToken')->group(function () {
 
     // devuelve informacion del plan a continuar, todos el bloque pero esto solo es vista
     Route::post('app/plan/misplanes/info/bloque/vista', [ApiPlanesController::class,'informacionBloqueMiPlanVista']);
+
+
+
+
+
+    //*** FRAGMENT INICIO
+
+    // devuelve todos los elementos bloque inicio
+    Route::post('app/inicio/bloque/completa', [ApiInicioController::class,'infoBloqueInicioCompleto']);
+
+
 
 
 

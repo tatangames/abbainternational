@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api\Planes;
 
 use App\Http\Controllers\Controller;
-use App\Models\BloqueCuestionario;
 use App\Models\BloqueCuestionarioTextos;
 use App\Models\BloquePreguntas;
 use App\Models\BloquePreguntasTextos;
@@ -579,6 +578,9 @@ class ApiPlanesController extends Controller
                         $dato->esperar_fecha = 0;
                     }
                 }
+
+
+                // TEXTO PERSONALIZADO EN EL BLOQUE
 
                 $textoPersonalizado = "";
                 // buscar si tiene texto personalizado, para no mostrar la fecha
