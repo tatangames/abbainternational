@@ -1279,13 +1279,11 @@ class ApiPlanesController extends Controller
                 ->paginate($limit, ['*'], 'page', $page);
 
             $hayinfo = 0;
-            if ($arrayPlanesUser->hasPages()) {
-                $hayinfo = 1;
-            }
+
 
 
             foreach ($arrayPlanesUser as $dato){
-
+                $hayinfo = 1;
                 $titulosRaw = $this->retornoTituloPlan($idiomaTextos, $dato->id_planes);
 
                 $dato->titulo = $titulosRaw['titulo'];
