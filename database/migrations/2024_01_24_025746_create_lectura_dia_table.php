@@ -11,13 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('guia_guiada', function (Blueprint $table) {
+        Schema::create('lectura_dia', function (Blueprint $table) {
             $table->id();
-
-            $table->date('fecha');
-            $table->boolean('visible');
-            $table->string('imagen');
-            $table->integer('posicion');
+            $table->timestamps();
         });
     }
 
@@ -26,6 +22,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('guia_guiada');
+        Schema::dropIfExists('lectura_dia');
     }
 };
