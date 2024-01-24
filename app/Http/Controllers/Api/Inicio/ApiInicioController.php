@@ -21,6 +21,7 @@ use App\Models\PlanesUsuarios;
 use App\Models\PlanesUsuariosContinuar;
 use App\Models\ZonaHoraria;
 use Carbon\Carbon;
+use Facebook\Facebook;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
@@ -38,22 +39,6 @@ class ApiInicioController extends Controller
     // devuelve todos los elementos bloque inicio
     public function infoBloqueInicioCompleto(Request $request){
 
-        $rules = array(
-            'idiomaplan' => 'required',
-            'iduser' => 'required'
-        );
-
-        $validator = Validator::make($request->all(), $rules);
-        if ( $validator->fails()){
-            return ['success' => 0, 'msj' => "validación incorrecta"];
-        }
-
-        $tokenApi = $request->header('Authorization');
-
-        // idioma, segun el usuario
-        $idiomaTextos = $this->reseteoIdiomaTextos($request->idiomaplan);
-
-        if ($userToken = JWTAuth::user($tokenApi)) {
 
             // DEVOLVER
 
@@ -65,11 +50,31 @@ class ApiInicioController extends Controller
                 // me debera redireccionar a otro fragment y posicionando boton nuevos planes
 
 
+            $fb = new Facebook([
+                'app_id' => config('services.facebook.app_id'),
+                'app_secret' => config('services.facebook.app_secret'),
+                'default_graph_version' => 'v19.0',
+            ]);
+
+            $accessToken = "EAAFnZADyB608BO75R4UzVlt1BLuUqflnVJZARSC6fjVQZBQzSW4A9ZCQgl5CaodwheVTBlISoauS4znncZCkZADFvWZBt6I99G4tI9drKeR3T3O3ytgWDlZBPusudT8CTKCD1jVZCz5Fq4FVcpIgZBjm6UKZA7zyafsAZAM57VzpuJuZBollPvacSxiF9jfKqFmVdXjhGc3f5DML8";
+
+            try {
+                $response = $fb->get('/' . config('services.facebook.page_id') . '?fields=name', $accessToken);
+                //$pageData = $response->getGraphPage();
+
+                // Obtener el nombre de la página
+                $pageName = 4;
+
+                return response()->json(['page_name' => $pageName]);
+
+            } catch (\Facebook\Exceptions\FacebookResponseException $e) {
+                return response()->json(['error' => 'Error de la API de Facebook: ' . $e->getMessage()], 500);
+            } catch (\Facebook\Exceptions\FacebookSDKException $e) {
+                return response()->json(['error' => 'Error del SDK de Facebook: ' . $e->getMessage()], 500);
+            }
 
 
 
-        }else{
-            return ['success' => 99];
-        }
+
     }
 }
