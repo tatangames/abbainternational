@@ -27,10 +27,10 @@ use App\Models\PlanesContenedorTextos;
 use App\Models\PlanesTextos;
 use App\Models\PlanesUsuarios;
 use App\Models\PlanesUsuariosContinuar;
+use App\Models\RachaUsuario;
 use App\Models\VideosHoy;
 use App\Models\ZonaHoraria;
 use Carbon\Carbon;
-use Facebook\Facebook;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
@@ -63,7 +63,6 @@ class ApiInicioController extends Controller
         $idiomaTextos = $this->reseteoIdiomaTextos($request->idiomaplan);
 
         if ($userToken = JWTAuth::user($tokenApi)) {
-
 
 
             $infoIglesia = Iglesias::where('id', $userToken->id_iglesia)->first();
@@ -142,6 +141,58 @@ class ApiInicioController extends Controller
                     ->max('nil.nivel');
 
                 $dato->nivelvoy = $infoNivelVoy;
+
+
+
+
+
+                // BLOQUE RACHAS
+
+                $arrayRachaUser = RachaUsuario::where('id_usuarios', $userToken->id)
+                    ->orderBy('fecha', 'DESC')
+                    ->get();
+
+                $fechaActualH = $this->retornoZonaHorariaUsuarioFormatFecha($userToken->id_iglesia);
+                $fechaActual = Carbon::parse($fechaActualH);
+                $diasConsecutivos = 0;
+
+
+
+                $pilaIdFechas = array();
+
+
+
+
+                foreach ($arrayRachaUser as $dato) {
+                    // Convertir la cadena de fecha a un objeto DateTime
+                    $fechaObjeto = Carbon::parse($dato->fecha);
+
+                    array_push($pilaIdFechas, $dato->id);
+
+                    // Verificar si la fecha actual es igual a la fecha en el bucle
+
+                    if ($fechaObjeto->equalTo($fechaActual)) {
+
+                        // Ignorar la fecha actual y continuar con la próxima iteración
+                        continue;
+                    }
+
+                    // Verificar si la fecha en el bucle es un día antes de la fecha actual
+                    if ($fechaObjeto->equalTo($fechaActual->copy()->subDay())) {
+                        // Incrementar el contador de días consecutivos
+                        $diasConsecutivos++;
+                        // Actualizar la fecha actual para la próxima iteración
+                        $fechaActual = $fechaObjeto;
+                    } else {
+                        // Si no es un día antes, salir del bucle
+                        break;
+                    }
+                }
+
+
+                // de este array de fechas elegidas, quiero ver los dias seguidos.
+
+
 
 
 
@@ -281,5 +332,17 @@ class ApiInicioController extends Controller
         }
 
         return $idiomatextos;
+    }
+
+
+    // RETORNO HORARIO ACTUAL DEL USUARIO SEGUN ZONA HORARIA
+    private function retornoZonaHorariaUsuarioFormatFecha($idIglesia){
+        $infoIglesia = Iglesias::where('id', $idIglesia)->first();
+        $infoZonaHoraria = ZonaHoraria::where('id', $infoIglesia->id_zona_horaria)->first();
+        $zonaHoraria = $infoZonaHoraria->zona;
+
+        // horario actual del cliente segun zona horaria
+
+        return Carbon::now($zonaHoraria)->format('Y-m-d');
     }
 }
