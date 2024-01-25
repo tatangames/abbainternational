@@ -7,13 +7,15 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * QUEDA REGISTRADA LA RACHA MAS ALTA ALCANZADA
      */
     public function up(): void
     {
-        Schema::create('racha_niveles', function (Blueprint $table) {
+        Schema::create('racha_alta', function (Blueprint $table) {
             $table->id();
-            $table->timestamps();
+            $table->bigInteger('id_usuarios')->unsigned();
+            $table->integer('contador');
+            $table->foreign('id_usuarios')->references('id')->on('usuarios');
         });
     }
 
@@ -22,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('racha_niveles');
+        Schema::dropIfExists('racha_alta');
     }
 };

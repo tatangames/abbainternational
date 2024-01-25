@@ -7,13 +7,16 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * TIPO DE LA INSIGNIA
      */
     public function up(): void
     {
         Schema::create('tipo_insignias', function (Blueprint $table) {
             $table->id();
-            $table->timestamps();
+            $table->string('imagen');
+
+            // si esta oculta el usuario ya no puede verla
+            $table->boolean('visible');
         });
     }
 

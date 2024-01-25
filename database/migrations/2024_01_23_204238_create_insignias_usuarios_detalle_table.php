@@ -7,13 +7,19 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * FECHA CUANDO GANO EL HITO, OSEA ALCANZO EL NIVEL
      */
     public function up(): void
     {
         Schema::create('insignias_usuarios_detalle', function (Blueprint $table) {
             $table->id();
-            $table->timestamps();
+            $table->bigInteger('id_niveles_insignias')->unsigned();
+            $table->bigInteger('id_usuarios')->unsigned();
+
+            $table->date('fecha');
+
+            $table->foreign('id_niveles_insignias')->references('id')->on('niveles_insignias');
+            $table->foreign('id_usuarios')->references('id')->on('usuarios');
         });
     }
 

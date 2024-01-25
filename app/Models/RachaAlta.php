@@ -5,9 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class RachaNiveles extends Model
+class RachaAlta extends Model
 {
     use HasFactory;
-    protected $table = 'racha_niveles';
+    protected $table = 'racha_alta';
     public $timestamps = false;
 }

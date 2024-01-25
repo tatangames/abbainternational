@@ -7,13 +7,18 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * se almacena el block detalle y se redirecciona al usuario,
+     * sino esta registrado se debera registrar de una vez
+     *
+     * // HABRA VARIOS REGISTROS, Y LA FECHA SERA UNICA.
      */
     public function up(): void
     {
         Schema::create('lectura_dia', function (Blueprint $table) {
             $table->id();
-            $table->timestamps();
+            $table->bigInteger('id_planes_block_detalle')->unsigned();
+
+            $table->foreign('id_planes_block_detalle')->references('id')->on('planes_block_detalle');
         });
     }
 

@@ -7,13 +7,17 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * SUMARAN TODAS LAS FECHAS SEGUIDAS, SINO SE BORRAN
      */
     public function up(): void
     {
-        Schema::create('racha_usuario_insignia', function (Blueprint $table) {
+        Schema::create('racha_usuario', function (Blueprint $table) {
             $table->id();
-            $table->timestamps();
+            $table->bigInteger('id_usuarios')->unsigned();
+
+            $table->date('fecha');
+
+            $table->foreign('id_usuarios')->references('id')->on('usuarios');
         });
     }
 
@@ -22,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('racha_usuario_insignia');
+        Schema::dropIfExists('racha_usuario');
     }
 };

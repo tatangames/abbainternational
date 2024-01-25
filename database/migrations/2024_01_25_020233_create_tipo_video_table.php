@@ -7,13 +7,13 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * LISTA UNICA DE TIPO DE VIDEO, FACEBOOK, INSTAGRAM, YOUTUBE, SERVIDOR PROPIO
      */
     public function up(): void
     {
-        Schema::create('rachas_usuario', function (Blueprint $table) {
+        Schema::create('tipo_video', function (Blueprint $table) {
             $table->id();
-            $table->timestamps();
+            $table->string('nombre', 50);
         });
     }
 
@@ -22,6 +22,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('rachas_usuario');
+        Schema::dropIfExists('tipo_video');
     }
 };

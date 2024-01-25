@@ -7,13 +7,20 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * CONTEO PARA GANARSE NIVEL DE INSIGINIA
      */
     public function up(): void
     {
         Schema::create('insignias_usuarios_conteo', function (Blueprint $table) {
             $table->id();
-            $table->timestamps();
+            $table->bigInteger('id_tipo_insignia')->unsigned();
+            $table->bigInteger('id_usuarios')->unsigned();
+
+            // solo podra seguir sumando si es menor al maximo de puntos permitido
+            $table->integer('conteo');
+
+            $table->foreign('id_tipo_insignia')->references('id')->on('tipo_insignias');
+            $table->foreign('id_usuarios')->references('id')->on('usuarios');
         });
     }
 

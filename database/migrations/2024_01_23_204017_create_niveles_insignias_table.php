@@ -7,13 +7,16 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * LOS DIFERENTES NIVELES DE LAS INSIGNIAS
      */
     public function up(): void
     {
         Schema::create('niveles_insignias', function (Blueprint $table) {
             $table->id();
-            $table->timestamps();
+            $table->bigInteger('id_tipo_insignia')->unsigned();
+            $table->integer('nivel');
+
+            $table->foreign('id_tipo_insignia')->references('id')->on('tipo_insignias');
         });
     }
 

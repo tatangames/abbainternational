@@ -7,13 +7,20 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * AQUI SE VINCULA AL USUARIO Y LA INSIGNIA GANADA
      */
     public function up(): void
     {
         Schema::create('insignias_usuarios', function (Blueprint $table) {
             $table->id();
-            $table->timestamps();
+            $table->bigInteger('id_tipo_insignia')->unsigned();
+            $table->bigInteger('id_usuario')->unsigned();
+
+            // fecha gano la insignia
+            $table->date('fecha');
+
+            $table->foreign('id_usuario')->references('id')->on('usuarios');
+            $table->foreign('id_tipo_insignia')->references('id')->on('tipo_insignias');
         });
     }
 

@@ -5,9 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class RachaUsuarioInsignia extends Model
+class VideosTextos extends Model
 {
     use HasFactory;
-    protected $table = 'racha_usuario_insignia';
+    protected $table = 'videos_textos';
     public $timestamps = false;
 }
