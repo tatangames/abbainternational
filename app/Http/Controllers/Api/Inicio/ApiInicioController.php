@@ -9,6 +9,7 @@ use App\Models\BloquePreguntasTextos;
 use App\Models\BloquePreguntasUsuarios;
 use App\Models\ComparteApp;
 use App\Models\ComparteAppTextos;
+use App\Models\ContenedorInicio;
 use App\Models\Iglesias;
 use App\Models\ImagenesDelDia;
 use App\Models\InsigniasTextos;
@@ -29,6 +30,7 @@ use App\Models\PlanesUsuarios;
 use App\Models\PlanesUsuariosContinuar;
 use App\Models\RachaUsuario;
 use App\Models\VideosHoy;
+use App\Models\VideosTextos;
 use App\Models\ZonaHoraria;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -64,185 +66,218 @@ class ApiInicioController extends Controller
 
         if ($userToken = JWTAuth::user($tokenApi)) {
 
-
-            $infoIglesia = Iglesias::where('id', $userToken->id_iglesia)->first();
-            $infoZonaHoraria = ZonaHoraria::where('id', $infoIglesia->id_zona_horaria)->first();
-            $zonaHoraria = $infoZonaHoraria->zona;
-
             // horario actual del cliente segun zona horaria
-            $horaServerUser = Carbon::now($zonaHoraria);
+            $zonaHorariaUsuario = $this->retornoZonaHorariaUsuario($userToken->id_iglesia);
 
+            // Array Final
+            $arrayFinalVideo = null;
+            $arrayFinalImagenes = null;
+            $arrayFinalInsignias = null;
 
-            // si hay un devocional para este dia
-            $hayLecturaDia = 0;
-            $arrayLecturaDia = null; // array del devocional
-            $textoLecturaDia = "";
-            // para saber redireccionar al usuario al cuestionario y sus preguntas
-            $idBlockDeta = 0;
+            // Si se mostrara o no el array final
+            $mostrarFinalDevocional = 0;
+            $mostrarFinalVideo = 0;
+            $mostrarFinalImagenes = 0;
+            $mostrarFinalComparteApp = 0;
+            $mostrarFinalInsignias = 0;
 
-            // si hay devocional para hoy segun zona horaria del usuario
-            if($arrayL = DB::table('lectura_dia AS le')
-                ->join('planes_block_detalle AS pblock', 'le.id_planes_block_detalle', '=', 'pblock.id')
-                ->join('planes_bloques AS p', 'pblock.id_planes_bloques', '=', 'p.id')
-                ->select('p.fecha_inicio', 'pblock.id AS idblockdeta')
-                ->whereDate('p.fecha_inicio', '=', Carbon::now($zonaHoraria))
-                ->first()){
-                $hayLecturaDia = 1;
-                $arrayLecturaDia = $arrayL;
+            // En cual posicion estan
+            $posicionFinalDevocional = 0;
+            $posicionFinalVideo = 0;
+            $posicionFinalImagenes = 0;
+            $posicionFinalComparteApp = 0;
+            $posicionFinalInsignias = 0;
 
-                $textoLecturaDia = $this->retornoTituloCuestionarioIdioma($arrayL->idblockdeta, $idiomaTextos);
+            // Conocer las posiciones que tendra cada bloque
+            $infoContenedorInicio = ContenedorInicio::all();
+            foreach ($infoContenedorInicio as $dato){
+                if($dato->id == 1){ // Devocional
+                    $posicionFinalDevocional = $dato->posicion;
+                    $mostrarFinalDevocional = $dato->visible;
+                }else if($dato->id == 2){ // Videos
+                    $posicionFinalVideo = $dato->posicion;
+                    $mostrarFinalVideo = $dato->visible;
+                }else if($dato->id == 3){ // Imagenes
+                    $posicionFinalImagenes = $dato->posicion;
+                    $mostrarFinalImagenes = $dato->visible;
+                }else if($dato->id == 4){ // Comparte app
+                    $posicionFinalComparteApp = $dato->posicion;
+                    $mostrarFinalComparteApp = $dato->visible;
+                }else if($dato->id == 5){ // Insignias
+                    $posicionFinalInsignias = $dato->posicion;
+                    $mostrarFinalInsignias = $dato->visible;
+                }
             }
 
 
-            // BLOQUE DE VIDEOS
-            $arrayVideosHoy = VideosHoy::orderBy('posicion', 'ASC')->get();
-            $hayvideoshoy = 0;
 
-            if($arrayVideosHoy != null && $arrayVideosHoy->isNotEmpty()){
-                $hayvideoshoy = 1;
+
+            // ************** BLOQUE DEVOCIONAL ******************
+
+            $devo_haydevocional = 0; // Seguro para saber si hay devocional hoy
+            $devo_cuestionario = "";
+            $devo_idBlockDeta = 0; // Para redireccionar a sus preguntas
+
+            if($mostrarFinalDevocional == 1){
+                // si hay devocional para hoy segun zona horaria del usuario
+                if($arrayL = DB::table('lectura_dia AS le')
+                    ->join('planes_block_detalle AS pblock', 'le.id_planes_block_detalle', '=', 'pblock.id')
+                    ->join('planes_bloques AS p', 'pblock.id_planes_bloques', '=', 'p.id')
+                    ->select('p.fecha_inicio', 'pblock.id AS idblockdeta')
+                    ->whereDate('p.fecha_inicio', '=', $zonaHorariaUsuario)
+                    ->first()){
+                    $devo_idBlockDeta = $arrayL->idblockdeta;
+                    $devo_cuestionario = $this->retornoTituloCuestionarioIdioma($arrayL->idblockdeta, $idiomaTextos);
+                }
             }
 
 
-            // BLOQUE IMAGENES DEL DIA
-            $arrayImagenesDIa = ImagenesDelDia::orderBy('posicion', 'ASC')->get();
-            $hayimageneshoy = 0;
-            if($arrayImagenesDIa != null && $arrayImagenesDIa->isNotEmpty()){
-                $hayimageneshoy = 1;
+
+            // ************** BLOQUE VIDEOS ******************
+
+            $arrayFinalVideo = VideosHoy::orderBy('posicion', 'ASC')->get();
+            $video_hayvideoshoy = 0; // Seguro para saber si hay videos
+
+            foreach ($arrayFinalVideo as $dato){
+                $dato->titulo = $this->retornoTituloVideo($dato->id, $idiomaTextos);
+            }
+
+            if($arrayFinalVideo != null && $arrayFinalVideo->isNotEmpty()){
+                $video_hayvideoshoy = 1;
             }
 
 
-            // BLOQUE COMPARTE APP
-            // solo habra 1 registro
-            $arrayComparteApp = ComparteApp::where('id', 1)->first();
-            $datosComparteApp = $this->retornoTituloCompartirAppIdioma($idiomaTextos);
-            $tituloCompartir = $datosComparteApp['titulo'];
-            $descripcionCompartir = $datosComparteApp['descripcion'];
+            // ************** BLOQUE IMAGENES DEL DIA ******************
 
 
-            // BLOQUE INSIGNIAS
-            $arrayInsignias = InsigniasUsuarios::where('id_usuario', $userToken->id)->get();
-            $hayInsignias = 0;
+            $imagenes_arrayDia = ImagenesDelDia::orderBy('posicion', 'ASC')->get();
+            $imagenes_hayimageneshoy = 0; // Seguro para saber si hay imagenes del dia
+
+            if($imagenes_arrayDia != null && $imagenes_arrayDia->isNotEmpty()){
+                $imagenes_hayimageneshoy = 1;
+            }
+
+            $arrayFinalImagenes = $imagenes_arrayDia;
 
 
 
-            foreach ($arrayInsignias as $dato){
-                $hayInsignias = 1;
+
+            // ************** BLOQUE COMPARTE LA APLICACION ******************
+
+
+            $comparte_arrayComparteApp = ComparteApp::where('id', 1)->first();
+            $comparte_datosComparteApp = $this->retornoTituloCompartirAppIdioma($idiomaTextos);
+            $comparte_titulo = $comparte_datosComparteApp['titulo'];
+            $comparte_descripcion = $comparte_datosComparteApp['descripcion'];
+
+
+
+            // ************** BLOQUE INSIGNIAS ******************
+
+
+            $insignia_arrayInsignias = InsigniasUsuarios::where('id_usuario', $userToken->id)->get();
+            $insignia_hayInsignias = 0;
+
+            if($insignia_arrayInsignias != null && $insignia_arrayInsignias->isNotEmpty()){
+                $insignia_hayInsignias = 1;
+            }
+
+            foreach ($insignia_arrayInsignias as $dato){
+
                 $infoTitulos = $this->retornoTituloInsigniasAppIdioma($dato->id_tipo_insignia, $idiomaTextos);
                 $dato->titulo = $infoTitulos['titulo'];
                 $dato->descripcion = $infoTitulos['descripcion'];
 
 
-                // conocer que nivel voy (ejemplo devuelve 5)
-                $infoNivelVoy = DB::table('insignias_usuarios_detalle AS indeta')
+                // Conocer que nivel voy (ejemplo devuelve 5)
+                $hito_infoNivelVoy = DB::table('insignias_usuarios_detalle AS indeta')
                     ->join('niveles_insignias AS nil', 'indeta.id_niveles_insignias', '=', 'nil.id')
                     ->join('tipo_insignias AS tipo', 'nil.id_tipo_insignia', '=', 'tipo.id')
                     ->select('nil.nivel', 'nil.id AS idnivelinsignia')
                     ->where('nil.id_tipo_insignia', $dato->id_tipo_insignia)
                     ->max('nil.nivel');
 
-                $dato->nivelvoy = $infoNivelVoy;
+                $dato->nivelvoy = $hito_infoNivelVoy;
 
 
+                // ------ INFORMACION DEL HITO DE CADA INSIGNIA ------
+
+                $hito_cuantoFaltan = 0; // Cuantos puntos me faltan para la siguiente nivel de esta insignia
+                $hito_haySiguienteNivel = 0; // Saber si hay un nivel mas por superar
 
 
-
-                // BLOQUE RACHAS
-
-                $arrayRachaUser = RachaUsuario::where('id_usuarios', $userToken->id)
-                    ->orderBy('fecha', 'DESC')
-                    ->get();
-
-                $fechaActualH = $this->retornoZonaHorariaUsuarioFormatFecha($userToken->id_iglesia);
-                $fechaActual = Carbon::parse($fechaActualH);
-                $diasConsecutivos = 0;
-
-
-
-                $pilaIdFechas = array();
-
-
-
-
-                foreach ($arrayRachaUser as $dato) {
-                    // Convertir la cadena de fecha a un objeto DateTime
-                    $fechaObjeto = Carbon::parse($dato->fecha);
-
-                    array_push($pilaIdFechas, $dato->id);
-
-                    // Verificar si la fecha actual es igual a la fecha en el bucle
-
-                    if ($fechaObjeto->equalTo($fechaActual)) {
-
-                        // Ignorar la fecha actual y continuar con la próxima iteración
-                        continue;
-                    }
-
-                    // Verificar si la fecha en el bucle es un día antes de la fecha actual
-                    if ($fechaObjeto->equalTo($fechaActual->copy()->subDay())) {
-                        // Incrementar el contador de días consecutivos
-                        $diasConsecutivos++;
-                        // Actualizar la fecha actual para la próxima iteración
-                        $fechaActual = $fechaObjeto;
-                    } else {
-                        // Si no es un día antes, salir del bucle
-                        break;
-                    }
-                }
-
-
-                // de este array de fechas elegidas, quiero ver los dias seguidos.
-
-
-
-
-
-
-
-                // saber cuantos puntos me faltan para el siguiente Hito
-                //$cuantoFaltan = 0;
-
-                // obtener los ya ganados para evitarlos
-                /*$arrayObtenidos = DB::table('insignias_usuarios_detalle AS indeta')
+                // Obtener los niveles ya ganados para evitarlos
+                $hito_arrayObtenidos = DB::table('insignias_usuarios_detalle AS indeta')
                     ->join('niveles_insignias AS nil', 'indeta.id_niveles_insignias', '=', 'nil.id')
                     ->join('tipo_insignias AS tipo', 'nil.id_tipo_insignia', '=', 'tipo.id')
                     ->select('nil.id')
                     ->where('nil.id_tipo_insignia', $dato->id_tipo_insignia)
                     ->get();
 
-                $pilaIdo = array();
+                $pilaIdYaGanados = array();
 
-                foreach ($arrayObtenidos as $item){
-                    array_push($pilaIdo, $item->id);
-                }*/
+                foreach ($hito_arrayObtenidos as $item){
+                    array_push($pilaIdYaGanados, $item->id);
+                }
 
 
 
                 // buscar el siguiente nivel que falta y cuanto me falta
-                /*if($infon = NivelesInsignias::where('id_tipo_insignia', $dato->id_tipo_insignia)
-                    ->whereNotIn('id', $pilaIdo)
-                    ->where('nivel', '>', $infoNivelVoy)
+                if($infoNivelSiguiente = NivelesInsignias::where('id_tipo_insignia', $dato->id_tipo_insignia)
+                    ->whereNotIn('id', $pilaIdYaGanados)
+                    ->where('nivel', '>', $hito_infoNivelVoy)
                     ->first()){
 
-                    $falta = $infon->nivel - $infoNivelVoy;
-
-                    return "siguiente nivel: " . $infon->nivel . " falta: " . $falta;
-                }else{
-                    return "burrr";
-                }*/
-
-
+                    $hito_haySiguienteNivel = 1; // Si hay siguiente nivel
+                    $hito_cuantoFaltan = $infoNivelSiguiente->nivel - $hito_infoNivelVoy;
+                }
             }
 
-            $arrayInsigOrdenado = $arrayInsignias->sortBy('titulo');
-            $arrayInsigOrdenadoArray = $arrayInsigOrdenado->toArray();
+            $insignia_arrayInsigOrdenado = $insignia_arrayInsignias->sortBy('titulo');
+            $arrayInsigOrdenadoArray = $insignia_arrayInsigOrdenado->toArray();
 
-            $solo5Insignias = array_slice($arrayInsigOrdenadoArray, 0, 5);
-
+            $arrayFinalInsignias = null;
+            if($arrayInsigOrdenadoArray != null){
+                $arrayFinalInsignias = array_slice($arrayInsigOrdenadoArray, 0, 5);
+            }
 
 
 
             return ['success' => 1,
-                'devocional' => $arrayLecturaDia];
+                'mostrarbloquedevocional' => $mostrarFinalDevocional,
+                'mostrarbloquevideo' => $mostrarFinalVideo,
+                'mostrarbloqueimagenes' => $mostrarFinalImagenes,
+                'mostrarbloquecomparte' => $mostrarFinalComparteApp,
+                'mostrarbloqueinsignias' => $mostrarFinalInsignias,
+
+                'posicionbloquedevocional' => $posicionFinalDevocional,
+                'posicionbloquevideo' => $posicionFinalVideo,
+                'posicionbloqueimagenes' => $posicionFinalImagenes,
+                'posicionbloquecomparte' => $posicionFinalComparteApp,
+                'posicionbloqueinsignias' => $posicionFinalInsignias,
+
+                'devohaydevocional' => $devo_haydevocional,
+                'devocuestionario' => $devo_cuestionario,
+                'devoidblockdeta' => $devo_idBlockDeta,
+
+                'videohayvideos' => $video_hayvideoshoy,
+
+                'imageneshayhoy' => $imagenes_hayimageneshoy,
+
+                'comparteappimagen' => $comparte_arrayComparteApp->imagen,
+                'comparteapptitulo' => $comparte_titulo,
+                'comparteappdescrip' => $comparte_descripcion,
+
+                'insigniashay' => $insignia_hayInsignias,
+
+
+                'arrayfinalvideo' => $arrayFinalVideo,
+                'arrayfinalimagenes' => $arrayFinalImagenes,
+                'arrayfinalinsignias' => $arrayFinalInsignias,
+
+
+
+                ];
 
 
 
@@ -253,6 +288,74 @@ class ApiInicioController extends Controller
     }
 
 
+
+
+
+
+    private function svewrf(){
+
+        // ------- CONOCER LA RACHA QUE LLEVO  -----------
+
+        /*$arrayRachaUser = RachaUsuario::where('id_usuarios', $userToken->id)
+            ->orderBy('fecha', 'DESC')
+            ->get();
+
+        $fechaActualH = $this->retornoZonaHorariaUsuarioFormatFecha($userToken->id_iglesia);
+        $fechaActual = Carbon::parse($fechaActualH);
+        $diasConsecutivos = 0;
+
+        $pilaIdFechas = array();
+
+
+        foreach ($arrayRachaUser as $dato) {
+            // Convertir la cadena de fecha a un objeto DateTime
+            $fechaObjeto = Carbon::parse($dato->fecha);
+
+            array_push($pilaIdFechas, $dato->id);
+
+            // Verificar si la fecha actual es igual a la fecha en el bucle
+
+            if ($fechaObjeto->equalTo($fechaActual)) {
+
+                // Ignorar la fecha actual y continuar con la próxima iteración
+                continue;
+            }
+
+            // Verificar si la fecha en el bucle es un día antes de la fecha actual
+            if ($fechaObjeto->equalTo($fechaActual->copy()->subDay())) {
+                // Incrementar el contador de días consecutivos
+                $diasConsecutivos++;
+                // Actualizar la fecha actual para la próxima iteración
+                $fechaActual = $fechaObjeto;
+            } else {
+                // Si no es un día antes, salir del bucle
+                break;
+            }
+        }*/
+
+
+    }
+
+
+
+    // RETORNO TITULO VIDEOS
+    private function retornoTituloVideo($idvideohoy, $idiomaTexto){
+
+        if($infoTexto = VideosTextos::where('id_idioma_planes', $idiomaTexto)
+            ->where('id_videos_hoy', $idvideohoy)
+            ->first()){
+
+            return $infoTexto->titulo;
+
+        }else{
+            // si no encuentra sera por defecto español
+
+            $infoTexto = VideosTextos::where('id_idioma_planes', 1)
+                ->first();
+
+            return $infoTexto->titulo;
+        }
+    }
 
 
 
@@ -335,7 +438,7 @@ class ApiInicioController extends Controller
     }
 
 
-    // RETORNO HORARIO ACTUAL DEL USUARIO SEGUN ZONA HORARIA
+    // RETORNO HORARIO ACTUAL DEL USUARIO SEGUN ZONA HORARIA -> DEVUELVE SOLO FECHA
     private function retornoZonaHorariaUsuarioFormatFecha($idIglesia){
         $infoIglesia = Iglesias::where('id', $idIglesia)->first();
         $infoZonaHoraria = ZonaHoraria::where('id', $infoIglesia->id_zona_horaria)->first();
@@ -344,5 +447,16 @@ class ApiInicioController extends Controller
         // horario actual del cliente segun zona horaria
 
         return Carbon::now($zonaHoraria)->format('Y-m-d');
+    }
+
+    // RETORNO HORARIO ACTUAL DEL USUARIO SEGUN ZONA HORARIA
+    private function retornoZonaHorariaUsuario($idIglesia){
+        $infoIglesia = Iglesias::where('id', $idIglesia)->first();
+        $infoZonaHoraria = ZonaHoraria::where('id', $infoIglesia->id_zona_horaria)->first();
+        $zonaHoraria = $infoZonaHoraria->zona;
+
+        // horario actual del cliente segun zona horaria
+
+        return Carbon::now($zonaHoraria);
     }
 }
