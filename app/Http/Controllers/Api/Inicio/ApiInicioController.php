@@ -81,35 +81,22 @@ class ApiInicioController extends Controller
             $mostrarFinalComparteApp = 0;
             $mostrarFinalInsignias = 0;
 
-            // En cual posicion estan
-            $posicionFinalDevocional = 0;
-            $posicionFinalVideo = 0;
-            $posicionFinalImagenes = 0;
-            $posicionFinalComparteApp = 0;
-            $posicionFinalInsignias = 0;
 
             // Conocer las posiciones que tendra cada bloque
             $infoContenedorInicio = ContenedorInicio::all();
             foreach ($infoContenedorInicio as $dato){
                 if($dato->id == 1){ // Devocional
-                    $posicionFinalDevocional = $dato->posicion;
                     $mostrarFinalDevocional = $dato->visible;
                 }else if($dato->id == 2){ // Videos
-                    $posicionFinalVideo = $dato->posicion;
                     $mostrarFinalVideo = $dato->visible;
                 }else if($dato->id == 3){ // Imagenes
-                    $posicionFinalImagenes = $dato->posicion;
                     $mostrarFinalImagenes = $dato->visible;
                 }else if($dato->id == 4){ // Comparte app
-                    $posicionFinalComparteApp = $dato->posicion;
                     $mostrarFinalComparteApp = $dato->visible;
                 }else if($dato->id == 5){ // Insignias
-                    $posicionFinalInsignias = $dato->posicion;
                     $mostrarFinalInsignias = $dato->visible;
                 }
             }
-
-
 
 
             // ************** BLOQUE DEVOCIONAL ******************
@@ -126,6 +113,8 @@ class ApiInicioController extends Controller
                     ->select('p.fecha_inicio', 'pblock.id AS idblockdeta')
                     ->whereDate('p.fecha_inicio', '=', $zonaHorariaUsuario)
                     ->first()){
+
+                    $devo_haydevocional = 1;
                     $devo_idBlockDeta = $arrayL->idblockdeta;
                     $devo_cuestionario = $this->retornoTituloCuestionarioIdioma($arrayL->idblockdeta, $idiomaTextos);
                 }
@@ -250,11 +239,6 @@ class ApiInicioController extends Controller
                 'mostrarbloquecomparte' => $mostrarFinalComparteApp,
                 'mostrarbloqueinsignias' => $mostrarFinalInsignias,
 
-                'posicionbloquedevocional' => $posicionFinalDevocional,
-                'posicionbloquevideo' => $posicionFinalVideo,
-                'posicionbloqueimagenes' => $posicionFinalImagenes,
-                'posicionbloquecomparte' => $posicionFinalComparteApp,
-                'posicionbloqueinsignias' => $posicionFinalInsignias,
 
                 'devohaydevocional' => $devo_haydevocional,
                 'devocuestionario' => $devo_cuestionario,
