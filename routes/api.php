@@ -93,18 +93,18 @@ Route::middleware('verificarToken')->group(function () {
 
 
 
+    // devuelve todos los elementos bloque inicio
+    Route::post('app/inicio/bloque/completa', [ApiInicioController::class,'infoBloqueInicioCompleto']);
+
+
+
+
+
 
 
 
 
 });
-
-
-
-
-
-// devuelve todos los elementos bloque inicio
-Route::post('app/inicio/bloque/completa', [ApiInicioController::class,'infoBloqueInicioCompleto']);
 
 
 

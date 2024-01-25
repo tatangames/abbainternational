@@ -48,6 +48,22 @@ class ApiInicioController extends Controller
     // devuelve todos los elementos bloque inicio
     public function infoBloqueInicioCompleto(Request $request){
 
+        $rules = array(
+            'idiomaplan' => 'required',
+            'iduser' => 'required',
+        );
+
+        $validator = Validator::make($request->all(), $rules);
+        if ( $validator->fails()){
+            return ['success' => 0, 'msj' => "validación incorrecta"];
+        }
+
+        $tokenApi = $request->header('Authorization');
+
+        $idiomaTextos = $this->reseteoIdiomaTextos($request->idiomaplan);
+
+        if ($userToken = JWTAuth::user($tokenApi)) {
+
 
 
             $infoIglesia = Iglesias::where('id', $userToken->id_iglesia)->first();
@@ -108,29 +124,6 @@ class ApiInicioController extends Controller
             $arrayInsignias = InsigniasUsuarios::where('id_usuario', $userToken->id)->get();
             $hayInsignias = 0;
 
-
-            $fb = new Facebook([
-                'app_id' => config('services.facebook.app_id'),
-                'app_secret' => config('services.facebook.app_secret'),
-                'default_graph_version' => 'v19.0',
-            ]);
-
-            $accessToken = "EAAFnZADyB608BO75R4UzVlt1BLuUqflnVJZARSC6fjVQZBQzSW4A9ZCQgl5CaodwheVTBlISoauS4znncZCkZADFvWZBt6I99G4tI9drKeR3T3O3ytgWDlZBPusudT8CTKCD1jVZCz5Fq4FVcpIgZBjm6UKZA7zyafsAZAM57VzpuJuZBollPvacSxiF9jfKqFmVdXjhGc3f5DML8";
-
-            try {
-                $response = $fb->get('/' . config('services.facebook.page_id') . '?fields=name', $accessToken);
-                //$pageData = $response->getGraphPage();
-
-                // Obtener el nombre de la página
-                $pageName = 4;
-
-                return response()->json(['page_name' => $pageName]);
-
-            } catch (\Facebook\Exceptions\FacebookResponseException $e) {
-                return response()->json(['error' => 'Error de la API de Facebook: ' . $e->getMessage()], 500);
-            } catch (\Facebook\Exceptions\FacebookSDKException $e) {
-                return response()->json(['error' => 'Error del SDK de Facebook: ' . $e->getMessage()], 500);
-            }
 
 
             foreach ($arrayInsignias as $dato){
@@ -201,6 +194,11 @@ class ApiInicioController extends Controller
                 'devocional' => $arrayLecturaDia];
 
 
+
+        }
+        else{
+            return ['success' => 99];
+        }
     }
 
 
