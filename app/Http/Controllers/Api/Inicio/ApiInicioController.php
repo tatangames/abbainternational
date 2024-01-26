@@ -126,6 +126,7 @@ class ApiInicioController extends Controller
 
             $arrayFinalVideo = VideosHoy::orderBy('posicion', 'ASC')->get();
             $video_hayvideoshoy = 0; // Seguro para saber si hay videos
+            $video_mayor5 = 0; // cuando hay mas de 5 video redireccionamiento
 
             foreach ($arrayFinalVideo as $dato){
                 $dato->titulo = $this->retornoTituloVideo($dato->id, $idiomaTextos);
@@ -133,6 +134,11 @@ class ApiInicioController extends Controller
 
             if($arrayFinalVideo != null && $arrayFinalVideo->isNotEmpty()){
                 $video_hayvideoshoy = 1;
+
+                if (count($arrayFinalVideo) > 5) {
+                    $video_mayor5 = 1;
+                }
+
             }
 
 
@@ -141,9 +147,14 @@ class ApiInicioController extends Controller
 
             $imagenes_arrayDia = ImagenesDelDia::orderBy('posicion', 'ASC')->get();
             $imagenes_hayimageneshoy = 0; // Seguro para saber si hay imagenes del dia
+            $imagenes_mayor5 = 0;
 
             if($imagenes_arrayDia != null && $imagenes_arrayDia->isNotEmpty()){
                 $imagenes_hayimageneshoy = 1;
+
+                if (count($imagenes_arrayDia) > 5) {
+                    $imagenes_mayor5 = 1;
+                }
             }
 
             $arrayFinalImagenes = $imagenes_arrayDia;
@@ -166,6 +177,8 @@ class ApiInicioController extends Controller
 
             $insignia_arrayInsignias = InsigniasUsuarios::where('id_usuario', $userToken->id)->get();
             $insignia_hayInsignias = 0;
+            $insignias_mayor5 = 0;
+
 
             if($insignia_arrayInsignias != null && $insignia_arrayInsignias->isNotEmpty()){
                 $insignia_hayInsignias = 1;
@@ -227,6 +240,11 @@ class ApiInicioController extends Controller
 
             $arrayFinalInsignias = null;
             if($arrayInsigOrdenadoArray != null){
+
+                if (count($arrayInsigOrdenadoArray) > 5) {
+                    $insignias_mayor5 = 1;
+                }
+
                 $arrayFinalInsignias = array_slice($arrayInsigOrdenadoArray, 0, 5);
             }
 
@@ -239,6 +257,9 @@ class ApiInicioController extends Controller
                 'mostrarbloquecomparte' => $mostrarFinalComparteApp,
                 'mostrarbloqueinsignias' => $mostrarFinalInsignias,
 
+                'videomayor5' => $video_mayor5,
+                'imagenesmayor5' => $imagenes_mayor5,
+                'insigniasmayor5' => $insignias_mayor5,
 
                 'devohaydevocional' => $devo_haydevocional,
                 'devocuestionario' => $devo_cuestionario,
