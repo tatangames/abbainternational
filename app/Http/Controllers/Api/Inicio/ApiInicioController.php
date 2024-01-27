@@ -29,6 +29,7 @@ use App\Models\PlanesTextos;
 use App\Models\PlanesUsuarios;
 use App\Models\PlanesUsuariosContinuar;
 use App\Models\RachaUsuario;
+use App\Models\TipoInsignias;
 use App\Models\VideosHoy;
 use App\Models\VideosTextos;
 use App\Models\ZonaHoraria;
@@ -233,6 +234,12 @@ class ApiInicioController extends Controller
                     $hito_haySiguienteNivel = 1; // Si hay siguiente nivel
                     $hito_cuantoFaltan = $infoNivelSiguiente->nivel - $hito_infoNivelVoy;
                 }
+
+                $infoInsigniaP = TipoInsignias::where('id', $dato->id_tipo_insignia)->first();
+                $dato->imageninsignia = $infoInsigniaP->imagen;
+
+                $dato->hitohaynextlevel = $hito_haySiguienteNivel;
+                $dato->hitocuantofalta = $hito_cuantoFaltan;
             }
 
             $insignia_arrayInsigOrdenado = $insignia_arrayInsignias->sortBy('titulo');
@@ -294,6 +301,169 @@ class ApiInicioController extends Controller
 
 
 
+    public function infoPlanSoloVista(Request $request)
+    {
+        $rules = array(
+            'idiomaplan' => 'required',
+            'idblockdeta' => 'required'
+        );
+
+        $validator = Validator::make($request->all(), $rules);
+        if ( $validator->fails()){
+            return ['success' => 0, 'msj' => "validación incorrecta"];
+        }
+
+        if($infoBlockDeta = PlanesBlockDetalle::where('id', $request->idblockdeta)->first()){
+
+            $infoPlanBloque = PlanesBloques::where('id', $infoBlockDeta->id_planes_bloques)->first();
+            $infoPlan = Planes::where('id', $infoPlanBloque->id_planes)->first();
+
+
+            $idiomaTextos = $this->reseteoIdiomaTextos($request->idiomaplan);
+
+            $titulo = "";
+            $subtitulo = null;
+            $descripcion = null;
+
+            if($infoPlanTextos = PlanesTextos::where('id_planes', $infoPlan->id)
+                ->where('id_idioma_planes', $idiomaTextos)
+                ->first()){
+                $titulo = $infoPlanTextos->titulo;
+                $subtitulo = $infoPlanTextos->subtitulo;
+                $descripcion = $infoPlanTextos->descripcion;
+            }
+
+            return ['success' => 1,
+                'imagen' => $infoPlan->imagenportada,
+                'titulo' => $titulo,
+                'subtitulo' => $subtitulo,
+                'descripcion' => $descripcion
+            ];
+        }else{
+            return ['success' => 99];
+        }
+    }
+
+
+
+
+    public function preguntasInicioGuardarActualizar(Request $request)
+    {
+
+        $rules = array(
+            'iduser' => 'required',
+            'idblockdeta' => 'required'
+        );
+
+        // Map listado
+
+        $validator = Validator::make($request->all(), $rules);
+        if ( $validator->fails()){
+            return ['success' => 0,
+                'msj' => "validación incorrecta"
+            ];
+        }
+
+        $tokenApi = $request->header('Authorization');
+
+        if ($userToken = JWTAuth::user($tokenApi)) {
+
+            $infoIglesia = Iglesias::where('id', $userToken->id_iglesia)->first();
+            $infoZonaHoraria = ZonaHoraria::where('id', $infoIglesia->id_zona_horaria)->first();
+            $zonaHoraria = $infoZonaHoraria->zona;
+
+            DB::beginTransaction();
+
+            try {
+
+
+                if($infoBlockDeta = PlanesBlockDetalle::where('id', $request->idblockdeta)->first()) {
+
+                    $infoPlanBloque = PlanesBloques::where('id', $infoBlockDeta->id_planes_bloques)->first();
+                    $infoPlan = Planes::where('id', $infoPlanBloque->id_planes)->first();
+
+                    // Verificar si usuario tiene registrado el plan, sino registrar
+                    if(PlanesUsuarios::where('id_usuario', $userToken->id)
+                        ->where('id_planes')->first()){
+                        // no hacer nada porque esta registrado
+                    }else{
+                        // vincular el plan al usuario
+                        $nuevo = new PlanesUsuarios();
+                        $nuevo->id_usuario = $userToken->id;
+                        $nuevo->id_planes = $infoPlan->id;
+                        $nuevo->fecha = Carbon::now($zonaHoraria);
+                        $nuevo->save();
+                    }
+
+
+                    if ($request->has('idpregunta')) {
+
+                        foreach ($request->idpregunta as $clave => $valor) {
+
+                            if(BloquePreguntasUsuarios::where('id_bloque_preguntas', $clave)
+                                ->where('id_usuarios', $userToken->id)->first()){
+
+                                // actualizar porque ya estan registradas
+                                BloquePreguntasUsuarios::where('id', $clave)
+                                    ->update([
+                                        'texto' => $valor['txtpregunta'],
+                                        'fecha_actualizo' => Carbon::now($zonaHoraria)
+                                    ]);
+
+                            }else{
+                                $pregunta = new BloquePreguntasUsuarios();
+                                $pregunta->id_bloque_preguntas = $clave;
+                                $pregunta->id_usuarios = $userToken->id;
+                                $pregunta->texto = $valor['txtpregunta'];
+                                $pregunta->fecha = Carbon::now($zonaHoraria);
+                                $pregunta->fecha_actualizo = null;
+                                $pregunta->save();
+                            }
+                        }
+                    }
+
+
+                    // colocar plan continuar por defecto
+                    $this->retornoActualizarPlanUsuarioContinuar($userToken->id, $infoPlan->id);
+
+
+                    DB::commit();
+                    return ['success' => 1];
+                }else{
+                    return ['success' => 99];
+                }
+            }catch(\Throwable $e){
+                DB::rollback();
+                Log::info("error: " . $e);
+                return ['success' => 99];
+            }
+
+        }else{
+            return ['success' => 99];
+        }
+    }
+
+
+    // actualizar planes usuarios continuar, esta tabla solo tiene 1 registro usuario
+    private function retornoActualizarPlanUsuarioContinuar($iduser, $idplan)
+    {
+        if($idPlanUser = PlanesUsuariosContinuar::where('id_usuarios', $iduser)
+            ->first()){
+            // solo actualizar
+
+            PlanesUsuariosContinuar::where('id', $idPlanUser->id)
+                ->update([
+                    'id_planes' => $idplan,
+                ]);
+        }
+        else{
+            // crear
+            $dato = new PlanesUsuariosContinuar();
+            $dato->id_usuarios = $iduser;
+            $dato->id_planes = $idplan;
+            $dato->save();
+        }
+    }
 
 
 

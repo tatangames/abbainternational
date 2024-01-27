@@ -73,9 +73,6 @@ Route::middleware('verificarToken')->group(function () {
     // informacion de preguntas de un bloque detalle
     Route::post('app/plan/misplanes/preguntas/bloque', [ApiPlanesController::class,'informacionPreguntasBloque']);
 
-    // guardar las preguntas del usuario segun plan
-    Route::post('app/plan/misplanes/preguntas/usuario/guardar', [ApiPlanesController::class,'guardarPreguntasUsuarioPlan']);
-
     // actualizar preguntas
     Route::post('app/plan/misplanes/preguntas/usuario/actualizar', [ApiPlanesController::class,'actualizarPreguntasUsuarioPlan']);
 
@@ -95,6 +92,13 @@ Route::middleware('verificarToken')->group(function () {
 
     // devuelve todos los elementos bloque inicio
     Route::post('app/inicio/bloque/completa', [ApiInicioController::class,'infoBloqueInicioCompleto']);
+
+    // informacion de un plan, solo para vista, usando idblockdeta para buscar id plan
+    Route::post('app/plan/informacion/solovista', [ApiInicioController::class,'infoPlanSoloVista']);
+
+    // guardar preguntas del cuestionario, registrar usuario al plan, set check a true,
+    Route::post('app/plan/inicio/preguntas/guardar/actualizar', [ApiInicioController::class,'preguntasInicioGuardarActualizar']);
+
 
 
 
