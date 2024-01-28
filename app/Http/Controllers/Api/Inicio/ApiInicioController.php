@@ -71,9 +71,6 @@ class ApiInicioController extends Controller
             $zonaHorariaUsuario = $this->retornoZonaHorariaUsuario($userToken->id_iglesia);
 
             // Array Final
-            $arrayFinalVideo = null;
-            $arrayFinalImagenes = null;
-            $arrayFinalInsignias = null;
 
             // Si se mostrara o no el array final
             $mostrarFinalDevocional = 0;
@@ -125,7 +122,10 @@ class ApiInicioController extends Controller
 
             // ************** BLOQUE VIDEOS ******************
 
-            $arrayFinalVideo = VideosHoy::orderBy('posicion', 'ASC')->get();
+            $arrayFinalVideo = VideosHoy::orderBy('posicion', 'ASC')
+                ->take(5)
+                ->get();
+
             $video_hayvideoshoy = 0; // Seguro para saber si hay videos
             $video_mayor5 = 0; // cuando hay mas de 5 video redireccionamiento
 
@@ -133,34 +133,34 @@ class ApiInicioController extends Controller
                 $dato->titulo = $this->retornoTituloVideo($dato->id, $idiomaTextos);
             }
 
+            $conteoVideo = VideosHoy::count();
+            if($conteoVideo > 5){
+                $video_mayor5 = 1;
+            }
+
             if($arrayFinalVideo != null && $arrayFinalVideo->isNotEmpty()){
                 $video_hayvideoshoy = 1;
-
-                if (count($arrayFinalVideo) > 5) {
-                    $video_mayor5 = 1;
-                }
-
             }
 
 
             // ************** BLOQUE IMAGENES DEL DIA ******************
 
 
-            $imagenes_arrayDia = ImagenesDelDia::orderBy('posicion', 'ASC')->get();
+            $arrayFinalImagenes = ImagenesDelDia::orderBy('posicion', 'ASC')
+                ->take(5)
+                ->get();
             $imagenes_hayimageneshoy = 0; // Seguro para saber si hay imagenes del dia
             $imagenes_mayor5 = 0;
 
-            if($imagenes_arrayDia != null && $imagenes_arrayDia->isNotEmpty()){
-                $imagenes_hayimageneshoy = 1;
 
-                if (count($imagenes_arrayDia) > 5) {
-                    $imagenes_mayor5 = 1;
-                }
+            $conteoImg = ImagenesDelDia::count();
+            if($conteoImg > 5){
+                $imagenes_mayor5 = 1;
             }
 
-            $arrayFinalImagenes = $imagenes_arrayDia;
-
-
+            if($arrayFinalImagenes != null && $arrayFinalImagenes->isNotEmpty()){
+                $imagenes_hayimageneshoy = 1;
+            }
 
 
             // ************** BLOQUE COMPARTE LA APLICACION ******************
@@ -176,7 +176,9 @@ class ApiInicioController extends Controller
             // ************** BLOQUE INSIGNIAS ******************
 
 
-            $insignia_arrayInsignias = InsigniasUsuarios::where('id_usuario', $userToken->id)->get();
+            $insignia_arrayInsignias = InsigniasUsuarios::where('id_usuario', $userToken->id)
+                ->take(5)
+                ->get();
             $insignia_hayInsignias = 0;
             $insignias_mayor5 = 0;
 
@@ -242,20 +244,13 @@ class ApiInicioController extends Controller
                 $dato->hitocuantofalta = $hito_cuantoFaltan;
             }
 
-            $insignia_arrayInsigOrdenado = $insignia_arrayInsignias->sortBy('titulo');
-            $arrayInsigOrdenadoArray = $insignia_arrayInsigOrdenado->toArray();
+            $arrayFinalInsignias = $insignia_arrayInsignias->sortBy('titulo');
 
-            $arrayFinalInsignias = null;
-            if($arrayInsigOrdenadoArray != null){
+            $conteoInsignias = InsigniasUsuarios::where('id_usuario', $userToken->id)->count();
 
-                if (count($arrayInsigOrdenadoArray) > 5) {
-                    $insignias_mayor5 = 1;
-                }
-
-                $arrayFinalInsignias = array_slice($arrayInsigOrdenadoArray, 0, 5);
+            if ($conteoInsignias > 5) {
+                $insignias_mayor5 = 1;
             }
-
-
 
             return ['success' => 1,
                 'mostrarbloquedevocional' => $mostrarFinalDevocional,
@@ -376,7 +371,6 @@ class ApiInicioController extends Controller
 
             try {
 
-
                 if($infoBlockDeta = PlanesBlockDetalle::where('id', $request->idblockdeta)->first()) {
 
                     $infoPlanBloque = PlanesBloques::where('id', $infoBlockDeta->id_planes_bloques)->first();
@@ -442,6 +436,92 @@ class ApiInicioController extends Controller
             return ['success' => 99];
         }
     }
+
+
+
+    public function listadoTodosLosVideos(Request $request)
+    {
+
+        $rules = array(
+            'iduser' => 'required',
+            'idiomaplan' => 'required'
+        );
+
+
+        $validator = Validator::make($request->all(), $rules);
+        if ( $validator->fails()){
+            return ['success' => 0,
+                'msj' => "validación incorrecta"
+            ];
+        }
+
+        $tokenApi = $request->header('Authorization');
+
+        if ($userToken = JWTAuth::user($tokenApi)) {
+
+            $idiomaTextos = $this->reseteoIdiomaTextos($request->idiomaplan);
+
+            $arrayVideos = VideosHoy::orderBy('posicion', 'ASC')->get();
+
+            foreach ($arrayVideos as $dato){
+
+                $info = $this->retornoTituloVideo($dato->id, $idiomaTextos);
+                $dato->titulo = $info;
+            }
+
+            return ['success' => 1,
+                'arrayfinalvideo' => $arrayVideos];
+
+        }else{
+            return ['success' => 99];
+        }
+    }
+
+
+
+    public function listadoTodosLasImagenes(Request $request)
+    {
+        $rules = array(
+            'iduser' => 'required',
+        );
+
+
+        $validator = Validator::make($request->all(), $rules);
+        if ( $validator->fails()){
+            return ['success' => 0,
+                'msj' => "validación incorrecta"
+            ];
+        }
+
+        $tokenApi = $request->header('Authorization');
+
+        if ($userToken = JWTAuth::user($tokenApi)) {
+
+
+            $arrayImagenes = ImagenesDelDia::orderBy('posicion', 'ASC')->get();
+
+            return ['success' => 1,
+                'arrayfinalimagenes' => $arrayImagenes];
+
+        }else{
+            return ['success' => 99];
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     // actualizar planes usuarios continuar, esta tabla solo tiene 1 registro usuario
@@ -513,6 +593,9 @@ class ApiInicioController extends Controller
 
 
 
+
+
+
     // RETORNO TITULO VIDEOS
     private function retornoTituloVideo($idvideohoy, $idiomaTexto){
 
@@ -575,11 +658,6 @@ class ApiInicioController extends Controller
                 'descripcion' => $infoTexto->texto_2];
         }
     }
-
-
-
-
-
 
     // RETORNO TODA DESCRIPCION DE UN CUESTIONARIO
     private function retornoTituloCuestionarioIdioma($idBlockDeta, $idiomaTexto){
