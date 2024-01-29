@@ -254,15 +254,13 @@ class ApiInicioController extends Controller
             }
 
 
-            //******* NIVEL DE RACHA MAS ALTA DEL USUARIO //***********
-            $nivelRachaAlta = 0;
-            if($infoRa = RachaAlta::where('id_usuarios', $userToken->id)->first()){
-                $nivelRachaAlta = $infoRa->contador;
-            }
+            //******* NIVEL DE RACHA  //***********
+
+            $infoTotalRachas = $this->retornoInformacionRacha($userToken);
+
 
             return ['success' => 1,
 
-                'rachaalta' => $nivelRachaAlta,
                 'mostrarbloquedevocional' => $mostrarFinalDevocional,
                 'mostrarbloquevideo' => $mostrarFinalVideo,
                 'mostrarbloqueimagenes' => $mostrarFinalImagenes,
@@ -288,11 +286,10 @@ class ApiInicioController extends Controller
                 'insigniashay' => $insignia_hayInsignias,
 
 
+                'arrayracha' => [$infoTotalRachas], // se mete en llaves
                 'arrayfinalvideo' => $arrayFinalVideo,
                 'arrayfinalimagenes' => $arrayFinalImagenes,
                 'arrayfinalinsignias' => $arrayFinalInsignias,
-
-
 
                 ];
 
@@ -303,6 +300,116 @@ class ApiInicioController extends Controller
             return ['success' => 99];
         }
     }
+
+
+
+    private function retornoInformacionRacha($userToken){
+
+        $fechaFormatHorariaCarbon = $this->retornoZonaHorariaUsuario($userToken->id_iglesia);
+        $anioActual = $fechaFormatHorariaCarbon->year;
+
+        $diasAppEsteAnio = RachaUsuario::where('id_usuarios', $userToken->id)
+            ->whereYear('fecha', $anioActual)
+            ->count();
+
+
+        $arrayRachaUser = RachaUsuario::where('id_usuarios', $userToken->id)
+            ->where('fecha', '<=', $fechaFormatHorariaCarbon)
+            ->orderBy('fecha', 'DESC')
+            ->get();
+
+        $fechaActualH = $this->retornoZonaHorariaUsuarioFormatFecha($userToken->id_iglesia);
+
+        $fechaActual = Carbon::parse($fechaActualH);
+        $diasConsecutivos = 0;
+
+        $pilaIdFechasSeguidas = array();
+
+        foreach ($arrayRachaUser as $dato) {
+            // Convertir la cadena de fecha a un objeto DateTime
+            $fechaObjeto = Carbon::parse($dato->fecha);
+
+            array_push($pilaIdFechasSeguidas, $dato->id);
+
+            // Verificar si la fecha actual es igual a la fecha en el bucle
+
+            if ($fechaObjeto->equalTo($fechaActual)) {
+
+                // Ignorar la fecha actual y continuar con la próxima iteración
+                continue;
+            }
+
+            // Verificar si la fecha en el bucle es un día antes de la fecha actual
+            if ($fechaObjeto->equalTo($fechaActual->copy()->subDay())) {
+                // Incrementar el contador de días consecutivos
+                $diasConsecutivos++;
+                // Actualizar la fecha actual para la próxima iteración
+                $fechaActual = $fechaObjeto;
+            } else {
+                // Si no es un día antes, salir del bucle
+                break;
+            }
+        }
+
+
+        $diaDomingo = 0;
+        $diaLunes = 0;
+        $diaMartes = 0;
+        $diaMiercoles = 0;
+        $diaJueves = 0;
+        $diaViernes = 0;
+        $diaSabado = 0;
+
+        // obtener los dias de estas fechas seguidas
+        $arrayFechaDias = RachaUsuario::where('id_usuarios', $userToken->id)
+            ->where('fecha', '<=', $fechaFormatHorariaCarbon)
+            ->orderBy('fecha', 'DESC')
+            ->take(7)
+            ->get();
+
+
+        // REPARAR ESTA PARTE PORQUE METE DIA NO VALIDO
+
+        foreach ($arrayFechaDias as $dato){
+
+            $fechaObjeto = Carbon::parse($dato->fecha);
+            $diaSemana = $fechaObjeto->dayOfWeek;
+
+            if($diaSemana == 0){ // domingo
+                $diaDomingo = 1;
+            }else if ($diaSemana == 1){ // lunes
+                $diaLunes = 1;
+            }else if ($diaSemana == 2){ // martes
+                $diaMartes = 1;
+            }else if ($diaSemana == 3){ // miercoles
+                $diaMiercoles = 1;
+            }else if ($diaSemana == 4){ // jueves
+                $diaJueves = 1;
+            }else if ($diaSemana == 5){ // viernes
+                $diaViernes = 1;
+            }else if ($diaSemana == 6){ // sabado
+                $diaSabado = 1;
+            }
+        }
+
+
+        $nivelRachaAlta = 0;
+        if($infoRa = RachaAlta::where('id_usuarios', $userToken->id)->first()){
+            $nivelRachaAlta = $infoRa->contador;
+        }
+
+        return ['diasesteanio' => $diasAppEsteAnio,
+            'diasconcecutivos' => $diasConsecutivos,
+            'nivelrachaalta' => $nivelRachaAlta,
+            'domingo' => $diaDomingo,
+            'lunes' => $diaLunes,
+            'martes' => $diaMartes,
+            'miercoles' => $diaMiercoles,
+            'jueves' => $diaJueves,
+            'viernes' => $diaViernes,
+            'sabado' => $diaSabado];
+    }
+
 
 
 
@@ -754,116 +861,7 @@ class ApiInicioController extends Controller
 
 
 
-    public function informacionRacha(Request $request){
 
-        // ------- CONOCER LA RACHA QUE LLEVO  -----------
-
-        $rules = array(
-            'iduser' => 'required',
-            'idiomaplan' => 'required',
-        );
-
-
-        $validator = Validator::make($request->all(), $rules);
-        if ( $validator->fails()){
-            return ['success' => 0,
-                'msj' => "validación incorrecta"
-            ];
-        }
-
-        $tokenApi = $request->header('Authorization');
-
-        if ($userToken = JWTAuth::user($tokenApi)) {
-
-            $idiomaTextos = $this->reseteoIdiomaTextos($request->idiomaplan);
-
-            $fechaFormatHorariaCarbon = $this->retornoZonaHorariaUsuario($userToken->id_iglesia);
-            $anioActual = $fechaFormatHorariaCarbon->year;
-
-            $diasAppEsteAnio = RachaUsuario::where('id_usuarios', $userToken->id)
-                ->whereYear('fecha', $anioActual)
-                ->count();
-
-            $arrayRachaUser = RachaUsuario::where('id_usuarios', $userToken->id)
-                ->orderBy('fecha', 'DESC')
-                ->get();
-
-
-            $fechaActualH = $this->retornoZonaHorariaUsuarioFormatFecha($userToken->id_iglesia);
-
-
-            $fechaActual = Carbon::parse($fechaActualH);
-            $diasConsecutivos = 0;
-
-            $pilaIdFechasSeguidas = array();
-
-            foreach ($arrayRachaUser as $dato) {
-                // Convertir la cadena de fecha a un objeto DateTime
-                $fechaObjeto = Carbon::parse($dato->fecha);
-
-                array_push($pilaIdFechasSeguidas, $dato->id);
-
-                // Verificar si la fecha actual es igual a la fecha en el bucle
-
-                if ($fechaObjeto->equalTo($fechaActual)) {
-
-                    // Ignorar la fecha actual y continuar con la próxima iteración
-                    continue;
-                }
-
-                // Verificar si la fecha en el bucle es un día antes de la fecha actual
-                if ($fechaObjeto->equalTo($fechaActual->copy()->subDay())) {
-                    // Incrementar el contador de días consecutivos
-                    $diasConsecutivos++;
-                    // Actualizar la fecha actual para la próxima iteración
-                    $fechaActual = $fechaObjeto;
-                } else {
-                    // Si no es un día antes, salir del bucle
-                    break;
-                }
-            }
-
-
-            $diaDomingo = 0;
-            $diaLunes = 0;
-            $diaMartes = 0;
-            $diaMiercoles = 0;
-            $diaJueves = 0;
-            $diaViernes = 0;
-            $diaSabado = 0;
-
-
-            // obtener los dias de estas fechas seguidas
-            $arrayFechaDias = RachaUsuario::where('id_usuarios', $userToken->id)
-                ->where('fecha', '<=', $fechaFormatHorariaCarbon)
-                ->orderBy('fecha', 'DESC')
-                ->take(7)
-                ->get();
-
-            foreach ($arrayFechaDias as $dato){
-
-
-
-            }
-
-
-            $nivelRachaAlta = 0;
-            if($infoRa = RachaAlta::where('id_usuarios', $userToken->id)->first()){
-                $nivelRachaAlta = $infoRa->contador;
-            }
-
-
-            return ['success' => 1,
-                'diasesteanio' => $diasAppEsteAnio,
-                'diasconcecutivos' => $diasConsecutivos,
-                'nivelrachaalta' => $nivelRachaAlta
-                ];
-        }
-        else{
-            return ['success' => 99];
-        }
-
-    }
 
 
 

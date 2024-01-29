@@ -111,8 +111,6 @@ Route::middleware('verificarToken')->group(function () {
     // informacion de una insignia
     Route::post('app/insignia/individual/informacion', [ApiInicioController::class,'informacionInsigniaIndividual']);
 
-    // informacion de recha
-    Route::post('app/racha/informacion', [ApiInicioController::class,'informacionRacha']);
 
 
 
