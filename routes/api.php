@@ -105,11 +105,14 @@ Route::middleware('verificarToken')->group(function () {
     // obtener listado de todos las imagenes
     Route::post('app/inicio/todos/lasimagenes', [ApiInicioController::class,'listadoTodosLasImagenes']);
 
+    // obtener listado de todas las insignias
+    Route::post('app/inicio/todos/lasinsignias', [ApiInicioController::class,'listadoTodosLasInsignias']);
 
+    // informacion de una insignia
+    Route::post('app/insignia/individual/informacion', [ApiInicioController::class,'informacionInsigniaIndividual']);
 
-
-
-
+    // informacion de recha
+    Route::post('app/racha/informacion', [ApiInicioController::class,'informacionRacha']);
 
 
 

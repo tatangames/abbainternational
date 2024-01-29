@@ -28,6 +28,7 @@ use App\Models\PlanesContenedorTextos;
 use App\Models\PlanesTextos;
 use App\Models\PlanesUsuarios;
 use App\Models\PlanesUsuariosContinuar;
+use App\Models\RachaAlta;
 use App\Models\RachaUsuario;
 use App\Models\TipoInsignias;
 use App\Models\VideosHoy;
@@ -175,7 +176,7 @@ class ApiInicioController extends Controller
 
             // ************** BLOQUE INSIGNIAS ******************
 
-
+            // ordenar por fechas ganadas deberia ser mejor
             $insignia_arrayInsignias = InsigniasUsuarios::where('id_usuario', $userToken->id)
                 ->take(5)
                 ->get();
@@ -252,7 +253,16 @@ class ApiInicioController extends Controller
                 $insignias_mayor5 = 1;
             }
 
+
+            //******* NIVEL DE RACHA MAS ALTA DEL USUARIO //***********
+            $nivelRachaAlta = 0;
+            if($infoRa = RachaAlta::where('id_usuarios', $userToken->id)->first()){
+                $nivelRachaAlta = $infoRa->contador;
+            }
+
             return ['success' => 1,
+
+                'rachaalta' => $nivelRachaAlta,
                 'mostrarbloquedevocional' => $mostrarFinalDevocional,
                 'mostrarbloquevideo' => $mostrarFinalVideo,
                 'mostrarbloqueimagenes' => $mostrarFinalImagenes,
@@ -497,7 +507,6 @@ class ApiInicioController extends Controller
 
         if ($userToken = JWTAuth::user($tokenApi)) {
 
-
             $arrayImagenes = ImagenesDelDia::orderBy('posicion', 'ASC')->get();
 
             return ['success' => 1,
@@ -509,17 +518,215 @@ class ApiInicioController extends Controller
     }
 
 
+    public function listadoTodosLasInsignias(Request $request)
+    {
+
+        $rules = array(
+            'iduser' => 'required',
+            'idiomaplan' => 'required'
+        );
+
+
+        $validator = Validator::make($request->all(), $rules);
+        if ( $validator->fails()){
+            return ['success' => 0,
+                'msj' => "validación incorrecta"
+            ];
+        }
+
+        $tokenApi = $request->header('Authorization');
+
+        if ($userToken = JWTAuth::user($tokenApi)) {
+
+            $idiomaTextos = $this->reseteoIdiomaTextos($request->idiomaplan);
+
+            $insignia_arrayInsignias = InsigniasUsuarios::where('id_usuario', $userToken->id)->get();
+
+            foreach ($insignia_arrayInsignias as $dato){
+
+                $infoTitulos = $this->retornoTituloInsigniasAppIdioma($dato->id_tipo_insignia, $idiomaTextos);
+                $dato->titulo = $infoTitulos['titulo'];
+                $dato->descripcion = $infoTitulos['descripcion'];
+
+
+                // Conocer que nivel voy (ejemplo devuelve 5)
+                $hito_infoNivelVoy = DB::table('insignias_usuarios_detalle AS indeta')
+                    ->join('niveles_insignias AS nil', 'indeta.id_niveles_insignias', '=', 'nil.id')
+                    ->join('tipo_insignias AS tipo', 'nil.id_tipo_insignia', '=', 'tipo.id')
+                    ->select('nil.nivel', 'nil.id AS idnivelinsignia')
+                    ->where('nil.id_tipo_insignia', $dato->id_tipo_insignia)
+                    ->max('nil.nivel');
+
+                $dato->nivelvoy = $hito_infoNivelVoy;
+
+
+                // ------ INFORMACION DEL HITO DE CADA INSIGNIA ------
+
+                $hito_cuantoFaltan = 0; // Cuantos puntos me faltan para la siguiente nivel de esta insignia
+                $hito_haySiguienteNivel = 0; // Saber si hay un nivel mas por superar
+
+
+                // Obtener los niveles ya ganados para evitarlos
+                $hito_arrayObtenidos = DB::table('insignias_usuarios_detalle AS indeta')
+                    ->join('niveles_insignias AS nil', 'indeta.id_niveles_insignias', '=', 'nil.id')
+                    ->join('tipo_insignias AS tipo', 'nil.id_tipo_insignia', '=', 'tipo.id')
+                    ->select('nil.id')
+                    ->where('nil.id_tipo_insignia', $dato->id_tipo_insignia)
+                    ->get();
+
+                $pilaIdYaGanados = array();
+
+                foreach ($hito_arrayObtenidos as $item){
+                    array_push($pilaIdYaGanados, $item->id);
+                }
+
+                // buscar el siguiente nivel que falta y cuanto me falta
+                if($infoNivelSiguiente = NivelesInsignias::where('id_tipo_insignia', $dato->id_tipo_insignia)
+                    ->whereNotIn('id', $pilaIdYaGanados)
+                    ->where('nivel', '>', $hito_infoNivelVoy)
+                    ->first()){
+
+                    $hito_haySiguienteNivel = 1; // Si hay siguiente nivel
+                    $hito_cuantoFaltan = $infoNivelSiguiente->nivel - $hito_infoNivelVoy;
+                }
+
+                $infoInsigniaP = TipoInsignias::where('id', $dato->id_tipo_insignia)->first();
+                $dato->imageninsignia = $infoInsigniaP->imagen;
+
+                $dato->hitohaynextlevel = $hito_haySiguienteNivel;
+                $dato->hitocuantofalta = $hito_cuantoFaltan;
+            }
+
+            $arrayFinalInsignias = $insignia_arrayInsignias->sortBy('titulo');
+
+            return ['success' => 1,
+                'arrayfinalinsignias' => $arrayFinalInsignias];
+
+        }else{
+            return ['success' => 99];
+        }
+    }
 
 
 
+    public function informacionInsigniaIndividual(Request $request)
+    {
+
+        $rules = array(
+            'iduser' => 'required',
+            'idiomaplan' => 'required',
+            'idinsignia' => 'required'
+        );
 
 
+        $validator = Validator::make($request->all(), $rules);
+        if ( $validator->fails()){
+            return ['success' => 0,
+                'msj' => "validación incorrecta"
+            ];
+        }
+
+        $tokenApi = $request->header('Authorization');
+
+        if ($userToken = JWTAuth::user($tokenApi)) {
+
+            $idiomaTextos = $this->reseteoIdiomaTextos($request->idiomaplan);
+
+            $infoInsignia = TipoInsignias::where('id', $request->idinsignia)->first();
+
+            $infoTitulos = $this->retornoTituloInsigniasAppIdioma($infoInsignia->id, $idiomaTextos);
+            $tituloInsignia = $infoTitulos['titulo'];
+            $descripcionInsignia = $infoTitulos['descripcion'];
 
 
+            // Conocer que nivel voy (ejemplo devuelve 5)
+            $hito_infoNivelVoy = DB::table('insignias_usuarios_detalle AS indeta')
+                ->join('niveles_insignias AS nil', 'indeta.id_niveles_insignias', '=', 'nil.id')
+                ->join('tipo_insignias AS tipo', 'nil.id_tipo_insignia', '=', 'tipo.id')
+                ->select('nil.nivel', 'nil.id AS idnivelinsignia')
+                ->where('nil.id_tipo_insignia', $infoInsignia->id)
+                ->max('nil.nivel');
+
+            // nivel que voy de insginia
+            $nivelvoy = $hito_infoNivelVoy;
 
 
+            // ------ INFORMACION DEL HITO DE CADA INSIGNIA ------
+
+            $hito_cuantoFaltan = 0; // Cuantos puntos me faltan para la siguiente nivel de esta insignia
+            $hito_haySiguienteNivel = 0; // Saber si hay un nivel mas por superar
 
 
+            // Obtener los niveles ya ganados para evitarlos
+            $hito_arrayObtenidos = DB::table('insignias_usuarios_detalle AS indeta')
+                ->join('niveles_insignias AS nil', 'indeta.id_niveles_insignias', '=', 'nil.id')
+                ->join('tipo_insignias AS tipo', 'nil.id_tipo_insignia', '=', 'tipo.id')
+                ->select('nil.id', 'indeta.fecha', 'nil.nivel')
+                ->where('nil.id_tipo_insignia', $infoInsignia->id)
+                ->orderBy('indeta.fecha', 'DESC')
+                ->get();
+
+            // obteniendo fecha cuando se gano el hito
+            foreach ($hito_arrayObtenidos as $dato){
+                $fecha = date("d-m-Y", strtotime($dato->fecha));
+
+                // como traigo idioma, necesito mostrar referencia
+                $infoTexto = $this->retornoMensajeHito($idiomaTextos);
+
+                $dato->hitotexto1 = $infoTexto['texto1'];
+                $dato->hitotexto2 = $infoTexto['texto2'];
+                $dato->fechaFormat = $fecha;
+            }
+
+            $cualNextLevel = 0;
+            // buscar el siguiente nivel que falta y cuanto me falta
+            if($infoNivelSiguiente = NivelesInsignias::where('id_tipo_insignia', $infoInsignia->id)
+                ->where('nivel', '>', $hito_infoNivelVoy)
+                ->first()){
+
+                $cualNextLevel = $infoNivelSiguiente->nivel;
+                $hito_haySiguienteNivel = 1; // Si hay siguiente nivel
+                $hito_cuantoFaltan = $infoNivelSiguiente->nivel - $hito_infoNivelVoy;
+            }
+
+
+            $textoFalta = $this->retornoMensajeHito($idiomaTextos);
+
+
+            return ['success' => 1,
+                'titulo' => $tituloInsignia,
+                'descripcion' => $descripcionInsignia,
+                'imagen' => $infoInsignia->imagen,
+                'nivelvoy' => $nivelvoy,
+                'hitocuantofalta' => $hito_cuantoFaltan,
+                'hitohaynextlevel' => $hito_haySiguienteNivel,
+                'cualnextlevel' => $cualNextLevel,
+                'textofalta' => $textoFalta['texto2'],
+                'hitoarray' => $hito_arrayObtenidos
+                ];
+
+        }else{
+            return ['success' => 99];
+        }
+    }
+
+    private function retornoMensajeHito($idiomaPlan){
+
+        if($idiomaPlan == 1){ // espanol
+
+            return ['texto1' => "Completado el:",
+                'texto2' => "Falta"];
+
+        }else if($idiomaPlan == 2){ // ingles
+            // si no encuentra sera por defecto español
+
+            return ['texto1' => "Completed on:",
+                'texto2' => "remaining"];
+        }else{
+            return ['texto1' => "Completado el:",
+                    'texto2' => "Falta"];
+        }
+    }
 
 
 
@@ -547,47 +754,114 @@ class ApiInicioController extends Controller
 
 
 
-    private function svewrf(){
+    public function informacionRacha(Request $request){
 
         // ------- CONOCER LA RACHA QUE LLEVO  -----------
 
-        /*$arrayRachaUser = RachaUsuario::where('id_usuarios', $userToken->id)
-            ->orderBy('fecha', 'DESC')
-            ->get();
-
-        $fechaActualH = $this->retornoZonaHorariaUsuarioFormatFecha($userToken->id_iglesia);
-        $fechaActual = Carbon::parse($fechaActualH);
-        $diasConsecutivos = 0;
-
-        $pilaIdFechas = array();
+        $rules = array(
+            'iduser' => 'required',
+            'idiomaplan' => 'required',
+        );
 
 
-        foreach ($arrayRachaUser as $dato) {
-            // Convertir la cadena de fecha a un objeto DateTime
-            $fechaObjeto = Carbon::parse($dato->fecha);
+        $validator = Validator::make($request->all(), $rules);
+        if ( $validator->fails()){
+            return ['success' => 0,
+                'msj' => "validación incorrecta"
+            ];
+        }
 
-            array_push($pilaIdFechas, $dato->id);
+        $tokenApi = $request->header('Authorization');
 
-            // Verificar si la fecha actual es igual a la fecha en el bucle
+        if ($userToken = JWTAuth::user($tokenApi)) {
 
-            if ($fechaObjeto->equalTo($fechaActual)) {
+            $idiomaTextos = $this->reseteoIdiomaTextos($request->idiomaplan);
 
-                // Ignorar la fecha actual y continuar con la próxima iteración
-                continue;
+            $fechaFormatHorariaCarbon = $this->retornoZonaHorariaUsuario($userToken->id_iglesia);
+            $anioActual = $fechaFormatHorariaCarbon->year;
+
+            $diasAppEsteAnio = RachaUsuario::where('id_usuarios', $userToken->id)
+                ->whereYear('fecha', $anioActual)
+                ->count();
+
+            $arrayRachaUser = RachaUsuario::where('id_usuarios', $userToken->id)
+                ->orderBy('fecha', 'DESC')
+                ->get();
+
+
+            $fechaActualH = $this->retornoZonaHorariaUsuarioFormatFecha($userToken->id_iglesia);
+
+
+            $fechaActual = Carbon::parse($fechaActualH);
+            $diasConsecutivos = 0;
+
+            $pilaIdFechasSeguidas = array();
+
+            foreach ($arrayRachaUser as $dato) {
+                // Convertir la cadena de fecha a un objeto DateTime
+                $fechaObjeto = Carbon::parse($dato->fecha);
+
+                array_push($pilaIdFechasSeguidas, $dato->id);
+
+                // Verificar si la fecha actual es igual a la fecha en el bucle
+
+                if ($fechaObjeto->equalTo($fechaActual)) {
+
+                    // Ignorar la fecha actual y continuar con la próxima iteración
+                    continue;
+                }
+
+                // Verificar si la fecha en el bucle es un día antes de la fecha actual
+                if ($fechaObjeto->equalTo($fechaActual->copy()->subDay())) {
+                    // Incrementar el contador de días consecutivos
+                    $diasConsecutivos++;
+                    // Actualizar la fecha actual para la próxima iteración
+                    $fechaActual = $fechaObjeto;
+                } else {
+                    // Si no es un día antes, salir del bucle
+                    break;
+                }
             }
 
-            // Verificar si la fecha en el bucle es un día antes de la fecha actual
-            if ($fechaObjeto->equalTo($fechaActual->copy()->subDay())) {
-                // Incrementar el contador de días consecutivos
-                $diasConsecutivos++;
-                // Actualizar la fecha actual para la próxima iteración
-                $fechaActual = $fechaObjeto;
-            } else {
-                // Si no es un día antes, salir del bucle
-                break;
-            }
-        }*/
 
+            $diaDomingo = 0;
+            $diaLunes = 0;
+            $diaMartes = 0;
+            $diaMiercoles = 0;
+            $diaJueves = 0;
+            $diaViernes = 0;
+            $diaSabado = 0;
+
+
+            // obtener los dias de estas fechas seguidas
+            $arrayFechaDias = RachaUsuario::where('id_usuarios', $userToken->id)
+                ->where('fecha', '<=', $fechaFormatHorariaCarbon)
+                ->orderBy('fecha', 'DESC')
+                ->take(7)
+                ->get();
+
+            foreach ($arrayFechaDias as $dato){
+
+
+
+            }
+
+
+            $nivelRachaAlta = 0;
+            if($infoRa = RachaAlta::where('id_usuarios', $userToken->id)->first()){
+                $nivelRachaAlta = $infoRa->contador;
+            }
+
+
+            return ['success' => 1,
+                'diasesteanio' => $diasAppEsteAnio,
+                'diasconcecutivos' => $diasConsecutivos,
+                'nivelrachaalta' => $nivelRachaAlta
+                ];
+        }
+        else{
+            return ['success' => 99];
+        }
 
     }
 
