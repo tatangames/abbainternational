@@ -258,7 +258,6 @@ class ApiInicioController extends Controller
 
             $infoTotalRachas = $this->retornoInformacionRacha($userToken);
 
-
             return ['success' => 1,
 
                 'mostrarbloquedevocional' => $mostrarFinalDevocional,
@@ -312,7 +311,6 @@ class ApiInicioController extends Controller
             ->whereYear('fecha', $anioActual)
             ->count();
 
-
         $arrayRachaUser = RachaUsuario::where('id_usuarios', $userToken->id)
             ->where('fecha', '<=', $fechaFormatHorariaCarbon)
             ->orderBy('fecha', 'DESC')
@@ -360,12 +358,75 @@ class ApiInicioController extends Controller
         $diaViernes = 0;
         $diaSabado = 0;
 
+
+
+
         // obtener los dias de estas fechas seguidas
         $arrayFechaDias = RachaUsuario::where('id_usuarios', $userToken->id)
             ->where('fecha', '<=', $fechaFormatHorariaCarbon)
             ->orderBy('fecha', 'DESC')
-            ->take(7)
             ->get();
+
+
+        $fechaServidorRestar = $fechaFormatHorariaCarbon;
+
+        if ($fechaServidorRestar->isMonday()) {
+           $diaLunes = 1;
+        }else{
+
+            // pero sino es dia lunes
+
+            foreach ($arrayFechaDias as $dato){
+
+                // para recorrer todas las fechas
+                foreach ($arrayFechaDias as $info){
+
+                    $fechaCarbonParse = Carbon::parse($info->fecha);
+
+                    if($fechaServidorRestar->equalTo($fechaCarbonParse)){
+
+                        // si encontro, ver que dia es
+                        $encontro = false;
+
+                        switch ($fechaServidorRestar->dayOfWeek){
+                            case 0: // domingo
+                                $encontro = true;
+                                $diaDomingo = 1;
+                                break;
+                            case 1: // lunes no hacer nada
+                                $encontro = true;
+                                break;
+                            case 2: // martes
+                                $encontro = true;
+                                $diaMartes = 1;
+                                break;
+                            case 3: // miercoles
+                                $encontro = true;
+                                $diaMiercoles = 1;
+                                break;
+                            case 4: // jueves
+                                $encontro = true;
+                                $diaJueves = 1;
+                                break;
+                            case 5: // viernes
+                                $encontro = true;
+                                $diaViernes = 1;
+                                break;
+                            case 6: // sabado
+                                $encontro = true;
+                                $diaSabado = 1;
+                                break;
+                        }
+
+                        if($encontro){
+                            break;
+                        }
+                    }
+                }
+
+                $fechaServidorRestar->subDay();
+            }
+        }
 
 
         // REPARAR ESTA PARTE PORQUE METE DIA NO VALIDO

@@ -28,7 +28,7 @@
     }
     body {
         font-family: 'Roboto', sans-serif;
-        background-image: url({{ asset('images/fondo-hojas.jpg') }});
+        background-image: url({{ asset('images/fondo1.jpg') }});
     }
     .demo-container {
         height: 100%;
@@ -85,36 +85,23 @@
         <div class="row" style="margin-top: 60px">
             <div class="col-lg-6 col-12 mx-auto">
                 <div class="text-center image-size-small position-relative">
-                    <img src="{{ asset('images/abba-logo.jpg') }}" class="rounded-circle p-2 bg-white">
+                    <img src="{{ asset('images/logo.png') }}" class="rounded-circle p-2 bg-white">
                 </div>
                 <div class="p-5 bg-white rounded shadow-lg">
-                    <h3 class="mb-2 text-center pt-5">Mi Caminar con Dios</h3>
-                    <p class="text-center lead">Panel de Administración</p>
+                    <h3 class="mb-2 text-center pt-5">ASTRO POLLO</h3>
+                    <p class="text-center lead">Cambio de Contraseña</p>
                     <form class=" validate-form">
 
                         <div class="input-group form-group" style="margin-top: 25px">
                             <div class="input-group-prepend">
                                 <span class="input-group-text"><i class="fas fa-user"></i></span>
                             </div>
-                            <input id="correo" maxlength="100" type="text" class="form-control" required placeholder="Correo electrónico" autocomplete="off">
+                            <input id="password" maxlength="16" type="text" class="form-control" required placeholder="Nueva Contraseña" autocomplete="off">
                         </div>
-
-                        <div class="input-group form-group" style="margin-top: 25px">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text"><i class="fas fa-key"></i></span>
-                            </div>
-                            <input id="password" maxlength="25" type="password" class="form-control" required placeholder="Contraseña" autocomplete="off">
-                        </div>
-
-                        <div class="form-group text-left">
-                            <a id="myLink" style="color: black; font-size: 15px" href="#" onclick="modalRecuperar()"> Contraseña olvidada?
-                            </a>
-                        </div>
-
 
                         <br>
                         <div class="form-group text-center">
-                            <input type="button" value="ACCEDER" onclick="login()" id="btnLogin" class="btn btn-lg w-100 shadow-lg" style="background: #010066; color: white">
+                            <input type="button" value="ACTUALIZAR" onclick="cambioDePassword()" id="btnLogin" class="btn btn-lg w-100 shadow-lg" style="background: #bb1c1c; color: white">
                         </div>
                     </form>
 
@@ -123,8 +110,6 @@
         </div>
     </div>
 </div>
-
-
 
 
 
@@ -139,87 +124,89 @@
 </html>
 <script>
 
-    var inputPassword = document.getElementById("password");
-    var inputUsuario = document.getElementById("usuario");
 
-    inputPassword.addEventListener("keyup", function(event) {
-        if (event.key === 'Enter') {
-            event.preventDefault();
-            login();
-        }
-    });
+    function cambioDePassword() {
 
-    inputUsuario.addEventListener("keyup", function(event) {
-        if (event.key === 'Enter') {
-            event.preventDefault();
-            login();
-        }
-    });
+        var contrasena = document.getElementById('password').value;
 
-    function login() {
-
-        var correo = document.getElementById('correo').value;
-        var password = document.getElementById('password').value;
-
-        if(correo === ''){
-            toastr.error("Correo es requerido");
+        if(contrasena === ''){
+            toastr.error("Contraseña nueva es requerido");
             return;
         }
 
-        if(password === ''){
-            toastr.error("Contraseña es requerido");
-            return;
-        }
+        openLoading();
 
-        if(correo.length > 100){
-            toastr.error("Máximo 100 caracteres para Correo");
-            return;
-        }
-
-        if(password.length > 25){
-            toastr.error("Máximo 25 caracteres para Contraseña");
-            return;
-        }
-
-        openLoading()
+        var token = "{{ $token }}";
 
         let formData = new FormData();
-        formData.append('correo', usuario);
-        formData.append('password', password);
+        formData.append('token', token);
+        formData.append('contrasena', contrasena);
 
-        axios.post('admin/login', formData, {
+
+        axios.post('/admin/administrador/actualizacion/password', formData,  {
+
         })
             .then((response) => {
                 closeLoading()
-                verificar(response);
+
+
+                if(response.data.success === 1){
+
+
+                    Swal.fire({
+                        title: 'ACTUALIZADO',
+                        text: "Se ha realizado el cambio correctamente",
+                        icon: 'info',
+                        showCancelButton: false,
+                        allowOutsideClick: false,
+                        confirmButtonColor: '#28a745',
+                        cancelButtonColor: '#d33',
+                        cancelButtonText: 'Cancelar',
+                        confirmButtonText: 'Aceptar'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            volver();
+                        }
+                    })
+                }
+
+                else if (response.data.success === 2) {
+
+                    // LINK EXPIRADO O TOKEN MALO
+
+                    Swal.fire({
+                        title: 'EL LINK EXPIRO',
+                        text: "Se debe solicitar nuevo cambio de contraseña",
+                        icon: 'info',
+                        showCancelButton: false,
+                        allowOutsideClick: false,
+                        confirmButtonColor: '#28a745',
+                        cancelButtonColor: '#d33',
+                        cancelButtonText: 'Cancelar',
+                        confirmButtonText: 'Aceptar'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            volver();
+                        }
+                    })
+                }
+
+                else {
+                    toastr.error('Error al guardar');
+                }
+
             })
             .catch((error) => {
-                closeLoading()
-                toastr.error("Error en la respuesta");
+                closeLoading();
+                toastr.error('Error del servidor');
             });
     }
 
-    function verificar(response) {
 
-        if (response.data.success === 0) {
-            toastr.error("Validación incorrecta");
-        } else if (response.data.success === 1) {
-            window.location = response.data.ruta;
-        } else if (response.data.success === 2) {
-            toastr.error("Contraseña incorrecta");
-        }else if (response.data.success === 3) {
-            toastr.error("Correo no encontrado");
-        }
-        else {
-            toastr.error('Error');
-        }
+    function volver(){
+        window.location.href="{{ url('/') }}";
     }
 
-
-    // modal para recuperar contrasena
-    function modalRecuperar(){
-        window.location.href="{{ url('/admin/ingreso/de/correo') }}";
-    }
 
 
 </script>

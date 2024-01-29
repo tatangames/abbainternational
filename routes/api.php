@@ -9,7 +9,7 @@ use App\Http\Controllers\Api\Correo\ApiCorreoController;
 use App\Http\Controllers\Api\Registro\ApiLoginController;
 use App\Http\Controllers\Api\Planes\ApiPlanesController;
 use App\Http\Controllers\Api\Inicio\ApiInicioController;
-
+use App\Http\Controllers\Api\Comunidad\ApiComunidadController;
 
 
 // inicio de sesion
@@ -112,6 +112,24 @@ Route::middleware('verificarToken')->group(function () {
     Route::post('app/insignia/individual/informacion', [ApiInicioController::class,'informacionInsigniaIndividual']);
 
 
+    //*** COMUNIDAD
+
+    // enviar solicitud a un amigo
+    Route::post('app/comunidad/enviar/solicitud', [ApiComunidadController::class,'enviarSolicitudAmigo']);
+
+    // listado de solicutes pendientes que yo he enviado
+    Route::post('app/comunidad/listado/solicitud/pendientes', [ApiComunidadController::class,'listadoSolicitudesPendientes']);
+
+    // listado de solicutes aceptadas que yo he enviado
+    Route::post('app/comunidad/listado/solicitud/aceptadas', [ApiComunidadController::class,'listadoSolicitudesAceptadas']);
+
+    // eliminar una solicitud
+    Route::post('app/comunidad/solicitud/eliminar', [ApiComunidadController::class,'eliminarSolicitud']);
+
+    // mostrar listado de insignias del usuario de comunidad
+    Route::post('app/comunidad/informacion/insignias', [ApiComunidadController::class,'informacionInsigniaAmigo']);
+
+    // listado de planes de ese usuario amigo para ver sus preguntas
 
 
 
