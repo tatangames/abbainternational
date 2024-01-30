@@ -12,13 +12,8 @@ use App\Http\Controllers\Backend\Sistema\PerfilController;
 
 Route::get('/', [LoginController::class,'index'])->name('login');
 
-Route::post('/login', [LoginController::class, 'login']);
-Route::post('/logout', [LoginController::class, 'logout'])->name('admin.logout');
-
-
-
-// --- CONTROL WEB ---
-Route::get('/panel', [ControlRolController::class,'indexRedireccionamiento'])->name('admin.panel');
+Route::post('/admin/login', [LoginController::class, 'login']);
+Route::post('/admin/logout', [LoginController::class, 'logout'])->name('admin.logout');
 
 // --- ROLES ---
 Route::get('/admin/roles/index', [RolesController::class,'index'])->name('admin.roles.index');
@@ -41,12 +36,43 @@ Route::post('/admin/permisos/nuevo-rol', [PermisoController::class, 'nuevoRol'])
 Route::post('/admin/permisos/extra-nuevo', [PermisoController::class, 'nuevoPermisoExtra']);
 Route::post('/admin/permisos/extra-borrar', [PermisoController::class, 'borrarPermisoGlobal']);
 
-// --- PERFIL ---
-Route::get('/admin/editar-perfil/index', [PerfilController::class,'indexEditarPerfil'])->name('admin.perfil');
-Route::post('/admin/editar-perfil/actualizar', [PerfilController::class, 'editarUsuario']);
+
+// --- VISTA PARA INGRESAR CORREO ---
+Route::get('/admin/ingreso/de/correo', [LoginController::class,'indexIngresoDeCorreo']);
+Route::post('/admin/enviar/correo/password', [LoginController::class, 'enviarCorreoAdministrador']);
+
+
+// VISTA AQUI SE INGRESA LA NUEVA CONTRASEÑA PORQUE EL LINK ES VALIDO
+Route::get('/admin/resetear/contrasena/administrador/{token}', [LoginController::class,'indexIngresoNuevaPasswordLink']);
+
+// VISTA SIN TOKEN PARA REDIRECCION
+Route::get('/admin/resetear/contrasena/administrador', [LoginController::class,'indexIngresoNuevaPasswordLinkRedireccion']);
+
+
+// ACTUALIZACION DE CONTRASENA
+
+Route::post('/admin/administrador/actualizacion/password', [LoginController::class, 'actualizarPasswordAdministrador']);
+
 
 // --- SIN PERMISOS VISTA 403 ---
 Route::get('sin-permisos', [ControlRolController::class,'indexSinPermiso'])->name('no.permisos.index');
+
+
+
+// --- CONTROL WEB ---
+Route::get('/panel', [ControlRolController::class,'indexRedireccionamiento'])->name('admin.panel');
+
+
+// --- PERFIL ---
+Route::get('/admin/perfil/index', [PerfilController::class,'indexEditarPerfil'])->name('admin.perfil');
+Route::post('/admin/perfil/actualizar/todo', [PerfilController::class, 'editarUsuario']);
+
+
+
+
+
+
+
 
 
 Route::get('/admin/dashboard/index', [DashboardController::class,'index'])->name('admin.dashboard.index');

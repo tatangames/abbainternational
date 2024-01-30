@@ -2,7 +2,7 @@
 <html lang="es">
 
 <head>
-    <title>Astro Pollo - Panel</title>
+    <title>Abba - Panel</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
@@ -11,7 +11,7 @@
     <link href="{{ asset('images/icono-sistema.png') }}" rel="icon">
     <!--Fontawesome CDN.-->
     <script defer src="https://use.fontawesome.com/releases/v5.0.6/js/all.js"></script>
-    <!-- comprimido de librerias -->
+
     <!-- libreria para alertas -->
     <link rel="stylesheet" href="{{asset('css/login/styleLogin.css')}}">
 
@@ -184,17 +184,21 @@
         openLoading()
 
         let formData = new FormData();
-        formData.append('correo', usuario);
+        formData.append('email', correo);
         formData.append('password', password);
 
         axios.post('admin/login', formData, {
         })
             .then((response) => {
+
+
                 closeLoading()
                 verificar(response);
             })
             .catch((error) => {
                 closeLoading()
+
+                console.log(error)
                 toastr.error("Error en la respuesta");
             });
     }

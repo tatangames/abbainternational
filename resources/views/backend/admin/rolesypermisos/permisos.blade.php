@@ -20,12 +20,12 @@
     <section class="content-header">
         <div class="container-fluid">
             <div class="col-sm-12">
-                <h1>Permisos Usuarios</h1>
+                <h1>Permisos Administrador</h1>
             </div>
             <br>
             <button type="button" onclick="modalAgregar()" class="btn btn-success btn-sm">
                 <i class="fas fa-pencil-alt"></i>
-                Nuevo Usuario
+                Nuevo Administrador
             </button>
         </div>
     </section>
@@ -51,7 +51,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title">Nuevo Usuario</h4>
+                    <h4 class="modal-title">Nuevo Administrador</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -68,8 +68,8 @@
                                     </div>
 
                                     <div class="form-group">
-                                        <label>Usuario</label>
-                                        <input type="text" maxlength="50" autocomplete="off" class="form-control" id="usuario-nuevo" placeholder="Usuario">
+                                        <label>Correo</label>
+                                        <input type="text" maxlength="100" autocomplete="off" class="form-control" id="correo-nuevo" placeholder="Correo electrónico">
                                     </div>
 
                                     <div class="form-group">
@@ -107,7 +107,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title">Editar Usuario</h4>
+                    <h4 class="modal-title">Editar Administrador</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -134,24 +134,13 @@
                                     </div>
 
                                     <div class="form-group">
-                                        <label>Usuario</label>
-                                        <input type="text" maxlength="50" autocomplete="off" class="form-control" id="usuario-editar">
+                                        <label>Correo electrónico</label>
+                                        <input type="text" maxlength="100" autocomplete="off" class="form-control" id="correo-editar">
                                     </div>
 
                                     <div class="form-group">
                                         <label>Contraseña</label>
                                         <input type="text" maxlength="16" autocomplete="off" class="form-control" id="password-editar" placeholder="Contraseña">
-                                    </div>
-
-                                    <div class="form-group">
-                                        <label>Disponibilidad</label><br>
-                                        <label class="switch" style="margin-top:10px">
-                                            <input type="checkbox" id="toggle-editar">
-                                            <div class="slider round">
-                                                <span class="on">Activo</span>
-                                                <span class="off">Inactivo</span>
-                                            </div>
-                                        </label>
                                     </div>
 
                                 </div>
@@ -204,7 +193,7 @@
         function nuevoUsuario(){
 
             var nombre = document.getElementById('nombre-nuevo').value;
-            var usuario = document.getElementById('usuario-nuevo').value;
+            var correo = document.getElementById('correo-nuevo').value;
             var password = document.getElementById('password-nuevo').value;
             var idrol = document.getElementById('rol-nuevo').value;
 
@@ -218,13 +207,13 @@
                 return;
             }
 
-            if(usuario === ''){
-                toastr.error('Usuario es requerido');
+            if(correo === ''){
+                toastr.error('Correo es requerido');
                 return;
             }
 
-            if(usuario.length > 50){
-                toastr.error('Máximo 50 caracteres para Usuario');
+            if(correo.length > 100){
+                toastr.error('Máximo 100 caracteres para Correo');
                 return;
             }
 
@@ -249,19 +238,22 @@
             }
 
             openLoading();
-            var formData = new FormData();
+            let formData = new FormData();
             formData.append('nombre', nombre);
-            formData.append('usuario', usuario);
+            formData.append('correo', correo);
             formData.append('password', password);
             formData.append('rol', idrol);
 
-            axios.post(url+'/permisos/nuevo-usuario', formData, {
+            console.log(idrol);
+
+
+            axios.post('/admin/permisos/nuevo-usuario', formData, {
             })
                 .then((response) => {
                     closeLoading()
 
                     if (response.data.success === 1) {
-                        toastr.error('Nombre Usuario ya existe');
+                        toastr.error('Correo ya registrado');
                     }
                     else if(response.data.success === 2){
                         toastr.success('Agregado');
@@ -282,7 +274,7 @@
             openLoading();
             document.getElementById("formulario-editar").reset();
 
-            axios.post(url+'/permisos/info-usuario',{
+            axios.post('/admin/permisos/info-usuario',{
                 'id': id
             })
                 .then((response) => {
@@ -293,7 +285,7 @@
                         $('#modalEditar').modal('show');
                         $('#id-editar').val(response.data.info.id);
                         $('#nombre-editar').val(response.data.info.nombre);
-                        $('#usuario-editar').val(response.data.info.usuario);
+                        $('#correo-editar').val(response.data.info.email);
 
                         document.getElementById("rol-editar").options.length = 0;
 
@@ -328,12 +320,9 @@
         function actualizar(){
             var id = document.getElementById('id-editar').value;
             var nombre = document.getElementById('nombre-editar').value;
-            var usuario = document.getElementById('usuario-editar').value;
+            var correo = document.getElementById('correo-editar').value;
             var password = document.getElementById('password-editar').value;
             var idrol = document.getElementById('rol-editar').value;
-
-            var t = document.getElementById('toggle-editar').checked;
-            var toggle = t ? 1 : 0;
 
             if(nombre === ''){
                 toastr.error('Nombre es requerido');
@@ -341,48 +330,48 @@
             }
 
             if(nombre.length > 50){
-                toastr.error('Máximo 50 caracteres para Nombre');
+                toastr.error('Máximo 50 caracteres para nombre');
                 return;
             }
 
-            if(usuario === ''){
-                toastr.error('Usuario es requerido');
+            if(correo === ''){
+                toastr.error('Correo es requerido');
                 return;
             }
 
-            if(usuario.length > 50){
-                toastr.error('Máximo 50 caracteres para Usuario');
+            if(correo.length > 100){
+                toastr.error('Máximo 100 caracteres para correo');
                 return;
             }
 
-            if(password.length > 0){
-                if(password.length < 4){
-                    toastr.error('Mínimo 4 caracteres para contraseña');
-                    return;
-                }
+           if(password.length > 0){
+               if(password.length < 4){
+                   toastr.error('Mínimo 4 caracteres para contraseña');
+                   return;
+               }
 
-                if(password.length > 16){
-                    toastr.error('Máximo 16 caracteres para contraseña');
-                    return;
-                }
-            }
+               if(password.length > 16){
+                   toastr.error('Máximo 16 caracteres para contraseña');
+                   return;
+               }
+           }
+
 
             openLoading()
             var formData = new FormData();
             formData.append('id', id);
             formData.append('nombre', nombre);
-            formData.append('usuario', usuario);
+            formData.append('correo', correo);
             formData.append('password', password);
-            formData.append('toggle', toggle);
             formData.append('rol', idrol);
 
-            axios.post(url+'/permisos/editar-usuario', formData, {
+            axios.post('/admin/permisos/editar-usuario', formData, {
             })
                 .then((response) => {
                     closeLoading()
 
                     if (response.data.success === 1) {
-                        toastr.error('El Usuario ya existe');
+                        toastr.error('El Correo ya existe');
                     }
                     else if(response.data.success === 2){
                         toastr.success('Actualizado');

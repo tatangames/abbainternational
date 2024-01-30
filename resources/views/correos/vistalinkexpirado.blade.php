@@ -2,7 +2,7 @@
 <html lang="es">
 
 <head>
-    <title>Abba - Panel</title>
+    <title>Astro Pollo - Panel</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
@@ -89,20 +89,11 @@
                 </div>
                 <div class="p-5 bg-white rounded shadow-lg">
                     <h3 class="mb-2 text-center pt-5">Mi Caminar con Dios</h3>
-                    <p class="text-center lead">Recuperacíon de Contraseña</p>
+                    <p class="text-center lead">El Link ha Expirado</p>
                     <form class=" validate-form">
 
-                        <div class="input-group form-group" style="margin-top: 25px">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text"><i class="fas fa-user"></i></span>
-                            </div>
-                            <input id="correo" maxlength="100" type="email" class="form-control" required placeholder="Correo electrónico" autocomplete="off">
-                        </div>
-
-                        <br>
                         <div class="form-group text-center">
-                            <input type="button" value="ENVÍAR CÓDIGO" onclick="buscarCorreo()" id="btnLogin" class="btn btn-lg w-100 shadow-lg"
-                                   style="background: #010066; color: white">
+                            <input type="button" value="INICIAR SESIÓN" onclick="regresar()" id="btnLogin" class="btn btn-lg w-100 shadow-lg" style="background: #010066; color: white">
                         </div>
                     </form>
 
@@ -125,77 +116,12 @@
 </html>
 <script>
 
-
-    function buscarCorreo() {
-
-        var correo = document.getElementById('correo').value;
-
-        if(correo === ''){
-            toastr.error("Correo es requerido");
-            return;
-        }
-
-        openLoading()
-
-        axios.post('/admin/enviar/correo/password',  {
-            'correo': correo
-        })
-            .then((response) => {
-                closeLoading()
+    function regresar(){
 
 
-                if(response.data.success === 1){
-
-                    Swal.fire({
-                        title: 'Correo Enviado',
-                        text: "Revise el correo para recuperación de contraseña",
-                        icon: 'info',
-                        showCancelButton: false,
-                        confirmButtonColor: '#28a745',
-                        cancelButtonColor: '#d33',
-                        cancelButtonText: 'Cancelar',
-                        confirmButtonText: 'Aceptar'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-
-                        }
-                    })
-                }
-
-                else if (response.data.success === 2) {
-
-                    // CORREO NO ENCONTRADO
-
-                    Swal.fire({
-                        title: 'No Encontrado',
-                        text: "El correo ingresado no se encuentra registrado",
-                        icon: 'info',
-                        showCancelButton: false,
-                        confirmButtonColor: '#28a745',
-                        cancelButtonColor: '#d33',
-                        cancelButtonText: 'Cancelar',
-                        confirmButtonText: 'Aceptar'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-
-                        }
-                    })
-                }
-
-                else {
-                    toastr.error('Error al guardar');
-                }
-
-            })
-            .catch((error) => {
-                closeLoading();
-                toastr.error('Error del servidor');
-            });
-
+        window.location.href="{{ url('/') }}";
 
 
     }
-
-
 
 </script>

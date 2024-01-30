@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Backend\Roles;
 use App\Http\Controllers\Controller;
 use App\Models\Administrador;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -13,7 +14,7 @@ class PermisoController extends Controller
 {
 
     public function __construct(){
-        $this->middleware('auth');
+        $this->middleware('auth:admin');
     }
 
     public function index(){
@@ -30,18 +31,19 @@ class PermisoController extends Controller
 
     public function nuevoUsuario(Request $request){
 
-        if(Administrador::where('usuario', $request->usuario)->first()){
+        if(Administrador::where('email', $request->correo)->first()){
             return ['success' => 1];
         }
 
         $u = new Administrador();
         $u->nombre = $request->nombre;
-        $u->usuario = $request->usuario;
-        $u->password = bcrypt($request->password);
-        $u->activo = 1;
+        $u->email = $request->correo;
+        $u->password = Hash::make($request->password);
 
         if ($u->save()) {
-            $u->assignRole($request->rol);
+            $role = Role::findById($request->rol, 'api');
+            $u->assignRole($role);
+
             return ['success' => 2];
         } else {
             return ['success' => 3];
@@ -69,24 +71,21 @@ class PermisoController extends Controller
 
         if(Administrador::where('id', $request->id)->first()){
 
-            if(Administrador::where('usuario', $request->usuario)
+            if(Administrador::where('email', $request->correo)
                 ->where('id', '!=', $request->id)->first()){
                 return ['success' => 1];
             }
 
             $usuario = Administrador::find($request->id);
             $usuario->nombre = $request->nombre;
-            $usuario->usuario = $request->usuario;
-            $usuario->activo = $request->toggle;
+            $usuario->email= $request->correo;
 
             if($request->password != null){
-                $usuario->password = bcrypt($request->password);
+                $usuario->password = Hash::make($request->password);
             }
 
-            //$usuario->assignRole($request->rol); asigna un rol extra
-
-            //elimina el rol existente y agrega el nuevo.
-            $usuario->syncRoles($request->rol);
+            $role = Role::findById($request->rol, 'api');
+            $usuario->syncRoles($role);
 
             $usuario->save();
 
@@ -111,7 +110,7 @@ class PermisoController extends Controller
             return ['success' => 1];
         }
 
-        Role::create(['name' => $request->nombre]);
+        Role::create(['name' => $request->nombre, 'guard_name' => 'api']);
 
         return ['success' => 2];
     }
@@ -123,7 +122,7 @@ class PermisoController extends Controller
             return ['success' => 1];
         }
 
-        Permission::create(['name' => $request->nombre, 'description' => $request->descripcion]);
+        Permission::create(['name' => $request->nombre, 'guard_name' => 'api', 'description' => $request->descripcion]);
 
         return ['success' => 2];
     }

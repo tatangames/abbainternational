@@ -8,7 +8,7 @@
 
     <ul class="navbar-nav">
         <li class="nav-item d-none d-sm-inline-block">
-            <a href="#" class="nav-link" style="color: white">Control de Repuestos</a>
+            <a href="#" class="nav-link" style="color: white">Mi Caminar con Dios</a>
         </li>
     </ul>
 

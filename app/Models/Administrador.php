@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 
 class Administrador extends Authenticatable
 {
@@ -16,8 +17,7 @@ class Administrador extends Authenticatable
     protected $table = 'administrador';
     public $timestamps = false;
 
-
-    protected $guard = 'admin';
+    protected $guard_name = 'api';
 
     /**
      * The attributes that are mass assignable.
@@ -48,5 +48,6 @@ class Administrador extends Authenticatable
     /*protected $casts = [
         'email_verified_at' => 'datetime',
     ];*/
+
 
 }

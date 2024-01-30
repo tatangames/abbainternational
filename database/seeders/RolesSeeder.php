@@ -16,15 +16,13 @@ class RolesSeeder extends Seeder
      */
     public function run(): void
     {
-        $roleAdmin = Role::create(['name' => 'Admin']);
-
-        // Inventario
-        $roleEditor = Role::create(['name' => 'Editor']);
+        $roleAdmin = Role::create(['name' => 'admin']);
 
 
         // solo para administrador
         Permission::create(['name' => 'sidebar.roles.y.permisos', 'description' => 'Sidebar seccion roles y permisos'])->syncRoles($roleAdmin);
-        Permission::create(['name' => 'sidebar.dashboard', 'description' => 'Sidebar dashboard'])->syncRoles($roleEditor);
+
+
 
 
 

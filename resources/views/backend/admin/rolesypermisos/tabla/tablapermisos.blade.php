@@ -9,7 +9,7 @@
                             <tr>
                                 <th>Nombre</th>
                                 <th>Rol</th>
-                                <th>Usuario</th>
+                                <th>Correo</th>
                                 <th>Opciones</th>
                             </tr>
                             </thead>
@@ -19,7 +19,7 @@
                                 <tr>
                                     <td>{{ $dato->nombre }}</td>
                                     <td>{{ $dato->roles->implode('name', ', ') }}</td>
-                                    <td>{{ $dato->usuario }}</td>
+                                    <td>{{ $dato->email }}</td>
 
                                     <td>
                                         <button type="button" class="btn btn-primary btn-xs" onclick="verInformacion({{ $dato->id }})">

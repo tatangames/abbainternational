@@ -27,8 +27,8 @@
                         <div class="card-body">
 
                             <div class="form-group">
-                                <label>Usuario</label>
-                                <input type="text" class="form-control" disabled value="{{ $usuario->usuario }}">
+                                <label>Correo Electrónico</label>
+                                <input type="text" maxlength="100" id="correo" class="form-control" value="{{ $usuario->email }}">
                             </div>
 
                             <div class="form-group">
@@ -74,49 +74,67 @@
         }
 
         function actualizar(){
+            var correo = document.getElementById('correo').value;
             var passwordNueva = document.getElementById('password').value;
             var passwordRepetida = document.getElementById('password1').value;
 
+
+
+
+
+            if(correo === ''){
+                toastr.error('Correo es requerido');
+                return;
+            }
+
+            if(correo.length > 100){
+                toastr.error('Correo máximo 100 caracteres');
+                return;
+            }
+
             if(passwordNueva === ''){
-                toastr.error('contraseña nueva es requerida');
+                toastr.error('Contraseña nueva es requerida');
                 return;
             }
 
             if(passwordRepetida === ''){
-                toastr.error('contraseña repetida es requerida');
+                toastr.error('Contraseña repetida es requerida');
                 return;
             }
 
             if(passwordNueva.length > 16){
-                toastr.error('máximo 16 caracteres para contraseña nueva');
+                toastr.error('Máximo 16 caracteres para contraseña nueva');
                 return;
             }
 
             if(passwordNueva.length < 4){
-                toastr.error('mínimo 4 caracteres para contraseña nueva');
+                toastr.error('Mínimo 4 caracteres para contraseña nueva');
                 return;
             }
 
             if(passwordRepetida.length > 16){
-                toastr.error('máximo 16 caracteres para contraseña repetida');
+                toastr.error('Máximo 16 caracteres para contraseña repetida');
                 return;
             }
 
             if(passwordRepetida.length < 4){
-                toastr.error('mínimo 4 caracteres para contraseña repetida');
+                toastr.error('Mínimo 4 caracteres para contraseña repetida');
                 return;
             }
 
             if(passwordNueva !== passwordRepetida){
-                toastr.error('las contraseñas no coinciden');
+                toastr.error('Las contraseñas no coinciden');
                 return;
             }
+
+
 
             openLoading()
             var formData = new FormData();
             formData.append('password', passwordNueva);
+            formData.append('correo', correo);
 
-            axios.post('/admin/editar-perfil/actualizar', formData, {
+            axios.post('/admin/perfil/actualizar/todo', formData, {
             })
                 .then((response) => {
                     closeLoading()
@@ -136,6 +154,10 @@
                     toastr.error('error al actualizar');
                 });
         }
+
+
+
+
 
 
     </script>

@@ -6,6 +6,7 @@
     <link href="{{ asset('css/toastr.min.css') }}" type="text/css" rel="stylesheet" />
     <link href="{{ asset('css/select2.min.css') }}" type="text/css" rel="stylesheet">
     <link href="{{ asset('css/select2-bootstrap-5-theme.min.css') }}" type="text/css" rel="stylesheet">
+    <link href="{{ asset('css/buttons_estilo.css') }}" rel="stylesheet">
 @stop
 
 <style>
@@ -24,7 +25,7 @@
             <h1>Lista de Permisos</h1>
         </div>
         <br>
-        <button type="button" onclick="modalAgregar()" class="btn btn-success btn-sm">
+        <button type="button" style="font-weight: bold; background-color: #28a745; color: white !important;" onclick="modalAgregar()" class="button button-3d button-rounded button-pill button-small">
             <i class="fas fa-pencil-alt"></i>
             Agregar Permiso
         </button>
@@ -33,7 +34,7 @@
 
 <section class="content">
     <div class="container-fluid">
-        <div class="card card-primary">
+        <div class="card card-success">
             <div class="card-header">
                 <h3 class="card-title">Lista</h3>
             </div>
@@ -115,12 +116,11 @@
             </div>
             <div class="modal-footer justify-content-between">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
-                <button type="button" class="btn btn-danger" onclick="borrar()">Borrar</button>
+                <button type="button" style="font-weight: bold; background-color: #ff4351; color: white !important;" class="button button-3d button-rounded button-pill button-small" onclick="borrar()">Borrar</button>
             </div>
         </div>
     </div>
 </div>
-
 
 
 @extends('backend.menus.footerjs')
@@ -174,7 +174,7 @@
             formData.append('idpermiso', idpermiso);
             formData.append('idrol', idrol);
 
-            axios.post(url+'/roles/permiso/borrar', formData, {
+            axios.post('/admin/roles/permiso/borrar', formData, {
             })
                 .then((response) => {
                     closeLoading()
@@ -206,7 +206,7 @@
             formData.append('idpermiso', idpermiso);
             formData.append('idrol', idrol);
 
-            axios.post(url+'/roles/permiso/agregar', formData, {
+            axios.post('/admin/roles/permiso/agregar', formData, {
             })
                 .then((response) => {
                     closeLoading()

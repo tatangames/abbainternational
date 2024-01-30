@@ -14,17 +14,16 @@ class ControlRolController extends Controller
 
     public function indexRedireccionamiento(){
 
+
         $user = Auth::user();
 
         // ADMINISTRADOR
-        if($user->hasRole('Admin')){
+        if($user->hasRole('admin')){
             $ruta = 'admin.dashboard.index';
         }
         else{
             $ruta = 'no.permisos.index';
         }
-
-
 
         return view('backend.index', compact( 'ruta', 'user'));
     }

@@ -2,7 +2,7 @@
 <html lang="es">
 
 <head>
-    <title>Astro Pollo - Panel</title>
+    <title>Abba - Panel</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
@@ -28,7 +28,7 @@
     }
     body {
         font-family: 'Roboto', sans-serif;
-        background-image: url({{ asset('images/fondo1.jpg') }});
+        background-image: url({{ asset('images/fondo-hojas.jpg') }});
     }
     .demo-container {
         height: 100%;
@@ -85,10 +85,10 @@
         <div class="row" style="margin-top: 60px">
             <div class="col-lg-6 col-12 mx-auto">
                 <div class="text-center image-size-small position-relative">
-                    <img src="{{ asset('images/logo.png') }}" class="rounded-circle p-2 bg-white">
+                    <img src="{{ asset('images/abba-logo.jpg') }}" class="rounded-circle p-2 bg-white">
                 </div>
                 <div class="p-5 bg-white rounded shadow-lg">
-                    <h3 class="mb-2 text-center pt-5">ASTRO POLLO</h3>
+                    <h3 class="mb-2 text-center pt-5">Mi Caminar con Dios</h3>
                     <p class="text-center lead">Cambio de Contraseña</p>
                     <form class=" validate-form">
 
@@ -101,7 +101,7 @@
 
                         <br>
                         <div class="form-group text-center">
-                            <input type="button" value="ACTUALIZAR" onclick="cambioDePassword()" id="btnLogin" class="btn btn-lg w-100 shadow-lg" style="background: #bb1c1c; color: white">
+                            <input type="button" value="ACTUALIZAR" onclick="cambioDePassword()" id="btnLogin" class="btn btn-lg w-100 shadow-lg" style="background: #010066; color: white">
                         </div>
                     </form>
 
@@ -131,6 +131,17 @@
 
         if(contrasena === ''){
             toastr.error("Contraseña nueva es requerido");
+            return;
+        }
+
+        if(contrasena.length > 16){
+            toastr.error("Máximo 16 caracteres para contraseña");
+            return;
+        }
+
+
+        if(contrasena.length < 4){
+            toastr.error("Mínimo 4 caracteres para contraseña");
             return;
         }
 

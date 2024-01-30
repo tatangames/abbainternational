@@ -15,11 +15,10 @@ class AdministradorSeeder extends Seeder
     {
         Administrador::create([
             'nombre' => 'Jonathan',
-            'usuario' => 'jonathan',
             'password' => bcrypt('1234'),
-            'correo' => null,
+            'email' => 'tatangamess@gmail.com',
             'token_correo' => null,
             'token_fecha' => null
-        ])->assignRole('Admin');
+        ])->assignRole('admin');
     }
 }
