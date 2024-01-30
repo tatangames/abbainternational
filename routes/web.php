@@ -92,15 +92,19 @@ Route::post('/admin/region/departamento/nuevo', [RegionesController::class,'nuev
 Route::post('/admin/region/departamento/informacion', [RegionesController::class,'informacionDepartamento']);
 Route::post('/admin/region/departamento/actualizar', [RegionesController::class,'actualizarDepartamento']);
 
-// zona horarias
+// Zona horarias -> id pais
 Route::get('/admin/region/zonahoraria/index/{id}', [RegionesController::class,'indexZonaHoraria']);
 Route::get('/admin/region/zonahoraria/tabla/{id}', [RegionesController::class,'tablaZonaHoraria']);
 Route::post('/admin/region/zonahoraria/nuevo', [RegionesController::class,'nuevoZonaHoraria']);
 Route::post('/admin/region/zonahoraria/informacion', [RegionesController::class,'informacionZonaHoraria']);
 Route::post('/admin/region/zonahoraria/actualizar', [RegionesController::class,'actualizarZonaHoraria']);
 
-
-
+// Iglesias -> id departamento
+Route::get('/admin/region/iglesias/index/{id}', [RegionesController::class,'indexIglesia']);
+Route::get('/admin/region/iglesias/tabla/{id}', [RegionesController::class,'tablaIglesia']);
+Route::post('/admin/region/iglesias/nuevo', [RegionesController::class,'nuevaIglesia']);
+Route::post('/admin/region/iglesias/informacion', [RegionesController::class,'informacionIglesia']);
+Route::post('/admin/region/iglesias/actualizar', [RegionesController::class,'actualizarIglesia']);
 
 
 

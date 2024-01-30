@@ -8,7 +8,6 @@ return new class extends Migration
 {
     /**
      * CADA IGLESIA TENDRA UN HORARIO REGISTRADO
-     * no se tomara horario de pais
      */
     public function up(): void
     {

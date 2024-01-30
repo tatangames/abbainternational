@@ -21,17 +21,18 @@
             <div class="col-sm-6">
 
                 <p style="font-weight: bold; font-size: 16px">País: {{$nombrePais}}</p>
+                <p style="font-weight: bold; font-size: 16px">Departamento: {{$nombreDepa}}</p>
 
                 <button type="button" onclick="modalAgregar()" class="btn btn-primary btn-sm">
                     <i class="fas fa-plus-square"></i>
-                    Nuevo Departamento
+                    Nueva Iglesia
                 </button>
             </div>
 
             <div class="col-sm-6">
                 <ol class="breadcrumb float-sm-right">
                     <li class="breadcrumb-item">Regiones</li>
-                    <li class="breadcrumb-item active">Departamentos</li>
+                    <li class="breadcrumb-item active">Iglesia</li>
                 </ol>
             </div>
 
@@ -42,7 +43,7 @@
         <div class="container-fluid">
             <div class="card card-success">
                 <div class="card-header">
-                    <h3 class="card-title">Listado de Departamentos</h3>
+                    <h3 class="card-title">Listado de Iglesias</h3>
                 </div>
                 <div class="card-body">
                     <div class="row">
@@ -60,7 +61,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title">Nuevo Departamento</h4>
+                    <h4 class="modal-title">Nueva Iglesias</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -71,10 +72,23 @@
                             <div class="row">
                                 <div class="col-md-12">
 
+
                                     <div class="form-group">
-                                        <label>Nombre del Departamento</label>
+                                        <label>Zona Horaria</label>
+                                        <br>
+                                        <select class="form-control" id="select-zona">
+                                            @foreach($arrayZonaH as $dato)
+                                                <option value="{{ $dato->id }}">{{ $dato->zona }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>Nombre</label>
                                         <input type="text" maxlength="50" class="form-control" id="nombre-nuevo" autocomplete="off">
                                     </div>
+
+
 
                                 </div>
                             </div>
@@ -94,7 +108,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title">Editar Departamento</h4>
+                    <h4 class="modal-title">Editar Iglesia</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -111,9 +125,20 @@
                                     </div>
 
                                     <div class="form-group">
-                                        <label>Nombre del Departamento</label>
+                                        <label>Zona Horaria</label>
+                                        <br>
+                                        <select class="form-control" id="select-zona-editar">
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>Nombre</label>
                                         <input type="text" maxlength="50" class="form-control" id="nombre-editar" autocomplete="off">
                                     </div>
+
+
+
+
 
                                 </div>
                             </div>
@@ -143,8 +168,8 @@
 
     <script type="text/javascript">
         $(document).ready(function(){
-            var idpais = {{ $idpais }};
-            var ruta = "{{ URL::to('/admin/region/departamento/tabla') }}/" + idpais;
+            var iddepa = {{ $iddepa }};
+            var ruta = "{{ URL::to('/admin/region/iglesias/tabla') }}/" + iddepa;
             $('#tablaDatatable').load(ruta);
 
             document.getElementById("divcontenedor").style.display = "block";
@@ -156,40 +181,42 @@
 
         // recarga tabla
         function recargar(){
-            var idpais = {{ $idpais }};
-            var ruta = "{{ URL::to('/admin/region/departamento/tabla') }}/" + idpais;
+            var iddepa = {{ $iddepa }};
+            var ruta = "{{ URL::to('/admin/region/iglesias/tabla') }}/" + iddepa;
             $('#tablaDatatable').load(ruta);
         }
 
-        // abre modal para agregar nuevo departamento
+        // abre modal para agregar nuevo iglesia
         function modalAgregar(){
             document.getElementById("formulario-nuevo").reset();
             $('#modalAgregar').modal('show');
         }
 
-        // envia datos de nuevo departamento al servidor
+        // envia datos de nueva iglesia al servidor
         function nuevo(){
             var nombre = document.getElementById('nombre-nuevo').value;
+            var idzona = document.getElementById('select-zona').value;
 
             if(nombre === ''){
-                toastr.error('Departamento es requerido');
+                toastr.error('Nombre es requerida');
                 return;
             }
 
-            // maximo de caracteres para departamento
+            // maximo de caracteres para zona horaria
             if(nombre.length > 50){
-                toastr.error('Departamento máximo 50 caracteres');
+                toastr.error('Nombre máximo 50 caracteres');
                 return;
             }
 
-            var idpais = {{ $idpais }};
+            var iddepa = {{ $iddepa }};
 
             openLoading();
             let formData = new FormData();
-            formData.append('idpais', idpais);
+            formData.append('iddepa', iddepa);
             formData.append('nombre', nombre);
+            formData.append('idzona', idzona);
 
-            axios.post('/admin/region/departamento/nuevo', formData, {
+            axios.post('/admin/region/iglesias/nuevo', formData, {
             })
                 .then((response) => {
                     closeLoading();
@@ -208,12 +235,12 @@
                 });
         }
 
-        // informacion de un departamento
+        // informacion de una iglesia
         function informacion(id){
             openLoading();
             document.getElementById("formulario-editar").reset();
 
-            axios.post('/admin/region/departamento/informacion',{
+            axios.post('/admin/region/iglesias/informacion',{
                 'id': id
             })
                 .then((response) => {
@@ -222,6 +249,16 @@
                         $('#modalEditar').modal('show');
                         $('#id-editar').val(response.data.info.id);
                         $('#nombre-editar').val(response.data.info.nombre);
+
+                        document.getElementById("select-zona-editar").options.length = 0;
+
+                        $.each(response.data.listado, function( key, val ){
+                            if(response.data.info.id_zona_horaria == val.id){
+                                $('#select-zona-editar').append('<option value="' +val.id +'" selected="selected">'+ val.zona +'</option>');
+                            }else{
+                                $('#select-zona-editar').append('<option value="' +val.id +'">'+ val.zona +'</option>');
+                            }
+                        });
 
                     }else{
                         toastr.error('Información no encontrada');
@@ -233,10 +270,11 @@
                 });
         }
 
-        // editar datos de un departamento
+        // editar datos de una iglesia
         function editar(){
             var id = document.getElementById('id-editar').value;
             var nombre = document.getElementById('nombre-editar').value;
+            var idzona = document.getElementById('select-zona-editar').value;
 
             if(nombre === ''){
                 toastr.error('Nombre es requerido');
@@ -252,8 +290,9 @@
             let formData = new FormData();
             formData.append('id', id);
             formData.append('nombre', nombre);
+            formData.append('idzona', idzona);
 
-            axios.post('/admin/region/departamento/actualizar', formData, {
+            axios.post('/admin/region/iglesias/actualizar', formData, {
             })
                 .then((response) => {
                     closeLoading();
@@ -266,7 +305,6 @@
                     else {
                         toastr.error('Error al actualizar');
                     }
-
                 })
                 .catch((error) => {
                     toastr.error('Error al actualizar');
@@ -274,9 +312,7 @@
                 });
         }
 
-    function vistaIglesias(iddepa){
-        window.location.href="{{ url('/admin/region/iglesias/index') }}/" + iddepa;
-    }
+
 
 
     </script>
