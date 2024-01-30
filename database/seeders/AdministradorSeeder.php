@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Administrador;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class AdministradorSeeder extends Seeder
 {
@@ -15,10 +16,18 @@ class AdministradorSeeder extends Seeder
     {
         Administrador::create([
             'nombre' => 'Jonathan',
-            'password' => bcrypt('1234'),
+            'password' => Hash::make('1234'),
             'email' => 'tatangamess@gmail.com',
             'token_correo' => null,
             'token_fecha' => null
         ])->assignRole('admin');
+
+        Administrador::create([
+            'nombre' => 'Editor',
+            'password' => Hash::make('1234'),
+            'email' => 'editor@gmail.com',
+            'token_correo' => null,
+            'token_fecha' => null
+        ])->assignRole('editor');
     }
 }

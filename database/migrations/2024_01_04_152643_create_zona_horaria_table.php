@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('zona_horaria', function (Blueprint $table) {
             $table->id();
             $table->bigInteger('id_pais')->unsigned();
-            $table->string('zona', 100);
+            $table->string('zona', 50);
 
             $table->foreign('id_pais')->references('id')->on('pais');
         });

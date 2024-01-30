@@ -19,6 +19,9 @@ class ControlRolController extends Controller
 
         // ADMINISTRADOR
         if($user->hasRole('admin')){
+            $ruta = 'admin.roles.index';
+        }
+        else if($user->hasRole('editor')){
             $ruta = 'admin.dashboard.index';
         }
         else{

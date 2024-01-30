@@ -42,6 +42,19 @@
                     </li>
                 @endcan
 
+                <!-- DASHBOARD -->
+
+                @can('sidebar.dashboard')
+                <li class="nav-item">
+                    <a href="{{ route('admin.dashboard.index') }}" target="frameprincipal" class="nav-link">
+                        <i class="far fa-circle nav-icon"></i>
+                        <p>Estadísticas</p>
+                    </a>
+                </li>
+                @endcan
+
+
+
                 <!-- REGIONES -->
                 @can('sidebar.regiones')
                 <li class="nav-item">
@@ -49,16 +62,16 @@
                     <a href="#" class="nav-link nav-">
                         <i class="far fa-edit"></i>
                         <p>
-                            Sistema
+                            Regiones
                             <i class="fas fa-angle-left right"></i>
                         </p>
                     </a>
 
                     <ul class="nav nav-treeview">
                         <li class="nav-item">
-                            <a href="{{ route('admin.dashboard.index') }}" target="frameprincipal" class="nav-link">
+                            <a href="{{ route('admin.region.pais.index') }}" target="frameprincipal" class="nav-link">
                                 <i class="far fa-circle nav-icon"></i>
-                                <p>Roles</p>
+                                <p>País</p>
                             </a>
                         </li>
 

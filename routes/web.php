@@ -8,6 +8,7 @@ use App\Http\Controllers\Controles\ControlRolController;
 use App\Http\Controllers\Backend\Roles\PermisoController;
 use App\Http\Controllers\Backend\Roles\RolesController;
 use App\Http\Controllers\Backend\Sistema\PerfilController;
+use App\Http\Controllers\Backend\Regiones\RegionesController;
 
 
 Route::get('/', [LoginController::class,'index'])->name('login');
@@ -70,9 +71,46 @@ Route::post('/admin/perfil/actualizar/todo', [PerfilController::class, 'editarUs
 
 
 
-
-
-
-
+// --- DASHBOARD ---
 
 Route::get('/admin/dashboard/index', [DashboardController::class,'index'])->name('admin.dashboard.index');
+
+
+// --- REGIONES ---
+
+// Pais
+Route::get('/admin/region/pais/index', [RegionesController::class,'indexPais'])->name('admin.region.pais.index');
+Route::get('/admin/region/pais/tabla', [RegionesController::class,'tablaPais']);
+Route::post('/admin/region/pais/nuevo', [RegionesController::class,'nuevoPais']);
+Route::post('/admin/region/pais/informacion', [RegionesController::class,'informacionPais']);
+Route::post('/admin/region/pais/actualizar', [RegionesController::class,'actualizarPais']);
+
+// Departamentos
+Route::get('/admin/region/departamento/index/{id}', [RegionesController::class,'indexDepartamentos']);
+Route::get('/admin/region/departamento/tabla/{id}', [RegionesController::class,'tablaDepartamentos']);
+Route::post('/admin/region/departamento/nuevo', [RegionesController::class,'nuevoDepartamento']);
+Route::post('/admin/region/departamento/informacion', [RegionesController::class,'informacionDepartamento']);
+Route::post('/admin/region/departamento/actualizar', [RegionesController::class,'actualizarDepartamento']);
+
+// zona horarias
+Route::get('/admin/region/zonahoraria/index/{id}', [RegionesController::class,'indexZonaHoraria']);
+Route::get('/admin/region/zonahoraria/tabla/{id}', [RegionesController::class,'tablaZonaHoraria']);
+Route::post('/admin/region/zonahoraria/nuevo', [RegionesController::class,'nuevoZonaHoraria']);
+Route::post('/admin/region/zonahoraria/informacion', [RegionesController::class,'informacionZonaHoraria']);
+Route::post('/admin/region/zonahoraria/actualizar', [RegionesController::class,'actualizarZonaHoraria']);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
