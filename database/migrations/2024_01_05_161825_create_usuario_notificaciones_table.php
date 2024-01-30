@@ -18,8 +18,6 @@ return new class extends Migration
 
             $table->boolean('notificacion_general'); // cuando son enviadas por one signal dashboard o panel
 
-
-
             $table->foreign('id_usuario')->references('id')->on('usuarios');
         });
     }

@@ -127,6 +127,14 @@ class RegionesController extends Controller
             ->orderBy('nombre', 'ASC')
             ->get();
 
+        foreach ($listado as $dato){
+
+            // total de iglesias asignadas al departamento
+            $conteo = Iglesias::where('id_departamento', $dato->id)->count();
+            $dato->conteo = $conteo;
+        }
+
+
         return view('backend.admin.regiones.departamentos.tabladepartamentos', compact('listado'));
     }
 

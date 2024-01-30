@@ -7,9 +7,10 @@
                         <table id="tabla" class="table table-bordered table-striped">
                             <thead>
                             <tr>
-                                <th style="width: 2%">ID</th>
-                                <th style="width: 8%">Nombre</th>
+                                <th style="width: 2%">País</th>
+                                <th style="width: 8%">Total Departamentos</th>
                                 <th style="width: 8%">Total Iglesias</th>
+                                <th style="width: 8%">Total Usuarios</th>
                                 <th style="width: 4%">Opciones</th>
                             </tr>
                             </thead>
@@ -17,16 +18,14 @@
 
                             @foreach($listado as $dato)
                                 <tr>
-                                    <td style="width: 2%">{{ $dato->id }}</td>
-                                    <td style="width: 8%">{{ $dato->nombre }}</td>
-                                    <td style="width: 8%">{{ $dato->conteo }}</td>
+                                    <td style="width: 2%">{{ $dato->nombre }}</td>
+                                    <td style="width: 8%">{{ $dato->conteodepa }}</td>
+                                    <td style="width: 8%">{{ $dato->conteoigle }}</td>
+                                    <td style="width: 8%">{{ $dato->conteousuario }}</td>
                                     <td style="width: 4%">
-                                        <button type="button" class="btn btn-primary btn-xs" onclick="informacion({{ $dato->id }})">
-                                            <i class="fas fa-eye" title="Editar"></i>&nbsp; Editar
-                                        </button>
 
-                                        <button type="button" style="color: white" class="btn btn-success btn-xs" onclick="vistaIglesias({{ $dato->id }})">
-                                            <i class="fas fa-edit" style="color: white;" title="Iglesias"></i>&nbsp; Iglesias
+                                        <button type="button" style="color: white" class="btn btn-success btn-xs" onclick="vistaUsuarios({{ $dato->id }})">
+                                            <i class="fas fa-eye" style="color: white;" title="Usuarios"></i>&nbsp; Usuarios
                                         </button>
                                     </td>
                                 </tr>

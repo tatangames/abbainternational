@@ -9,6 +9,7 @@ use App\Http\Controllers\Backend\Roles\PermisoController;
 use App\Http\Controllers\Backend\Roles\RolesController;
 use App\Http\Controllers\Backend\Sistema\PerfilController;
 use App\Http\Controllers\Backend\Regiones\RegionesController;
+use App\Http\Controllers\Backend\Usuarios\UsuariosController;
 
 
 Route::get('/', [LoginController::class,'index'])->name('login');
@@ -105,6 +106,13 @@ Route::get('/admin/region/iglesias/tabla/{id}', [RegionesController::class,'tabl
 Route::post('/admin/region/iglesias/nuevo', [RegionesController::class,'nuevaIglesia']);
 Route::post('/admin/region/iglesias/informacion', [RegionesController::class,'informacionIglesia']);
 Route::post('/admin/region/iglesias/actualizar', [RegionesController::class,'actualizarIglesia']);
+
+
+// --- USUARIOS ---
+// Usuarios por pais
+Route::get('/admin/usuarios/pais/index', [UsuariosController::class,'indexUsuarioPais'])->name('admin.usuarios.pais.index');
+Route::get('/admin/usuarios/pais/tabla', [UsuariosController::class,'tablaUsuarioPais']);
+Route::get('/admin/usuarios/pais/todos/{idpais}', [UsuariosController::class,'indexUsuariosPaisTodos']);
 
 
 
