@@ -79,7 +79,7 @@
         // vista a usuarios por pais
         function vistaUsuarios(idpais){
 
-            window.location.href="{{ url('/admin/usuarios/pais/todos') }}/" + idpais;
+            window.location.href="{{ url('/admin/usuarios/pais/todos/vista') }}/" + idpais;
         }
 
 

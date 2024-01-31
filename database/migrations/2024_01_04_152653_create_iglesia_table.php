@@ -15,10 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('nombre', 50);
             $table->bigInteger('id_departamento')->unsigned();
-            $table->bigInteger('id_zona_horaria')->unsigned();
 
             $table->foreign('id_departamento')->references('id')->on('departamento');
-            $table->foreign('id_zona_horaria')->references('id')->on('zona_horaria');
         });
     }
 

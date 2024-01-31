@@ -14,10 +14,11 @@ class DatabaseSeeder extends Seeder
     {
         $this->call(RolesSeeder::class);
         $this->call(AdministradorSeeder::class);
-        /*$this->call(GenerosSeeder::class);
+        $this->call(GenerosSeeder::class);
         $this->call(PaisSeeder::class);
+        $this->call(ZonaHorariaSeed::class);
         $this->call(DepartamentoSeeder::class);
-        $this->call(IglesiaSeeder::class);*/
+        $this->call(IglesiaSeeder::class);
 
     }
 }

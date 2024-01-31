@@ -112,7 +112,10 @@ Route::post('/admin/region/iglesias/actualizar', [RegionesController::class,'act
 // Usuarios por pais
 Route::get('/admin/usuarios/pais/index', [UsuariosController::class,'indexUsuarioPais'])->name('admin.usuarios.pais.index');
 Route::get('/admin/usuarios/pais/tabla', [UsuariosController::class,'tablaUsuarioPais']);
-Route::get('/admin/usuarios/pais/todos/{idpais}', [UsuariosController::class,'indexUsuariosPaisTodos']);
+
+Route::get('/admin/usuarios/pais/todos/vista/{idpais}', [UsuariosController::class,'indexUsuariosPaisTodos']);
+Route::get('/admin/usuarios/pais/todos/tabla/{idpais}', [UsuariosController::class,'tablaUsuariosPaisTodos']);
+Route::post('/admin/usuarios/pais/info/usuario', [UsuariosController::class,'informacionUsuario']);
 
 
 

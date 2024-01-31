@@ -38,7 +38,7 @@ class CorreoTokenPasswordMail extends Mailable
     {
         return $this->from(env('MAIL_FROM_ADDRESS'), env('MAIL_FROM_NAME'))
             ->view('correos.recuperarpasswordadmin')
-            ->subject("Recuperar contraseña - Abba App")
+            ->subject("Recuperar contraseña - Abba")
             ->with($this->dataArray);
     }
 

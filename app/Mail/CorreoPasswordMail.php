@@ -44,7 +44,7 @@ class CorreoPasswordMail extends Mailable
     {
         return $this->from(env('MAIL_FROM_ADDRESS'), env('MAIL_FROM_NAME'))
             ->view('correos.vistarecuperarpassword')
-            ->subject($this->sujeto . " - Abba App")
+            ->subject($this->sujeto . " - Abba")
             ->with($this->dataArray);
     }
 
