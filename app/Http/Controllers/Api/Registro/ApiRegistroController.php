@@ -70,8 +70,7 @@ class ApiRegistroController extends Controller
 
             $ajustes = new UsuarioNotificaciones();
             $ajustes->id_usuario = $nuevoUsuario->id;
-            $ajustes->onesignal = $request->onesignal;
-            $ajustes->notificacion_general = 1;
+            $ajustes->onesignal = $request->idonesignal;
             $ajustes->save();
 
             DB::commit();
