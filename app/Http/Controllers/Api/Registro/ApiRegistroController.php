@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Registro;
 
 use App\Http\Controllers\Controller;
+use App\Models\Iglesias;
 use App\Models\UsuarioNotificaciones;
 use App\Models\Usuarios;
 use Illuminate\Http\Request;
@@ -31,7 +32,7 @@ class ApiRegistroController extends Controller
             'version' => 'required',
         );
 
-        // onesignal
+        // idonesignal
 
         $validator = Validator::make($request->all(), $rules);
         if ( $validator->fails()){
@@ -62,6 +63,7 @@ class ApiRegistroController extends Controller
             $nuevoUsuario->password = Hash::make($request->password);
             $nuevoUsuario->version_registro = $request->version;
             $nuevoUsuario->fecha_registro = $fecha;
+            $nuevoUsuario->notificacion_general = 1;
             $nuevoUsuario->save();
 
             $token = JWTAuth::fromUser($nuevoUsuario);
@@ -84,4 +86,28 @@ class ApiRegistroController extends Controller
                 'error' => $e];
         }
     }
+
+
+
+    public function listadoDeIglesias(Request $request){
+
+        $rules = array(
+            'iddepa' => 'required',
+        );
+
+        $validator = Validator::make($request->all(), $rules);
+        if ( $validator->fails()){
+            return ['success' => 0, 'error' => 'validacion incorrecta'];
+        }
+
+        $listado = Iglesias::where('id_departamento', $request->iddepa)
+            ->where('visible', 1)
+            ->get();
+
+        return ['success' => 1,
+                'listado' => $listado];
+    }
+
+
+
 }

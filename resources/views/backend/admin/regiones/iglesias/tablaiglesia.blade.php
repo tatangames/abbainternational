@@ -9,7 +9,7 @@
                             <tr>
                                 <th style="width: 2%">ID</th>
                                 <th style="width: 8%">Nombre</th>
-                                <th style="width: 8%">Zona Horaria</th>
+                                <th style="width: 4%">Visible</th>
                                 <th style="width: 4%">Opciones</th>
                             </tr>
                             </thead>
@@ -19,7 +19,14 @@
                                 <tr>
                                     <td style="width: 2%">{{ $dato->id }}</td>
                                     <td style="width: 8%">{{ $dato->nombre }}</td>
-                                    <td style="width: 8%">{{ $dato->zona }}</td>
+
+                                    <td style="width: 4%">
+                                        @if($dato->visible == 1)
+                                            <span class="badge bg-success">Activo</span>
+                                        @else
+                                            <span class="badge bg-danger">Inactivo</span>
+                                        @endif
+                                    </td>
                                     <td style="width: 4%">
                                         <button type="button" class="btn btn-primary btn-xs" onclick="informacion({{ $dato->id }})">
                                             <i class="fas fa-eye" title="Editar"></i>&nbsp; Editar

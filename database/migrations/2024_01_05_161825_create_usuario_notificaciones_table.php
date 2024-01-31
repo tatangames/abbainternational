@@ -7,7 +7,9 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * CADA VEZ QUE SE REGISTRE O INICIE SESION SE GUARDARA SU IDENTIFICADOR
+     * SE COMPROBARA EN LOGIN QUE SI EL IDENTIFICADO ESTA REGISTRADO NO SE HARA NADA
+     *
      */
     public function up(): void
     {

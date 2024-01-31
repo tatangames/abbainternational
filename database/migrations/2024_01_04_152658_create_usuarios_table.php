@@ -19,12 +19,16 @@ return new class extends Migration
             $table->string('nombre', 50);
             $table->string('apellido', 50);
             $table->string('correo', 100);
+
+            // el usuario tiene 20 caracteres para contraseña
             $table->string('password', 255);
             $table->string('codigo_pass', 10)->nullable();
             $table->string('version_registro', 100);
             $table->date('fecha_nacimiento');
             $table->dateTime('fecha_registro');
 
+            // para que usuario pueda desactivar sus notificaciones
+            $table->boolean('notificacion_general');
 
             $table->foreign('id_iglesia')->references('id')->on('iglesia');
             $table->foreign('id_genero')->references('id')->on('generos');

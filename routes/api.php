@@ -15,6 +15,9 @@ use App\Http\Controllers\Api\Comunidad\ApiComunidadController;
 // inicio de sesion
 Route::post('app/login', [ApiLoginController::class,'loginUsuario']);
 
+// solicitar listado de iglesias segun id departamento
+Route::post('app/solicitar/listado/iglesias', [ApiRegistroController::class,'listadoDeIglesias']);
+
 // registro de usuario
 Route::post('app/registro/usuario', [ApiRegistroController::class,'registroUsuario']);
 

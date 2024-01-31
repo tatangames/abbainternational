@@ -4,6 +4,7 @@
     <link href="{{ asset('css/adminlte.min.css') }}" type="text/css" rel="stylesheet" />
     <link href="{{ asset('css/dataTables.bootstrap4.css') }}" type="text/css" rel="stylesheet" />
     <link href="{{ asset('css/toastr.min.css') }}" type="text/css" rel="stylesheet" />
+    <link href="{{ asset('css/estiloToggle.css') }}" type="text/css" rel="stylesheet" />
 
 @stop
 
@@ -74,21 +75,9 @@
 
 
                                     <div class="form-group">
-                                        <label>Zona Horaria</label>
-                                        <br>
-                                        <select class="form-control" id="select-zona">
-                                            @foreach($arrayZonaH as $dato)
-                                                <option value="{{ $dato->id }}">{{ $dato->zona }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-
-                                    <div class="form-group">
                                         <label>Nombre</label>
                                         <input type="text" maxlength="50" class="form-control" id="nombre-nuevo" autocomplete="off">
                                     </div>
-
-
 
                                 </div>
                             </div>
@@ -125,18 +114,20 @@
                                     </div>
 
                                     <div class="form-group">
-                                        <label>Zona Horaria</label>
-                                        <br>
-                                        <select class="form-control" id="select-zona-editar">
-                                        </select>
-                                    </div>
-
-                                    <div class="form-group">
                                         <label>Nombre</label>
                                         <input type="text" maxlength="50" class="form-control" id="nombre-editar" autocomplete="off">
                                     </div>
 
-
+                                    <div class="form-group">
+                                        <label>Visibilidad</label><br>
+                                        <label class="switch" style="margin-top:10px">
+                                            <input type="checkbox" id="toggle-visible">
+                                            <div class="slider round">
+                                                <span class="on">Activo</span>
+                                                <span class="off">Inactivo</span>
+                                            </div>
+                                        </label>
+                                    </div>
 
 
 
@@ -195,7 +186,6 @@
         // envia datos de nueva iglesia al servidor
         function nuevo(){
             var nombre = document.getElementById('nombre-nuevo').value;
-            var idzona = document.getElementById('select-zona').value;
 
             if(nombre === ''){
                 toastr.error('Nombre es requerida');
@@ -214,7 +204,6 @@
             let formData = new FormData();
             formData.append('iddepa', iddepa);
             formData.append('nombre', nombre);
-            formData.append('idzona', idzona);
 
             axios.post('/admin/region/iglesias/nuevo', formData, {
             })
@@ -250,15 +239,11 @@
                         $('#id-editar').val(response.data.info.id);
                         $('#nombre-editar').val(response.data.info.nombre);
 
-                        document.getElementById("select-zona-editar").options.length = 0;
-
-                        $.each(response.data.listado, function( key, val ){
-                            if(response.data.info.id_zona_horaria == val.id){
-                                $('#select-zona-editar').append('<option value="' +val.id +'" selected="selected">'+ val.zona +'</option>');
-                            }else{
-                                $('#select-zona-editar').append('<option value="' +val.id +'">'+ val.zona +'</option>');
-                            }
-                        });
+                        if(response.data.info.visible === 0){
+                            $("#toggle-visible").prop("checked", false);
+                        }else{
+                            $("#toggle-visible").prop("checked", true);
+                        }
 
                     }else{
                         toastr.error('Información no encontrada');
@@ -272,9 +257,10 @@
 
         // editar datos de una iglesia
         function editar(){
-            var id = document.getElementById('id-editar').value;
-            var nombre = document.getElementById('nombre-editar').value;
-            var idzona = document.getElementById('select-zona-editar').value;
+            let id = document.getElementById('id-editar').value;
+            let nombre = document.getElementById('nombre-editar').value;
+            let t = document.getElementById('toggle-visible').checked;
+            let visible = t ? 1 : 0;
 
             if(nombre === ''){
                 toastr.error('Nombre es requerido');
@@ -290,7 +276,7 @@
             let formData = new FormData();
             formData.append('id', id);
             formData.append('nombre', nombre);
-            formData.append('idzona', idzona);
+            formData.append('visible', visible);
 
             axios.post('/admin/region/iglesias/actualizar', formData, {
             })

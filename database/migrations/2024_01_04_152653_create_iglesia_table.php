@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('nombre', 50);
             $table->bigInteger('id_departamento')->unsigned();
+            $table->boolean('visible')->default(1);
 
             $table->foreign('id_departamento')->references('id')->on('departamento');
         });

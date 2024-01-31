@@ -340,11 +340,6 @@ class RegionesController extends Controller
             ->orderBy('nombre', 'ASC')
             ->get();
 
-        foreach ($listado as $dato){
-            $infoZonaH = ZonaHoraria::where('id', $dato->id_zona_horaria)->first();
-            $dato->zona = $infoZonaH->zona;
-        }
-
         return view('backend.admin.regiones.iglesias.tablaiglesia', compact('listado'));
     }
 
@@ -355,7 +350,6 @@ class RegionesController extends Controller
         $rules = array(
             'nombre' => 'required',
             'iddepa' => 'required',
-            'idzona' => 'required'
         );
 
         $validator = Validator::make($request->all(), $rules);
@@ -370,7 +364,7 @@ class RegionesController extends Controller
             $nuevo = new Iglesias();
             $nuevo->nombre = $request->nombre;
             $nuevo->id_departamento = $request->iddepa;
-            $nuevo->id_zona_horaria = $request->idzona;
+            $nuevo->visible = 1;
             $nuevo->save();
 
             // registrado correctamente
@@ -396,9 +390,7 @@ class RegionesController extends Controller
 
         if($infoIglesia = Iglesias::where('id', $request->id)->first()){
 
-            $arrayZonasH = ZonaHoraria::orderBy('zona', 'ASC')->get();
-
-            return ['success' => 1, 'info' => $infoIglesia, 'listado' => $arrayZonasH];
+            return ['success' => 1, 'info' => $infoIglesia];
         }else{
             return ['success' => 2];
         }
@@ -409,7 +401,7 @@ class RegionesController extends Controller
         $rules = array(
             'id' => 'required',
             'nombre' => 'required',
-            'idzona' => 'required'
+            'visible' => 'required'
         );
 
         $validator = Validator::make($request->all(), $rules);
@@ -421,7 +413,7 @@ class RegionesController extends Controller
 
             Iglesias::where('id', $request->id)->update([
                 'nombre' => $request->nombre,
-                'id_zona_horaria' => $request->idzona
+                'visible' => $request->visible
             ]);
 
             return ['success' => 1];
