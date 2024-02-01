@@ -11,7 +11,7 @@ use App\Http\Controllers\Backend\Sistema\PerfilController;
 use App\Http\Controllers\Backend\Regiones\RegionesController;
 use App\Http\Controllers\Backend\Usuarios\UsuariosController;
 use App\Http\Controllers\Backend\Recursos\RecursosController;
-
+use App\Http\Controllers\Backend\Planes\PlanesController;
 
 Route::get('/', [LoginController::class,'index'])->name('login');
 
@@ -135,8 +135,10 @@ Route::post('/admin/imagendia/actualizar/posicion', [RecursosController::class,'
 Route::post('/admin/imagendia/nuevo', [RecursosController::class,'nuevaImagenDia']);
 Route::post('/admin/imagendia/borrar', [RecursosController::class,'borrarImagenDia']);
 
-
-
+// --- PLANES ---
+Route::get('/admin/planes/index', [PlanesController::class,'indexPlanes'])->name('admin.planes.index');
+Route::get('/admin/planes/tabla', [PlanesController::class,'tablaPlanes']);
+Route::get('/admin/planes/agregar/nuevo', [PlanesController::class,'indexNuevoPlan']);
 
 
 

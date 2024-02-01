@@ -16,9 +16,6 @@ return new class extends Migration
         Schema::create('idioma_planes', function (Blueprint $table) {
             $table->id();
             $table->string('nombre', 50);
-
-            // solo afectara si se agrega un tercer idioma en adelante
-            $table->boolean('disponible');
         });
     }
 

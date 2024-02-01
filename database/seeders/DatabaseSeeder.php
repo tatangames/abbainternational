@@ -20,5 +20,6 @@ class DatabaseSeeder extends Seeder
         $this->call(DepartamentoSeeder::class);
         $this->call(IglesiaSeeder::class);
         $this->call(TextoIdiomaSistemaSeeder::class);
+        $this->call(IdiomaPlanesSeeder::class);
     }
 }

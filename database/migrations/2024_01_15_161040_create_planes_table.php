@@ -8,12 +8,12 @@ return new class extends Migration
 {
     /**
      * TODOS LOS PLANES PARA TODOS LOS USUARIOS
+     * SERA UN LISTADO Y SE OBTENDRA CON PAGINACION
      */
     public function up(): void
     {
         Schema::create('planes', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('id_planes_contenedor')->unsigned();
 
             // para la miniatura
             $table->string('imagen', 100);
@@ -23,12 +23,12 @@ return new class extends Migration
 
             $table->boolean('visible');
 
+            $table->date('fecha');
+
             // para mostrar o no la barra de progreso, el calculo se hace a codigo
             $table->boolean('barra_progreso');
 
             $table->integer('posicion');
-
-            $table->foreign('id_planes_contenedor')->references('id')->on('planes_contenedor');
         });
     }
 
