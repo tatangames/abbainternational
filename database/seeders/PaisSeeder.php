@@ -9,7 +9,7 @@ use Illuminate\Database\Seeder;
 class PaisSeeder extends Seeder
 {
     /**
-     * Run the database seeds.
+     * AGREGAR PAISES
      */
     public function run(): void
     {

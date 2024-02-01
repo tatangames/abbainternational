@@ -44,6 +44,7 @@ class ApiCorreoController extends Controller
 
         if($info = Usuarios::where('correo', $request->correo)->first()){
 
+            // el texto que se enviara al correo segun idioma
             $dataIdioma = $this->idiomaCorreoRecuperacion($request->idioma);
 
             // codigo aleaotorio
@@ -144,26 +145,11 @@ class ApiCorreoController extends Controller
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     // OBTIENE LOS TEXTOS SEGUN IDIOMA DE LA APP
     private function idiomaCorreoRecuperacion($tipoIdioma){
 
-        // 0: espanol
-        // 1: ingles
+        // 1: espanol
+        // 2: ingles
 
         $msj1 = "";
         $msj2 = "";
@@ -171,6 +157,7 @@ class ApiCorreoController extends Controller
         $msj4 = "";
         $msj5 = "";
 
+        // Buscar en un modelo donde tengo datos
         $datosIdioma = new IdiomaCentral();
         $allTextos = $datosIdioma->retornarTextos($tipoIdioma);
 

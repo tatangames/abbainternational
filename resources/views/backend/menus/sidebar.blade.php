@@ -38,6 +38,13 @@
                                 </a>
                             </li>
 
+                            <li class="nav-item">
+                                <a href="{{ route('admin.idioma.sistema.index') }}" target="frameprincipal" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Idioma Sistema</p>
+                                </a>
+                            </li>
+
                         </ul>
                     </li>
                 @endcan

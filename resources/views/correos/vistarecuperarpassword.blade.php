@@ -199,7 +199,7 @@
                                     <table class="heading_block block-3" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
                                         <tr>
                                             <td class="pad">
-                                                <h1 style="margin: 0; color: #000000; direction: ltr; font-family: Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif; font-size: 38px; font-weight: 700; letter-spacing: normal; line-height: 120%; text-align: center; margin-top: 0; margin-bottom: 0; mso-line-height-alt: 45.6px;"><span class="tinyMce-placeholder">Abba App</span></h1>
+                                                <h1 style="margin: 0; color: #000000; direction: ltr; font-family: Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif; font-size: 38px; font-weight: 700; letter-spacing: normal; line-height: 120%; text-align: center; margin-top: 0; margin-bottom: 0; mso-line-height-alt: 45.6px;"><span class="tinyMce-placeholder">Mi Caminar con Dios</span></h1>
                                             </td>
                                         </tr>
                                     </table>
@@ -364,7 +364,7 @@
                                         <tr>
                                             <td class="pad" style="padding-bottom:30px;padding-left:40px;padding-right:40px;padding-top:20px;">
                                                 <div style="color:#555555;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;font-size:12px;line-height:120%;text-align:left;mso-line-height-alt:14.399999999999999px;">
-                                                    <p style="margin: 0; word-break: break-word;"><span style="color: #95979c;">Abba App © 2024</span></p>
+                                                    <p style="margin: 0; word-break: break-word;"><span style="color: #95979c;">Mi Caminar Con Dios © 2024</span></p>
                                                 </div>
                                             </td>
                                         </tr>

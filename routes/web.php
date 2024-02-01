@@ -117,8 +117,14 @@ Route::get('/admin/usuarios/pais/todos/vista/{idpais}', [UsuariosController::cla
 Route::get('/admin/usuarios/pais/todos/tabla/{idpais}', [UsuariosController::class,'tablaUsuariosPaisTodos']);
 Route::post('/admin/usuarios/pais/info/usuario', [UsuariosController::class,'informacionUsuario']);
 
+// --- IDIOMA SISTEMA ---
 
 
+Route::get('/admin/idiomasistema/index', [PerfilController::class,'indexIdiomaSistema'])->name('admin.idioma.sistema.index');
+Route::get('/admin/idiomasistema/tabla', [PerfilController::class,'tablaIdiomaSistema']);
+Route::post('/admin/idiomasistema/nuevo', [PerfilController::class,'nuevoIdiomaSistema']);
+Route::post('/admin/idiomasistema/informacion', [PerfilController::class,'informacionIdiomaSistema']);
+Route::post('/admin/idiomasistema/actualizar', [PerfilController::class,'actualizarIdiomaSistema']);
 
 
 

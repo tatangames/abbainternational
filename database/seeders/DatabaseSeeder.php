@@ -19,6 +19,6 @@ class DatabaseSeeder extends Seeder
         $this->call(ZonaHorariaSeed::class);
         $this->call(DepartamentoSeeder::class);
         $this->call(IglesiaSeeder::class);
-
+        $this->call(TextoIdiomaSistemaSeeder::class);
     }
 }
