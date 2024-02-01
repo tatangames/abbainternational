@@ -115,6 +115,27 @@
 
 
 
+                <li class="nav-item">
+
+                    <a href="#" class="nav-link nav-">
+                        <i class="far fa-edit"></i>
+                        <p>
+                            Recursos
+                            <i class="fas fa-angle-left right"></i>
+                        </p>
+                    </a>
+
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="{{ route('admin.imagenes.dia.index') }}" target="frameprincipal" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Imagenes Día</p>
+                            </a>
+                        </li>
+
+                    </ul>
+                </li>
+
 
             </ul>
         </nav>

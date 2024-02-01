@@ -10,6 +10,7 @@ use App\Http\Controllers\Backend\Roles\RolesController;
 use App\Http\Controllers\Backend\Sistema\PerfilController;
 use App\Http\Controllers\Backend\Regiones\RegionesController;
 use App\Http\Controllers\Backend\Usuarios\UsuariosController;
+use App\Http\Controllers\Backend\Recursos\RecursosController;
 
 
 Route::get('/', [LoginController::class,'index'])->name('login');
@@ -125,6 +126,14 @@ Route::get('/admin/idiomasistema/tabla', [PerfilController::class,'tablaIdiomaSi
 Route::post('/admin/idiomasistema/nuevo', [PerfilController::class,'nuevoIdiomaSistema']);
 Route::post('/admin/idiomasistema/informacion', [PerfilController::class,'informacionIdiomaSistema']);
 Route::post('/admin/idiomasistema/actualizar', [PerfilController::class,'actualizarIdiomaSistema']);
+
+// --- IMAGENES DEL DIA ---
+
+Route::get('/admin/imagendia/index', [RecursosController::class,'indexImagenesDelDia'])->name('admin.imagenes.dia.index');
+Route::get('/admin/imagendia/tabla', [RecursosController::class,'tablaImagenesDelDia']);
+Route::post('/admin/imagendia/actualizar/posicion', [RecursosController::class,'actualizarPosicionImagenDia']);
+Route::post('/admin/imagendia/nuevo', [RecursosController::class,'nuevaImagenDia']);
+Route::post('/admin/imagendia/borrar', [RecursosController::class,'borrarImagenDia']);
 
 
 

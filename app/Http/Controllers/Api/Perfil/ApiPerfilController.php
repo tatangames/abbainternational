@@ -19,7 +19,6 @@ class ApiPerfilController extends Controller
     // informacion de mi perfil
     public function informacionPerfilUsuario(Request $request)
     {
-
         $rules = array(
             'iduser' => 'required',
         );
@@ -28,7 +27,6 @@ class ApiPerfilController extends Controller
         if ( $validator->fails()){
             return ['success' => 0];
         }
-
 
         // sacar usuario del token
         $tokenApi = $request->header('Authorization');

@@ -10,4 +10,8 @@ class ImagenesDelDia extends Model
     use HasFactory;
     protected $table = 'imagenes_dia';
     public $timestamps = false;
+
+    protected $fillable = [
+        'posicion'
+    ];
 }
