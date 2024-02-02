@@ -170,7 +170,13 @@
 
         // vista para agregar nuevo plan
         function nuevoPlan(){
-            window.location.href="{{ url('/admin/planes/agregar/nuevo') }}";
+            window.location.href="{{ url('/admin/planes/agregar/nuevo/index') }}";
+        }
+
+        // vista para editar el plan
+
+        function vistaEditarPlan(idplan){
+            window.location.href="{{ url('/admin/planes/vista/editar/index') }}/" + idplan;
         }
 
 

@@ -17,16 +17,10 @@ return new class extends Migration
 
             // para la miniatura
             $table->string('imagen', 100);
-
-            // para la miniatura
+            // para la portada
             $table->string('imagenportada', 100);
-
             $table->boolean('visible');
-
             $table->date('fecha');
-
-            // para mostrar o no la barra de progreso, el calculo se hace a codigo
-            $table->boolean('barra_progreso');
 
             $table->integer('posicion');
         });

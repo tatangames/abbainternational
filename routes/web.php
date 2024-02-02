@@ -138,9 +138,14 @@ Route::post('/admin/imagendia/borrar', [RecursosController::class,'borrarImagenD
 // --- PLANES ---
 Route::get('/admin/planes/index', [PlanesController::class,'indexPlanes'])->name('admin.planes.index');
 Route::get('/admin/planes/tabla', [PlanesController::class,'tablaPlanes']);
-Route::get('/admin/planes/agregar/nuevo', [PlanesController::class,'indexNuevoPlan']);
+Route::get('/admin/planes/agregar/nuevo/index', [PlanesController::class,'indexNuevoPlan']);
+Route::post('/admin/planes/agregar/nuevo', [PlanesController::class,'guardarNuevoPlan']);
+Route::post('/admin/planes/actualizar/posicion', [PlanesController::class,'actualizarPosicionPlanes']);
 
-
+Route::get('/admin/planes/vista/editar/index/{idplan}', [PlanesController::class,'indexEditarPlan']);
+Route::post('/admin/planes/datos/actualizar', [PlanesController::class,'actualizarPlanes']);
+Route::post('/admin/planes/imagen/actualizar', [PlanesController::class,'actualizarImagenPlanes']);
+Route::post('/admin/planes/imagenportada/actualizar', [PlanesController::class,'actualizarImagenPortadaPlanes']);
 
 
 

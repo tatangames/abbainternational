@@ -46,10 +46,10 @@
         <div class="container-fluid">
             <div class="card card-success">
                 <div class="card-header">
-                    <h3 class="card-title">Crear Nuevo Devocional</h3>
+                    <h3 class="card-title">Editar Plan Devocional</h3>
                 </div>
                 <div class="card-body">
-                    <div class="row">
+                    <div>
                         <div class="col-md-12">
 
                             <section>
@@ -58,7 +58,7 @@
                                     <div class="col-md-3">
                                         <div class="form-group">
                                             <label class="control-label">Fecha:</label>
-                                            <input type="date" class="form-control" id="fecha" value="{{ $fechaActual }}">
+                                            <input type="date" class="form-control" id="fecha" value="{{ $infoPlan->fecha }}">
                                         </div>
                                     </div>
                                 </div>
@@ -66,24 +66,39 @@
                             </section>
 
                             <section style="margin-top: 15px">
-                                <div class="row">
-                                    <div class="form-group">
-                                        <div class="form-group">
-                                            <label class="control-label">Imagen (Ejemplo: 400x400 px)</label>
-                                            <input type="file" class="form-control" style="color:#191818" id="imagen-nuevo" accept="image/jpeg, image/jpg, image/png"/>
-                                        </div>
-                                    </div>
-                                </div>
 
+                                <label class="control-label">Imagen (Ejemplo: 400x400 px)</label>
                                 <div class="row">
-                                    <div class="form-group">
-                                        <div class="form-group">
-                                            <label class="control-label">Imagen Portada (Ejemplo: 600x400 px)</label>
-                                            <input type="file" class="form-control" style="color:#191818" id="imagenportada-nuevo" accept="image/jpeg, image/jpg, image/png"/>
-                                        </div>
+                                    <div class="input-group input-group col-md-4">
+                                        <input type="file" class="form-control" style="color:#191818" id="imagen-nuevo" accept="image/jpeg, image/jpg, image/png"/>
+
+                                        <span class="input-group-append">
+                                        <button type="button" class="btn btn-info btn-sm" onclick="actualizarImagen()">Actualizar</button>
+                                            </span>
                                     </div>
                                 </div>
                             </section>
+
+
+
+                            <section style="margin-top: 35px">
+                                <label class="control-label">Imagen Portada (Ejemplo: 600x400 px)</label>
+
+                                <div class="row">
+
+                                    <div class="input-group input-group col-md-4">
+                                        <input type="file" class="form-control" style="color:#191818" id="imagenportada-nuevo" accept="image/jpeg, image/jpg, image/png"/>
+
+                                        <span class="input-group-append">
+                                            <button type="button" class="btn btn-info btn-sm" onclick="actualizarImagenPortada()">Actualizar</button>
+                                            </span>
+                                    </div>
+
+                                </div>
+
+                            </section>
+
+
 
                             <hr><br>
 
@@ -143,6 +158,36 @@
                     </thead>
                     <tbody>
 
+
+                    @foreach($arrayPlanTextos as $item)
+                        <tr>
+                            <td>
+                                <p id="fila" class="form-control" style="max-width: 65px">{{ $item->contador }}</p>
+                            </td>
+
+                            <td>
+                                <!-- data-ididioma se utiliza para comparar si falta agregar idioma nuevo -->
+                                <input name="arrayIdioma[]" disabled data-idplantexto="{{ $item->id }}" data-ididioma="{{ $item->id_idioma_planes }}" value="{{ $item->idioma }}" class="form-control" type="text">
+                            </td>
+
+                            <td>
+                                <input name="arrayTitulo[]" disabled value="{{ $item->titulo }}" class="form-control" type="text">
+                            </td>
+
+                            <td>
+                                <input name="arraySubtitulo[]" disabled value="{{ $item->subtitulo }}" class="form-control" type="text">
+                                <input name="arrayDescripcion[]" disabled style="display: none" data-txtdescripcion="{{ $item->descripcion }}" class="form-control" type="text">
+
+                            </td>
+
+                            <td>
+                                 <button type="button" class="btn btn-block btn-info" onclick="editarFila(this)">Editar</button>
+                            </td>
+                        </tr>
+
+                    @endforeach
+
+
                     </tbody>
                 </table>
             </div>
@@ -151,12 +196,8 @@
 
 
     <div class="modal-footer justify-content-between float-right" style="margin-top: 25px; margin-bottom: 30px;">
-        <button type="button" class="btn btn-success" onclick="preguntarGuardar()">Guardar Devocional</button>
+        <button type="button" class="btn btn-success" onclick="preguntarGuardar()">Actualizar Devocional</button>
     </div>
-
-
-
-
 
 
     <!-- MODAL PARA AGREGAR DATOS DE UN IDIOMA -->
@@ -204,6 +245,49 @@
 
 
 
+    <!-- MODAL PARA AGREGAR DATOS EDITADOS -->
+
+    <div class="modal fade" id="modalDatosEditados" >
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Información</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="formulario-datoseditados">
+                        <div class="card-body">
+                            <div class="col-md-12">
+
+                                <div class="form-group">
+                                    <label>Título</label>
+                                    <input type="text" maxlength="150" autocomplete="off" class="form-control" id="titulo-plan-editado">
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Subtitulo (Opcional)</label>
+                                    <input type="text" maxlength="50" autocomplete="off" class="form-control" id="subtitulo-plan-editado">
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Descripción (Opcional)</label>
+                                    <textarea name="editor-descripcion-editado" id="editor-descripcion-editado"></textarea>
+                                </div>
+
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer justify-content-between">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-success" onclick="actualizarDatosEditados()">Actualizar Fila</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
 </div>
 
@@ -226,6 +310,7 @@
         $(document).ready(function() {
 
             window.varGlobalEditorDescripcion;
+            window.varGlobalEditorDescripcionEditados;
 
             ClassicEditor
                 .create( document.querySelector( '#editor-descripcion' ), {
@@ -256,11 +341,101 @@
                 .catch( error => {
                 } );
 
+            ClassicEditor
+                .create( document.querySelector( '#editor-descripcion-editado' ), {
+
+                    toolbar: {
+                        items: [
+                            'heading',
+                            '|',
+                            'bold',
+                            'italic',
+                            'underline',
+                            'strikethrough',
+                            '|',
+                            'numberedList',
+                            'bulletedList',
+                            '|',
+                            'alignment',
+                            '|',
+                            'undo',
+                            'redo'
+                        ]
+                    },
+                    language: 'es',
+                })
+                .then( editor => {
+                    varGlobalEditorDescripcionEditados = editor;
+                } )
+                .catch( error => {
+                } );
+
+
             document.getElementById("divcontenedor").style.display = "block";
         });
     </script>
 
     <script>
+
+
+        // VARIABLES PARA EDITAR CADA FILA, REFERENCIAS
+        var referenciaArrayTitulo;
+        var referenciaArraySubtitulo;
+        var referenciaArrayDescripcion;
+
+        // obtener los datos de la fila y llevarlos al modal
+        function editarFila(e){
+
+            var fila = $(e).closest('tr');
+
+            var valorInputTitulo = fila.find('input[name="arrayTitulo[]"]').val();
+            var valorInputTituloRef = fila.find('input[name="arrayTitulo[]"]');
+            referenciaArrayTitulo = valorInputTituloRef;
+
+            var valorInputSubtitulo = fila.find('input[name="arraySubtitulo[]"]').val();
+            var valorInputSubtituloRef = fila.find('input[name="arraySubtitulo[]"]');
+            referenciaArraySubtitulo = valorInputSubtituloRef;
+
+            var valorInputDescripcionRef = fila.find('input[name="arrayDescripcion[]"]');
+            var valorActualDescrip = valorInputDescripcionRef.data('txtdescripcion'); // ESTE ES EL DATA-
+            referenciaArrayDescripcion = valorInputDescripcionRef;
+
+            // limpiar modal
+            document.getElementById("formulario-datoseditados").reset();
+
+            $('#titulo-plan-editado').val(valorInputTitulo);
+            $('#subtitulo-plan-editado').val(valorInputSubtitulo);
+            varGlobalEditorDescripcionEditados.setData(valorActualDescrip);
+
+            $('#modalDatosEditados').modal('show');
+        }
+
+        // METER LOS DATOS DE NUEVO A LA FILA
+        function actualizarDatosEditados(){
+
+            var titulo = document.getElementById('titulo-plan-editado').value;
+            var subtitulo = document.getElementById('subtitulo-plan-editado').value; // opcional
+
+            if(titulo === ''){
+                toastr.error('Título es requerido')
+                return;
+            }
+
+            // subtitulo y descripcion son opcionales
+            if(subtitulo.length > 50){
+                toastr.error('Subtitulo 50 caracteres máximo')
+                return;
+            }
+
+            const editorDataDescripcionEdit = varGlobalEditorDescripcionEditados.getData();
+
+            // Actualizar la fila con las referencias
+            referenciaArrayTitulo.val(titulo);
+            referenciaArraySubtitulo.val(subtitulo);
+
+            referenciaArrayDescripcion.data('txtdescripcion', editorDataDescripcionEdit);
+            $('#modalDatosEditados').modal('hide');
+        }
 
 
         function verificarIdiomaTabla(){
@@ -331,6 +506,10 @@
 
             // AGREGAR A FILA
 
+
+            // COMO ES NUEVA FILA, SE IDENTIFICARA CON 0, PARA CREAR EL REGISTRO
+            let valorNull = 0;
+
             var nFilas = $('#matriz >tbody >tr').length;
             nFilas += 1;
 
@@ -341,7 +520,7 @@
                 "</td>" +
 
                 "<td>" +
-                "<input name='arrayIdioma[]' disabled data-ididioma='" + idIdiomaSelect + "' value='" + selectedOptionText + "' class='form-control' type='text'>" +
+                "<input name='arrayIdioma[]' disabled    data-idplantexto='" + valorNull + "'  data-ididioma='" + idIdiomaSelect + "' value='" + selectedOptionText + "' class='form-control' type='text'>" +
                 "</td>" +
 
 
@@ -351,11 +530,11 @@
 
                 "<td>" +
                 "<input name='arraySubtitulo[]' disabled value='" + subtitulo + "' class='form-control' type='text'>" +
-                "<input name='arrayDescripcion[]' style='display: none' data-txtdescripcion='" + editorDataDescripcion + "' class='form-control' type='text'>" +
+                "<input name='arrayDescripcion[]' disabled style='display: none' data-txtdescripcion='" + editorDataDescripcion + "' class='form-control' type='text'>" +
                 "</td>" +
 
                 "<td>" +
-                "<button type='button' class='btn btn-block btn-danger' onclick='borrarFila(this)'>Borrar</button>" +
+                "<button type='button' class='btn btn-block btn-info' onclick='editarFila(this)'>Editar</button>" +
                 "</td>" +
 
                 "</tr>";
@@ -384,7 +563,7 @@
         function preguntarGuardar(){
 
             Swal.fire({
-                title: '¿Guardar Devocional?',
+                title: '¿Actualizar Devocional?',
                 text: '',
                 icon: 'info',
                 showCancelButton: true,
@@ -395,45 +574,21 @@
                 cancelButtonText: 'NO'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    guardarPlanFinal();
+                    actualizarPlanFinal();
                 }
             })
         }
 
-        function guardarPlanFinal(){
+        // Actualizando
+        function actualizarPlanFinal(){
 
             var fecha = document.getElementById('fecha').value;
-            var imagen = document.getElementById('imagen-nuevo');
-            var imagenPortada = document.getElementById('imagenportada-nuevo');
             var selectIdioma = document.getElementById("select-idioma");
 
             if(fecha === ''){
                 toastr.error('Fecha es Requerida');
                 return;
             }
-
-
-            if(imagen.files && imagen.files[0]){ // si trae imagen
-                if (!imagen.files[0].type.match('image/jpeg|image/jpeg|image/png')){
-                    toastr.error('Formato de imagen permitido: .png .jpg .jpeg');
-                    return;
-                }
-            }else{
-                toastr.error('Imagen es Requerida')
-                return;
-            }
-
-
-            if(imagenPortada.files && imagenPortada.files[0]){ // si trae imagen
-                if (!imagenPortada.files[0].type.match('image/jpeg|image/jpeg|image/png')){
-                    toastr.error('Formato de imagen permitido: .png .jpg .jpeg');
-                    return;
-                }
-            }else{
-                toastr.error('Imagen Portada es Requerida')
-                return;
-            }
-
 
             // Verificar que haya ingresado todos los idiomas
             let conteoIdioma = selectIdioma.length;
@@ -447,85 +602,156 @@
             }
 
 
+            let idplan = {{ $idplan }};
+
             // obtener ID idioma, titulo, subtitulo, descripcion
-
-
-
 
 
             let formData = new FormData();
             const contenedorArray = [];
             var arrayIdIdioma = $("input[name='arrayIdioma[]']").map(function(){return $(this).attr("data-ididioma");}).get();
+            var arrayIdPlanTexto = $("input[name='arrayIdioma[]']").map(function(){return $(this).attr("data-idplantexto");}).get();
             var arrayTitulo = $("input[name='arrayTitulo[]']").map(function(){return $(this).val();}).get();
             var arraySubtitulo = $("input[name='arraySubtitulo[]']").map(function(){return $(this).val();}).get();
-            var arrayDescripcion = $("input[name='arrayDescripcion[]']").map(function(){return $(this).attr("data-txtdescripcion");}).get();
+
+            // OBTENER LOS DATOS ACTUALIZADOS PORQUE SE EDITAN
+            var arrayDescripcion = $("input[name='arrayDescripcion[]']").map(function() {
+                return $(this).data("txtdescripcion");
+            }).get();
 
 
             for(var i = 0; i < arrayIdIdioma.length; i++){
-
+                let infoIdPlanTexto = arrayIdPlanTexto[i];
                 let infoIdIdioma = arrayIdIdioma[i];
                 let infoTitulo = arrayTitulo[i];
                 let infoSubtitulo = arraySubtitulo[i];
                 let infoDescripcion = arrayDescripcion[i];
 
                 // ESTOS NOMBRES SE UTILIZAN EN CONTROLADOR
-                contenedorArray.push({ infoIdIdioma, infoTitulo, infoSubtitulo, infoDescripcion});
+                contenedorArray.push({ infoIdPlanTexto, infoIdIdioma, infoTitulo, infoSubtitulo, infoDescripcion});
             }
 
             formData.append('contenedorArray', JSON.stringify(contenedorArray));
             formData.append('fecha', fecha);
-            formData.append('imagen', imagen.files[0]);
-            formData.append('imagenportada', imagenPortada.files[0]);
+            formData.append('idplan', idplan);
+            formData.append('idplantexto', idplan);
 
             openLoading();
 
-            axios.post('/admin/planes/agregar/nuevo', formData, {
+            axios.post('/admin/planes/datos/actualizar', formData, {
             })
                 .then((response) => {
                     closeLoading();
 
-                   if(response.data.success === 1){
-                        Swal.fire({
-                            title: "Devocional Creado",
-                            text: "Se deberan registrar cada fecha del devocional",
-                            icon: 'success',
-                            showCancelButton: false,
-                            allowOutsideClick: false,
-                            confirmButtonColor: '#28a745',
-                            confirmButtonText: 'Aceptar'
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                vistaAtrasPlanes();
-                            }
-                        })
+                    if(response.data.success === 1){
+                        toastr.success("Actualizado");
                     }
                     else {
-                        toastr.error('Error al registrar');
+                        toastr.error('Error al actualizar');
                     }
                 })
                 .catch((error) => {
-                    toastr.error('Error al registrar');
+                    toastr.error('Error al actualizar');
                     closeLoading();
                 });
         }
 
 
-        function borrarFila(elemento){
-            var tabla = elemento.parentNode.parentNode;
-            tabla.parentNode.removeChild(tabla);
-            setearFila();
-        }
+        // actualizar solo imagen
+        function actualizarImagen(){
+            var imagen = document.getElementById('imagen-nuevo');
 
-        function setearFila(){
-
-            var table = document.getElementById('matriz');
-            var conteo = 0;
-            for (var r = 1, n = table.rows.length; r < n; r++) {
-                conteo +=1;
-                var element = table.rows[r].cells[0].children[0];
-                document.getElementById(element.id).innerHTML = ""+conteo;
+            if(imagen.files && imagen.files[0]){ // si trae imagen
+                if (!imagen.files[0].type.match('image/jpeg|image/jpeg|image/png')){
+                    toastr.error('Formato de imagen permitido: .png .jpg .jpeg');
+                    return;
+                }
+            }else{
+                toastr.error('Imagen es requerida');
+                return;
             }
+
+            let idplan = {{ $idplan }};
+
+            let formData = new FormData();
+            formData.append('idplan', idplan);
+            formData.append('imagen', imagen.files[0]);
+
+            openLoading();
+
+            axios.post('/admin/planes/imagen/actualizar', formData, {
+            })
+                .then((response) => {
+                    closeLoading();
+
+                    if(response.data.success === 1){
+                        var limpiarInput = document.getElementById('imagen-nuevo');
+                        limpiarInput.value = '';
+                        toastr.success("Actualizado");
+                    }
+                    else {
+                        toastr.error('Error al actualizar');
+                    }
+                })
+                .catch((error) => {
+                    toastr.error('Error al actualizar');
+                    closeLoading();
+                });
         }
+
+
+        // actualizar solo imagen portada
+        function actualizarImagenPortada(){
+            var imagen = document.getElementById('imagenportada-nuevo');
+
+            if(imagen.files && imagen.files[0]){ // si trae imagen
+                if (!imagen.files[0].type.match('image/jpeg|image/jpeg|image/png')){
+                    toastr.error('Formato de imagen permitido: .png .jpg .jpeg');
+                    return;
+                }
+            }else{
+                toastr.error('Imagen portada es requerida');
+                return;
+            }
+
+            let idplan = {{ $idplan }};
+
+            let formData = new FormData();
+            formData.append('idplan', idplan);
+            formData.append('imagen', imagen.files[0]);
+
+            openLoading();
+
+            axios.post('/admin/planes/imagenportada/actualizar', formData, {
+            })
+                .then((response) => {
+                    closeLoading();
+
+                    if(response.data.success === 1){
+
+                        toastr.success("Actualizado");
+
+                        var limpiarInput = document.getElementById('imagenportada-nuevo');
+                        limpiarInput.value = '';
+                    }
+                    else {
+                        toastr.error('Error al actualizar');
+                    }
+                })
+                .catch((error) => {
+                    toastr.error('Error al actualizar');
+                    closeLoading();
+                });
+        }
+
+
+
+
+
+
+
+
+
 
 
     </script>

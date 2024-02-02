@@ -20,18 +20,29 @@
                             <tr class="row1" data-id="{{ $dato->id }}">
 
                                 <td>{{ $dato->posicion }}</td>
-                                <td>{{ $dato->fechaFormat }}</td>
-                                <td>{{ $dato->descripcion }}</td>
+                                <td>{{ $dato->titulo }}</td>
 
                                 <td>
                                     <center><img alt="Imagenes" src="{{ url('storage/archivos/'.$dato->imagen) }}" width="100px" height="100px" /></center>
                                 </td>
 
                                 <td>
-                                    <button type="button" class="btn btn-danger btn-xs" onclick="modalBorrar({{ $dato->id }})">
-                                        <i class="fas fa-eye" title="Borrar"></i>&nbsp; Borrar
-                                    </button>
+                                    <center><img alt="Imagenes" src="{{ url('storage/archivos/'.$dato->imagenportada) }}" width="100px" height="100px" /></center>
+                                </td>
 
+
+                                <td>
+                                    @if($dato->visible == 1)
+                                        <span class="badge bg-success">Activo</span>
+                                    @else
+                                        <span class="badge bg-danger">Inactivo</span>
+                                    @endif
+                                </td>
+
+                                <td>
+                                    <button type="button" class="btn btn-info btn-xs" onclick="vistaEditarPlan({{ $dato->id }})">
+                                        <i class="fas fa-edit" title="Editar"></i>&nbsp; Editar
+                                    </button>
                                 </td>
 
                             </tr>
@@ -68,7 +79,7 @@
 
             openLoading();
 
-            axios.post('/admin/imagendia/actualizar/posicion',  {
+            axios.post('/admin/planes/actualizar/posicion',  {
                 'order': order
             })
                 .then((response) => {
