@@ -179,6 +179,13 @@
             window.location.href="{{ url('/admin/planes/vista/editar/index') }}/" + idplan;
         }
 
+        // vista para ver los bloques
+        function vistaListadoBloques(idplan){
+            window.location.href="{{ url('/admin/planesbloques/vista/index') }}/" + idplan;
+        }
+
+
+
 
     </script>
 

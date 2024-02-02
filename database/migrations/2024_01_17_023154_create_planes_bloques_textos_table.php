@@ -17,7 +17,8 @@ return new class extends Migration
             $table->bigInteger('id_planes_bloques')->unsigned();
             $table->bigInteger('id_idioma_planes')->unsigned();
 
-            $table->string('titulo', 20)->nullable();
+            // este sera el texto personalizado
+            $table->string('titulo', 30)->nullable();
 
             $table->foreign('id_planes_bloques')->references('id')->on('planes_bloques');
             $table->foreign('id_idioma_planes')->references('id')->on('idioma_planes');

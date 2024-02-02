@@ -356,4 +356,36 @@ class PlanesController extends Controller
         }
     }
 
+
+    public function indexPlanBloque($idplan)
+    {
+        // texto idioma por defecto
+        $infoPlanTexto = PlanesTextos::where('id_planes', $idplan)
+            ->where('id_idioma_planes', 1)
+            ->first();
+
+        $nombreDevo = $infoPlanTexto->titulo;
+
+        return view('backend.admin.devocional.planes.bloques.vistaplanesbloques', compact('nombreDevo', 'idplan'));
+    }
+
+
+    public function tablaPlanBloque($idplan)
+    {
+
+        return "tabla";
+
+        return view('backend.admin.devocional.planes.bloques.tablaplanesbloques');
+    }
+
+
+    public function indexNuevoPlanBloque($idplan)
+    {
+        $arrayIdiomas = IdiomaPlanes::orderBy('id', 'ASC')->get();
+        $fechaCarbon = Carbon::now('America/El_Salvador');
+        $fechaActual = date("Y-m-d", strtotime($fechaCarbon));
+
+        return view('backend.admin.devocional.planes.bloques.nuevo.vistanuevoplanbloque', compact('idplan', 'fechaActual', 'arrayIdiomas'));
+    }
+
 }

@@ -142,12 +142,16 @@ Route::get('/admin/planes/agregar/nuevo/index', [PlanesController::class,'indexN
 Route::post('/admin/planes/agregar/nuevo', [PlanesController::class,'guardarNuevoPlan']);
 Route::post('/admin/planes/actualizar/posicion', [PlanesController::class,'actualizarPosicionPlanes']);
 
+// Editar plan
 Route::get('/admin/planes/vista/editar/index/{idplan}', [PlanesController::class,'indexEditarPlan']);
 Route::post('/admin/planes/datos/actualizar', [PlanesController::class,'actualizarPlanes']);
 Route::post('/admin/planes/imagen/actualizar', [PlanesController::class,'actualizarImagenPlanes']);
 Route::post('/admin/planes/imagenportada/actualizar', [PlanesController::class,'actualizarImagenPortadaPlanes']);
 
-
+// vista Bloque de plan
+Route::get('/admin/planesbloques/vista/index/{idplan}', [PlanesController::class,'indexPlanBloque']);
+Route::get('/admin/planesbloques/tabla/index/{idplan}', [PlanesController::class,'tablaPlanBloque']);
+Route::get('/admin/planesbloques/agregar/nuevo/index/{idplan}', [PlanesController::class,'indexNuevoPlanBloque']);
 
 
 

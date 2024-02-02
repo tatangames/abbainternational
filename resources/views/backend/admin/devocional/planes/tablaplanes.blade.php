@@ -43,6 +43,10 @@
                                     <button type="button" class="btn btn-info btn-xs" onclick="vistaEditarPlan({{ $dato->id }})">
                                         <i class="fas fa-edit" title="Editar"></i>&nbsp; Editar
                                     </button>
+
+                                    <button type="button" class="btn btn-info btn-xs" onclick="vistaListadoBloques({{ $dato->id }})">
+                                        <i class="fas fa-edit" title="Fechas"></i>&nbsp; Fechas
+                                    </button>
                                 </td>
 
                             </tr>
