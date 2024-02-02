@@ -163,8 +163,10 @@ Route::get('/admin/planbloquedetalle/vista/{idplanbloque}', [PlanesController::c
 Route::get('/admin/planbloquedetalle/tabla/{idplanbloque}', [PlanesController::class,'tablaBloqueDetalle']);
 Route::get('/admin/planbloquedetalle/agregar/nuevo/index/{idplanbloque}', [PlanesController::class,'indexNuevoPlanBloqueDetalle']);
 Route::post('/admin/planbloquedetalle/agregar/nuevo', [PlanesController::class,'registrarPlanesBloquesDetalle']);
+Route::post('/admin/planbloquedetalle/actualizar/posicion', [PlanesController::class,'actualizarPosicionPlanesBlockDetalle']);
 
-
+// Editar bloque detalle
+Route::get('/admin/planbloquedetalle/vista/editar/index/{idplanbloquedetalle}', [PlanesController::class,'indexEditarPlanBloqueDetalle']);
 
 
 

@@ -471,7 +471,6 @@ class PlanesController extends Controller
 
     public function indexEditarPlanBloque($idplanbloque){
 
-
         $infoBloque = PlanesBloques::where('id', $idplanbloque)->first();
         $arrayIdiomas = IdiomaPlanes::orderBy('id', 'ASC')->get();
         $arrayPlanBloqueTextos = PlanesBloquesTextos::where('id_planes_bloques', $idplanbloque)
@@ -558,9 +557,20 @@ class PlanesController extends Controller
 
     public function tablaBloqueDetalle($idplanbloque){
 
-        return "tablaa2";
+        $listado = PlanesBlockDetalle::where('id_planes_bloques', $idplanbloque)
+            ->orderBy('posicion', 'ASC')->get();
 
-        return view('backend.admin.devocional.planes.bloques.bloquedetalle.tablabloquedetalle');
+        foreach ($listado as $dato){
+
+            $titulo = "";
+            if($info = PlanesBlockDetaTextos::where('id_planes_block_detalle', $dato->id)
+                ->where('id_idioma_planes', 1)->first()){
+                $titulo = $info->titulo;
+            }
+            $dato->titulo = $titulo;
+        }
+
+        return view('backend.admin.devocional.planes.bloques.bloquedetalle.tablabloquedetalle', compact('listado'));
     }
 
     public function indexNuevoPlanBloqueDetalle($idplanbloque){
@@ -638,6 +648,44 @@ class PlanesController extends Controller
             DB::rollback();
             return ['success' => 99];
         }
+    }
+
+
+    public function actualizarPosicionPlanesBlockDetalle(Request $request){
+
+        $tasks = PlanesBlockDetalle::all();
+
+        foreach ($tasks as $task) {
+            $id = $task->id;
+
+            foreach ($request->order as $order) {
+                if ($order['id'] == $id) {
+                    $task->update(['posicion' => $order['posicion']]);
+                }
+            }
+        }
+        return ['success' => 1];
+    }
+
+
+    public function indexEditarPlanBloqueDetalle($idplanbloquedetalle){
+
+        $infoBloque = PlanesBlockDetalle::where('id', $idplanbloquedetalle)->first();
+        $arrayIdiomas = IdiomaPlanes::orderBy('id', 'ASC')->get();
+        $arrayPlanBlockDetaTextos = PlanesBlockDetaTextos::where('id_planes_block_detalle', $idplanbloquedetalle)
+            ->orderBy('id_idioma_planes', 'ASC')
+            ->get();
+
+        $contador = 0;
+        foreach ($arrayPlanBlockDetaTextos as $dato){
+            $contador++;
+            $dato->contador = $contador;
+
+            $infoIdioma = IdiomaPlanes::where('id', $dato->id_idioma_planes)->first();
+            $dato->idioma = $infoIdioma->nombre;
+        }
+
+        return view('backend.admin.devocional.planes.bloques.bloquedetalle.editar.vistaeditarplanbloquedetalle', compact('infoBloque', 'arrayIdiomas', 'idplanbloquedetalle', 'arrayPlanBlockDetaTextos'));
     }
 
 }

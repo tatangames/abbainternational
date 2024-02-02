@@ -6,6 +6,7 @@
     <link href="{{ asset('css/toastr.min.css') }}" type="text/css" rel="stylesheet" />
     <link href="{{ asset('css/buttons_estilo.css') }}" rel="stylesheet">
     <link href="{{ asset('css/select2.min.css') }}" type="text/css" rel="stylesheet">
+    <link href="{{ asset('css/estiloToggle.css') }}" type="text/css" rel="stylesheet" />
     <link href="{{ asset('css/select2-bootstrap-5-theme.min.css') }}" type="text/css" rel="stylesheet">
 @stop
 
@@ -34,7 +35,7 @@
 
     <section class="content-header">
         <div class="container-fluid">
-            <button type="button" style="font-weight: bold; background-color: #2339cc; color: white !important;" onclick="vistaAtrasPlanes()" class="button button-3d button-rounded button-pill button-small">
+            <button type="button" style="font-weight: bold; background-color: #2339cc; color: white !important;" onclick="vistaAtras()" class="button button-3d button-rounded button-pill button-small">
                 <i class="fas fa-arrow-left"></i>
                 Atras
             </button>
@@ -46,61 +47,12 @@
         <div class="container-fluid">
             <div class="card card-success">
                 <div class="card-header">
-                    <h3 class="card-title">Editar Plan Devocional</h3>
+                    <h3 class="card-title">Editar Detalle</h3>
                 </div>
                 <div class="card-body">
                     <div>
                         <div class="col-md-12">
 
-                            <section>
-                                <div class="row">
-
-                                    <div class="col-md-3">
-                                        <div class="form-group">
-                                            <label class="control-label">Fecha:</label>
-                                            <input type="date" class="form-control" id="fecha" value="{{ $infoPlan->fecha }}">
-                                        </div>
-                                    </div>
-                                </div>
-
-                            </section>
-
-                            <section style="margin-top: 15px">
-
-                                <label class="control-label">Imagen (Ejemplo: 400x400 px)</label>
-                                <div class="row">
-                                    <div class="input-group input-group col-md-4">
-                                        <input type="file" class="form-control" style="color:#191818" id="imagen-nuevo" accept="image/jpeg, image/jpg, image/png"/>
-
-                                        <span class="input-group-append">
-                                        <button type="button" class="btn btn-info btn-sm" onclick="actualizarImagen()">Actualizar</button>
-                                            </span>
-                                    </div>
-                                </div>
-                            </section>
-
-
-
-                            <section style="margin-top: 35px">
-                                <label class="control-label">Imagen Portada (Ejemplo: 600x400 px)</label>
-
-                                <div class="row">
-
-                                    <div class="input-group input-group col-md-4">
-                                        <input type="file" class="form-control" style="color:#191818" id="imagenportada-nuevo" accept="image/jpeg, image/jpg, image/png"/>
-
-                                        <span class="input-group-append">
-                                            <button type="button" class="btn btn-info btn-sm" onclick="actualizarImagenPortada()">Actualizar</button>
-                                            </span>
-                                    </div>
-
-                                </div>
-
-                            </section>
-
-
-
-                            <hr><br>
 
                         </div>
                     </div>
@@ -118,7 +70,7 @@
 
                         <div class="col-md-3">
                             <div class="form-group">
-                                <label class="control-label">Idioma para nuevo Devocional:</label>
+                                <label class="control-label">Idioma para Texto Personalizado:</label>
                                 <select class="form-control" id="select-idioma">
                                     @foreach($arrayIdiomas as $item)
                                         <option value="{{$item->id}}">{{$item->nombre}}</option>
@@ -152,14 +104,13 @@
                         <th style="width: 4%">#</th>
                         <th style="width: 10%">Idioma</th>
                         <th style="width: 10%">Título</th>
-                        <th style="width: 10%">Subtitulo (Opcional)</th>
                         <th style="width: 6%">Opciones</th>
                     </tr>
                     </thead>
                     <tbody>
 
 
-                    @foreach($arrayPlanTextos as $item)
+                    @foreach($arrayPlanBlockDetaTextos as $item)
                         <tr>
                             <td>
                                 <p id="fila" class="form-control" style="max-width: 65px">{{ $item->contador }}</p>
@@ -167,21 +118,17 @@
 
                             <td>
                                 <!-- data-ididioma se utiliza para comparar si falta agregar idioma nuevo -->
-                                <input name="arrayIdioma[]" disabled data-idplantexto="{{ $item->id }}" data-ididioma="{{ $item->id_idioma_planes }}" value="{{ $item->idioma }}" class="form-control" type="text">
+                                <input name="arrayIdioma[]" disabled data-idbloquedetatexto="{{ $item->id }}" data-ididioma="{{ $item->id_idioma_planes }}" value="{{ $item->idioma }}" class="form-control" type="text">
                             </td>
 
                             <td>
-                                <input name="arrayTitulo[]" disabled value="{{ $item->titulo }}" class="form-control" type="text">
+                                <input name="arrayTitulo[]" disabled  value="{{ $item->titulo }}" class="form-control" type="text">
+                                <input name="arrayDescripcion[]" disabled style="display: none" data-txtdescripcion="holisss" class="form-control" type="text">
                             </td>
 
-                            <td>
-                                <input name="arraySubtitulo[]" disabled value="{{ $item->subtitulo }}" class="form-control" type="text">
-                                <input name="arrayDescripcion[]" disabled style="display: none" data-txtdescripcion="{{ $item->descripcion }}" class="form-control" type="text">
-
-                            </td>
 
                             <td>
-                                 <button type="button" class="btn btn-block btn-info" onclick="editarFila(this)">Editar</button>
+                                <button type="button" class="btn btn-block btn-info" onclick="editarFila(this)">Editar</button>
                             </td>
                         </tr>
 
@@ -218,18 +165,12 @@
 
                                 <div class="form-group">
                                     <label>Título</label>
-                                    <input type="text" maxlength="150" autocomplete="off" class="form-control" id="titulo-plan">
+                                    <input type="text" maxlength="100" autocomplete="off" class="form-control" id="titulo-nuevo">
                                 </div>
 
                                 <div class="form-group">
-                                    <label>Subtitulo (Opcional)</label>
-                                    <input type="text" maxlength="50" autocomplete="off" class="form-control" id="subtitulo-plan">
-                                </div>
-
-                                <div class="form-group">
-                                    <label>Descripción (Opcional)</label>
-                                    <textarea name="content" id="editor-descripcion"></textarea>
-
+                                    <label>Descripción </label>
+                                    <div id="editor-nuevo"></div>
                                 </div>
 
                             </div>
@@ -243,7 +184,6 @@
             </div>
         </div>
     </div>
-
 
 
     <!-- MODAL PARA AGREGAR DATOS EDITADOS -->
@@ -264,18 +204,14 @@
 
                                 <div class="form-group">
                                     <label>Título</label>
-                                    <input type="text" maxlength="150" autocomplete="off" class="form-control" id="titulo-plan-editado">
+                                    <input type="text" maxlength="100" autocomplete="off" class="form-control" id="titulo-editar">
                                 </div>
 
                                 <div class="form-group">
-                                    <label>Subtitulo (Opcional)</label>
-                                    <input type="text" maxlength="50" autocomplete="off" class="form-control" id="subtitulo-plan-editado">
+                                    <label>Descripción </label>
+                                    <div id="editor-editar"></div>
                                 </div>
 
-                                <div class="form-group">
-                                    <label>Descripción (Opcional)</label>
-                                    <textarea name="content" id="editor-descripcion-editado"></textarea>
-                                </div>
 
                             </div>
                         </div>
@@ -310,12 +246,12 @@
     <script type="text/javascript">
         $(document).ready(function() {
 
+
             window.varGlobalEditorDescripcion;
             window.varGlobalEditorDescripcionEditados;
 
-
             ClassicEditor
-                .create(document.querySelector('#editor-descripcion'), {
+                .create(document.querySelector('#editor-nuevo'), {
                     language: 'es',
                 })
                 .then(editor => {
@@ -326,7 +262,7 @@
                 });
 
             ClassicEditor
-                .create(document.querySelector('#editor-descripcion-editado'), {
+                .create(document.querySelector('#editor-editar'), {
                     language: 'es',
                 })
                 .then(editor => {
@@ -336,18 +272,14 @@
 
                 });
 
-
             document.getElementById("divcontenedor").style.display = "block";
         });
     </script>
 
     <script>
 
-
-        // VARIABLES PARA EDITAR CADA FILA, REFERENCIAS
         var referenciaArrayTitulo;
-        var referenciaArraySubtitulo;
-        var referenciaArrayDescripcion;
+
 
         // obtener los datos de la fila y llevarlos al modal
         function editarFila(e){
@@ -358,19 +290,17 @@
             var valorInputTituloRef = fila.find('input[name="arrayTitulo[]"]');
             referenciaArrayTitulo = valorInputTituloRef;
 
-            var valorInputSubtitulo = fila.find('input[name="arraySubtitulo[]"]').val();
-            var valorInputSubtituloRef = fila.find('input[name="arraySubtitulo[]"]');
-            referenciaArraySubtitulo = valorInputSubtituloRef;
-
             var valorInputDescripcionRef = fila.find('input[name="arrayDescripcion[]"]');
             var valorActualDescrip = valorInputDescripcionRef.data('txtdescripcion'); // ESTE ES EL DATA-
             referenciaArrayDescripcion = valorInputDescripcionRef;
 
+            console.log(valorActualDescrip)
+
             // limpiar modal
             document.getElementById("formulario-datoseditados").reset();
 
-            $('#titulo-plan-editado').val(valorInputTitulo);
-            $('#subtitulo-plan-editado').val(valorInputSubtitulo);
+            $('#titulo-editar').val(valorInputTitulo);
+
             varGlobalEditorDescripcionEditados.setData(valorActualDescrip);
 
             $('#modalDatosEditados').modal('show');
@@ -379,8 +309,7 @@
         // METER LOS DATOS DE NUEVO A LA FILA
         function actualizarDatosEditados(){
 
-            var titulo = document.getElementById('titulo-plan-editado').value;
-            var subtitulo = document.getElementById('subtitulo-plan-editado').value; // opcional
+            var titulo = document.getElementById('titulo-editar').value;
 
             if(titulo === ''){
                 toastr.error('Título es requerido')
@@ -388,18 +317,13 @@
             }
 
             // subtitulo y descripcion son opcionales
-            if(subtitulo.length > 50){
-                toastr.error('Subtitulo 50 caracteres máximo')
+            if(titulo.length > 30){
+                toastr.error('Título 30 caracteres máximo')
                 return;
             }
 
-            const editorDataDescripcionEdit = varGlobalEditorDescripcionEditados.getData();
-
             // Actualizar la fila con las referencias
             referenciaArrayTitulo.val(titulo);
-            referenciaArraySubtitulo.val(subtitulo);
-
-            referenciaArrayDescripcion.data('txtdescripcion', editorDataDescripcionEdit);
             $('#modalDatosEditados').modal('hide');
         }
 
@@ -424,12 +348,12 @@
             // puede abrir modal para registrar datos
 
             document.getElementById("formulario-datosidioma").reset();
-            varGlobalEditorDescripcion.setData("");
 
             $('#modalDatosIdioma').modal('show');
         }
 
 
+        // CUANDO ES NUEVO TEXTO PERSONALIZADO
         function AgregarFila(){
 
             // verificar siempre
@@ -452,8 +376,7 @@
             }
 
             // verificar datos cada uno
-            var titulo = document.getElementById('titulo-plan').value;
-            var subtitulo = document.getElementById('subtitulo-plan').value; // opcional
+            var titulo = document.getElementById('titulo-nuevo').value;
 
             if(titulo === ''){
                 toastr.error('Título es requerido')
@@ -461,13 +384,10 @@
             }
 
             // subtitulo y descripcion son opcionales
-            if(subtitulo.length > 50){
-                toastr.error('Subtitulo 50 caracteres máximo')
+            if(titulo.length > 30){
+                toastr.error('Título 30 caracteres máximo')
                 return;
             }
-
-            const editorDataDescripcion = varGlobalEditorDescripcion.getData();
-
 
 
             // AGREGAR A FILA
@@ -486,17 +406,12 @@
                 "</td>" +
 
                 "<td>" +
-                "<input name='arrayIdioma[]' disabled    data-idplantexto='" + valorNull + "'  data-ididioma='" + idIdiomaSelect + "' value='" + selectedOptionText + "' class='form-control' type='text'>" +
+                "<input name='arrayIdioma[]' disabled    data-idbloquetexto='" + valorNull + "'  data-ididioma='" + idIdiomaSelect + "' value='" + selectedOptionText + "' class='form-control' type='text'>" +
                 "</td>" +
 
 
                 "<td>" +
                 "<input name='arrayTitulo[]' disabled value='" + titulo + "' class='form-control' type='text'>" +
-                "</td>" +
-
-                "<td>" +
-                "<input name='arraySubtitulo[]' disabled value='" + subtitulo + "' class='form-control' type='text'>" +
-                "<input name='arrayDescripcion[]' disabled style='display: none' data-txtdescripcion='" + editorDataDescripcion + "' class='form-control' type='text'>" +
                 "</td>" +
 
                 "<td>" +
@@ -522,14 +437,15 @@
 
 
 
-        function vistaAtrasPlanes(){
-            window.location.href="{{ url('/admin/planes/index') }}";
+        function vistaAtras(){
+            let idplanesbloques = {{ $infoBloque->id_planes_bloques }};
+            window.location.href="{{ url('/admin/planbloquedetalle/vista') }}/" + idplanesbloques;
         }
 
         function preguntarGuardar(){
 
             Swal.fire({
-                title: '¿Actualizar Devocional?',
+                title: '¿Actualizar Fecha?',
                 text: '',
                 icon: 'info',
                 showCancelButton: true,
@@ -540,13 +456,13 @@
                 cancelButtonText: 'NO'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    actualizarPlanFinal();
+                    actualizarFechaFinal();
                 }
             })
         }
 
         // Actualizando
-        function actualizarPlanFinal(){
+        function actualizarFechaFinal(){
 
             var fecha = document.getElementById('fecha').value;
             var selectIdioma = document.getElementById("select-idioma");
@@ -556,19 +472,25 @@
                 return;
             }
 
+            let t = document.getElementById('toggle-personalizado').checked;
+            let togglePersonalizado = t ? 1 : 0;
+
+
             // Verificar que haya ingresado todos los idiomas
             let conteoIdioma = selectIdioma.length;
 
 
             var nRegistro = $('#matriz > tbody >tr').length;
 
-            if (nRegistro !== conteoIdioma){
-                toastr.error('Idiomas son requeridos');
-                return;
+
+            // Verificar si toggle esta activo para actualizar idiomas
+            if(togglePersonalizado === 1){
+                if (nRegistro !== conteoIdioma){
+                    toastr.error('Idiomas son requeridos');
+                    return;
+                }
             }
 
-
-            let idplan = {{ $idplan }};
 
             // obtener ID idioma, titulo, subtitulo, descripcion
 
@@ -576,35 +498,28 @@
             let formData = new FormData();
             const contenedorArray = [];
             var arrayIdIdioma = $("input[name='arrayIdioma[]']").map(function(){return $(this).attr("data-ididioma");}).get();
-            var arrayIdPlanTexto = $("input[name='arrayIdioma[]']").map(function(){return $(this).attr("data-idplantexto");}).get();
+            var arrayIdBloqueTexto = $("input[name='arrayIdioma[]']").map(function(){return $(this).attr("data-idbloquetexto");}).get();
             var arrayTitulo = $("input[name='arrayTitulo[]']").map(function(){return $(this).val();}).get();
-            var arraySubtitulo = $("input[name='arraySubtitulo[]']").map(function(){return $(this).val();}).get();
 
-            // OBTENER LOS DATOS ACTUALIZADOS PORQUE SE EDITAN
-            var arrayDescripcion = $("input[name='arrayDescripcion[]']").map(function() {
-                return $(this).data("txtdescripcion");
-            }).get();
+
 
 
             for(var i = 0; i < arrayIdIdioma.length; i++){
-                let infoIdPlanTexto = arrayIdPlanTexto[i];
+                let infoIdBloqueTexto = arrayIdBloqueTexto[i];
                 let infoIdIdioma = arrayIdIdioma[i];
                 let infoTitulo = arrayTitulo[i];
-                let infoSubtitulo = arraySubtitulo[i];
-                let infoDescripcion = arrayDescripcion[i];
 
                 // ESTOS NOMBRES SE UTILIZAN EN CONTROLADOR
-                contenedorArray.push({ infoIdPlanTexto, infoIdIdioma, infoTitulo, infoSubtitulo, infoDescripcion});
+                contenedorArray.push({ infoIdBloqueTexto, infoIdIdioma, infoTitulo});
             }
 
             formData.append('contenedorArray', JSON.stringify(contenedorArray));
             formData.append('fecha', fecha);
-            formData.append('idplan', idplan);
-            formData.append('idplantexto', idplan);
+            formData.append('idplanbloque', idplanbloque);
 
             openLoading();
 
-            axios.post('/admin/planes/datos/actualizar', formData, {
+            axios.post('/admin/planesbloques/datos/actualizar', formData, {
             })
                 .then((response) => {
                     closeLoading();
@@ -621,101 +536,6 @@
                     closeLoading();
                 });
         }
-
-
-        // actualizar solo imagen
-        function actualizarImagen(){
-            var imagen = document.getElementById('imagen-nuevo');
-
-            if(imagen.files && imagen.files[0]){ // si trae imagen
-                if (!imagen.files[0].type.match('image/jpeg|image/jpeg|image/png')){
-                    toastr.error('Formato de imagen permitido: .png .jpg .jpeg');
-                    return;
-                }
-            }else{
-                toastr.error('Imagen es requerida');
-                return;
-            }
-
-            let idplan = {{ $idplan }};
-
-            let formData = new FormData();
-            formData.append('idplan', idplan);
-            formData.append('imagen', imagen.files[0]);
-
-            openLoading();
-
-            axios.post('/admin/planes/imagen/actualizar', formData, {
-            })
-                .then((response) => {
-                    closeLoading();
-
-                    if(response.data.success === 1){
-                        var limpiarInput = document.getElementById('imagen-nuevo');
-                        limpiarInput.value = '';
-                        toastr.success("Actualizado");
-                    }
-                    else {
-                        toastr.error('Error al actualizar');
-                    }
-                })
-                .catch((error) => {
-                    toastr.error('Error al actualizar');
-                    closeLoading();
-                });
-        }
-
-
-        // actualizar solo imagen portada
-        function actualizarImagenPortada(){
-            var imagen = document.getElementById('imagenportada-nuevo');
-
-            if(imagen.files && imagen.files[0]){ // si trae imagen
-                if (!imagen.files[0].type.match('image/jpeg|image/jpeg|image/png')){
-                    toastr.error('Formato de imagen permitido: .png .jpg .jpeg');
-                    return;
-                }
-            }else{
-                toastr.error('Imagen portada es requerida');
-                return;
-            }
-
-            let idplan = {{ $idplan }};
-
-            let formData = new FormData();
-            formData.append('idplan', idplan);
-            formData.append('imagen', imagen.files[0]);
-
-            openLoading();
-
-            axios.post('/admin/planes/imagenportada/actualizar', formData, {
-            })
-                .then((response) => {
-                    closeLoading();
-
-                    if(response.data.success === 1){
-
-                        toastr.success("Actualizado");
-
-                        var limpiarInput = document.getElementById('imagenportada-nuevo');
-                        limpiarInput.value = '';
-                    }
-                    else {
-                        toastr.error('Error al actualizar');
-                    }
-                })
-                .catch((error) => {
-                    toastr.error('Error al actualizar');
-                    closeLoading();
-                });
-        }
-
-
-
-
-
-
-
 
 
 

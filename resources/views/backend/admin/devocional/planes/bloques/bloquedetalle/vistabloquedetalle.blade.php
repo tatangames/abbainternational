@@ -62,8 +62,8 @@
 @extends('backend.menus.footerjs')
 @section('archivos-js')
 
-    <script src="{{ asset('js/jquery.dataTables.js') }}" type="text/javascript"></script>
-    <script src="{{ asset('js/dataTables.bootstrap4.js') }}" type="text/javascript"></script>
+    <script src="{{ asset('js/jquery-ui-drag.js') }}" type="text/javascript"></script>
+    <script src="{{ asset('js/datatables-drag.min.js') }}" type="text/javascript"></script>
 
     <script src="{{ asset('js/toastr.min.js') }}" type="text/javascript"></script>
     <script src="{{ asset('js/axios.min.js') }}" type="text/javascript"></script>
@@ -89,19 +89,20 @@
             $('#tablaDatatable').load(ruta);
         }
 
-
+        // vista para agregar nuevo
         function vistaNuevoPlanBloqueDetalle(){
             var idplanbloque = {{ $idplanbloque }};
             window.location.href="{{ url('/admin/planbloquedetalle/agregar/nuevo/index') }}/" + idplanbloque;
         }
 
+        // vista para editar
         function informacionEditar(idplanbloquedetalle){
-            window.location.href="{{ url('/admin/pxxxx') }}/" + idplanbloquedetalle;
+            window.location.href="{{ url('/admin/planbloquedetalle/vista/editar/index') }}/" + idplanbloquedetalle;
         }
 
         // aqui se ingresara para agregar Texto Devocional y Preguntas
-        function informacionDetalleBloqueDevocional(idplanbloque){
-            window.location.href="{{ url('/admin/planbloquedetalle/vista') }}/" + idplanbloque;
+        function vistaDevocionalPreguntas(idplanbloquedetalle){
+            window.location.href="{{ url('/admin/xxxxx') }}/" + idplanbloquedetalle;
         }
 
     </script>

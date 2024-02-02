@@ -187,7 +187,7 @@
 
                                 <div class="form-group">
                                     <label>Descripción (Opcional)</label>
-                                    <div id="editor"></div>
+                                    <textarea name="content" id="editor"></textarea>
                                 </div>
 
                             </div>

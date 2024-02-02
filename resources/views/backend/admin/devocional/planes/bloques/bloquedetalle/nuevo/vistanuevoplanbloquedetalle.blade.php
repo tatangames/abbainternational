@@ -159,7 +159,8 @@
                                 <div class="form-group">
                                     <label>Descripción </label>
                                     <i class="far fa-question-circle" onclick="queEsEsto()"></i>
-                                    <div id="editor"></div>
+                                    <textarea name="content" id="editor"></textarea>
+
                                 </div>
 
                             </div>
@@ -204,6 +205,7 @@
                     language: 'es',
                 })
                 .then(editor => {
+
                     varGlobalEditorDescripcion = editor;
                 })
                 .catch(error => {
@@ -294,7 +296,7 @@
                 return;
             }
 
-            let txtdescripcion = varGlobalEditorDescripcion;
+            const txtdescripcion = varGlobalEditorDescripcion.getData();
 
             // AGREGAR A FILA
 
