@@ -17,7 +17,7 @@ return new class extends Migration
             $table->bigInteger('id_planes')->unsigned();
 
             // Fecha del bloque
-            $table->dateTime('fecha_inicio');
+            $table->date('fecha_inicio');
 
             // esto oculta al usuario
             $table->boolean('visible');

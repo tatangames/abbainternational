@@ -5,6 +5,10 @@ namespace App\Http\Controllers\Backend\Planes;
 use App\Http\Controllers\Controller;
 use App\Models\IdiomaPlanes;
 use App\Models\Planes;
+use App\Models\PlanesBlockDetalle;
+use App\Models\PlanesBlockDetaTextos;
+use App\Models\PlanesBloques;
+use App\Models\PlanesBloquesTextos;
 use App\Models\PlanesTextos;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -142,7 +146,7 @@ class PlanesController extends Controller
 
                 // completado
                 DB::commit();
-                return ['success' => 2];
+                return ['success' => 1];
             }catch(\Throwable $e){
                 Log::info('error: ' . $e);
                 DB::rollback();
@@ -219,7 +223,6 @@ class PlanesController extends Controller
                 // sus idiomas
                 foreach ($datosContenedor as $filaArray) {
 
-                    Log::info("ID descripcion: " . $filaArray['infoDescripcion']);
 
                     // comprobar si existe para actualizar o crear segun idioma nuevo
                     if($infoPlanTexto = PlanesTextos::where('id', $filaArray['infoIdPlanTexto'])->first()){
@@ -372,10 +375,23 @@ class PlanesController extends Controller
 
     public function tablaPlanBloque($idplan)
     {
+        $listado = PlanesBloques::where('id_planes', $idplan)->orderBy('fecha_inicio', 'ASC')->get();
 
-        return "tabla";
+        foreach ($listado as $dato){
+            $fechaFormat = date("d-m-Y", strtotime($dato->fecha_inicio));
+            $dato->fechaFormat = $fechaFormat;
 
-        return view('backend.admin.devocional.planes.bloques.tablaplanesbloques');
+            $textoPersonalizado = "";
+            if($texto = PlanesBloquesTextos::where('id_planes_bloques', $dato->id)
+                ->where('id_idioma_planes', 1)
+                ->first()){
+                $textoPersonalizado = $texto->titulo;
+            }
+
+            $dato->textoPersonalizado = $textoPersonalizado;
+        }
+
+        return view('backend.admin.devocional.planes.bloques.tablaplanesbloques', compact('listado'));
     }
 
 
@@ -386,6 +402,242 @@ class PlanesController extends Controller
         $fechaActual = date("Y-m-d", strtotime($fechaCarbon));
 
         return view('backend.admin.devocional.planes.bloques.nuevo.vistanuevoplanbloque', compact('idplan', 'fechaActual', 'arrayIdiomas'));
+    }
+
+
+    public function registrarPlanesBloques(Request $request){
+
+        $regla = array(
+            'idplan' => 'required',
+            'fecha' => 'required',
+            'toggle' => 'required'
+        );
+
+        // array: infoIdIdioma, infoTitulo
+
+        $validar = Validator::make($request->all(), $regla);
+
+        if ($validar->fails()){ return ['success' => 0];}
+
+        DB::beginTransaction();
+
+        try {
+
+            $datosContenedor = json_decode($request->contenedorArray, true);
+
+            // crear un plan bloque
+            $bloque = new PlanesBloques();
+            $bloque->id_planes = $request->idplan;
+            $bloque->fecha_inicio = $request->fecha;
+            $bloque->visible = 0;
+            $bloque->texto_personalizado = $request->toggle;
+            $bloque->save();
+
+            if($request->toggle == 1){
+
+                // sus idiomas
+                foreach ($datosContenedor as $filaArray) {
+
+
+                    // comprobar si existe para actualizar o crear segun idioma nuevo
+                    if(PlanesBloquesTextos::where('id_planes_bloques', $bloque->id)
+                        ->where('id_idioma_planes', $filaArray['infoIdIdioma'])
+                        ->first()){
+
+                        // no registrar porque ya esta registrado
+                    }else{
+                        // como no encontro, se creara
+
+                        $detalle = new PlanesBloquesTextos();
+                        $detalle->id_planes_bloques = $bloque->id;
+                        $detalle->id_idioma_planes = $filaArray['infoIdIdioma'];
+                        $detalle->titulo = $filaArray['infoTitulo'];
+                        $detalle->save();
+                    }
+                }
+            }
+
+
+            // completado y actualizado
+            DB::commit();
+            return ['success' => 1];
+        }catch(\Throwable $e){
+            Log::info('error: ' . $e);
+            DB::rollback();
+            return ['success' => 99];
+        }
+    }
+
+
+    public function indexEditarPlanBloque($idplanbloque){
+
+
+        $infoBloque = PlanesBloques::where('id', $idplanbloque)->first();
+        $arrayIdiomas = IdiomaPlanes::orderBy('id', 'ASC')->get();
+        $arrayPlanBloqueTextos = PlanesBloquesTextos::where('id_planes_bloques', $idplanbloque)
+            ->orderBy('id_idioma_planes', 'ASC')
+            ->get();
+
+        $contador = 0;
+        foreach ($arrayPlanBloqueTextos as $dato){
+            $contador++;
+            $dato->contador = $contador;
+
+            $infoIdioma = IdiomaPlanes::where('id', $dato->id_idioma_planes)->first();
+            $dato->idioma = $infoIdioma->nombre;
+        }
+
+        return view('backend.admin.devocional.planes.bloques.editar.vistaeditarplanbloque', compact('infoBloque', 'arrayIdiomas', 'idplanbloque', 'arrayPlanBloqueTextos'));
+    }
+
+
+
+    public function actualizarPlanesBloques(Request $request){
+
+        $regla = array(
+            'idplanbloque' => 'required',
+            'fecha' => 'required',
+            'toggle' => 'required'
+        );
+
+        // array: infoIdBloqueTexto, infoIdIdioma, infoTitulo
+
+        $validar = Validator::make($request->all(), $regla);
+
+        if ($validar->fails()){ return ['success' => 0];}
+
+        DB::beginTransaction();
+
+        try {
+
+            PlanesBloques::where('id', $request->idplanbloque)->update([
+                'fecha_inicio' => $request->fecha,
+                'texto_personalizado' => $request->toggle
+            ]);
+
+            $datosContenedor = json_decode($request->contenedorArray, true);
+
+            // sus idiomas
+            foreach ($datosContenedor as $filaArray) {
+
+                // comprobar si existe para actualizar o crear segun idioma nuevo
+                if($infoBloqueTexto = PlanesBloquesTextos::where('id', $filaArray['infoIdBloqueTexto'])->first()){
+
+                    // actualizar
+                    PlanesBloquesTextos::where('id', $infoBloqueTexto->id)->update([
+                        'titulo' => $filaArray['infoTitulo'],
+                    ]);
+
+                }else{
+
+                    // como no encontro, se creara
+
+                    $detalle = new PlanesBloquesTextos();
+                    $detalle->id_planes_bloques = $request->idplanbloque;
+                    $detalle->id_idioma_planes = $filaArray['infoIdIdioma'];
+                    $detalle->titulo = $filaArray['infoTitulo'];
+                    $detalle->save();
+                }
+            }
+
+            // completado y actualizado
+            DB::commit();
+            return ['success' => 1];
+        }catch(\Throwable $e){
+            Log::info('error: ' . $e);
+            DB::rollback();
+            return ['success' => 99];
+        }
+    }
+
+    // redirecciona a vista donde se agrega detalle a planbloque
+    public function indexBloqueDetalle($idplanbloque){
+
+        return view('backend.admin.devocional.planes.bloques.bloquedetalle.vistabloquedetalle', compact('idplanbloque'));
+    }
+
+    public function tablaBloqueDetalle($idplanbloque){
+
+        return "tablaa2";
+
+        return view('backend.admin.devocional.planes.bloques.bloquedetalle.tablabloquedetalle');
+    }
+
+    public function indexNuevoPlanBloqueDetalle($idplanbloque){
+
+        $arrayIdiomas = IdiomaPlanes::orderBy('id', 'ASC')->get();
+
+        $fechaCarbon = Carbon::now('America/El_Salvador');
+        $fechaActual = date("Y-m-d", strtotime($fechaCarbon));
+
+        return view('backend.admin.devocional.planes.bloques.bloquedetalle.nuevo.vistanuevoplanbloquedetalle', compact('arrayIdiomas', 'fechaActual', 'idplanbloque'));
+    }
+
+
+    public function registrarPlanesBloquesDetalle(Request $request){
+
+        $regla = array(
+            'idplanbloque' => 'required',
+            'fecha' => 'required',
+        );
+
+        // array: infoIdIdioma, infoTitulo, infoDescripcion
+
+        $validar = Validator::make($request->all(), $regla);
+
+        if ($validar->fails()){ return ['success' => 0];}
+
+        DB::beginTransaction();
+
+        try {
+
+            $datosContenedor = json_decode($request->contenedorArray, true);
+
+            if($info = PlanesBlockDetalle::where('id_planes_bloques')
+            ->orderBy('posicion', 'DESC')->first()){
+                $nuevaPosicion = $info->posicion + 1;
+            }else{
+                $nuevaPosicion = 1;
+            }
+
+
+            // crear un plan bloque
+            $bloque = new PlanesBlockDetalle();
+            $bloque->id_planes_bloques = $request->idplanbloque;
+            $bloque->posicion = $nuevaPosicion;
+            $bloque->visible = 0;
+            $bloque->save();
+
+
+            // sus idiomas
+            foreach ($datosContenedor as $filaArray) {
+
+                // comprobar si existe para evitar duplicados o crear segun idioma nuevo
+                if(PlanesBlockDetaTextos::where('id_planes_block_detalle', $bloque->id)
+                    ->where('id_idioma_planes', $filaArray['infoIdIdioma'])
+                    ->first()){
+
+                    // no registrar porque ya esta creado
+                }else{
+                    // como no encontro, se creara
+
+                    $detalle = new PlanesBlockDetaTextos();
+                    $detalle->id_planes_block_detalle = $bloque->id;
+                    $detalle->id_idioma_planes = $filaArray['infoIdIdioma'];
+                    $detalle->titulo = $filaArray['infoTitulo'];
+                    $detalle->titulo_pregunta = $filaArray['infoDescripcion'];
+                    $detalle->save();
+                }
+            }
+
+            // completado y actualizado
+            DB::commit();
+            return ['success' => 1];
+        }catch(\Throwable $e){
+            Log::info('error: ' . $e);
+            DB::rollback();
+            return ['success' => 99];
+        }
     }
 
 }

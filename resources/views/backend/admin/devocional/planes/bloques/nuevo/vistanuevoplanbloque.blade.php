@@ -74,7 +74,7 @@
                                     <i class="far fa-question-circle" onclick="queEsEsto()"></i>
                                     <br>
                                     <label class="switch" style="margin-top:10px">
-                                        <input type="checkbox" id="toggle-visible">
+                                        <input type="checkbox" id="toggle-personalizado">
                                         <div class="slider round">
                                             <span class="on">Activo</span>
                                             <span class="off">Inactivo</span>
@@ -116,7 +116,7 @@
                             </div>
                         </div>
                     </div>
-                    <button type="button" class="btn btn-info btn-sm" onclick="verificarIdiomaTabla()">Agregar Idioma</button>
+                    <button type="button" class="btn btn-info btn-sm" onclick="verificarTextoTabla()">Agregar Texto Personalizado</button>
 
 
                 </section>
@@ -141,7 +141,6 @@
                         <th style="width: 4%">#</th>
                         <th style="width: 10%">Idioma</th>
                         <th style="width: 10%">Título</th>
-                        <th style="width: 10%">Subtitulo (Opcional)</th>
                         <th style="width: 6%">Opciones</th>
                     </tr>
                     </thead>
@@ -155,7 +154,7 @@
 
 
     <div class="modal-footer justify-content-between float-right" style="margin-top: 25px; margin-bottom: 30px;">
-        <button type="button" class="btn btn-success" onclick="preguntarGuardar()">Guardar Devocional</button>
+        <button type="button" class="btn btn-success" onclick="preguntarGuardar()">Guardar Fecha</button>
     </div>
 
 
@@ -163,9 +162,9 @@
 
 
 
-    <!-- MODAL PARA AGREGAR DATOS DE UN IDIOMA -->
+    <!-- MODAL PARA AGREGAR DATOS DE UN TEXTO PERSONALIZADO -->
 
-    <div class="modal fade" id="modalDatosIdioma" >
+    <div class="modal fade" id="modalDatosPersonalizado" >
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
@@ -175,23 +174,13 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form id="formulario-datosidioma">
+                    <form id="formulario-personalizado">
                         <div class="card-body">
                             <div class="col-md-12">
 
                                 <div class="form-group">
                                     <label>Título</label>
-                                    <input type="text" maxlength="150" autocomplete="off" class="form-control" id="titulo-plan">
-                                </div>
-
-                                <div class="form-group">
-                                    <label>Subtitulo (Opcional)</label>
-                                    <input type="text" maxlength="50" autocomplete="off" class="form-control" id="subtitulo-plan">
-                                </div>
-
-                                <div class="form-group">
-                                    <label>Descripción (Opcional)</label>
-                                    <textarea name="editor-descripcion" id="editor-descripcion"></textarea>
+                                    <input type="text" maxlength="30" autocomplete="off" class="form-control" id="titulo-personalizado">
                                 </div>
 
                             </div>
@@ -223,42 +212,10 @@
     <script src="{{ asset('js/sweetalert2.all.min.js') }}"></script>
     <script src="{{ asset('js/alertaPersonalizada.js') }}"></script>
     <script src="{{ asset('js/select2.min.js') }}"></script>
-    <script src="{{ asset('js/ckeditor5.js') }}"></script>
 
 
     <script type="text/javascript">
         $(document).ready(function() {
-
-            window.varGlobalEditorDescripcion;
-
-            ClassicEditor
-                .create( document.querySelector( '#editor-descripcion' ), {
-
-                    toolbar: {
-                        items: [
-                            'heading',
-                            '|',
-                            'bold',
-                            'italic',
-                            'underline',
-                            'strikethrough',
-                            '|',
-                            'numberedList',
-                            'bulletedList',
-                            '|',
-                            'alignment',
-                            '|',
-                            'undo',
-                            'redo'
-                        ]
-                    },
-                    language: 'es',
-                })
-                .then( editor => {
-                    varGlobalEditorDescripcion = editor;
-                } )
-                .catch( error => {
-                } );
 
             document.getElementById("divcontenedor").style.display = "block";
         });
@@ -284,7 +241,7 @@
         }
 
 
-        function verificarIdiomaTabla(){
+        function verificarTextoTabla(){
 
             var idIdiomaSelect = document.getElementById('select-idioma').value;
 
@@ -303,10 +260,8 @@
 
             // puede abrir modal para registrar datos
 
-            document.getElementById("formulario-datosidioma").reset();
-            varGlobalEditorDescripcion.setData("");
-
-            $('#modalDatosIdioma').modal('show');
+            document.getElementById("formulario-personalizado").reset();
+            $('#modalDatosPersonalizado').modal('show');
         }
 
 
@@ -332,8 +287,7 @@
             }
 
             // verificar datos cada uno
-            var titulo = document.getElementById('titulo-plan').value;
-            var subtitulo = document.getElementById('subtitulo-plan').value; // opcional
+            var titulo = document.getElementById('titulo-personalizado').value;
 
             if(titulo === ''){
                 toastr.error('Título es requerido')
@@ -341,13 +295,10 @@
             }
 
             // subtitulo y descripcion son opcionales
-            if(subtitulo.length > 50){
-                toastr.error('Subtitulo 50 caracteres máximo')
+            if(titulo.length > 30){
+                toastr.error('Título 30 caracteres máximo')
                 return;
             }
-
-            const editorDataDescripcion = varGlobalEditorDescripcion.getData();
-
 
 
             // AGREGAR A FILA
@@ -365,14 +316,8 @@
                 "<input name='arrayIdioma[]' disabled data-ididioma='" + idIdiomaSelect + "' value='" + selectedOptionText + "' class='form-control' type='text'>" +
                 "</td>" +
 
-
                 "<td>" +
                 "<input name='arrayTitulo[]' disabled value='" + titulo + "' class='form-control' type='text'>" +
-                "</td>" +
-
-                "<td>" +
-                "<input name='arraySubtitulo[]' disabled value='" + subtitulo + "' class='form-control' type='text'>" +
-                "<input name='arrayDescripcion[]' style='display: none' data-txtdescripcion='" + editorDataDescripcion + "' class='form-control' type='text'>" +
                 "</td>" +
 
                 "<td>" +
@@ -393,7 +338,7 @@
             })
 
 
-            $('#modalDatosIdioma').modal('hide');
+            $('#modalDatosPersonalizado').modal('hide');
         }
 
 
@@ -407,7 +352,7 @@
         function preguntarGuardar(){
 
             Swal.fire({
-                title: '¿Guardar Devocional?',
+                title: '¿Guardar Fecha?',
                 text: '',
                 icon: 'info',
                 showCancelButton: true,
@@ -418,42 +363,21 @@
                 cancelButtonText: 'NO'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    guardarPlanFinal();
+                    guardarBloqueFinal();
                 }
             })
         }
 
-        function guardarPlanFinal(){
+        function guardarBloqueFinal(){
 
             var fecha = document.getElementById('fecha').value;
-            var imagen = document.getElementById('imagen-nuevo');
-            var imagenPortada = document.getElementById('imagenportada-nuevo');
             var selectIdioma = document.getElementById("select-idioma");
+            let t = document.getElementById('toggle-personalizado').checked;
+            let togglePersonalizado = t ? 1 : 0;
+
 
             if(fecha === ''){
                 toastr.error('Fecha es Requerida');
-                return;
-            }
-
-
-            if(imagen.files && imagen.files[0]){ // si trae imagen
-                if (!imagen.files[0].type.match('image/jpeg|image/jpeg|image/png')){
-                    toastr.error('Formato de imagen permitido: .png .jpg .jpeg');
-                    return;
-                }
-            }else{
-                toastr.error('Imagen es Requerida')
-                return;
-            }
-
-
-            if(imagenPortada.files && imagenPortada.files[0]){ // si trae imagen
-                if (!imagenPortada.files[0].type.match('image/jpeg|image/jpeg|image/png')){
-                    toastr.error('Formato de imagen permitido: .png .jpg .jpeg');
-                    return;
-                }
-            }else{
-                toastr.error('Imagen Portada es Requerida')
                 return;
             }
 
@@ -464,53 +388,47 @@
 
             var nRegistro = $('#matriz > tbody >tr').length;
 
-            if (nRegistro !== conteoIdioma){
-                toastr.error('Idiomas son requeridos');
-                return;
+            // verificar que si activo texto personalizado
+            if(togglePersonalizado == 1){
+                if (nRegistro !== conteoIdioma){
+
+                    toastr.error('Idiomas son requeridos');
+                    return;
+                }
             }
 
-
-            // obtener ID idioma, titulo, subtitulo, descripcion
-
-
-
-
+            let idplan = {{ $idplan }};
 
             let formData = new FormData();
             const contenedorArray = [];
             var arrayIdIdioma = $("input[name='arrayIdioma[]']").map(function(){return $(this).attr("data-ididioma");}).get();
             var arrayTitulo = $("input[name='arrayTitulo[]']").map(function(){return $(this).val();}).get();
-            var arraySubtitulo = $("input[name='arraySubtitulo[]']").map(function(){return $(this).val();}).get();
-            var arrayDescripcion = $("input[name='arrayDescripcion[]']").map(function(){return $(this).attr("data-txtdescripcion");}).get();
-
 
             for(var i = 0; i < arrayIdIdioma.length; i++){
 
                 let infoIdIdioma = arrayIdIdioma[i];
                 let infoTitulo = arrayTitulo[i];
-                let infoSubtitulo = arraySubtitulo[i];
-                let infoDescripcion = arrayDescripcion[i];
 
                 // ESTOS NOMBRES SE UTILIZAN EN CONTROLADOR
-                contenedorArray.push({ infoIdIdioma, infoTitulo, infoSubtitulo, infoDescripcion});
+                contenedorArray.push({ infoIdIdioma, infoTitulo });
             }
 
             formData.append('contenedorArray', JSON.stringify(contenedorArray));
             formData.append('fecha', fecha);
-            formData.append('imagen', imagen.files[0]);
-            formData.append('imagenportada', imagenPortada.files[0]);
+            formData.append('idplan', idplan);
+            formData.append('toggle', togglePersonalizado);
 
             openLoading();
 
-            axios.post('/admin/planes/agregar/nuevo', formData, {
+            axios.post('/admin/planesbloques/agregar/nuevo', formData, {
             })
                 .then((response) => {
                     closeLoading();
 
                    if(response.data.success === 1){
                         Swal.fire({
-                            title: "Devocional Creado",
-                            text: "Se deberan registrar cada fecha del devocional",
+                            title: "Fecha Creada",
+                            text: "Se deberan registrar el Detalle para esta Fecha",
                             icon: 'success',
                             showCancelButton: false,
                             allowOutsideClick: false,

@@ -20,18 +20,18 @@
         <div class="row mb-2">
             <div class="col-sm-6">
 
-                <p style="font-weight: bold; font-size: 16px">Devocional: {{$nombreDevo}}</p>
+                <p style="font-weight: bold; font-size: 16px">Detalle del Devocional</p>
 
-                <button type="button" onclick="vistaNuevoPlanBloque()" class="btn btn-primary btn-sm">
+                <button type="button" onclick="vistaNuevoPlanBloqueDetalle()" class="btn btn-primary btn-sm">
                     <i class="fas fa-plus-square"></i>
-                    Nueva Fecha
+                    Nuevo Detalle
                 </button>
             </div>
 
             <div class="col-sm-6">
                 <ol class="breadcrumb float-sm-right">
                     <li class="breadcrumb-item">Devocional</li>
-                    <li class="breadcrumb-item active">Fechas</li>
+                    <li class="breadcrumb-item active">Detalle</li>
                 </ol>
             </div>
 
@@ -42,7 +42,7 @@
         <div class="container-fluid">
             <div class="card card-success">
                 <div class="card-header">
-                    <h3 class="card-title">Listado de Fechas para Devocional</h3>
+                    <h3 class="card-title">Listado de Detalles</h3>
                 </div>
                 <div class="card-body">
                     <div class="row">
@@ -56,7 +56,7 @@
         </div>
     </section>
 
- </div>
+</div>
 
 
 @extends('backend.menus.footerjs')
@@ -72,12 +72,11 @@
 
     <script type="text/javascript">
         $(document).ready(function(){
-            var idplan = {{ $idplan }};
-            var ruta = "{{ URL::to('/admin/planesbloques/tabla/index') }}/" + idplan;
+            var idplanbloque = {{ $idplanbloque }};
+            var ruta = "{{ URL::to('/admin/planbloquedetalle/tabla') }}/" + idplanbloque;
             $('#tablaDatatable').load(ruta);
 
             document.getElementById("divcontenedor").style.display = "block";
-
         });
     </script>
 
@@ -85,23 +84,23 @@
 
         // recarga tabla
         function recargar(){
-            var idplan = {{ $idplan }};
-            var ruta = "{{ URL::to('/admin/planesbloques/tabla/index') }}/" + idplan;
+            var idplanbloque = {{ $idplanbloque }};
+            var ruta = "{{ URL::to('/admin/planbloquedetalle/tabla') }}/" + idplanbloque;
             $('#tablaDatatable').load(ruta);
         }
 
 
-        function vistaNuevoPlanBloque(){
-            var idplan = {{ $idplan }};
-            window.location.href="{{ url('/admin/planesbloques/agregar/nuevo/index') }}/" + idplan;
+        function vistaNuevoPlanBloqueDetalle(){
+            var idplanbloque = {{ $idplanbloque }};
+            window.location.href="{{ url('/admin/planbloquedetalle/agregar/nuevo/index') }}/" + idplanbloque;
         }
 
-        function informacionEditar(idplanbloque){
-            window.location.href="{{ url('/admin/planesbloques/vista/editar/index') }}/" + idplanbloque;
+        function informacionEditar(idplanbloquedetalle){
+            window.location.href="{{ url('/admin/pxxxx') }}/" + idplanbloquedetalle;
         }
 
-        // aqui se ingresara a ver el detalle de ese bloque
-        function informacionDetalleBloque(idplanbloque){
+        // aqui se ingresara para agregar Texto Devocional y Preguntas
+        function informacionDetalleBloqueDevocional(idplanbloque){
             window.location.href="{{ url('/admin/planbloquedetalle/vista') }}/" + idplanbloque;
         }
 

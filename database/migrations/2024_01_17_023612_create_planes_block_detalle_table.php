@@ -17,6 +17,7 @@ return new class extends Migration
 
             $table->bigInteger('id_planes_bloques')->unsigned();
             $table->integer('posicion');
+            $table->boolean('visible');
 
             $table->foreign('id_planes_bloques')->references('id')->on('planes_bloques');
         });
