@@ -280,6 +280,7 @@
             let formData = new FormData();
             formData.append('id', id);
             formData.append('nombre', descripcion);
+            formData.append('imagen', imagen.files[0]);
 
             axios.post('/admin/imagenpreguntas/actualizar', formData, {
             })

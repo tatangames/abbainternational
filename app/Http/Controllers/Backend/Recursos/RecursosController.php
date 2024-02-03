@@ -232,7 +232,7 @@ class RecursosController extends Controller
     public function actualizarImagenPregunta(Request $request)
     {
         $rules = array(
-            'idfila' => 'required',
+            'id' => 'required',
             'nombre' => 'required',
         );
 
@@ -246,7 +246,7 @@ class RecursosController extends Controller
 
         if ($request->hasFile('imagen')) {
 
-            if($infoImagen = ImagenPreguntas::where('id', $request->idfila)->first()){
+            if($infoImagen = ImagenPreguntas::where('id', $request->id)->first()){
 
                 $cadena = Str::random(15);
                 $tiempo = microtime();

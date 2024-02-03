@@ -47,7 +47,7 @@
         <div class="container-fluid">
             <div class="card card-success">
                 <div class="card-header">
-                    <h3 class="card-title">Editar Detalle</h3>
+                    <h3 class="card-title">Editar Pregunta</h3>
                 </div>
                 <div class="card-body">
                     <div>
@@ -66,19 +66,45 @@
         <div class="row mb-12">
             <div class="col-sm-12">
                 <section>
-                    <div class="row">
 
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label class="control-label">Idioma para Texto Personalizado:</label>
-                                <select class="form-control" id="select-idioma">
-                                    @foreach($arrayIdiomas as $item)
-                                        <option value="{{$item->id}}">{{$item->nombre}}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
+
+                    <div class="form-group col-md-3">
+                        <label class="control-label">Seleccionar Imagen</label>
+                        <select class="form-control" id="select-imagen">
+                            @foreach($arrayImagenes as $item)
+                                @if($infoPregunta->id_imagen_pregunta == $item->id)
+                                    <option value="{{$item->id}}" selected>{{$item->nombre}}</option>
+                                @else
+                                    <option value="{{$item->id}}">{{$item->nombre}}</option>
+                                @endif
+
+                            @endforeach
+                        </select>
                     </div>
+
+                    <div class="form-group" style="margin-left: 5px">
+                        <label>Pregunta es Requerida</label><br>
+                        <label class="switch" style="margin-top:10px">
+                            <input type="checkbox" id="toggle-requerida">
+                            <div class="slider round">
+                                <span class="on">Sí</span>
+                                <span class="off">No</span>
+                            </div>
+                        </label>
+                    </div>
+
+
+                    <div class="form-group col-md-3" style="margin-top: 35px">
+                        <label class="control-label">Idioma</label>
+                        <select class="form-control" id="select-idioma">
+                            @foreach($arrayIdiomas as $item)
+                                <option value="{{$item->id}}">{{$item->nombre}}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+
+
                     <button type="button" class="btn btn-info btn-sm" onclick="verificarIdiomaTabla()">Agregar Idioma</button>
 
 
@@ -103,14 +129,13 @@
                     <tr>
                         <th style="width: 4%">#</th>
                         <th style="width: 10%">Idioma</th>
-                        <th style="width: 10%">Título</th>
                         <th style="width: 6%">Opciones</th>
                     </tr>
                     </thead>
                     <tbody>
 
 
-                    @foreach($arrayPlanBlockDetaTextos as $item)
+                    @foreach($arrayBloquePreguntasTextos as $item)
                         <tr>
                             <td>
                                 <p id="fila" class="form-control" style="max-width: 65px">{{ $item->contador }}</p>
@@ -118,14 +143,10 @@
 
                             <td>
                                 <!-- data-ididioma se utiliza para comparar si falta agregar idioma nuevo -->
-                                <input name="arrayIdioma[]" disabled data-idbloquedetatexto="{{ $item->id }}" data-ididioma="{{ $item->id_idioma_planes }}" value="{{ $item->idioma }}" class="form-control" type="text">
-                            </td>
+                                <input name="arrayIdioma[]" disabled data-idbloquepreguntastextos="{{ $item->id }}" data-ididioma="{{ $item->id_idioma_planes }}" value="{{ $item->idioma }}" class="form-control" type="text">
+                                <input name="arrayDescripcion[]" disabled style="display: none" data-txtdescripcion="{{ $item->texto }}" class="form-control" type="text">
 
-                            <td>
-                                <input name="arrayTitulo[]" disabled  value="{{ $item->titulo }}" class="form-control" type="text">
-                                <input name="arrayDescripcion[]" disabled style="display: none" data-txtdescripcion="{{ $item->titulo_pregunta }}" class="form-control" type="text">
                             </td>
-
 
                             <td>
                                 <button type="button" class="btn btn-block btn-info" onclick="editarFila(this)">Editar</button>
@@ -143,7 +164,7 @@
 
 
     <div class="modal-footer justify-content-between float-right" style="margin-top: 25px; margin-bottom: 30px;">
-        <button type="button" class="btn btn-success" onclick="preguntarGuardar()">Actualizar Devocional</button>
+        <button type="button" class="btn btn-success" onclick="preguntarGuardar()">Actualizar Pregunta</button>
     </div>
 
 
@@ -162,11 +183,6 @@
                     <form id="formulario-datosidioma">
                         <div class="card-body">
                             <div class="col-md-12">
-
-                                <div class="form-group">
-                                    <label>Título</label>
-                                    <input type="text" maxlength="100" autocomplete="off" class="form-control" id="titulo-nuevo">
-                                </div>
 
                                 <div class="form-group">
                                     <label>Descripción </label>
@@ -202,10 +218,6 @@
                         <div class="card-body">
                             <div class="col-md-12">
 
-                                <div class="form-group">
-                                    <label>Título</label>
-                                    <input type="text" maxlength="100" autocomplete="off" class="form-control" id="titulo-editar">
-                                </div>
 
                                 <div class="form-group">
                                     <label>Descripción </label>
@@ -219,7 +231,7 @@
                 </div>
                 <div class="modal-footer justify-content-between">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
-                    <button type="button" class="btn btn-success" onclick="actualizarDatosEditados()">Actualizar Fila</button>
+                    <button type="button" class="btn btn-success" onclick="actualizarDatosEditados()">Actualizar Preguntas</button>
                 </div>
             </div>
         </div>
@@ -246,7 +258,6 @@
     <script type="text/javascript">
         $(document).ready(function() {
 
-
             window.varGlobalEditorDescripcion;
             window.varGlobalEditorDescripcionEditados;
 
@@ -272,13 +283,18 @@
 
                 });
 
+
+            let valor = {{ $infoPregunta->requerido }};
+
+            if(valor == 1){
+                $("#toggle-requerida").prop("checked", true);
+            }
+
             document.getElementById("divcontenedor").style.display = "block";
         });
     </script>
 
     <script>
-
-        var referenciaArrayTitulo;
 
 
         // obtener los datos de la fila y llevarlos al modal
@@ -286,19 +302,10 @@
 
             var fila = $(e).closest('tr');
 
-            var valorInputTitulo = fila.find('input[name="arrayTitulo[]"]').val();
-            var valorInputTituloRef = fila.find('input[name="arrayTitulo[]"]');
-            referenciaArrayTitulo = valorInputTituloRef;
-
             var valorInputDescripcionRef = fila.find('input[name="arrayDescripcion[]"]');
             var valorActualDescrip = valorInputDescripcionRef.data('txtdescripcion'); // ESTE ES EL DATA-
             referenciaArrayDescripcion = valorInputDescripcionRef;
 
-
-            // limpiar modal
-            document.getElementById("formulario-datoseditados").reset();
-
-            $('#titulo-editar').val(valorInputTitulo);
 
             varGlobalEditorDescripcionEditados.setData(valorActualDescrip);
 
@@ -308,22 +315,6 @@
         // METER LOS DATOS DE NUEVO A LA FILA
         function actualizarDatosEditados(){
 
-            var titulo = document.getElementById('titulo-editar').value;
-
-            if(titulo === ''){
-                toastr.error('Título es requerido')
-                return;
-            }
-
-            // subtitulo y descripcion son opcionales
-            if(titulo.length > 30){
-                toastr.error('Título 30 caracteres máximo')
-                return;
-            }
-
-            // Actualizar la fila con las referencias
-            referenciaArrayTitulo.val(titulo);
-
             const editorDataDescripcionEdit = varGlobalEditorDescripcionEditados.getData();
             referenciaArrayDescripcion.data('txtdescripcion', editorDataDescripcionEdit);
 
@@ -331,7 +322,7 @@
         }
 
 
-        // verificar que idioma no este en la tabla, para abrir modal y agrgear el nuevo idioma a la fila
+        // verificar que idioma no este en la tabla, para abrir modal y agregar el nuevo idioma a la fila
         function verificarIdiomaTabla(){
 
             var idIdiomaSelect = document.getElementById('select-idioma').value;
@@ -379,20 +370,6 @@
                 }
             }
 
-            // verificar datos cada uno
-            var titulo = document.getElementById('titulo-nuevo').value;
-
-            if(titulo === ''){
-                toastr.error('Título es requerido')
-                return;
-            }
-
-            // subtitulo y descripcion son opcionales
-            if(titulo.length > 30){
-                toastr.error('Título 30 caracteres máximo')
-                return;
-            }
-
 
             // AGREGAR A FILA
             const editorDataDescripcionEdit = varGlobalEditorDescripcionEditados.getData();
@@ -410,12 +387,7 @@
                 "</td>" +
 
                 "<td>" +
-                "<input name='arrayIdioma[]' disabled    data-idbloquedetatexto='" + valorNull + "'  data-ididioma='" + idIdiomaSelect + "' value='" + selectedOptionText + "' class='form-control' type='text'>" +
-                "</td>" +
-
-
-                "<td>" +
-                "<input name='arrayTitulo[]' disabled value='" + titulo + "' class='form-control' type='text'>" +
+                "<input name='arrayIdioma[]' disabled    data-idbloquepreguntastextos='" + valorNull + "'  data-ididioma='" + idIdiomaSelect + "' value='" + selectedOptionText + "' class='form-control' type='text'>" +
                 "<input name='arrayDescripcion[]' disabled  data-txtdescripcion='" + editorDataDescripcionEdit + "'  style='display: none' class='form-control' type='hidden'>" +
                 "</td>" +
 
@@ -443,14 +415,14 @@
 
 
         function vistaAtras(){
-            let idplanesbloques = {{ $infoBloque->id_planes_bloques }};
-            window.location.href="{{ url('/admin/planbloquedetalle/vista') }}/" + idplanesbloques;
+            let idplanbloquedetalle = {{ $infoPregunta->id_plan_block_detalle }};
+            window.location.href="{{ url('/admin/preguntas/vista') }}/" + idplanbloquedetalle;
         }
 
         function preguntarGuardar(){
 
             Swal.fire({
-                title: '¿Actualizar Detalle?',
+                title: '¿Actualizar Pregunta?',
                 text: '',
                 icon: 'info',
                 showCancelButton: true,
@@ -461,17 +433,17 @@
                 cancelButtonText: 'NO'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    actualizarDetalleFinal();
+                    actualizarPreguntaFinal();
                 }
             })
         }
 
         // Actualizando los datos en el servidor
-        function actualizarDetalleFinal(){
+        function actualizarPreguntaFinal(){
 
             var selectIdioma = document.getElementById("select-idioma");
 
-                 // Verificar que haya ingresado todos los idiomas
+            // Verificar que haya ingresado todos los idiomas
             let conteoIdioma = selectIdioma.length;
 
 
@@ -485,13 +457,18 @@
 
             // obtener ID idioma, titulo, subtitulo, descripcion
 
-            let idplanbloquedetalle = {{ $idplanbloquedetalle }};
+            let idbloquepreguntas = {{ $infoPregunta->id }};
+
+            // id imagen y toggle
+            var selectImagen = document.getElementById("select-imagen").value;
+            let t = document.getElementById('toggle-requerida').checked;
+            let toggle = t ? 1 : 0;
+
 
             let formData = new FormData();
             const contenedorArray = [];
             var arrayIdIdioma = $("input[name='arrayIdioma[]']").map(function(){return $(this).attr("data-ididioma");}).get();
-            var arrayIdBloqueDetaTexto = $("input[name='arrayIdioma[]']").map(function(){return $(this).attr("data-idbloquedetatexto");}).get();
-            var arrayTitulo = $("input[name='arrayTitulo[]']").map(function(){return $(this).val();}).get();
+            var arrayIdBloquePreguntasTextos = $("input[name='arrayIdioma[]']").map(function(){return $(this).attr("data-idbloquepreguntastextos");}).get();
 
             // OBTENER LOS DATOS ACTUALIZADOS PORQUE SE EDITAN
             var arrayDescripcion = $("input[name='arrayDescripcion[]']").map(function() {
@@ -500,21 +477,22 @@
 
 
             for(var i = 0; i < arrayIdIdioma.length; i++){
-                let infoIdBloqueDetaTexto = arrayIdBloqueDetaTexto[i];
+                let infoIdBloquePreguntaTextos = arrayIdBloquePreguntasTextos[i];
                 let infoIdIdioma = arrayIdIdioma[i];
-                let infoTitulo = arrayTitulo[i];
                 let infoDescripcion = arrayDescripcion[i];
 
                 // ESTOS NOMBRES SE UTILIZAN EN CONTROLADOR
-                contenedorArray.push({ infoIdBloqueDetaTexto, infoIdIdioma, infoTitulo, infoDescripcion});
+                contenedorArray.push({ infoIdBloquePreguntaTextos, infoIdIdioma, infoDescripcion});
             }
 
             formData.append('contenedorArray', JSON.stringify(contenedorArray));
-            formData.append('idplanbloquedetalle', idplanbloquedetalle);
+            formData.append('idbloquepreguntas', idbloquepreguntas);
+            formData.append('idimagen', selectImagen);
+            formData.append('toggle', toggle);
 
             openLoading();
 
-            axios.post('/admin/planbloquedetalle/datos/actualizar', formData, {
+            axios.post('/admin/preguntas/editar', formData, {
             })
                 .then((response) => {
                     closeLoading();

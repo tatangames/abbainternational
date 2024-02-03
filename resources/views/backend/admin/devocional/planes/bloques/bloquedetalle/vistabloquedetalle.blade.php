@@ -106,6 +106,10 @@
         }
 
         // vistan listado de preguntas
+        function vistaPreguntas(idplanbloquedetalle){
+            window.location.href="{{ url('/admin/preguntas/vista') }}/" + idplanbloquedetalle;
+        }
+
 
     </script>
 

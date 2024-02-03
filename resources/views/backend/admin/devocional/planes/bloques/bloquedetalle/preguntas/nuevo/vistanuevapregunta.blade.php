@@ -7,6 +7,8 @@
     <link href="{{ asset('css/buttons_estilo.css') }}" rel="stylesheet">
     <link href="{{ asset('css/select2.min.css') }}" type="text/css" rel="stylesheet">
     <link href="{{ asset('css/select2-bootstrap-5-theme.min.css') }}" type="text/css" rel="stylesheet">
+    <link href="{{ asset('css/estiloToggle.css') }}" type="text/css" rel="stylesheet" />
+
 @stop
 
 <style>
@@ -34,95 +36,56 @@
 
     <section class="content-header">
         <div class="container-fluid">
-            <button type="button" style="font-weight: bold; background-color: #2339cc; color: white !important;" onclick="vistaAtrasPlanes()" class="button button-3d button-rounded button-pill button-small">
+            <button type="button" style="font-weight: bold; background-color: #2339cc; color: white !important;" onclick="vistaAtrasPlanesBloquesDetalle()" class="button button-3d button-rounded button-pill button-small">
                 <i class="fas fa-arrow-left"></i>
                 Atras
             </button>
         </div>
     </section>
 
-
-    <section class="content" style="margin-top: 20px">
-        <div class="container-fluid">
-            <div class="card card-success">
-                <div class="card-header">
-                    <h3 class="card-title">Crear Nuevo Devocional</h3>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-12">
-
-                            <section>
-                                <div class="row">
-
-                                    <div class="col-md-3">
-                                        <div class="form-group">
-                                            <label class="control-label">Fecha:</label>
-                                            <input type="date" class="form-control" id="fecha" value="{{ $fechaActual }}">
-                                        </div>
-                                    </div>
-                                </div>
-
-                            </section>
-
-                            <section style="margin-top: 15px">
-                                <div class="row">
-                                    <div class="form-group">
-                                        <div class="form-group">
-                                            <label class="control-label">Imagen (Ejemplo: 400x400 px)</label>
-                                            <input type="file" class="form-control" style="color:#191818" id="imagen-nuevo" accept="image/jpeg, image/jpg, image/png"/>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="row">
-                                    <div class="form-group">
-                                        <div class="form-group">
-                                            <label class="control-label">Imagen Portada (Ejemplo: 600x400 px)</label>
-                                            <input type="file" class="form-control" style="color:#191818" id="imagenportada-nuevo" accept="image/jpeg, image/jpg, image/png"/>
-                                        </div>
-                                    </div>
-                                </div>
-                            </section>
-
-                            <hr><br>
-
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-
     <section class="content-header">
         <div class="row mb-12">
             <div class="col-sm-12">
                 <section>
-                    <div class="row">
 
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label class="control-label">Idioma para nuevo Devocional:</label>
-                                <select class="form-control" id="select-idioma">
-                                    @foreach($arrayIdiomas as $item)
-                                        <option value="{{$item->id}}">{{$item->nombre}}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
+
+
+                    <div class="form-group col-md-3">
+                        <label class="control-label">Seleccionar Imagen</label>
+                        <select class="form-control" id="select-imagen">
+                            @foreach($arrayImagenes as $item)
+                                <option value="{{$item->id}}">{{$item->nombre}}</option>
+                            @endforeach
+                        </select>
                     </div>
-                    <button type="button" class="btn btn-info btn-sm" onclick="verificarIdiomaTabla()">Agregar Idioma</button>
 
+                    <div class="form-group" style="margin-left: 5px">
+                        <label>Pregunta es Requerida</label><br>
+                        <label class="switch" style="margin-top:10px">
+                            <input type="checkbox" id="toggle-requerida">
+                            <div class="slider round">
+                                <span class="on">Sí</span>
+                                <span class="off">No</span>
+                            </div>
+                        </label>
+                    </div>
+
+
+                    <div class="form-group col-md-3" style="margin-top: 35px">
+                        <label class="control-label">Idioma</label>
+                        <select class="form-control" id="select-idioma">
+                            @foreach($arrayIdiomas as $item)
+                                <option value="{{$item->id}}">{{$item->nombre}}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <button type="button" class="btn btn-info btn-sm" onclick="verificarTextoTabla()">Agregar Preguntas </button>
 
                 </section>
             </div>
-
         </div>
     </section>
-
-
-
 
     <section class="content">
         <div class="container-fluid">
@@ -136,8 +99,6 @@
                     <tr>
                         <th style="width: 4%">#</th>
                         <th style="width: 10%">Idioma</th>
-                        <th style="width: 10%">Título</th>
-                        <th style="width: 10%">Subtitulo (Opcional)</th>
                         <th style="width: 6%">Opciones</th>
                     </tr>
                     </thead>
@@ -151,17 +112,15 @@
 
 
     <div class="modal-footer justify-content-between float-right" style="margin-top: 25px; margin-bottom: 30px;">
-        <button type="button" class="btn btn-success" onclick="preguntarGuardar()">Guardar Devocional</button>
+        <button type="button" class="btn btn-success" onclick="preguntarGuardar()">Guardar Detalle</button>
     </div>
 
 
 
 
+    <!-- MODAL PARA AGREGAR DATOS -->
 
-
-    <!-- MODAL PARA AGREGAR DATOS DE UN IDIOMA -->
-
-    <div class="modal fade" id="modalDatosIdioma" >
+    <div class="modal fade" id="modalDatos" >
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
@@ -171,22 +130,12 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form id="formulario-datosidioma">
+                    <form id="formulario-datos">
                         <div class="card-body">
                             <div class="col-md-12">
 
                                 <div class="form-group">
-                                    <label>Título</label>
-                                    <input type="text" maxlength="150" autocomplete="off" class="form-control" id="titulo-plan">
-                                </div>
-
-                                <div class="form-group">
-                                    <label>Subtitulo (Opcional)</label>
-                                    <input type="text" maxlength="50" autocomplete="off" class="form-control" id="subtitulo-plan">
-                                </div>
-
-                                <div class="form-group">
-                                    <label>Descripción (Opcional)</label>
+                                    <label>Descripción </label>
                                     <textarea name="content" id="editor"></textarea>
                                 </div>
 
@@ -232,6 +181,7 @@
                     language: 'es',
                 })
                 .then(editor => {
+
                     varGlobalEditorDescripcion = editor;
                 })
                 .catch(error => {
@@ -244,11 +194,10 @@
 
     <script>
 
-
-        function verificarIdiomaTabla(){
+        // verificar si idioma no esta agregado a tabla, antes de abrir modal
+        function verificarTextoTabla(){
 
             var idIdiomaSelect = document.getElementById('select-idioma').value;
-
             var arrayIdIdioma = $("input[name='arrayIdioma[]']").map(function(){return $(this).attr("data-ididioma");}).get();
 
 
@@ -263,14 +212,13 @@
             }
 
             // puede abrir modal para registrar datos
-
-            document.getElementById("formulario-datosidioma").reset();
+            document.getElementById("formulario-datos").reset();
             varGlobalEditorDescripcion.setData("");
 
-            $('#modalDatosIdioma').modal('show');
+            $('#modalDatos').modal('show');
         }
 
-
+        // agregar dato nuevo a fila
         function AgregarFila(){
 
             // verificar siempre
@@ -292,23 +240,9 @@
                 }
             }
 
-            // verificar datos cada uno
-            var titulo = document.getElementById('titulo-plan').value;
-            var subtitulo = document.getElementById('subtitulo-plan').value; // opcional
 
-            if(titulo === ''){
-                toastr.error('Título es requerido')
-                return;
-            }
-
-            // subtitulo y descripcion son opcionales
-            if(subtitulo.length > 50){
-                toastr.error('Subtitulo 50 caracteres máximo')
-                return;
-            }
-
-            const editorDataDescripcion = varGlobalEditorDescripcion.getData();
-
+            // PUEDE SER NULL
+            const txtdescripcion = varGlobalEditorDescripcion.getData();
 
 
             // AGREGAR A FILA
@@ -324,16 +258,7 @@
 
                 "<td>" +
                 "<input name='arrayIdioma[]' disabled data-ididioma='" + idIdiomaSelect + "' value='" + selectedOptionText + "' class='form-control' type='text'>" +
-                "</td>" +
-
-
-                "<td>" +
-                "<input name='arrayTitulo[]' disabled value='" + titulo + "' class='form-control' type='text'>" +
-                "</td>" +
-
-                "<td>" +
-                "<input name='arraySubtitulo[]' disabled value='" + subtitulo + "' class='form-control' type='text'>" +
-                "<input name='arrayDescripcion[]' style='display: none' data-txtdescripcion='" + editorDataDescripcion + "' class='form-control' type='text'>" +
+                "<input name='arrayDescripcion[]' disabled data-txtdescripcion='" + txtdescripcion + "' type='hidden'>" +
                 "</td>" +
 
                 "<td>" +
@@ -353,20 +278,19 @@
                 timer: 1500
             })
 
-
-            $('#modalDatosIdioma').modal('hide');
+            $('#modalDatos').modal('hide');
         }
 
-
-
-        function vistaAtrasPlanes(){
-            window.location.href="{{ url('/admin/planes/index') }}";
+        // vista volver atras
+        function vistaAtrasPlanesBloquesDetalle(){
+            let idplanbloquedetalle = {{ $idplanbloquedetalle }};
+            window.location.href="{{ url('/admin/preguntas/vista') }}/" + idplanbloquedetalle;
         }
 
         function preguntarGuardar(){
 
             Swal.fire({
-                title: '¿Guardar Devocional?',
+                title: '¿Guardar Pregunta?',
                 text: '',
                 icon: 'info',
                 showCancelButton: true,
@@ -377,45 +301,17 @@
                 cancelButtonText: 'NO'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    guardarPlanFinal();
+                    guardarBloquePregunta();
                 }
             })
         }
 
-        function guardarPlanFinal(){
+        function guardarBloquePregunta(){
 
-            var fecha = document.getElementById('fecha').value;
-            var imagen = document.getElementById('imagen-nuevo');
-            var imagenPortada = document.getElementById('imagenportada-nuevo');
             var selectIdioma = document.getElementById("select-idioma");
-
-            if(fecha === ''){
-                toastr.error('Fecha es Requerida');
-                return;
-            }
-
-
-            if(imagen.files && imagen.files[0]){ // si trae imagen
-                if (!imagen.files[0].type.match('image/jpeg|image/jpeg|image/png')){
-                    toastr.error('Formato de imagen permitido: .png .jpg .jpeg');
-                    return;
-                }
-            }else{
-                toastr.error('Imagen es Requerida')
-                return;
-            }
-
-
-            if(imagenPortada.files && imagenPortada.files[0]){ // si trae imagen
-                if (!imagenPortada.files[0].type.match('image/jpeg|image/jpeg|image/png')){
-                    toastr.error('Formato de imagen permitido: .png .jpg .jpeg');
-                    return;
-                }
-            }else{
-                toastr.error('Imagen Portada es Requerida')
-                return;
-            }
-
+            var selectImagen = document.getElementById("select-imagen").value;
+            let t = document.getElementById('toggle-requerida').checked;
+            let toggle = t ? 1 : 0;
 
             // Verificar que haya ingresado todos los idiomas
             let conteoIdioma = selectIdioma.length;
@@ -428,48 +324,42 @@
                 return;
             }
 
-
-            // obtener ID idioma, titulo, subtitulo, descripcion
-
-
-
+            let idplanbloquedetalle = {{ $idplanbloquedetalle }};
 
 
             let formData = new FormData();
             const contenedorArray = [];
             var arrayIdIdioma = $("input[name='arrayIdioma[]']").map(function(){return $(this).attr("data-ididioma");}).get();
-            var arrayTitulo = $("input[name='arrayTitulo[]']").map(function(){return $(this).val();}).get();
-            var arraySubtitulo = $("input[name='arraySubtitulo[]']").map(function(){return $(this).val();}).get();
+
+            // texto de pregunta que puede ser null
             var arrayDescripcion = $("input[name='arrayDescripcion[]']").map(function(){return $(this).attr("data-txtdescripcion");}).get();
 
 
             for(var i = 0; i < arrayIdIdioma.length; i++){
 
                 let infoIdIdioma = arrayIdIdioma[i];
-                let infoTitulo = arrayTitulo[i];
-                let infoSubtitulo = arraySubtitulo[i];
                 let infoDescripcion = arrayDescripcion[i];
 
                 // ESTOS NOMBRES SE UTILIZAN EN CONTROLADOR
-                contenedorArray.push({ infoIdIdioma, infoTitulo, infoSubtitulo, infoDescripcion});
+                contenedorArray.push({ infoIdIdioma, infoDescripcion });
             }
 
             formData.append('contenedorArray', JSON.stringify(contenedorArray));
-            formData.append('fecha', fecha);
-            formData.append('imagen', imagen.files[0]);
-            formData.append('imagenportada', imagenPortada.files[0]);
+            formData.append('idplanbloquedetalle', idplanbloquedetalle);
+            formData.append('toggle', toggle);
+            formData.append('idimagen', selectImagen);
 
             openLoading();
 
-            axios.post('/admin/planes/agregar/nuevo', formData, {
+            axios.post('/admin/preguntas/registrar/nuevo', formData, {
             })
                 .then((response) => {
                     closeLoading();
 
-                   if(response.data.success === 1){
+                    if(response.data.success === 1){
                         Swal.fire({
-                            title: "Devocional Creado",
-                            text: "Se deberan registrar cada fecha del devocional",
+                            title: "Pregunta Creada",
+
                             icon: 'success',
                             showCancelButton: false,
                             allowOutsideClick: false,
@@ -477,7 +367,7 @@
                             confirmButtonText: 'Aceptar'
                         }).then((result) => {
                             if (result.isConfirmed) {
-                                vistaAtrasPlanes();
+                                vistaAtrasPlanesBloquesDetalle();
                             }
                         })
                     }

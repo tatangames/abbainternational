@@ -413,9 +413,9 @@
 
             for(var a = 0; a < arrayIdIdioma.length; a++){
 
-                let infoIdMedic = arrayIdIdioma[a];
+                let infoIdLenguaje = arrayIdIdioma[a];
 
-                if(idIdiomaSelect == infoIdMedic){
+                if(idIdiomaSelect == infoIdLenguaje){
                     toastr.error('El Idioma ya esta agregado');
                     return;
                 }
@@ -443,9 +443,9 @@
 
             for(var a = 0; a < arrayIdIdioma.length; a++){
 
-                let infoIdMedic = arrayIdIdioma[a];
+                let infoIdLenguaje = arrayIdIdioma[a];
 
-                if(idIdiomaSelect == infoIdMedic){
+                if(idIdiomaSelect == infoIdLenguaje){
                     toastr.error('El Idioma ya estaba agregado');
                     return;
                 }

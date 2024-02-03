@@ -12,6 +12,7 @@ use App\Http\Controllers\Backend\Regiones\RegionesController;
 use App\Http\Controllers\Backend\Usuarios\UsuariosController;
 use App\Http\Controllers\Backend\Recursos\RecursosController;
 use App\Http\Controllers\Backend\Planes\PlanesController;
+use App\Http\Controllers\Backend\Planes\PreguntasController;
 
 Route::get('/', [LoginController::class,'index'])->name('login');
 
@@ -184,5 +185,13 @@ Route::get('/admin/planbloquedetalle/devocional/vista/{idplanbloquedetalle}', [P
 Route::post('/admin/planbloquedetalle/guardar/devocional', [PlanesController::class,'guardarDevocionalTexto']);
 Route::post('/admin/planbloquedetalle/actualizar/devocional', [PlanesController::class,'actualizarDevocionalTexto']);
 
+// -> Preguntas
+Route::get('/admin/preguntas/vista/{idplanbloquedetalle}', [PreguntasController::class,'indexPreguntas']);
+Route::get('/admin/preguntas/tabla/{idplanbloquedetalle}', [PreguntasController::class,'tablaPreguntas']);
+Route::get('/admin/preguntas/nuevoregitros/{idplanbloquedetalle}', [PreguntasController::class,'indexNuevasPreguntas']);
+Route::post('/admin/preguntas/registrar/nuevo', [PreguntasController::class,'registrarNuevaPregunta']);
+Route::post('/admin/preguntas/actualizar/posicion', [PreguntasController::class,'actualizarPosicionPreguntas']);
 
-
+// Editar
+Route::get('/admin/preguntas/vista/editar/{idbloquepreguntas}', [PreguntasController::class,'indexEditarBloquePregunta']);
+Route::post('/admin/preguntas/editar', [PreguntasController::class,'editarBloquePreguntas']);

@@ -16,7 +16,8 @@ return new class extends Migration
             $table->bigInteger('id_bloque_preguntas')->unsigned();
             $table->bigInteger('id_idioma_planes')->unsigned();
 
-            $table->text('texto');
+            // si puede ser null
+            $table->text('texto')->nullable();
 
             $table->foreign('id_idioma_planes')->references('id')->on('idioma_planes');
             $table->foreign('id_bloque_preguntas')->references('id')->on('bloque_preguntas');
