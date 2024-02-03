@@ -7,7 +7,9 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * HASTA QUE HAYA UN REGISTRO PODRA HABILITAR TABLA planes_block_detalle
+     * columna visible, sera devocional y preguntas requeridos, aunque en app
+     * permite que solo devocional se muestre
      */
     public function up(): void
     {

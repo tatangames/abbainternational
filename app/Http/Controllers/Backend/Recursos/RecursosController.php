@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Backend\Recursos;
 
 use App\Http\Controllers\Controller;
 use App\Models\ImagenesDelDia;
+use App\Models\ImagenPreguntas;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -24,7 +25,7 @@ class RecursosController extends Controller
     }
 
 
-    // regresa tabla listado de paises
+    // regresa tabla listado
     public function tablaImagenesDelDia(){
         $listado = ImagenesDelDia::orderBy('posicion', 'ASC')->get();
 
@@ -136,6 +137,169 @@ class RecursosController extends Controller
             return ['success' => 1];
         }
     }
+
+
+
+
+    //****************************** IMAGENES PREGUNTAS ****************************************
+
+
+
+
+
+
+    public function indexImagenesPreguntas(){
+        return view('backend.admin.recursos.imagenpreguntas.vistaimagenpregunta');
+    }
+
+
+    // regresa tabla listado
+    public function tablaImagenesPreguntas(){
+        $listado = ImagenPreguntas::orderBy('id', 'ASC')->get();
+
+        return view('backend.admin.recursos.imagenpreguntas.tablaimagenpregunta', compact('listado'));
+    }
+
+
+    public function nuevaImagenPregunta(Request $request)
+    {
+        $rules = array(
+            'nombre' => 'required',
+        );
+
+        // imagen
+
+        $validator = Validator::make($request->all(), $rules);
+
+        if ($validator->fails()) {
+            return ['success' => 0];
+        }
+
+        if ($request->hasFile('imagen')) {
+
+            $cadena = Str::random(15);
+            $tiempo = microtime();
+            $union = $cadena . $tiempo;
+            $nombre = str_replace(' ', '_', $union);
+
+            $extension = '.' . $request->imagen->getClientOriginalExtension();
+            $nombreFoto = $nombre . strtolower($extension);
+            $avatar = $request->file('imagen');
+            $upload = Storage::disk('archivos')->put($nombreFoto, \File::get($avatar));
+
+            if ($upload) {
+
+                $nuevaImagen = new ImagenPreguntas();
+                $nuevaImagen->imagen = $nombreFoto;
+                $nuevaImagen->nombre = $request->nombre;
+                $nuevaImagen->save();
+
+                return ['success' => 1];
+
+            } else {
+                // error al subir imagen
+                return ['success' => 99];
+            }
+        } else {
+            // imagen no encontrada
+            return ['success' => 99];
+        }
+    }
+
+
+    public function informacionImagenPregunta(Request $request){
+        $rules = array(
+            'id' => 'required',
+        );
+
+        $validator = Validator::make($request->all(), $rules);
+        if ( $validator->fails()){
+            return ['success' => 0];
+        }
+
+
+        if($lista = ImagenPreguntas::where('id', $request->id)->first()){
+
+            return ['success' => 1, 'info' => $lista];
+        }else{
+            return ['success' => 2];
+        }
+    }
+
+
+
+
+    public function actualizarImagenPregunta(Request $request)
+    {
+        $rules = array(
+            'idfila' => 'required',
+            'nombre' => 'required',
+        );
+
+        // imagen
+
+        $validator = Validator::make($request->all(), $rules);
+
+        if ($validator->fails()) {
+            return ['success' => 0];
+        }
+
+        if ($request->hasFile('imagen')) {
+
+            if($infoImagen = ImagenPreguntas::where('id', $request->idfila)->first()){
+
+                $cadena = Str::random(15);
+                $tiempo = microtime();
+                $union = $cadena . $tiempo;
+                $nombre = str_replace(' ', '_', $union);
+
+                $extension = '.' . $request->imagen->getClientOriginalExtension();
+                $nombreFoto = $nombre . strtolower($extension);
+                $avatar = $request->file('imagen');
+                $upload = Storage::disk('archivos')->put($nombreFoto, \File::get($avatar));
+
+                if ($upload) {
+
+                    $imagenOld = $infoImagen->imagen;
+
+                    ImagenPreguntas::where('id', $infoImagen->id)
+                        ->update([
+                            'nombre' => $request->nombre,
+                            'imagen' => $nombreFoto
+                        ]);
+
+                    if(Storage::disk('archivos')->exists($imagenOld)){
+                        Storage::disk('archivos')->delete($imagenOld);
+                    }
+
+                    return ['success' => 1];
+
+                } else {
+                    // error al subir imagen
+                    return ['success' => 99];
+                }
+            }else{
+
+                // fila no encontrada
+                return ['success' => 99];
+            }
+        } else {
+
+            // solo actualizar nombre
+
+            ImagenPreguntas::where('id', $request->id)
+                ->update([
+                    'nombre' => $request->nombre,
+                ]);
+
+            return ['success' => 1];
+        }
+    }
+
+
+
+
+
 
 
 

@@ -34,8 +34,12 @@
                                         <i class="fas fa-edit" title="Editar"></i>&nbsp; Editar
                                     </button>
 
-                                    <button type="button" class="btn btn-success btn-xs" onclick="vistaDevocionalPreguntas({{ $dato->id }})">
-                                        <i class="fas fa-edit" title="Devo. y Preguntas"></i>&nbsp; Devo. y Preguntas
+                                    <button type="button" class="btn btn-success btn-xs" onclick="vistaDevocional({{ $dato->id }})">
+                                        <i class="fas fa-edit" title="Devocional"></i>&nbsp; Devocional
+                                    </button>
+
+                                    <button type="button" class="btn btn-success btn-xs" onclick="vistaPreguntas({{ $dato->id }})">
+                                        <i class="fas fa-edit" title="Preguntas"></i>&nbsp; Preguntas
                                     </button>
                                 </td>
 

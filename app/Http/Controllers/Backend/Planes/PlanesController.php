@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Backend\Planes;
 
 use App\Http\Controllers\Controller;
+use App\Models\BloqueCuestionarioTextos;
 use App\Models\IdiomaPlanes;
 use App\Models\Planes;
 use App\Models\PlanesBlockDetalle;
@@ -603,7 +604,7 @@ class PlanesController extends Controller
 
             $datosContenedor = json_decode($request->contenedorArray, true);
 
-            if($info = PlanesBlockDetalle::where('id_planes_bloques')
+            if($info = PlanesBlockDetalle::where('id_planes_bloques', $request->idplanbloque)
             ->orderBy('posicion', 'DESC')->first()){
                 $nuevaPosicion = $info->posicion + 1;
             }else{
@@ -687,5 +688,162 @@ class PlanesController extends Controller
 
         return view('backend.admin.devocional.planes.bloques.bloquedetalle.editar.vistaeditarplanbloquedetalle', compact('infoBloque', 'arrayIdiomas', 'idplanbloquedetalle', 'arrayPlanBlockDetaTextos'));
     }
+
+
+    public function actualizarPlanesBloquesDetaTextos(Request $request)
+    {
+
+        $regla = array(
+            'idplanbloquedetalle' => 'required',
+        );
+
+        // array: infoIdBloqueDetaTexto, infoIdIdioma, infoTitulo, infoDescripcion
+
+        $validar = Validator::make($request->all(), $regla);
+
+        if ($validar->fails()){ return ['success' => 0];}
+
+        DB::beginTransaction();
+
+        try {
+
+            // TABLA: planes_block_detalle  no hay nada que actualizar
+
+            $datosContenedor = json_decode($request->contenedorArray, true);
+
+            // sus idiomas
+            foreach ($datosContenedor as $filaArray) {
+
+                // comprobar si existe para actualizar o crear segun idioma nuevo
+                if($infoBloqueDetaTexto = PlanesBlockDetaTextos::where('id', $filaArray['infoIdBloqueDetaTexto'])->first()){
+
+                    // actualizar
+                    PlanesBlockDetaTextos::where('id', $infoBloqueDetaTexto->id)->update([
+                        'titulo' => $filaArray['infoTitulo'],
+                        'titulo_pregunta' => $filaArray['infoDescripcion'],
+                    ]);
+
+                }else{
+
+                    // como no encontro, se creara
+
+                    $detalle = new PlanesBlockDetaTextos();
+                    $detalle->id_planes_block_detalle = $request->idplanbloquedetalle;
+                    $detalle->id_idioma_planes = $filaArray['infoIdIdioma'];
+                    $detalle->titulo = $filaArray['infoTitulo'];
+                    $detalle->titulo_pregunta = $filaArray['infoDescripcion'];
+                    $detalle->save();
+                }
+            }
+
+            // completado y actualizado
+            DB::commit();
+            return ['success' => 1];
+        }catch(\Throwable $e){
+            Log::info('error: ' . $e);
+            DB::rollback();
+            return ['success' => 99];
+        }
+    }
+
+
+
+    public function indexDevocionalPregunta($idplanbloquedetalle)
+    {
+        $arrayIdiomas = IdiomaPlanes::orderBy('id', 'ASC')->get();
+
+        $arrayCuestionario = BloqueCuestionarioTextos::where('id_bloque_detalle', $idplanbloquedetalle)
+            ->orderBy('id', 'ASC')
+            ->get();
+
+        $contador = 0;
+        foreach ($arrayCuestionario as $dato){
+            $contador++;
+            $dato->contador = $contador;
+
+            $infoIdioma = IdiomaPlanes::where('id', $dato->id_idioma_planes)->first();
+            $dato->idioma = $infoIdioma->nombre;
+        }
+
+        return view('backend.admin.devocional.planes.bloques.bloquedetalle.devocional.vistadevocionales', compact('idplanbloquedetalle',
+        'arrayIdiomas', 'arrayCuestionario'));
+    }
+
+    // guardar devocional segun idioma
+    public function guardarDevocionalTexto(Request $request)
+    {
+
+        $regla = array(
+            'idblockdetalle' => 'required',
+            'ididioma' => 'required',
+            'devocional' => 'required',
+        );
+
+
+        $validar = Validator::make($request->all(), $regla);
+
+        if ($validar->fails()){ return ['success' => 0];}
+
+        DB::beginTransaction();
+
+        try {
+
+                // comprobar si existe
+                if(BloqueCuestionarioTextos::where('id_bloque_detalle', $request->idblockdetalle)
+                    ->where('id_idioma_planes', $request->ididioma)
+                    ->first()){
+
+                    // no hacer nada
+
+                }else{
+
+                    // como no encontro, se creara
+
+                    $detalle = new BloqueCuestionarioTextos();
+                    $detalle->id_bloque_detalle = $request->idblockdetalle;
+                    $detalle->id_idioma_planes = $request->ididioma;
+                    $detalle->texto = $request->devocional;
+                    $detalle->save();
+                }
+
+
+            // creado
+            DB::commit();
+            return ['success' => 1];
+        }catch(\Throwable $e){
+            Log::info('error: ' . $e);
+            DB::rollback();
+            return ['success' => 99];
+        }
+    }
+
+
+    public function actualizarDevocionalTexto(Request $request)
+    {
+        Log::info($request->all());
+        $regla = array(
+            'idcuestionario' => 'required',
+            'devocional' => 'required',
+        );
+
+        $validar = Validator::make($request->all(), $regla);
+
+        if ($validar->fails()){ return ['success' => 0];}
+
+
+        if ($info = BloqueCuestionarioTextos::where('id', $request->idcuestionario)->first()){
+
+            // actualizar
+            BloqueCuestionarioTextos::where('id', $info->id)->update([
+                'texto' => $request->devocional,
+            ]);
+        }
+
+        return ['success' => 1];
+    }
+
+
+
+
 
 }

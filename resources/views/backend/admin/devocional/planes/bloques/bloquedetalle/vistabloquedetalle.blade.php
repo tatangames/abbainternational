@@ -100,10 +100,12 @@
             window.location.href="{{ url('/admin/planbloquedetalle/vista/editar/index') }}/" + idplanbloquedetalle;
         }
 
-        // aqui se ingresara para agregar Texto Devocional y Preguntas
-        function vistaDevocionalPreguntas(idplanbloquedetalle){
-            window.location.href="{{ url('/admin/xxxxx') }}/" + idplanbloquedetalle;
+        // aqui se ingresara para agregar Texto Devocional
+        function vistaDevocional(idplanbloquedetalle){
+            window.location.href="{{ url('/admin/planbloquedetalle/devocional/vista') }}/" + idplanbloquedetalle;
         }
+
+        // vistan listado de preguntas
 
     </script>
 

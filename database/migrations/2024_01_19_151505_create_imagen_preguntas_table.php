@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * NUMERACION DE IMAGENES
+     * NUMERACION DE IMAGENES PARA LAS PREGUNTAS, ES EL ICONO
      */
     public function up(): void
     {

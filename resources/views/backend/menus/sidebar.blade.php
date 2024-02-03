@@ -133,6 +133,14 @@
                             </a>
                         </li>
 
+                        <li class="nav-item">
+                            <a href="{{ route('admin.imagenes.preguntas.index') }}" target="frameprincipal" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Imagenes Preguntas</p>
+                            </a>
+                        </li>
+
+
                     </ul>
                 </li>
 

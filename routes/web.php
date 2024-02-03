@@ -135,6 +135,16 @@ Route::post('/admin/imagendia/actualizar/posicion', [RecursosController::class,'
 Route::post('/admin/imagendia/nuevo', [RecursosController::class,'nuevaImagenDia']);
 Route::post('/admin/imagendia/borrar', [RecursosController::class,'borrarImagenDia']);
 
+// --- IMAGENES PARA PREGUNTAS ---
+
+Route::get('/admin/imagenpreguntas/index', [RecursosController::class,'indexImagenesPreguntas'])->name('admin.imagenes.preguntas.index');
+Route::get('/admin/imagenpreguntas/tabla', [RecursosController::class,'tablaImagenesPreguntas']);
+Route::post('/admin/imagenpreguntas/nuevo', [RecursosController::class,'nuevaImagenPregunta']);
+Route::post('/admin/imagenpreguntas/informacion', [RecursosController::class,'informacionImagenPregunta']);
+
+Route::post('/admin/imagenpreguntas/actualizar', [RecursosController::class,'actualizarImagenPregunta']);
+
+
 // --- PLANES ---
 Route::get('/admin/planes/index', [PlanesController::class,'indexPlanes'])->name('admin.planes.index');
 Route::get('/admin/planes/tabla', [PlanesController::class,'tablaPlanes']);
@@ -167,8 +177,12 @@ Route::post('/admin/planbloquedetalle/actualizar/posicion', [PlanesController::c
 
 // Editar bloque detalle
 Route::get('/admin/planbloquedetalle/vista/editar/index/{idplanbloquedetalle}', [PlanesController::class,'indexEditarPlanBloqueDetalle']);
+Route::post('/admin/planbloquedetalle/datos/actualizar', [PlanesController::class,'actualizarPlanesBloquesDetaTextos']);
 
-
+// Vista para agregar devocional
+Route::get('/admin/planbloquedetalle/devocional/vista/{idplanbloquedetalle}', [PlanesController::class,'indexDevocionalPregunta']);
+Route::post('/admin/planbloquedetalle/guardar/devocional', [PlanesController::class,'guardarDevocionalTexto']);
+Route::post('/admin/planbloquedetalle/actualizar/devocional', [PlanesController::class,'actualizarDevocionalTexto']);
 
 
 

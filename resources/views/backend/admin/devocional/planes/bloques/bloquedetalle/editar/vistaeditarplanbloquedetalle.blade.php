@@ -123,7 +123,7 @@
 
                             <td>
                                 <input name="arrayTitulo[]" disabled  value="{{ $item->titulo }}" class="form-control" type="text">
-                                <input name="arrayDescripcion[]" disabled style="display: none" data-txtdescripcion="holisss" class="form-control" type="text">
+                                <input name="arrayDescripcion[]" disabled style="display: none" data-txtdescripcion="{{ $item->titulo_pregunta }}" class="form-control" type="text">
                             </td>
 
 
@@ -240,7 +240,7 @@
     <script src="{{ asset('js/sweetalert2.all.min.js') }}"></script>
     <script src="{{ asset('js/alertaPersonalizada.js') }}"></script>
     <script src="{{ asset('js/select2.min.js') }}"></script>
-    <script src="{{ asset('js/ckeditor5.js') }}"></script>
+    <script src="{{ asset('plugins/ckeditor5v1/build/ckeditor.js') }}"></script>
 
 
     <script type="text/javascript">
@@ -294,7 +294,6 @@
             var valorActualDescrip = valorInputDescripcionRef.data('txtdescripcion'); // ESTE ES EL DATA-
             referenciaArrayDescripcion = valorInputDescripcionRef;
 
-            console.log(valorActualDescrip)
 
             // limpiar modal
             document.getElementById("formulario-datoseditados").reset();
@@ -324,10 +323,15 @@
 
             // Actualizar la fila con las referencias
             referenciaArrayTitulo.val(titulo);
+
+            const editorDataDescripcionEdit = varGlobalEditorDescripcionEditados.getData();
+            referenciaArrayDescripcion.data('txtdescripcion', editorDataDescripcionEdit);
+
             $('#modalDatosEditados').modal('hide');
         }
 
 
+        // verificar que idioma no este en la tabla, para abrir modal y agrgear el nuevo idioma a la fila
         function verificarIdiomaTabla(){
 
             var idIdiomaSelect = document.getElementById('select-idioma').value;
@@ -353,7 +357,7 @@
         }
 
 
-        // CUANDO ES NUEVO TEXTO PERSONALIZADO
+        // CUANDO ES NUEVO TEXTO, para nuevo idioma
         function AgregarFila(){
 
             // verificar siempre
@@ -391,7 +395,7 @@
 
 
             // AGREGAR A FILA
-
+            const editorDataDescripcionEdit = varGlobalEditorDescripcionEditados.getData();
 
             // COMO ES NUEVA FILA, SE IDENTIFICARA CON 0, PARA CREAR EL REGISTRO
             let valorNull = 0;
@@ -406,12 +410,13 @@
                 "</td>" +
 
                 "<td>" +
-                "<input name='arrayIdioma[]' disabled    data-idbloquetexto='" + valorNull + "'  data-ididioma='" + idIdiomaSelect + "' value='" + selectedOptionText + "' class='form-control' type='text'>" +
+                "<input name='arrayIdioma[]' disabled    data-idbloquedetatexto='" + valorNull + "'  data-ididioma='" + idIdiomaSelect + "' value='" + selectedOptionText + "' class='form-control' type='text'>" +
                 "</td>" +
 
 
                 "<td>" +
                 "<input name='arrayTitulo[]' disabled value='" + titulo + "' class='form-control' type='text'>" +
+                "<input name='arrayDescripcion[]' disabled  data-txtdescripcion='" + editorDataDescripcionEdit + "'  style='display: none' class='form-control' type='hidden'>" +
                 "</td>" +
 
                 "<td>" +
@@ -445,7 +450,7 @@
         function preguntarGuardar(){
 
             Swal.fire({
-                title: '¿Actualizar Fecha?',
+                title: '¿Actualizar Detalle?',
                 text: '',
                 icon: 'info',
                 showCancelButton: true,
@@ -456,70 +461,60 @@
                 cancelButtonText: 'NO'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    actualizarFechaFinal();
+                    actualizarDetalleFinal();
                 }
             })
         }
 
-        // Actualizando
-        function actualizarFechaFinal(){
+        // Actualizando los datos en el servidor
+        function actualizarDetalleFinal(){
 
-            var fecha = document.getElementById('fecha').value;
             var selectIdioma = document.getElementById("select-idioma");
 
-            if(fecha === ''){
-                toastr.error('Fecha es Requerida');
-                return;
-            }
-
-            let t = document.getElementById('toggle-personalizado').checked;
-            let togglePersonalizado = t ? 1 : 0;
-
-
-            // Verificar que haya ingresado todos los idiomas
+                 // Verificar que haya ingresado todos los idiomas
             let conteoIdioma = selectIdioma.length;
 
 
             var nRegistro = $('#matriz > tbody >tr').length;
 
 
-            // Verificar si toggle esta activo para actualizar idiomas
-            if(togglePersonalizado === 1){
-                if (nRegistro !== conteoIdioma){
-                    toastr.error('Idiomas son requeridos');
-                    return;
-                }
+            if (nRegistro !== conteoIdioma){
+                toastr.error('Idiomas son requeridos');
+                return;
             }
-
 
             // obtener ID idioma, titulo, subtitulo, descripcion
 
+            let idplanbloquedetalle = {{ $idplanbloquedetalle }};
 
             let formData = new FormData();
             const contenedorArray = [];
             var arrayIdIdioma = $("input[name='arrayIdioma[]']").map(function(){return $(this).attr("data-ididioma");}).get();
-            var arrayIdBloqueTexto = $("input[name='arrayIdioma[]']").map(function(){return $(this).attr("data-idbloquetexto");}).get();
+            var arrayIdBloqueDetaTexto = $("input[name='arrayIdioma[]']").map(function(){return $(this).attr("data-idbloquedetatexto");}).get();
             var arrayTitulo = $("input[name='arrayTitulo[]']").map(function(){return $(this).val();}).get();
 
-
+            // OBTENER LOS DATOS ACTUALIZADOS PORQUE SE EDITAN
+            var arrayDescripcion = $("input[name='arrayDescripcion[]']").map(function() {
+                return $(this).data("txtdescripcion");
+            }).get();
 
 
             for(var i = 0; i < arrayIdIdioma.length; i++){
-                let infoIdBloqueTexto = arrayIdBloqueTexto[i];
+                let infoIdBloqueDetaTexto = arrayIdBloqueDetaTexto[i];
                 let infoIdIdioma = arrayIdIdioma[i];
                 let infoTitulo = arrayTitulo[i];
+                let infoDescripcion = arrayDescripcion[i];
 
                 // ESTOS NOMBRES SE UTILIZAN EN CONTROLADOR
-                contenedorArray.push({ infoIdBloqueTexto, infoIdIdioma, infoTitulo});
+                contenedorArray.push({ infoIdBloqueDetaTexto, infoIdIdioma, infoTitulo, infoDescripcion});
             }
 
             formData.append('contenedorArray', JSON.stringify(contenedorArray));
-            formData.append('fecha', fecha);
-            formData.append('idplanbloque', idplanbloque);
+            formData.append('idplanbloquedetalle', idplanbloquedetalle);
 
             openLoading();
 
-            axios.post('/admin/planesbloques/datos/actualizar', formData, {
+            axios.post('/admin/planbloquedetalle/datos/actualizar', formData, {
             })
                 .then((response) => {
                     closeLoading();

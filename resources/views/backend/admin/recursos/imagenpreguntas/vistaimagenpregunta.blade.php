@@ -31,7 +31,7 @@
             <div class="col-sm-6">
                 <ol class="breadcrumb float-sm-right">
                     <li class="breadcrumb-item">Recursos</li>
-                    <li class="breadcrumb-item active">Imágenes</li>
+                    <li class="breadcrumb-item active">Imágenes Preguntas</li>
                 </ol>
             </div>
         </div>
@@ -74,14 +74,13 @@
 
                                 <div class="form-group">
                                     <label>Descripción</label>
-                                    <input type="text" maxlength="100" autocomplete="off" class="form-control" id="descripcion-nuevo" placeholder="Descripción">
+                                    <input type="text" maxlength="50" autocomplete="off" class="form-control" id="descripcion-nuevo" placeholder="Descripción">
                                 </div>
-
 
                                 <div class="form-group">
                                     <div>
                                         <label>Imagen</label>
-                                        <p>Tamaño no superar: 1000 x 1000 px</p>
+                                        <p>Tamaño no superar: 512 x 512 px</p>
                                     </div>
                                     <br>
                                     <div class="col-md-10">
@@ -121,13 +120,13 @@
                             <div class="form-group">
                                 <label>Descripción</label>
                                 <input type="hidden" id="id-editar">
-                                <input type="text" maxlength="100" autocomplete="off" class="form-control" id="descripcion-editar">
+                                <input type="text" maxlength="50" autocomplete="off" class="form-control" id="descripcion-editar">
                             </div>
 
                             <div class="form-group">
                                 <div>
                                     <label>Imagen</label>
-                                    <p>Tamaño no superar: 1000 x 1000 px</p>
+                                    <p>Tamaño no superar: 512 x 512 px</p>
                                 </div>
                                 <br>
                                 <div class="col-md-10">
@@ -150,8 +149,8 @@
 @extends('backend.menus.footerjs')
 @section('archivos-js')
 
-    <script src="{{ asset('js/jquery-ui-drag.js') }}" type="text/javascript"></script>
-    <script src="{{ asset('js/datatables-drag.min.js') }}" type="text/javascript"></script>
+    <script src="{{ asset('js/jquery.dataTables.js') }}" type="text/javascript"></script>
+    <script src="{{ asset('js/dataTables.bootstrap4.js') }}" type="text/javascript"></script>
 
     <script src="{{ asset('js/toastr.min.js') }}" type="text/javascript"></script>
     <script src="{{ asset('js/axios.min.js') }}" type="text/javascript"></script>
@@ -160,7 +159,7 @@
 
     <script type="text/javascript">
         $(document).ready(function(){
-            var ruta = "{{ URL::to('/admin/imagendia/tabla') }}";
+            var ruta = "{{ URL::to('/admin/imagenpreguntas/tabla') }}";
             $('#tablaDatatable').load(ruta);
         });
     </script>
@@ -168,7 +167,7 @@
     <script>
 
         function recargar(){
-            var ruta = "{{ URL::to('/admin/imagendia/tabla') }}";
+            var ruta = "{{ URL::to('/admin/imagenpreguntas/tabla') }}";
             $('#tablaDatatable').load(ruta);
         }
 
@@ -189,12 +188,10 @@
                 return;
             }
 
-            if(descripcion.length > 100){
-                toastr.error('Descripción máximo 100 caracteres');
+            if(descripcion.length > 50){
+                toastr.error('Descripción máximo 50 caracteres');
                 return;
             }
-
-
 
             if(imagen.files && imagen.files[0]){ // si trae imagen
                 if (!imagen.files[0].type.match('image/jpeg|image/jpeg|image/png')){
@@ -211,9 +208,9 @@
 
             var formData = new FormData();
             formData.append('imagen', imagen.files[0]);
-            formData.append('descripcion', descripcion);
+            formData.append('nombre', descripcion);
 
-            axios.post('/admin/imagendia/nuevo', formData, {
+            axios.post('/admin/imagenpreguntas/nuevo', formData, {
             })
                 .then((response) => {
                     closeLoading();
@@ -232,47 +229,78 @@
                 });
         }
 
-
-        function modalBorrar(idimagen){
-            Swal.fire({
-                title: 'Borrar Imagen?',
-                text: "",
-                icon: 'info',
-                showCancelButton: true,
-                confirmButtonColor: '#28a745',
-                cancelButtonColor: '#d33',
-                cancelButtonText: 'Cancelar',
-                confirmButtonText: 'Si'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    solicitarBorrarImagen(idimagen);
-                }
-            })
-        }
-
-        function solicitarBorrarImagen(idimagen){
-
+        function informacion(id){
             openLoading();
+            document.getElementById("formulario-editar").reset();
 
-            axios.post('/admin/imagendia/borrar',{
-                'idimagen': idimagen
+            axios.post('/admin/imagenpreguntas/informacion',{
+                'id': id
             })
                 .then((response) => {
                     closeLoading();
                     if(response.data.success === 1){
+                        $('#modalEditar').modal('show');
+                        $('#id-editar').val(response.data.info.id);
+                        $('#descripcion-editar').val(response.data.info.nombre);
 
-                        toastr.success('Imagen Eliminada');
-                        recargar();
                     }else{
-                        toastr.error('Error al borrar');
+                        toastr.error('Información no encontrada');
                     }
                 })
                 .catch((error) => {
-                    toastr.error('Error al borrar');
                     closeLoading();
+                    toastr.error('Información no encontrada');
                 });
         }
 
+
+        function editar(){
+            var id = document.getElementById('id-editar').value;
+            var descripcion = document.getElementById('descripcion-editar').value;
+            var imagen = document.getElementById('imagen-editar');
+
+            if(descripcion === '') {
+                toastr.error('Descripción es requerido');
+                return;
+            }
+
+            if(descripcion.length > 50){
+                toastr.error('Descripción máximo 50 caracteres');
+                return;
+            }
+
+            if(imagen.files && imagen.files[0]){ // si trae imagen
+                if (!imagen.files[0].type.match('image/jpeg|image/jpeg|image/png')){
+                    toastr.error('Formato de imagen permitido: .png .jpg .jpeg');
+                    return;
+                }
+            }
+
+            openLoading();
+            let formData = new FormData();
+            formData.append('id', id);
+            formData.append('nombre', descripcion);
+
+            axios.post('/admin/imagenpreguntas/actualizar', formData, {
+            })
+                .then((response) => {
+                    closeLoading();
+
+                    if(response.data.success === 1){
+                        toastr.success('Actualizado correctamente');
+                        $('#modalEditar').modal('hide');
+                        recargar();
+                    }
+                    else {
+                        toastr.error('Error al actualizar');
+                    }
+
+                })
+                .catch((error) => {
+                    toastr.error('Error al actualizar');
+                    closeLoading();
+                });
+        }
 
 
     </script>
