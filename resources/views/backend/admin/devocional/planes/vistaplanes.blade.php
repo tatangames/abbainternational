@@ -167,6 +167,10 @@
 
     <script>
 
+        function recargar(){
+            var ruta = "{{ URL::to('/admin/planes/tabla') }}";
+            $('#tablaDatatable').load(ruta);
+        }
 
         // vista para agregar nuevo plan
         function nuevoPlan(){
@@ -185,6 +189,87 @@
         }
 
 
+        function preguntaActivar(idplan){
+
+            Swal.fire({
+                title: '¿Activar?',
+                text: "",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#28a745',
+                cancelButtonColor: '#d33',
+                cancelButtonText: 'Cancelar',
+                confirmButtonText: 'Si'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    configurarPlan(1, idplan);
+                }
+            })
+        }
+
+
+        function preguntaDeshabilitar(idplan){
+
+            Swal.fire({
+                title: '¿Deshabilitar?',
+                text: "",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#28a745',
+                cancelButtonColor: '#d33',
+                cancelButtonText: 'Cancelar',
+                confirmButtonText: 'Si'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    configurarPlan(0, idplan);
+                }
+            })
+
+        }
+
+
+        function configurarPlan(estado, idplan){
+
+            let formData = new FormData();
+            formData.append('idplan', idplan);
+            formData.append('estado', estado);
+            openLoading();
+
+            axios.post('/admin/planes/activacion', formData, {
+            })
+                .then((response) => {
+                    closeLoading();
+
+                    if(response.data.success === 1){
+
+                        toastr.success('Actualizado');
+                        recargar();
+                    }
+                    else if(response.data.success === 2){
+
+                        Swal.fire({
+                            title: 'No Activado',
+                            text: "Se requiere crear las fechas a este Plan Devocional",
+                            icon: 'info',
+                            showCancelButton: false,
+                            confirmButtonColor: '#28a745',
+                            cancelButtonColor: '#d33',
+                            confirmButtonText: 'Si'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+
+                            }
+                        })
+                    }
+                    else{
+                        toastr.error('Error al actualizar');
+                    }
+                })
+                .catch((error) => {
+                    toastr.error('Error al actualizar');
+                    closeLoading();
+                });
+        }
 
 
     </script>

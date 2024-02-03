@@ -62,9 +62,13 @@
                                             <div class="form-group">
                                                 <label class="control-label">Idioma para Devocional:</label>
                                                 <select class="form-control" id="select-idioma">
-                                                    @foreach($arrayIdiomas as $item)
-                                                        <option value="{{$item->id}}">{{$item->nombre}}</option>
-                                                    @endforeach
+                                                    @if($conteoIdioma == 0)
+                                                        <option value="1">Español</option>
+                                                    @else
+                                                        @foreach($arrayIdiomas as $item)
+                                                            <option value="{{$item->id}}">{{$item->nombre}}</option>
+                                                        @endforeach
+                                                    @endif
                                                 </select>
                                             </div>
 
@@ -132,13 +136,6 @@
             </div>
         </div>
     </section>
-
-
-    <div class="modal-footer justify-content-between float-right" style="margin-top: 25px; margin-bottom: 30px;">
-        <button type="button" class="btn btn-success" onclick="preguntarGuardar()">Guardar Detalle</button>
-    </div>
-
-
 
 
     <!-- MODAL PARA AGREGAR DATOS NUEVOS -->

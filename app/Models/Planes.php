@@ -10,4 +10,8 @@ class Planes extends Model
     use HasFactory;
     protected $table = 'planes';
     public $timestamps = false;
+
+    protected $fillable = [
+        'posicion'
+    ];
 }

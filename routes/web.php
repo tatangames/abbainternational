@@ -152,6 +152,7 @@ Route::get('/admin/planes/tabla', [PlanesController::class,'tablaPlanes']);
 Route::get('/admin/planes/agregar/nuevo/index', [PlanesController::class,'indexNuevoPlan']);
 Route::post('/admin/planes/agregar/nuevo', [PlanesController::class,'guardarNuevoPlan']);
 Route::post('/admin/planes/actualizar/posicion', [PlanesController::class,'actualizarPosicionPlanes']);
+Route::post('/admin/planes/activacion', [PlanesController::class,'activacionPlan']);
 
 // Editar plan
 Route::get('/admin/planes/vista/editar/index/{idplan}', [PlanesController::class,'indexEditarPlan']);
@@ -164,6 +165,7 @@ Route::get('/admin/planesbloques/vista/index/{idplan}', [PlanesController::class
 Route::get('/admin/planesbloques/tabla/index/{idplan}', [PlanesController::class,'tablaPlanBloque']);
 Route::get('/admin/planesbloques/agregar/nuevo/index/{idplan}', [PlanesController::class,'indexNuevoPlanBloque']);
 Route::post('/admin/planesbloques/agregar/nuevo', [PlanesController::class,'registrarPlanesBloques']);
+Route::post('/admin/planesbloques/activacion', [PlanesController::class,'activacionPlanBloque']);
 
 // Editar Bloque
 Route::get('/admin/planesbloques/vista/editar/index/{idplanbloque}', [PlanesController::class,'indexEditarPlanBloque']);
@@ -175,6 +177,8 @@ Route::get('/admin/planbloquedetalle/tabla/{idplanbloque}', [PlanesController::c
 Route::get('/admin/planbloquedetalle/agregar/nuevo/index/{idplanbloque}', [PlanesController::class,'indexNuevoPlanBloqueDetalle']);
 Route::post('/admin/planbloquedetalle/agregar/nuevo', [PlanesController::class,'registrarPlanesBloquesDetalle']);
 Route::post('/admin/planbloquedetalle/actualizar/posicion', [PlanesController::class,'actualizarPosicionPlanesBlockDetalle']);
+Route::post('/admin/planbloquedetalle/activacion', [PlanesController::class,'activacionPlanBloqueDetalle']);
+
 
 // Editar bloque detalle
 Route::get('/admin/planbloquedetalle/vista/editar/index/{idplanbloquedetalle}', [PlanesController::class,'indexEditarPlanBloqueDetalle']);

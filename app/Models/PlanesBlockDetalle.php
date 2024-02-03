@@ -10,4 +10,8 @@ class PlanesBlockDetalle extends Model
     use HasFactory;
     protected $table = 'planes_block_detalle';
     public $timestamps = false;
+
+    protected $fillable = [
+        'posicion'
+    ];
 }

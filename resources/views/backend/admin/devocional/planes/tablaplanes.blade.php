@@ -47,6 +47,17 @@
                                     <button type="button" class="btn btn-info btn-xs" onclick="vistaListadoBloques({{ $dato->id }})">
                                         <i class="fas fa-edit" title="Fechas"></i>&nbsp; Fechas
                                     </button>
+
+                                    @if($dato->visible == 1)
+                                    <button type="button" class="btn btn-danger btn-xs" onclick="preguntaDeshabilitar({{ $dato->id }})">
+                                        <i class="fas fa-edit" title="Deshabilitar"></i>&nbsp; Deshabilitar
+                                    </button>
+                                    @else
+                                    <button type="button" class="btn btn-success btn-xs" onclick="preguntaActivar({{ $dato->id }})">
+                                        <i class="fas fa-edit" title="Activar"></i>&nbsp; Activar
+                                    </button>
+                                    @endif
+
                                 </td>
 
                             </tr>

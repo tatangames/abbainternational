@@ -10,4 +10,8 @@ class VideosHoy extends Model
     use HasFactory;
     protected $table = 'videos_hoy';
     public $timestamps = false;
+
+    protected $fillable = [
+        'posicion'
+    ];
 }

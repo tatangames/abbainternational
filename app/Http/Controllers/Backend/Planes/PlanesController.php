@@ -177,6 +177,34 @@ class PlanesController extends Controller
     }
 
 
+    public function activacionPlan(Request $request)
+    {
+        $regla = array(
+            'idplan' => 'required',
+            'estado' => 'required'
+        );
+
+        $validar = Validator::make($request->all(), $regla);
+
+        if ($validar->fails()){ return ['success' => 0];}
+
+        // VERIFICAR QUE HAYA BLOQUES EN TABLA:
+        if(PlanesBloques::where('id_planes', $request->idplan)->first()){
+
+            // si hay bloque creado
+            Planes::where('id', $request->idplan)->update([
+                'visible' => $request->estado,
+            ]);
+
+
+
+            return ['success' => 1];
+        }else{
+            return ['success' => 2];
+        }
+    }
+
+
     public function indexEditarPlan($idplan)
     {
         $infoPlan = Planes::where('id', $idplan)->first();
@@ -470,6 +498,32 @@ class PlanesController extends Controller
     }
 
 
+    public function activacionPlanBloque(Request $request)
+    {
+        $regla = array(
+            'idplanbloques' => 'required',
+            'estado' => 'required'
+        );
+
+        $validar = Validator::make($request->all(), $regla);
+
+        if ($validar->fails()){ return ['success' => 0];}
+
+        // VERIFICAR QUE HAYA PLAN BLOQUES DETALLE EN TABLA:
+        if(PlanesBlockDetalle::where('id_planes_bloques', $request->idplanbloques)->first()){
+
+            // si hay bloque creado
+            PlanesBloques::where('id', $request->idplanbloques)->update([
+                'visible' => $request->estado,
+            ]);
+
+            return ['success' => 1];
+        }else{
+            return ['success' => 2];
+        }
+    }
+
+
     public function indexEditarPlanBloque($idplanbloque){
 
         $infoBloque = PlanesBloques::where('id', $idplanbloque)->first();
@@ -669,6 +723,35 @@ class PlanesController extends Controller
     }
 
 
+    // Validar que tenga el Devocional como minimo registrado ya
+    public function activacionPlanBloqueDetalle(Request $request)
+    {
+        $regla = array(
+            'idplanbloquedetalle' => 'required',
+            'estado' => 'required'
+        );
+
+        $validar = Validator::make($request->all(), $regla);
+
+        if ($validar->fails()){ return ['success' => 0];}
+
+        // VERIFICAR QUE HAYA PLAN BLOQUES DETALLE EN TABLA:
+        if(BloqueCuestionarioTextos::where('id_bloque_detalle', $request->idplanbloquedetalle)->first()){
+
+            // si hay bloque creado
+            PlanesBlockDetalle::where('id', $request->idplanbloquedetalle)->update([
+                'visible' => $request->estado,
+            ]);
+
+            return ['success' => 1];
+        }else{
+            return ['success' => 2];
+        }
+    }
+
+
+
+
     public function indexEditarPlanBloqueDetalle($idplanbloquedetalle){
 
         $infoBloque = PlanesBlockDetalle::where('id', $idplanbloquedetalle)->first();
@@ -756,6 +839,13 @@ class PlanesController extends Controller
             ->orderBy('id', 'ASC')
             ->get();
 
+        // ESTO ES PARA QUE EL SELECT AL SELECCIONAR IDIOMA ME DEJE ESPANOL POR DEFECTO
+        // SI CON ES 0, YA QUE AGREGA CADA UNO DE UN SOLO A SERVIDOR
+        $conteoIdioma = 0;
+        if(BloqueCuestionarioTextos::where('id_bloque_detalle', $idplanbloquedetalle)->first()){
+            $conteoIdioma = 1;
+        }
+
         $contador = 0;
         foreach ($arrayCuestionario as $dato){
             $contador++;
@@ -766,7 +856,7 @@ class PlanesController extends Controller
         }
 
         return view('backend.admin.devocional.planes.bloques.bloquedetalle.devocional.vistadevocionales', compact('idplanbloquedetalle',
-        'arrayIdiomas', 'arrayCuestionario'));
+        'arrayIdiomas', 'arrayCuestionario', 'conteoIdioma'));
     }
 
     // guardar devocional segun idioma
