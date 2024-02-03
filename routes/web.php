@@ -195,3 +195,27 @@ Route::post('/admin/preguntas/actualizar/posicion', [PreguntasController::class,
 // Editar
 Route::get('/admin/preguntas/vista/editar/{idbloquepreguntas}', [PreguntasController::class,'indexEditarBloquePregunta']);
 Route::post('/admin/preguntas/editar', [PreguntasController::class,'editarBloquePreguntas']);
+
+
+// Informacion para compartir app
+Route::get('/admin/comparteapp/index', [RecursosController::class,'indexComparteApp'])->name('admin.comparte.app.index');
+Route::post('/admin/comparteapp/actualizar/imagen', [RecursosController::class,'actualizarImagenComparteApp']);
+Route::post('/admin/comparteapp/registrar/idioma', [RecursosController::class,'registrarIdiomaComparteApp']);
+Route::post('/admin/comparteapp/actualizar', [RecursosController::class,'actualizarComparteApp']);
+
+
+// ---- VIDEOS HOY ---
+Route::get('/admin/videoshoy/vista', [RecursosController::class,'indexVideosHoy'])->name('admin.videos.hoy.index');
+Route::get('/admin/videoshoy/tabla', [RecursosController::class,'tablaVideosHoy']);
+Route::get('/admin/videoshoy/vista/nuevo', [RecursosController::class,'vistaNuevoVideosHoy']);
+Route::post('/admin/videoshoy/registrar', [RecursosController::class,'registrarVideoUrl']);
+Route::post('/admin/videoshoy/actualizar/posicion', [RecursosController::class,'actualizarPosicionVideosHoy']);
+Route::post('/admin/videoshoy/borrar', [RecursosController::class,'borrarVideoUrl']);
+
+// editar
+Route::get('/admin/videoshoy/vista/editar/{idvideohoy}', [RecursosController::class,'indexVideosHoyEditar']);
+Route::post('/admin/videoshoy/imagen/actualizar', [RecursosController::class,'actualizarImagenVideosHoy']);
+Route::post('/admin/videoshoy/actualizar', [RecursosController::class,'actualizarVideosHoyTextos']);
+
+
+

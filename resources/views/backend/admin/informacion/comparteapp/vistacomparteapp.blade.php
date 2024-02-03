@@ -33,25 +33,35 @@
 
 <div id="divcontenedor" style="display: none">
 
-    <section class="content-header">
-        <div class="container-fluid">
-            <button type="button" style="font-weight: bold; background-color: #2339cc; color: white !important;" onclick="vistaAtras()" class="button button-3d button-rounded button-pill button-small">
-                <i class="fas fa-arrow-left"></i>
-                Atras
-            </button>
-        </div>
-    </section>
-
 
     <section class="content" style="margin-top: 20px">
         <div class="container-fluid">
             <div class="card card-success">
                 <div class="card-header">
-                    <h3 class="card-title">Editar Detalle</h3>
+                    <h3 class="card-title">Editar</h3>
                 </div>
                 <div class="card-body">
                     <div>
                         <div class="col-md-12">
+
+                            <section style="margin-top: 35px">
+                                <label class="control-label">Imagen</label>
+
+                                <div class="row">
+
+                                    <div class="input-group input-group col-md-4">
+                                        <input type="file" class="form-control" style="color:#191818" id="imagen-nuevo" accept="image/jpeg, image/jpg, image/png"/>
+
+                                        <span class="input-group-append">
+                                            <button type="button" class="btn btn-info btn-sm" onclick="actualizarImagen()">Actualizar</button>
+                                            </span>
+                                    </div>
+
+                                </div>
+
+                            </section>
+
+
 
 
                         </div>
@@ -104,13 +114,14 @@
                         <th style="width: 4%">#</th>
                         <th style="width: 10%">Idioma</th>
                         <th style="width: 10%">Título</th>
+                        <th style="width: 10%">Subtitulo</th>
                         <th style="width: 6%">Opciones</th>
                     </tr>
                     </thead>
                     <tbody>
 
 
-                    @foreach($arrayPlanBlockDetaTextos as $item)
+                    @foreach($arrayComparteAppTextos as $item)
                         <tr>
                             <td>
                                 <p id="fila" class="form-control" style="max-width: 65px">{{ $item->contador }}</p>
@@ -118,14 +129,16 @@
 
                             <td>
                                 <!-- data-ididioma se utiliza para comparar si falta agregar idioma nuevo -->
-                                <input name="arrayIdioma[]" disabled data-idbloquedetatexto="{{ $item->id }}" data-ididioma="{{ $item->id_idioma_planes }}" value="{{ $item->idioma }}" class="form-control" type="text">
+                                <input name="arrayIdioma[]" disabled data-idfila="{{ $item->id }}" data-ididioma="{{ $item->id_idioma_planes }}" value="{{ $item->idioma }}" class="form-control" type="text">
                             </td>
 
                             <td>
-                                <input name="arrayTitulo[]" disabled  value="{{ $item->titulo }}" class="form-control" type="text">
-                                <input name="arrayDescripcion[]" disabled style="display: none" data-txtdescripcion="{{ $item->titulo_pregunta }}" class="form-control" type="text">
+                                <input name="arrayTitulo[]" disabled maxlength="100"  value="{{ $item->texto_1 }}" class="form-control" type="text">
                             </td>
 
+                            <td>
+                                <input name="arraySubtitulo[]" disabled maxlength="200"  value="{{ $item->texto_2 }}" class="form-control" type="text">
+                            </td>
 
                             <td>
                                 <button type="button" class="btn btn-block btn-info" onclick="editarFila(this)">Editar</button>
@@ -140,12 +153,6 @@
             </div>
         </div>
     </section>
-
-
-    <div class="modal-footer justify-content-between float-right" style="margin-top: 25px; margin-bottom: 30px;">
-        <button type="button" class="btn btn-success" onclick="preguntarGuardar()">Actualizar Devocional</button>
-    </div>
-
 
     <!-- MODAL PARA AGREGAR DATOS DE UN IDIOMA -->
 
@@ -169,8 +176,8 @@
                                 </div>
 
                                 <div class="form-group">
-                                    <label>Descripción </label>
-                                    <div id="editor-nuevo"></div>
+                                    <label>Subtitulo</label>
+                                    <input type="text" maxlength="200" autocomplete="off" class="form-control" id="subtitulo-nuevo">
                                 </div>
 
                             </div>
@@ -204,12 +211,13 @@
 
                                 <div class="form-group">
                                     <label>Título</label>
+                                    <input type="hidden" id="id-editar">
                                     <input type="text" maxlength="100" autocomplete="off" class="form-control" id="titulo-editar">
                                 </div>
 
                                 <div class="form-group">
-                                    <label>Descripción </label>
-                                    <div id="editor-editar"></div>
+                                    <label>Subtitulo</label>
+                                    <input type="text" maxlength="200" autocomplete="off" class="form-control" id="subtitulo-editar">
                                 </div>
 
 
@@ -246,32 +254,6 @@
     <script type="text/javascript">
         $(document).ready(function() {
 
-
-            window.varGlobalEditorDescripcion;
-            window.varGlobalEditorDescripcionEditados;
-
-            ClassicEditor
-                .create(document.querySelector('#editor-nuevo'), {
-                    language: 'es',
-                })
-                .then(editor => {
-                    varGlobalEditorDescripcion = editor;
-                })
-                .catch(error => {
-
-                });
-
-            ClassicEditor
-                .create(document.querySelector('#editor-editar'), {
-                    language: 'es',
-                })
-                .then(editor => {
-                    varGlobalEditorDescripcionEditados = editor;
-                })
-                .catch(error => {
-
-                });
-
             document.getElementById("divcontenedor").style.display = "block";
         });
     </script>
@@ -279,55 +261,100 @@
     <script>
 
         var referenciaArrayTitulo;
-
+        var referenciaArraySubtitulo;
 
         // obtener los datos de la fila y llevarlos al modal
         function editarFila(e){
 
+            document.getElementById("formulario-datoseditados").reset();
+
+
             var fila = $(e).closest('tr');
+
+
+            var valorInputFila = fila.find('input[name="arrayIdioma[]"]');
+            var valorActualFila = valorInputFila.data('idfila'); // ESTE ES EL DATA-
+            $('#id-editar').val(valorActualFila);
+
 
             var valorInputTitulo = fila.find('input[name="arrayTitulo[]"]').val();
             var valorInputTituloRef = fila.find('input[name="arrayTitulo[]"]');
             referenciaArrayTitulo = valorInputTituloRef;
 
-            var valorInputDescripcionRef = fila.find('input[name="arrayDescripcion[]"]');
-            var valorActualDescrip = valorInputDescripcionRef.data('txtdescripcion'); // ESTE ES EL DATA-
-            referenciaArrayDescripcion = valorInputDescripcionRef;
-
+            var valorInputSubtitulo = fila.find('input[name="arraySubtitulo[]"]').val();
+            var valorInputSubtituloRef = fila.find('input[name="arraySubtitulo[]"]');
+            referenciaArraySubtitulo = valorInputSubtituloRef;
 
             // limpiar modal
-            document.getElementById("formulario-datoseditados").reset();
 
             $('#titulo-editar').val(valorInputTitulo);
-
-            varGlobalEditorDescripcionEditados.setData(valorActualDescrip);
+            $('#subtitulo-editar').val(valorInputSubtitulo);
 
             $('#modalDatosEditados').modal('show');
         }
 
-        // METER LOS DATOS DE NUEVO A LA FILA
+        // ACTUALIZAR LA FILA
         function actualizarDatosEditados(){
 
+            var idfila = document.getElementById('id-editar').value;
             var titulo = document.getElementById('titulo-editar').value;
+            var subtitulo = document.getElementById('subtitulo-editar').value;
 
             if(titulo === ''){
                 toastr.error('Título es requerido')
                 return;
             }
 
-            // subtitulo y descripcion son opcionales
-            if(titulo.length > 30){
-                toastr.error('Título 30 caracteres máximo')
+            if(titulo.length > 100){
+                toastr.error('Título 100 caracteres máximo')
                 return;
             }
 
-            // Actualizar la fila con las referencias
-            referenciaArrayTitulo.val(titulo);
+            if(subtitulo.length > 200){
+                toastr.error('Título 200 caracteres máximo')
+                return;
+            }
 
-            const editorDataDescripcionEdit = varGlobalEditorDescripcionEditados.getData();
-            referenciaArrayDescripcion.data('txtdescripcion', editorDataDescripcionEdit);
 
-            $('#modalDatosEditados').modal('hide');
+            let formData = new FormData();
+            formData.append('idfila', idfila);
+            formData.append('titulo',titulo);
+            formData.append('subtitulo', subtitulo);
+
+            openLoading();
+
+            axios.post('/admin/comparteapp/actualizar', formData, {
+            })
+                .then((response) => {
+                    closeLoading();
+
+                    if(response.data.success === 1){
+
+                        Swal.fire({
+                            title: "Actualizado",
+                            text: "",
+                            icon: 'success',
+                            showCancelButton: false,
+                            allowOutsideClick: false,
+                            confirmButtonColor: '#28a745',
+                            confirmButtonText: 'Aceptar'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                location.reload();
+                            }
+                        })
+
+                    }
+                    else {
+                        toastr.error('Error al actualizar');
+                    }
+                })
+                .catch((error) => {
+                    toastr.error('Error al actualizar');
+                    closeLoading();
+                });
+
+
         }
 
 
@@ -337,7 +364,6 @@
             var idIdiomaSelect = document.getElementById('select-idioma').value;
 
             var arrayIdIdioma = $("input[name='arrayIdioma[]']").map(function(){return $(this).attr("data-ididioma");}).get();
-
 
             for(var a = 0; a < arrayIdIdioma.length; a++){
 
@@ -355,6 +381,48 @@
 
             $('#modalDatosIdioma').modal('show');
         }
+
+
+        // actualizar la imagen
+        function actualizarImagen(){
+
+            var imagen = document.getElementById('imagen-nuevo');
+
+            if(imagen.files && imagen.files[0]){ // si trae imagen
+                if (!imagen.files[0].type.match('image/jpeg|image/jpeg|image/png')){
+                    toastr.error('Formato de imagen permitido: .png .jpg .jpeg');
+                    return;
+                }
+            }else{
+                toastr.error('Imagen es requerida');
+                return;
+            }
+
+            let formData = new FormData();
+            formData.append('imagen', imagen.files[0]);
+
+            openLoading();
+
+            axios.post('/admin/comparteapp/actualizar/imagen', formData, {
+            })
+                .then((response) => {
+                    closeLoading();
+
+                    if(response.data.success === 1){
+
+                        toastr.success("Actualizado");
+                    }
+                    else {
+                        toastr.error('Error al actualizar');
+                    }
+                })
+                .catch((error) => {
+                    toastr.error('Error al actualizar');
+                    closeLoading();
+                });
+        }
+
+
 
 
         // CUANDO ES NUEVO TEXTO, para nuevo idioma
@@ -381,6 +449,7 @@
 
             // verificar datos cada uno
             var titulo = document.getElementById('titulo-nuevo').value;
+            var subtitulo = document.getElementById('subtitulo-nuevo').value;
 
             if(titulo === ''){
                 toastr.error('Título es requerido')
@@ -388,139 +457,45 @@
             }
 
             // subtitulo y descripcion son opcionales
-            if(titulo.length > 30){
-                toastr.error('Título 30 caracteres máximo')
+            if(titulo.length > 100){
+                toastr.error('Título 100 caracteres máximo')
                 return;
             }
 
-
-            // AGREGAR A FILA
-            const editorDataDescripcionEdit = varGlobalEditorDescripcionEditados.getData();
-
-            // COMO ES NUEVA FILA, SE IDENTIFICARA CON 0, PARA CREAR EL REGISTRO
-            let valorNull = 0;
-
-            var nFilas = $('#matriz >tbody >tr').length;
-            nFilas += 1;
-
-            var markup = "<tr>" +
-
-                "<td>" +
-                "<p id='fila" + (nFilas) + "' class='form-control' style='max-width: 65px'>" + (nFilas) + "</p>" +
-                "</td>" +
-
-                "<td>" +
-                "<input name='arrayIdioma[]' disabled    data-idbloquedetatexto='" + valorNull + "'  data-ididioma='" + idIdiomaSelect + "' value='" + selectedOptionText + "' class='form-control' type='text'>" +
-                "</td>" +
-
-
-                "<td>" +
-                "<input name='arrayTitulo[]' disabled value='" + titulo + "' class='form-control' type='text'>" +
-                "<input name='arrayDescripcion[]' disabled  data-txtdescripcion='" + editorDataDescripcionEdit + "'  style='display: none' class='form-control' type='hidden'>" +
-                "</td>" +
-
-                "<td>" +
-                "<button type='button' class='btn btn-block btn-info' onclick='editarFila(this)'>Editar</button>" +
-                "</td>" +
-
-                "</tr>";
-
-            $("#matriz tbody").append(markup);
-
-
-            Swal.fire({
-                position: 'center',
-                icon: 'success',
-                title: 'Idioma agregado',
-                showConfirmButton: false,
-                timer: 1500
-            })
-
-
-            $('#modalDatosIdioma').modal('hide');
-        }
-
-
-
-        function vistaAtras(){
-            let idplanesbloques = {{ $infoBloque->id_planes_bloques }};
-            window.location.href="{{ url('/admin/planbloquedetalle/vista') }}/" + idplanesbloques;
-        }
-
-        function preguntarGuardar(){
-
-            Swal.fire({
-                title: '¿Actualizar Detalle?',
-                text: '',
-                icon: 'info',
-                showCancelButton: true,
-                confirmButtonColor: '#28a745',
-                cancelButtonColor: '#d33',
-                allowOutsideClick: false,
-                confirmButtonText: 'SI',
-                cancelButtonText: 'NO'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    actualizarDetalleFinal();
-                }
-            })
-        }
-
-        // Actualizando los datos en el servidor
-        function actualizarDetalleFinal(){
-
-            var selectIdioma = document.getElementById("select-idioma");
-
-                 // Verificar que haya ingresado todos los idiomas
-            let conteoIdioma = selectIdioma.length;
-
-
-            var nRegistro = $('#matriz > tbody >tr').length;
-
-
-            if (nRegistro !== conteoIdioma){
-                toastr.error('Idiomas son requeridos');
+            if(subtitulo.length > 200){
+                toastr.error('Subtitulo 200 caracteres máximo')
                 return;
             }
 
-            // obtener ID idioma, titulo, subtitulo, descripcion
-
-            let idplanbloquedetalle = {{ $idplanbloquedetalle }};
 
             let formData = new FormData();
-            const contenedorArray = [];
-            var arrayIdIdioma = $("input[name='arrayIdioma[]']").map(function(){return $(this).attr("data-ididioma");}).get();
-            var arrayIdBloqueDetaTexto = $("input[name='arrayIdioma[]']").map(function(){return $(this).attr("data-idbloquedetatexto");}).get();
-            var arrayTitulo = $("input[name='arrayTitulo[]']").map(function(){return $(this).val();}).get();
-
-            // OBTENER LOS DATOS ACTUALIZADOS PORQUE SE EDITAN
-            var arrayDescripcion = $("input[name='arrayDescripcion[]']").map(function() {
-                return $(this).data("txtdescripcion");
-            }).get();
-
-
-            for(var i = 0; i < arrayIdIdioma.length; i++){
-                let infoIdBloqueDetaTexto = arrayIdBloqueDetaTexto[i];
-                let infoIdIdioma = arrayIdIdioma[i];
-                let infoTitulo = arrayTitulo[i];
-                let infoDescripcion = arrayDescripcion[i];
-
-                // ESTOS NOMBRES SE UTILIZAN EN CONTROLADOR
-                contenedorArray.push({ infoIdBloqueDetaTexto, infoIdIdioma, infoTitulo, infoDescripcion});
-            }
-
-            formData.append('contenedorArray', JSON.stringify(contenedorArray));
-            formData.append('idplanbloquedetalle', idplanbloquedetalle);
+            formData.append('ididioma', idIdiomaSelect);
+            formData.append('titulo',titulo);
+            formData.append('subtitulo', subtitulo);
 
             openLoading();
 
-            axios.post('/admin/planbloquedetalle/datos/actualizar', formData, {
+            axios.post('/admin/comparteapp/registrar/idioma', formData, {
             })
                 .then((response) => {
                     closeLoading();
 
                     if(response.data.success === 1){
-                        toastr.success("Actualizado");
+
+                        Swal.fire({
+                            title: "Idioma Agregado",
+                            text: "",
+                            icon: 'success',
+                            showCancelButton: false,
+                            allowOutsideClick: false,
+                            confirmButtonColor: '#28a745',
+                            confirmButtonText: 'Aceptar'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                location.reload();
+                            }
+                        })
+
                     }
                     else {
                         toastr.error('Error al actualizar');
@@ -531,6 +506,7 @@
                     closeLoading();
                 });
         }
+
 
 
 

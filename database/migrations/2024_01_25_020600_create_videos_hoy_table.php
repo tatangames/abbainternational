@@ -20,6 +20,9 @@ return new class extends Migration
             $table->string('url_video', 100);
             $table->integer('posicion');
 
+            // fecha cuando fue agregado
+            $table->date('fecha');
+
             $table->foreign('id_tipo_video')->references('id')->on('tipo_video');
         });
     }

@@ -140,6 +140,13 @@
                             </a>
                         </li>
 
+                        <li class="nav-item">
+                            <a href="{{ route('admin.videos.hoy.index') }}" target="frameprincipal" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Videos URL</p>
+                            </a>
+                        </li>
+
 
                     </ul>
                 </li>
@@ -165,6 +172,29 @@
                     </ul>
                 </li>
 
+
+
+                <li class="nav-item">
+
+                    <a href="#" class="nav-link nav-">
+                        <i class="far fa-edit"></i>
+                        <p>
+                            Información
+                            <i class="fas fa-angle-left right"></i>
+                        </p>
+                    </a>
+
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="{{ route('admin.comparte.app.index') }}" target="frameprincipal" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Comparte App</p>
+                            </a>
+                        </li>
+
+
+                    </ul>
+                </li>
 
             </ul>
         </nav>

@@ -6,7 +6,6 @@
     <link href="{{ asset('css/toastr.min.css') }}" type="text/css" rel="stylesheet" />
     <link href="{{ asset('css/buttons_estilo.css') }}" rel="stylesheet">
     <link href="{{ asset('css/select2.min.css') }}" type="text/css" rel="stylesheet">
-    <link href="{{ asset('css/estiloToggle.css') }}" type="text/css" rel="stylesheet" />
     <link href="{{ asset('css/select2-bootstrap-5-theme.min.css') }}" type="text/css" rel="stylesheet">
 @stop
 
@@ -47,12 +46,51 @@
         <div class="container-fluid">
             <div class="card card-success">
                 <div class="card-header">
-                    <h3 class="card-title">Editar Detalle</h3>
+                    <h3 class="card-title">Crear Nueva URL</h3>
                 </div>
                 <div class="card-body">
-                    <div>
+                    <div class="row">
                         <div class="col-md-12">
 
+                            <section style="margin-top: 0px">
+
+                                <div class="row">
+                                    <div class="form-group">
+                                        <div class="form-group">
+                                            <label class="control-label">Fecha</label>
+                                            <input type="date" class="form-control" id="fecha" value="{{ $fechaActual }}">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="form-group">
+                                        <div class="form-group">
+                                            <label class="control-label">Imagen</label>
+                                            <input type="file" class="form-control" style="color:#191818" id="imagen-nuevo" accept="image/jpeg, image/jpg, image/png"/>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                                <div class="form-group" style="max-width: 20%">
+                                    <label class="control-label">Tipo Video</label>
+                                    <select class="form-control" id="select-tipovideo">
+                                        @foreach($arrayTipo as $item)
+                                            <option value="{{$item->id}}">{{$item->nombre}}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+
+                                <div class="form-group" style="max-width: 35%">
+                                    <label class="control-label">URL Video</label>
+                                    <input type="text" maxlength="100" class="form-control" id="url-nuevo" >
+                                </div>
+
+                            </section>
+
+                            <hr><br>
 
                         </div>
                     </div>
@@ -70,7 +108,7 @@
 
                         <div class="col-md-3">
                             <div class="form-group">
-                                <label class="control-label">Idioma para Texto Personalizado:</label>
+                                <label class="control-label">Idioma:</label>
                                 <select class="form-control" id="select-idioma">
                                     @foreach($arrayIdiomas as $item)
                                         <option value="{{$item->id}}">{{$item->nombre}}</option>
@@ -79,8 +117,8 @@
                             </div>
                         </div>
                     </div>
-                    <button type="button" class="btn btn-info btn-sm" onclick="verificarIdiomaTabla()">Agregar Idioma</button>
 
+                    <button type="button" class="btn btn-info btn-sm" onclick="verificarIdiomaTabla()">Agregar Idioma</button>
 
                 </section>
             </div>
@@ -109,32 +147,6 @@
                     </thead>
                     <tbody>
 
-
-                    @foreach($arrayPlanBlockDetaTextos as $item)
-                        <tr>
-                            <td>
-                                <p id="fila" class="form-control" style="max-width: 65px">{{ $item->contador }}</p>
-                            </td>
-
-                            <td>
-                                <!-- data-ididioma se utiliza para comparar si falta agregar idioma nuevo -->
-                                <input name="arrayIdioma[]" disabled data-idbloquedetatexto="{{ $item->id }}" data-ididioma="{{ $item->id_idioma_planes }}" value="{{ $item->idioma }}" class="form-control" type="text">
-                            </td>
-
-                            <td>
-                                <input name="arrayTitulo[]" disabled  value="{{ $item->titulo }}" class="form-control" type="text">
-                                <input name="arrayDescripcion[]" disabled style="display: none" data-txtdescripcion="{{ $item->titulo_pregunta }}" class="form-control" type="text">
-                            </td>
-
-
-                            <td>
-                                <button type="button" class="btn btn-block btn-info" onclick="editarFila(this)">Editar</button>
-                            </td>
-                        </tr>
-
-                    @endforeach
-
-
                     </tbody>
                 </table>
             </div>
@@ -143,8 +155,9 @@
 
 
     <div class="modal-footer justify-content-between float-right" style="margin-top: 25px; margin-bottom: 30px;">
-        <button type="button" class="btn btn-success" onclick="preguntarGuardar()">Actualizar Devocional</button>
+        <button type="button" class="btn btn-success" onclick="preguntarGuardar()">Guardar URL</button>
     </div>
+
 
 
     <!-- MODAL PARA AGREGAR DATOS DE UN IDIOMA -->
@@ -168,11 +181,6 @@
                                     <input type="text" maxlength="100" autocomplete="off" class="form-control" id="titulo-nuevo">
                                 </div>
 
-                                <div class="form-group">
-                                    <label>Descripción </label>
-                                    <div id="editor-nuevo"></div>
-                                </div>
-
                             </div>
                         </div>
                     </form>
@@ -180,46 +188,6 @@
                 <div class="modal-footer justify-content-between">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
                     <button type="button" class="btn btn-success" onclick="AgregarFila()">Guardar</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-
-    <!-- MODAL PARA AGREGAR DATOS EDITADOS -->
-
-    <div class="modal fade" id="modalDatosEditados" >
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title">Información</h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form id="formulario-datoseditados">
-                        <div class="card-body">
-                            <div class="col-md-12">
-
-                                <div class="form-group">
-                                    <label>Título</label>
-                                    <input type="text" maxlength="100" autocomplete="off" class="form-control" id="titulo-editar">
-                                </div>
-
-                                <div class="form-group">
-                                    <label>Descripción </label>
-                                    <div id="editor-editar"></div>
-                                </div>
-
-
-                            </div>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer justify-content-between">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
-                    <button type="button" class="btn btn-success" onclick="actualizarDatosEditados()">Actualizar Fila</button>
                 </div>
             </div>
         </div>
@@ -240,37 +208,10 @@
     <script src="{{ asset('js/sweetalert2.all.min.js') }}"></script>
     <script src="{{ asset('js/alertaPersonalizada.js') }}"></script>
     <script src="{{ asset('js/select2.min.js') }}"></script>
-    <script src="{{ asset('plugins/ckeditor5v1/build/ckeditor.js') }}"></script>
 
 
     <script type="text/javascript">
         $(document).ready(function() {
-
-
-            window.varGlobalEditorDescripcion;
-            window.varGlobalEditorDescripcionEditados;
-
-            ClassicEditor
-                .create(document.querySelector('#editor-nuevo'), {
-                    language: 'es',
-                })
-                .then(editor => {
-                    varGlobalEditorDescripcion = editor;
-                })
-                .catch(error => {
-
-                });
-
-            ClassicEditor
-                .create(document.querySelector('#editor-editar'), {
-                    language: 'es',
-                })
-                .then(editor => {
-                    varGlobalEditorDescripcionEditados = editor;
-                })
-                .catch(error => {
-
-                });
 
             document.getElementById("divcontenedor").style.display = "block";
         });
@@ -278,66 +219,12 @@
 
     <script>
 
-        var referenciaArrayTitulo;
 
-
-        // obtener los datos de la fila y llevarlos al modal
-        function editarFila(e){
-
-            var fila = $(e).closest('tr');
-
-            var valorInputTitulo = fila.find('input[name="arrayTitulo[]"]').val();
-            var valorInputTituloRef = fila.find('input[name="arrayTitulo[]"]');
-            referenciaArrayTitulo = valorInputTituloRef;
-
-            var valorInputDescripcionRef = fila.find('input[name="arrayDescripcion[]"]');
-            var valorActualDescrip = valorInputDescripcionRef.data('txtdescripcion'); // ESTE ES EL DATA-
-            referenciaArrayDescripcion = valorInputDescripcionRef;
-
-
-            // limpiar modal
-            document.getElementById("formulario-datoseditados").reset();
-
-            $('#titulo-editar').val(valorInputTitulo);
-
-            varGlobalEditorDescripcionEditados.setData(valorActualDescrip);
-
-            $('#modalDatosEditados').modal('show');
-        }
-
-        // METER LOS DATOS DE NUEVO A LA FILA
-        function actualizarDatosEditados(){
-
-            var titulo = document.getElementById('titulo-editar').value;
-
-            if(titulo === ''){
-                toastr.error('Título es requerido')
-                return;
-            }
-
-            // subtitulo y descripcion son opcionales
-            if(titulo.length > 30){
-                toastr.error('Título 30 caracteres máximo')
-                return;
-            }
-
-            // Actualizar la fila con las referencias
-            referenciaArrayTitulo.val(titulo);
-
-            const editorDataDescripcionEdit = varGlobalEditorDescripcionEditados.getData();
-            referenciaArrayDescripcion.data('txtdescripcion', editorDataDescripcionEdit);
-
-            $('#modalDatosEditados').modal('hide');
-        }
-
-
-        // verificar que idioma no este en la tabla, para abrir modal y agrgear el nuevo idioma a la fila
         function verificarIdiomaTabla(){
 
             var idIdiomaSelect = document.getElementById('select-idioma').value;
 
             var arrayIdIdioma = $("input[name='arrayIdioma[]']").map(function(){return $(this).attr("data-ididioma");}).get();
-
 
             for(var a = 0; a < arrayIdIdioma.length; a++){
 
@@ -357,7 +244,6 @@
         }
 
 
-        // CUANDO ES NUEVO TEXTO, para nuevo idioma
         function AgregarFila(){
 
             // verificar siempre
@@ -371,9 +257,9 @@
 
             for(var a = 0; a < arrayIdIdioma.length; a++){
 
-                let infoIdIdioma = arrayIdIdioma[a];
+                let infoIdLenguaje = arrayIdIdioma[a];
 
-                if(idIdiomaSelect == infoIdIdioma){
+                if(idIdiomaSelect == infoIdLenguaje){
                     toastr.error('El Idioma ya estaba agregado');
                     return;
                 }
@@ -387,18 +273,13 @@
                 return;
             }
 
-            // subtitulo y descripcion son opcionales
-            if(titulo.length > 30){
-                toastr.error('Título 30 caracteres máximo')
+            if(titulo.length > 100){
+                toastr.error('Título 100 caracteres máximo')
                 return;
             }
 
 
             // AGREGAR A FILA
-            const editorDataDescripcionEdit = varGlobalEditorDescripcionEditados.getData();
-
-            // COMO ES NUEVA FILA, SE IDENTIFICARA CON 0, PARA CREAR EL REGISTRO
-            let valorNull = 0;
 
             var nFilas = $('#matriz >tbody >tr').length;
             nFilas += 1;
@@ -410,17 +291,16 @@
                 "</td>" +
 
                 "<td>" +
-                "<input name='arrayIdioma[]' disabled    data-idbloquedetatexto='" + valorNull + "'  data-ididioma='" + idIdiomaSelect + "' value='" + selectedOptionText + "' class='form-control' type='text'>" +
+                "<input name='arrayIdioma[]' disabled data-ididioma='" + idIdiomaSelect + "' value='" + selectedOptionText + "' class='form-control' type='text'>" +
                 "</td>" +
 
 
                 "<td>" +
                 "<input name='arrayTitulo[]' disabled value='" + titulo + "' class='form-control' type='text'>" +
-                "<input name='arrayDescripcion[]' disabled  data-txtdescripcion='" + editorDataDescripcionEdit + "'  style='display: none' class='form-control' type='hidden'>" +
                 "</td>" +
 
                 "<td>" +
-                "<button type='button' class='btn btn-block btn-info' onclick='editarFila(this)'>Editar</button>" +
+                "<button type='button' class='btn btn-block btn-danger' onclick='borrarFila(this)'>Borrar</button>" +
                 "</td>" +
 
                 "</tr>";
@@ -443,14 +323,13 @@
 
 
         function vistaAtras(){
-            let idplanesbloques = {{ $infoBloque->id_planes_bloques }};
-            window.location.href="{{ url('/admin/planbloquedetalle/vista') }}/" + idplanesbloques;
+            window.location.href="{{ url('/admin/videoshoy/vista') }}";
         }
 
         function preguntarGuardar(){
 
             Swal.fire({
-                title: '¿Actualizar Detalle?',
+                title: '¿Guardar Video URL?',
                 text: '',
                 icon: 'info',
                 showCancelButton: true,
@@ -461,78 +340,121 @@
                 cancelButtonText: 'NO'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    actualizarDetalleFinal();
+                    guardarPlanFinal();
                 }
             })
         }
 
-        // Actualizando los datos en el servidor
-        function actualizarDetalleFinal(){
+        function guardarPlanFinal(){
 
+            var fecha = document.getElementById('fecha').value;
+            var selectTipoVideo = document.getElementById('select-tipovideo').value;
+            var urlVideo = document.getElementById('url-nuevo').value;
+            var imagen = document.getElementById('imagen-nuevo');
             var selectIdioma = document.getElementById("select-idioma");
 
-                 // Verificar que haya ingresado todos los idiomas
+            if(fecha === ''){
+                toastr.error('Fecha es Requerida');
+                return;
+            }
+
+            if(urlVideo === ''){
+                toastr.error('URL Video es Requerida');
+                return;
+            }
+
+            if(imagen.files && imagen.files[0]){ // si trae imagen
+                if (!imagen.files[0].type.match('image/jpeg|image/jpeg|image/png')){
+                    toastr.error('Formato de imagen permitido: .png .jpg .jpeg');
+                    return;
+                }
+            }else{
+                toastr.error('Imagen es Requerida')
+                return;
+            }
+
+
+
+            // Verificar que haya ingresado todos los idiomas
             let conteoIdioma = selectIdioma.length;
 
-
             var nRegistro = $('#matriz > tbody >tr').length;
-
 
             if (nRegistro !== conteoIdioma){
                 toastr.error('Idiomas son requeridos');
                 return;
             }
 
-            // obtener ID idioma, titulo, subtitulo, descripcion
-
-            let idplanbloquedetalle = {{ $idplanbloquedetalle }};
 
             let formData = new FormData();
             const contenedorArray = [];
             var arrayIdIdioma = $("input[name='arrayIdioma[]']").map(function(){return $(this).attr("data-ididioma");}).get();
-            var arrayIdBloqueDetaTexto = $("input[name='arrayIdioma[]']").map(function(){return $(this).attr("data-idbloquedetatexto");}).get();
             var arrayTitulo = $("input[name='arrayTitulo[]']").map(function(){return $(this).val();}).get();
 
-            // OBTENER LOS DATOS ACTUALIZADOS PORQUE SE EDITAN
-            var arrayDescripcion = $("input[name='arrayDescripcion[]']").map(function() {
-                return $(this).data("txtdescripcion");
-            }).get();
-
-
             for(var i = 0; i < arrayIdIdioma.length; i++){
-                let infoIdBloqueDetaTexto = arrayIdBloqueDetaTexto[i];
+
                 let infoIdIdioma = arrayIdIdioma[i];
                 let infoTitulo = arrayTitulo[i];
-                let infoDescripcion = arrayDescripcion[i];
 
                 // ESTOS NOMBRES SE UTILIZAN EN CONTROLADOR
-                contenedorArray.push({ infoIdBloqueDetaTexto, infoIdIdioma, infoTitulo, infoDescripcion});
+                contenedorArray.push({ infoIdIdioma, infoTitulo});
             }
 
             formData.append('contenedorArray', JSON.stringify(contenedorArray));
-            formData.append('idplanbloquedetalle', idplanbloquedetalle);
+            formData.append('fecha', fecha);
+            formData.append('imagen', imagen.files[0]);
+            formData.append('idtipovideo', selectTipoVideo);
+            formData.append('urlvideo', urlVideo);
+
 
             openLoading();
 
-            axios.post('/admin/planbloquedetalle/datos/actualizar', formData, {
+            axios.post('/admin/videoshoy/registrar', formData, {
             })
                 .then((response) => {
                     closeLoading();
 
                     if(response.data.success === 1){
-                        toastr.success("Actualizado");
+                        Swal.fire({
+                            title: "Video URL Creada",
+                            icon: 'success',
+                            showCancelButton: false,
+                            allowOutsideClick: false,
+                            confirmButtonColor: '#28a745',
+                            confirmButtonText: 'Aceptar'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                vistaAtras();
+                            }
+                        })
                     }
                     else {
-                        toastr.error('Error al actualizar');
+                        toastr.error('Error al registrar');
                     }
                 })
                 .catch((error) => {
-                    toastr.error('Error al actualizar');
+                    toastr.error('Error al registrar');
                     closeLoading();
                 });
         }
 
 
+        function borrarFila(elemento){
+            var tabla = elemento.parentNode.parentNode;
+            tabla.parentNode.removeChild(tabla);
+            setearFila();
+        }
+
+        function setearFila(){
+
+            var table = document.getElementById('matriz');
+            var conteo = 0;
+            for (var r = 1, n = table.rows.length; r < n; r++) {
+                conteo +=1;
+                var element = table.rows[r].cells[0].children[0];
+                document.getElementById(element.id).innerHTML = ""+conteo;
+            }
+        }
 
 
     </script>

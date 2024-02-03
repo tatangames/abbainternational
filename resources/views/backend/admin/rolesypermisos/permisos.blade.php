@@ -244,7 +244,6 @@
             formData.append('password', password);
             formData.append('rol', idrol);
 
-            console.log(idrol);
 
 
             axios.post('/admin/permisos/nuevo-usuario', formData, {
@@ -279,7 +278,6 @@
             })
                 .then((response) => {
                     closeLoading();
-                    console.log(response);
 
                     if(response.data.success === 1){
                         $('#modalEditar').modal('show');
@@ -312,7 +310,6 @@
                 })
                 .catch((error) => {
                     closeLoading()
-                    console.log(error);
                     toastr.error('Información no encontrado..');
                 });
         }

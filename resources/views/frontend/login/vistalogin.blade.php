@@ -198,7 +198,6 @@
             .catch((error) => {
                 closeLoading()
 
-                console.log(error)
                 toastr.error("Error en la respuesta");
             });
     }
