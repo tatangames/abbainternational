@@ -496,7 +496,7 @@
 
                 "<td>" +
                 "<input name='arraySubtitulo[]' disabled value='" + subtitulo + "' class='form-control' type='text'>" +
-                "<input name='arrayDescripcion[]' disabled style='display: none' data-txtdescripcion='" + editorDataDescripcion + "' class='form-control' type='text'>" +
+                "<input name='arrayDescripcion[]' disabled data-txtdescripcion='" + editorDataDescripcion + "' class='form-control' type='hidden'>" +
                 "</td>" +
 
                 "<td>" +

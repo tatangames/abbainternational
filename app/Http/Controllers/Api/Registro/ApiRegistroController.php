@@ -68,10 +68,22 @@ class ApiRegistroController extends Controller
 
             $token = JWTAuth::fromUser($nuevoUsuario);
 
-            $ajustes = new UsuarioNotificaciones();
-            $ajustes->id_usuario = $nuevoUsuario->id;
-            $ajustes->onesignal = $request->idonesignal;
-            $ajustes->save();
+
+
+
+            $idOneSignal = $request->idonesignal;
+
+            if($idOneSignal != null){
+                if(strlen($idOneSignal) == 0){
+                    // vacio no hacer nada
+                }else{
+
+                    $nuevoid = new UsuarioNotificaciones();
+                    $nuevoid->id_usuario = $nuevoUsuario->id;
+                    $nuevoid->onesignal = $idOneSignal;
+                    $nuevoid->save();
+                }
+            }
 
             DB::commit();
             return ['success' => 2,

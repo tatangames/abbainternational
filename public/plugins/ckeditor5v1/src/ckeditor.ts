@@ -10,13 +10,18 @@ import { Bold, Italic, Underline } from '@ckeditor/ckeditor5-basic-styles';
 import { BlockQuote } from '@ckeditor/ckeditor5-block-quote';
 import type { EditorConfig } from '@ckeditor/ckeditor5-core';
 import { Essentials } from '@ckeditor/ckeditor5-essentials';
-import { FontSize } from '@ckeditor/ckeditor5-font';
+import { FontFamily, FontSize } from '@ckeditor/ckeditor5-font';
+import { Heading } from '@ckeditor/ckeditor5-heading';
 import { HorizontalLine } from '@ckeditor/ckeditor5-horizontal-line';
-import { DataFilter, HtmlComment } from '@ckeditor/ckeditor5-html-support';
-import { TextPartLanguage } from '@ckeditor/ckeditor5-language';
-import { List, ListProperties } from '@ckeditor/ckeditor5-list';
+import { Indent, IndentBlock } from '@ckeditor/ckeditor5-indent';
+import { List } from '@ckeditor/ckeditor5-list';
 import { Paragraph } from '@ckeditor/ckeditor5-paragraph';
-import { SpecialCharacters, SpecialCharactersLatin } from '@ckeditor/ckeditor5-special-characters';
+import {
+	SpecialCharacters,
+	SpecialCharactersArrows,
+	SpecialCharactersCurrency,
+	SpecialCharactersLatin
+} from '@ckeditor/ckeditor5-special-characters';
 import { Undo } from '@ckeditor/ckeditor5-undo';
 
 // You can read more about extending the build with additional plugins in the "Installing plugins" guide.
@@ -27,18 +32,20 @@ class Editor extends ClassicEditor {
 		Alignment,
 		BlockQuote,
 		Bold,
-		DataFilter,
 		Essentials,
+		FontFamily,
 		FontSize,
+		Heading,
 		HorizontalLine,
-		HtmlComment,
+		Indent,
+		IndentBlock,
 		Italic,
 		List,
-		ListProperties,
 		Paragraph,
 		SpecialCharacters,
+		SpecialCharactersArrows,
+		SpecialCharactersCurrency,
 		SpecialCharactersLatin,
-		TextPartLanguage,
 		Underline,
 		Undo
 	];
@@ -46,16 +53,22 @@ class Editor extends ClassicEditor {
 	public static override defaultConfig: EditorConfig = {
 		toolbar: {
 			items: [
+				'heading',
+				'|',
 				'bold',
 				'italic',
 				'bulletedList',
 				'numberedList',
 				'|',
+				'outdent',
+				'indent',
+				'|',
 				'blockQuote',
 				'undo',
 				'redo',
-				'alignment',
 				'fontSize',
+				'fontFamily',
+				'alignment',
 				'horizontalLine',
 				'specialCharacters',
 				'underline'

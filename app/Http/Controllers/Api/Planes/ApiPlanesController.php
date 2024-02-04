@@ -33,12 +33,14 @@ use DateTime;
 class ApiPlanesController extends Controller
 {
 
-
+    // retorna planes que no ha agregado el usuario
     public function buscarPlanesNoAgregados(Request $request){
 
         $rules = array(
             'idiomaplan' => 'required',
-            'iduser' => 'required'
+            'iduser' => 'required',
+            'page' => 'required',
+            'limit' => 'required'
         );
 
         $validator = Validator::make($request->all(), $rules);
@@ -49,134 +51,55 @@ class ApiPlanesController extends Controller
         $tokenApi = $request->header('Authorization');
 
         // idioma, segun el usuario
-        $idiomaTextos = $this->reseteoIdiomaTextos($request->idiomaplan);
+        $idiomaTextos = $request->idiomaplan;
 
         if ($userToken = JWTAuth::user($tokenApi)) {
 
 
-            $arrayContenedor = PlanesContenedor::where('visible', 1)->get();
-
             // todos los planes de mi usuario
-            $arrayId = PlanesUsuarios::where('id_usuario', $userToken->id)
+            $arrayIdYaSeleccionados = PlanesUsuarios::where('id_usuario', $userToken->id)
                 ->select('id_planes')
                 ->get();
 
-            // meter todos los planes, menos elegidos por el usuario ya
-            foreach ($arrayContenedor as $dato){
+            // conocer si habra planes disponibles
+            $hayInfo = 0;
 
-                $hayInfo = 0;
+            // obtener todos los planes NO elegido por el usuario y sean visible
+            $arrayPlanes = Planes::whereNotIn('id', $arrayIdYaSeleccionados)
+                ->where('visible', 1)
+                ->get();
 
-                // obtener todos los planes NO elegido por el usuario y sean visible
-                $arrayPlanes = Planes::whereNotIn('id', $arrayId)
-                    ->where('id_planes_contenedor', $dato->id)
-                    ->where('visible', 1)
-                    ->get();
-
-                if ($arrayPlanes->isNotEmpty()) {
-                    $hayInfo = 1;
-                }
-
-                $dato->hayinfo = $hayInfo;
+            if ($arrayPlanes->isNotEmpty()) {
+                $hayInfo = 1;
             }
 
 
-            // EVITAR LOS TITULOS VACIOS
-            $arrayPlanesValidos = $this->retornoPlanesNoElegidos($arrayContenedor, $userToken->id, $idiomaTextos);
+            $page = $request->input('page', 1);
+            $limit = $request->input('limit', 10);
 
-            $haydatos = 0;
-            if ($arrayPlanesValidos->isNotEmpty()) {
-                $haydatos = 1;
+
+            $arrayPlanes = Planes::whereNotIn('id', $arrayIdYaSeleccionados)
+                ->where('visible', 1)
+                ->paginate($limit, ['*'], 'page', $page);
+
+            foreach ($arrayPlanes as $dato){
+                $arrayRaw = $this->retornoTituloPlan($idiomaTextos, $dato->id);
+                $dato->titulo = $arrayRaw['titulo'];
+                $dato->subtitulo = $arrayRaw['subtitulo'];
             }
+
+            // sortByDesc
+            $sortedResult = $arrayPlanes->getCollection()->sortBy('posicion')->values();
+            $arrayPlanes->setCollection($sortedResult);
+
 
             return [
                 'success' => 1,
-                'hayinfo' => $haydatos,
-                'listado' => $arrayPlanesValidos,
+                'hayinfo' => $hayInfo,
+                'listado' => $arrayPlanes
                 ];
         }else{
             return ['success' => 99];
-        }
-    }
-
-    // COMO IDIOMATEXTOS DEVUELVE 0 POR DEFECTO, Y EL ID 1 ES MINIMO EN LA BASE DE DATOS
-    private function reseteoIdiomaTextos($idiomatextos)
-    {
-        if($idiomatextos == 0){
-            $idiomatextos = 1;
-        }
-
-        return $idiomatextos;
-    }
-
-    // RETORNA POR TITULO Y SUS PLANES DISPONIBLES POR USUARIO
-    private function retornoPlanesNoElegidos($arraybuscar, $idusuario, $idiomaTextos){
-
-        // todos los planes de mi usuario
-        $arrayId = PlanesUsuarios::where('id_usuario', $idusuario)
-            ->select('id_planes')
-            ->get();
-
-        $pilaIdContenedor = array();
-
-        foreach ($arraybuscar as $item){
-            if($item->hayinfo > 0){
-                array_push($pilaIdContenedor, $item->id);
-            }
-        }
-
-        $planesContenedor = PlanesContenedor::whereIn('id', $pilaIdContenedor)
-            ->orderBy('posicion', 'ASC')
-            ->get();
-
-        $resultsBloque = array();
-        $index = 0;
-
-        foreach ($planesContenedor as $dato){
-            array_push($resultsBloque, $dato);
-
-
-            // obtener el titulo segun idioma
-            $tituloContenedor = $this->retornoTituloContenedorPlan($idiomaTextos, $dato->id);
-            $dato->titulo = $tituloContenedor;
-
-
-            // obtener todos los planes NO elegido por el usuario
-            $arrayPlanes = Planes::whereNotIn('id', $arrayId)
-                ->where('id_planes_contenedor', $dato->id)
-                ->get();
-
-            foreach ($arrayPlanes as $item){
-                $arrayRaw = $this->retornoTituloPlan($idiomaTextos, $item->id);
-                $item->titulo = $arrayRaw['titulo'];
-                $item->subtitulo = $arrayRaw['subtitulo'];
-            }
-
-            $resultsBloque[$index]->detalle = $arrayPlanes;
-            $index++;
-        }
-
-        return $planesContenedor;
-    }
-
-
-    // RETORNO DE TITULO DEL CONTENEDOR DEL PLAN SEGUN IDIOMA
-    private function retornoTituloContenedorPlan($idiomaTextos, $idContenedor){
-
-        // si encuentra idioma solicitado
-        if($infoPlanContenedorTexto = PlanesContenedorTextos::where('id_planes_contenedor', $idContenedor)
-            ->where('id_idioma_planes', $idiomaTextos)
-            ->first()){
-
-            return $infoPlanContenedorTexto->titulo;
-
-        }else{
-            // si no encuentra sera por defecto español
-
-            $infoPlanContenedorTexto = PlanesContenedorTextos::where('id_planes_contenedor', $idContenedor)
-                ->where('id_idioma_planes', 1)
-                ->first();
-
-            return $infoPlanContenedorTexto->titulo;
         }
     }
 
@@ -207,7 +130,6 @@ class ApiPlanesController extends Controller
     }
 
 
-
     // ver informacion de un plan para poder seleccionarlo
     public function informacionPlanSeleccionado(Request $request)
     {
@@ -223,7 +145,7 @@ class ApiPlanesController extends Controller
 
         if($infoPlan = Planes::where('id', $request->idplan)->first()){
 
-            $idiomaTextos = $this->reseteoIdiomaTextos($request->idiomaplan);
+            $idiomaTextos = $request->idiomaplan;
 
             $titulo = "";
             $subtitulo = null;

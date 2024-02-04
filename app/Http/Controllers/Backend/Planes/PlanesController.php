@@ -869,7 +869,6 @@ class PlanesController extends Controller
             'devocional' => 'required',
         );
 
-
         $validar = Validator::make($request->all(), $regla);
 
         if ($validar->fails()){ return ['success' => 0];}
@@ -877,7 +876,6 @@ class PlanesController extends Controller
         DB::beginTransaction();
 
         try {
-
                 // comprobar si existe
                 if(BloqueCuestionarioTextos::where('id_bloque_detalle', $request->idblockdetalle)
                     ->where('id_idioma_planes', $request->ididioma)
