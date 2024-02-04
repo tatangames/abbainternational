@@ -70,7 +70,7 @@
 
                         <div class="col-md-3">
                             <div class="form-group">
-                                <label class="control-label">Idioma para Texto Personalizado:</label>
+                                <label class="control-label">Idioma</label>
                                 <select class="form-control" id="select-idioma">
                                     @foreach($arrayIdiomas as $item)
                                         <option value="{{$item->id}}">{{$item->nombre}}</option>
@@ -123,9 +123,8 @@
 
                             <td>
                                 <input name="arrayTitulo[]" disabled  value="{{ $item->titulo }}" class="form-control" type="text">
-                                <input name="arrayDescripcion[]" disabled style="display: none" data-txtdescripcion="{{ $item->titulo_pregunta }}" class="form-control" type="text">
+                                <textarea name="arrayDescripcion[]" disabled style="display: none" class="form-control">{{ $item->titulo_pregunta }}</textarea>
                             </td>
-
 
                             <td>
                                 <button type="button" class="btn btn-block btn-info" onclick="editarFila(this)">Editar</button>
@@ -170,7 +169,7 @@
 
                                 <div class="form-group">
                                     <label>Descripción </label>
-                                    <div id="editor-nuevo"></div>
+                                    <textarea name="content" id="editor-nuevo"></textarea>
                                 </div>
 
                             </div>
@@ -209,7 +208,7 @@
 
                                 <div class="form-group">
                                     <label>Descripción </label>
-                                    <div id="editor-editar"></div>
+                                    <textarea name="content" id="editor-editar"></textarea>
                                 </div>
 
 
@@ -247,15 +246,15 @@
         $(document).ready(function() {
 
 
-            window.varGlobalEditorDescripcion;
-            window.varGlobalEditorDescripcionEditados;
+            window.varGlobalEditorNuevo;
+            window.varGlobalEditorEditar;
 
             ClassicEditor
                 .create(document.querySelector('#editor-nuevo'), {
                     language: 'es',
                 })
                 .then(editor => {
-                    varGlobalEditorDescripcion = editor;
+                    varGlobalEditorNuevo = editor;
                 })
                 .catch(error => {
 
@@ -266,7 +265,7 @@
                     language: 'es',
                 })
                 .then(editor => {
-                    varGlobalEditorDescripcionEditados = editor;
+                    varGlobalEditorEditar = editor;
                 })
                 .catch(error => {
 
@@ -279,7 +278,7 @@
     <script>
 
         var referenciaArrayTitulo;
-
+        var referenciaArrayDescripcion;
 
         // obtener los datos de la fila y llevarlos al modal
         function editarFila(e){
@@ -290,17 +289,15 @@
             var valorInputTituloRef = fila.find('input[name="arrayTitulo[]"]');
             referenciaArrayTitulo = valorInputTituloRef;
 
-            var valorInputDescripcionRef = fila.find('input[name="arrayDescripcion[]"]');
-            var valorActualDescrip = valorInputDescripcionRef.data('txtdescripcion'); // ESTE ES EL DATA-
+            var valorInputDescripcion = fila.find('textarea[name="arrayDescripcion[]"]').val();
+            var valorInputDescripcionRef = fila.find('textarea[name="arrayDescripcion[]"]');
             referenciaArrayDescripcion = valorInputDescripcionRef;
-
 
             // limpiar modal
             document.getElementById("formulario-datoseditados").reset();
 
             $('#titulo-editar').val(valorInputTitulo);
-
-            varGlobalEditorDescripcionEditados.setData(valorActualDescrip);
+            varGlobalEditorEditar.setData(valorInputDescripcion);
 
             $('#modalDatosEditados').modal('show');
         }
@@ -315,18 +312,16 @@
                 return;
             }
 
-            // subtitulo y descripcion son opcionales
-            if(titulo.length > 30){
-                toastr.error('Título 30 caracteres máximo')
+            if(titulo.length > 100){
+                toastr.error('Título 100 caracteres máximo')
                 return;
             }
 
+            const editorDataDescripcionEdit = varGlobalEditorEditar.getData();
+
             // Actualizar la fila con las referencias
             referenciaArrayTitulo.val(titulo);
-
-            const editorDataDescripcionEdit = varGlobalEditorDescripcionEditados.getData();
-            referenciaArrayDescripcion.data('txtdescripcion', editorDataDescripcionEdit);
-
+            referenciaArrayDescripcion.val(editorDataDescripcionEdit);
             $('#modalDatosEditados').modal('hide');
         }
 
@@ -388,14 +383,17 @@
             }
 
             // subtitulo y descripcion son opcionales
-            if(titulo.length > 30){
-                toastr.error('Título 30 caracteres máximo')
+            if(titulo.length > 100){
+                toastr.error('Título 100 caracteres máximo')
                 return;
             }
 
 
             // AGREGAR A FILA
-            const editorDataDescripcionEdit = varGlobalEditorDescripcionEditados.getData();
+            const editorDataDescripcionEdit = varGlobalEditorNuevo.getData();
+
+            console.log(editorDataDescripcionEdit);
+
 
             // COMO ES NUEVA FILA, SE IDENTIFICARA CON 0, PARA CREAR EL REGISTRO
             let valorNull = 0;
@@ -416,7 +414,7 @@
 
                 "<td>" +
                 "<input name='arrayTitulo[]' disabled value='" + titulo + "' class='form-control' type='text'>" +
-                "<input name='arrayDescripcion[]' disabled  data-txtdescripcion='" + editorDataDescripcionEdit + "'  style='display: none' class='form-control' type='hidden'>" +
+                "<textarea name='arrayDescripcion[]' style='display: none' class='form-control'>" + editorDataDescripcionEdit + "</textarea>" +
                 "</td>" +
 
                 "<td>" +
@@ -493,10 +491,8 @@
             var arrayIdBloqueDetaTexto = $("input[name='arrayIdioma[]']").map(function(){return $(this).attr("data-idbloquedetatexto");}).get();
             var arrayTitulo = $("input[name='arrayTitulo[]']").map(function(){return $(this).val();}).get();
 
-            // OBTENER LOS DATOS ACTUALIZADOS PORQUE SE EDITAN
-            var arrayDescripcion = $("input[name='arrayDescripcion[]']").map(function() {
-                return $(this).data("txtdescripcion");
-            }).get();
+            var arrayDescripcion = $("textarea[name='arrayDescripcion[]']").map(function(){return $(this).val();}).get();
+
 
 
             for(var i = 0; i < arrayIdIdioma.length; i++){

@@ -197,7 +197,7 @@
     <script type="text/javascript">
         $(document).ready(function() {
 
-            window.varGlobalEditorDescripcion;
+            window.varGlobalEditorNuevo;
 
             ClassicEditor
                 .create(document.querySelector('#editor'), {
@@ -205,7 +205,7 @@
                 })
                 .then(editor => {
 
-                    varGlobalEditorDescripcion = editor;
+                    varGlobalEditorNuevo = editor;
                 })
                 .catch(error => {
 
@@ -254,7 +254,7 @@
 
             // puede abrir modal para registrar datos
             document.getElementById("formulario-personalizado").reset();
-            varGlobalEditorDescripcion.setData("");
+            varGlobalEditorNuevo.setData("");
 
             $('#modalDatosPersonalizado').modal('show');
         }
@@ -295,7 +295,7 @@
                 return;
             }
 
-            const txtdescripcion = varGlobalEditorDescripcion.getData();
+            const editorDataDescripcion = varGlobalEditorNuevo.getData();
 
             // AGREGAR A FILA
 
@@ -313,7 +313,9 @@
                 "</td>" +
 
                 "<td>" +
-                "<input name='arrayTitulo[]' disabled   data-txtdescripcion='" + txtdescripcion + "'       value='" + titulo + "' class='form-control' type='text'>" +
+                "<input name='arrayTitulo[]' disabled   value='" + titulo + "' class='form-control' type='text'>" +
+                "<textarea name='arrayDescripcion[]' style='display: none' class='form-control'>" + editorDataDescripcion + "</textarea>" +
+
                 "</td>" +
 
                 "<td>" +
@@ -332,7 +334,6 @@
                 showConfirmButton: false,
                 timer: 1500
             })
-
 
             $('#modalDatosPersonalizado').modal('hide');
         }
@@ -391,7 +392,7 @@
             const contenedorArray = [];
             var arrayIdIdioma = $("input[name='arrayIdioma[]']").map(function(){return $(this).attr("data-ididioma");}).get();
             var arrayTitulo = $("input[name='arrayTitulo[]']").map(function(){return $(this).val();}).get();
-            var arrayDescripcion = $("input[name='arrayTitulo[]']").map(function(){return $(this).attr("data-txtdescripcion");}).get();
+            var arrayDescripcion = $("textarea[name='arrayDescripcion[]']").map(function(){return $(this).val();}).get();
 
             for(var i = 0; i < arrayIdIdioma.length; i++){
 
