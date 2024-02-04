@@ -34,21 +34,11 @@
 
 <div id="divcontenedor" style="display: none">
 
-    <section class="content-header">
-        <div class="container-fluid">
-            <button type="button" style="font-weight: bold; background-color: #2339cc; color: white !important;" onclick="vistaAtrasPlanesBloquesDetalle()" class="button button-3d button-rounded button-pill button-small">
-                <i class="fas fa-arrow-left"></i>
-                Atras
-            </button>
-        </div>
-    </section>
 
     <section class="content-header">
         <div class="row mb-12">
             <div class="col-sm-12">
                 <section>
-
-
 
                     <div class="form-group col-md-3">
                         <label class="control-label">Seleccionar Imagen</label>
@@ -80,7 +70,7 @@
                         </select>
                     </div>
 
-                    <button type="button" class="btn btn-info btn-sm" onclick="verificarTextoTabla()">Agregar Preguntas </button>
+                    <button type="button" class="btn btn-info btn-sm" onclick="verificarTextoTabla()">Agregar Texto</button>
 
                 </section>
             </div>
@@ -112,7 +102,7 @@
 
 
     <div class="modal-footer justify-content-between float-right" style="margin-top: 25px; margin-bottom: 30px;">
-        <button type="button" class="btn btn-success" onclick="preguntarGuardar()">Guardar Detalle</button>
+        <button type="button" class="btn btn-success" onclick="preguntarGuardar()">Guardar Preguntas</button>
     </div>
 
 
@@ -174,7 +164,7 @@
     <script type="text/javascript">
         $(document).ready(function() {
 
-            window.varGlobalEditorDescripcion;
+            window.varGlobalEditorNuevo;
 
             ClassicEditor
                 .create(document.querySelector('#editor'), {
@@ -182,7 +172,7 @@
                 })
                 .then(editor => {
 
-                    varGlobalEditorDescripcion = editor;
+                    varGlobalEditorNuevo = editor;
                 })
                 .catch(error => {
 
@@ -213,7 +203,7 @@
 
             // puede abrir modal para registrar datos
             document.getElementById("formulario-datos").reset();
-            varGlobalEditorDescripcion.setData("");
+            varGlobalEditorNuevo.setData("");
 
             $('#modalDatos').modal('show');
         }
@@ -242,7 +232,7 @@
 
 
             // PUEDE SER NULL
-            const txtdescripcion = varGlobalEditorDescripcion.getData();
+            const txtdescripcion = varGlobalEditorNuevo.getData();
 
 
             // AGREGAR A FILA
@@ -258,7 +248,7 @@
 
                 "<td>" +
                 "<input name='arrayIdioma[]' disabled data-ididioma='" + idIdiomaSelect + "' value='" + selectedOptionText + "' class='form-control' type='text'>" +
-                "<input name='arrayDescripcion[]' disabled data-txtdescripcion='" + txtdescripcion + "' type='hidden'>" +
+                "<textarea name='arrayDescripcion[]' style='display: none' class='form-control'>" + txtdescripcion + "</textarea>" +
                 "</td>" +
 
                 "<td>" +
@@ -281,11 +271,7 @@
             $('#modalDatos').modal('hide');
         }
 
-        // vista volver atras
-        function vistaAtrasPlanesBloquesDetalle(){
-            let idplanbloquedetalle = {{ $idplanbloquedetalle }};
-            window.location.href="{{ url('/admin/preguntas/vista') }}/" + idplanbloquedetalle;
-        }
+
 
         function preguntarGuardar(){
 
@@ -332,7 +318,7 @@
             var arrayIdIdioma = $("input[name='arrayIdioma[]']").map(function(){return $(this).attr("data-ididioma");}).get();
 
             // texto de pregunta que puede ser null
-            var arrayDescripcion = $("input[name='arrayDescripcion[]']").map(function(){return $(this).attr("data-txtdescripcion");}).get();
+            var arrayDescripcion = $("textarea[name='arrayDescripcion[]']").map(function(){return $(this).val();}).get();
 
 
             for(var i = 0; i < arrayIdIdioma.length; i++){
@@ -367,7 +353,7 @@
                             confirmButtonText: 'Aceptar'
                         }).then((result) => {
                             if (result.isConfirmed) {
-                                vistaAtrasPlanesBloquesDetalle();
+                                limpiarCampos();
                             }
                         })
                     }

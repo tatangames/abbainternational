@@ -32,15 +32,6 @@
 
 <div id="divcontenedor" style="display: none">
 
-    <section class="content-header">
-        <div class="container-fluid">
-            <button type="button" style="font-weight: bold; background-color: #2339cc; color: white !important;" onclick="vistaAtrasPlanes()" class="button button-3d button-rounded button-pill button-small">
-                <i class="fas fa-arrow-left"></i>
-                Atras
-            </button>
-        </div>
-    </section>
-
 
     <section class="content" style="margin-top: 20px">
         <div class="container-fluid">
@@ -153,10 +144,6 @@
     <div class="modal-footer justify-content-between float-right" style="margin-top: 25px; margin-bottom: 30px;">
         <button type="button" class="btn btn-success" onclick="preguntarGuardar()">Guardar Devocional</button>
     </div>
-
-
-
-
 
 
     <!-- MODAL PARA AGREGAR DATOS DE UN IDIOMA -->
@@ -476,7 +463,7 @@
                             confirmButtonText: 'Aceptar'
                         }).then((result) => {
                             if (result.isConfirmed) {
-                                vistaAtrasPlanes();
+                                limpiarTodo();
                             }
                         })
                     }
@@ -490,6 +477,14 @@
                 });
         }
 
+
+        function limpiarTodo(){
+            document.getElementById("matriz").innerHTML = ""
+
+            document.getElementById("imagen-nuevo").value = "";
+            document.getElementById("imagenportada-nuevo").value = "";
+
+        }
 
         function borrarFila(elemento){
             var tabla = elemento.parentNode.parentNode;

@@ -33,16 +33,6 @@
 
 <div id="divcontenedor" style="display: none">
 
-    <section class="content-header">
-        <div class="container-fluid">
-            <button type="button" style="font-weight: bold; background-color: #2339cc; color: white !important;" onclick="vistaAtras()" class="button button-3d button-rounded button-pill button-small">
-                <i class="fas fa-arrow-left"></i>
-                Atras
-            </button>
-        </div>
-    </section>
-
-
     <section class="content" style="margin-top: 20px">
         <div class="container-fluid">
             <div class="card card-success">
@@ -50,67 +40,55 @@
                     <h3 class="card-title">Editar Pregunta</h3>
                 </div>
                 <div class="card-body">
-                    <div>
-                        <div class="col-md-12">
+                    <div class="col-md-12">
+
+                        <section>
+                            <div class="form-group col-md-3">
+                                <label class="control-label">Seleccionar Imagen</label>
+                                <select class="form-control" id="select-imagen">
+                                    @foreach($arrayImagenes as $item)
+                                        @if($infoPregunta->id_imagen_pregunta == $item->id)
+                                            <option value="{{$item->id}}" selected>{{$item->nombre}}</option>
+                                        @else
+                                            <option value="{{$item->id}}">{{$item->nombre}}</option>
+                                        @endif
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="form-group" style="margin-left: 5px">
+                                <label>Pregunta es Requerida</label><br>
+                                <label class="switch" style="margin-top:10px">
+                                    <input type="checkbox" id="toggle-requerida">
+                                    <div class="slider round">
+                                        <span class="on">Sí</span>
+                                        <span class="off">No</span>
+                                    </div>
+                                </label>
+                            </div>
 
 
-                        </div>
+                            <div class="form-group col-md-3" style="margin-top: 35px">
+                                <label class="control-label">Idioma</label>
+                                <select class="form-control" id="select-idioma">
+                                    @foreach($arrayIdiomas as $item)
+                                        <option value="{{$item->id}}">{{$item->nombre}}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+
+
+                            <button type="button" class="btn btn-info btn-sm" onclick="verificarIdiomaTabla()">Agregar Idioma</button>
+
+
+                        </section>
+
+
+
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
-
-
-    <section class="content-header">
-        <div class="row mb-12">
-            <div class="col-sm-12">
-                <section>
-
-
-                    <div class="form-group col-md-3">
-                        <label class="control-label">Seleccionar Imagen</label>
-                        <select class="form-control" id="select-imagen">
-                            @foreach($arrayImagenes as $item)
-                                @if($infoPregunta->id_imagen_pregunta == $item->id)
-                                    <option value="{{$item->id}}" selected>{{$item->nombre}}</option>
-                                @else
-                                    <option value="{{$item->id}}">{{$item->nombre}}</option>
-                                @endif
-
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div class="form-group" style="margin-left: 5px">
-                        <label>Pregunta es Requerida</label><br>
-                        <label class="switch" style="margin-top:10px">
-                            <input type="checkbox" id="toggle-requerida">
-                            <div class="slider round">
-                                <span class="on">Sí</span>
-                                <span class="off">No</span>
-                            </div>
-                        </label>
-                    </div>
-
-
-                    <div class="form-group col-md-3" style="margin-top: 35px">
-                        <label class="control-label">Idioma</label>
-                        <select class="form-control" id="select-idioma">
-                            @foreach($arrayIdiomas as $item)
-                                <option value="{{$item->id}}">{{$item->nombre}}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-
-
-                    <button type="button" class="btn btn-info btn-sm" onclick="verificarIdiomaTabla()">Agregar Idioma</button>
-
-
-                </section>
-            </div>
-
         </div>
     </section>
 
@@ -144,7 +122,8 @@
                             <td>
                                 <!-- data-ididioma se utiliza para comparar si falta agregar idioma nuevo -->
                                 <input name="arrayIdioma[]" disabled data-idbloquepreguntastextos="{{ $item->id }}" data-ididioma="{{ $item->id_idioma_planes }}" value="{{ $item->idioma }}" class="form-control" type="text">
-                                <input name="arrayDescripcion[]" disabled style="display: none" data-txtdescripcion="{{ $item->texto }}" class="form-control" type="text">
+
+                                <textarea name="arrayDescripcion[]" disabled style="display: none" class="form-control">{{ $item->texto }}</textarea>
 
                             </td>
 
@@ -258,15 +237,15 @@
     <script type="text/javascript">
         $(document).ready(function() {
 
-            window.varGlobalEditorDescripcion;
-            window.varGlobalEditorDescripcionEditados;
+            window.varGlobalEditorNuevo;
+            window.varGlobalEditorEditar;
 
             ClassicEditor
                 .create(document.querySelector('#editor-nuevo'), {
                     language: 'es',
                 })
                 .then(editor => {
-                    varGlobalEditorDescripcion = editor;
+                    varGlobalEditorNuevo = editor;
                 })
                 .catch(error => {
 
@@ -277,7 +256,7 @@
                     language: 'es',
                 })
                 .then(editor => {
-                    varGlobalEditorDescripcionEditados = editor;
+                    varGlobalEditorEditar = editor;
                 })
                 .catch(error => {
 
@@ -296,18 +275,18 @@
 
     <script>
 
+        var referenciaArrayDescripcion;
 
         // obtener los datos de la fila y llevarlos al modal
         function editarFila(e){
 
             var fila = $(e).closest('tr');
 
-            var valorInputDescripcionRef = fila.find('input[name="arrayDescripcion[]"]');
-            var valorActualDescrip = valorInputDescripcionRef.data('txtdescripcion'); // ESTE ES EL DATA-
+            var valorInputDescripcion = fila.find('textarea[name="arrayDescripcion[]"]').val();
+            var valorInputDescripcionRef = fila.find('textarea[name="arrayDescripcion[]"]');
             referenciaArrayDescripcion = valorInputDescripcionRef;
 
-
-            varGlobalEditorDescripcionEditados.setData(valorActualDescrip);
+            varGlobalEditorEditar.setData(valorInputDescripcion);
 
             $('#modalDatosEditados').modal('show');
         }
@@ -315,8 +294,8 @@
         // METER LOS DATOS DE NUEVO A LA FILA
         function actualizarDatosEditados(){
 
-            const editorDataDescripcionEdit = varGlobalEditorDescripcionEditados.getData();
-            referenciaArrayDescripcion.data('txtdescripcion', editorDataDescripcionEdit);
+            const editorDataDescripcionEdit = varGlobalEditorEditar.getData();
+            referenciaArrayDescripcion.val(editorDataDescripcionEdit);
 
             $('#modalDatosEditados').modal('hide');
         }
@@ -372,7 +351,7 @@
 
 
             // AGREGAR A FILA
-            const editorDataDescripcionEdit = varGlobalEditorDescripcionEditados.getData();
+            const editorDataDescripcionEdit = varGlobalEditorNuevo.getData();
 
             // COMO ES NUEVA FILA, SE IDENTIFICARA CON 0, PARA CREAR EL REGISTRO
             let valorNull = 0;
@@ -388,7 +367,7 @@
 
                 "<td>" +
                 "<input name='arrayIdioma[]' disabled    data-idbloquepreguntastextos='" + valorNull + "'  data-ididioma='" + idIdiomaSelect + "' value='" + selectedOptionText + "' class='form-control' type='text'>" +
-                "<input name='arrayDescripcion[]' disabled  data-txtdescripcion='" + editorDataDescripcionEdit + "'  style='display: none' class='form-control' type='hidden'>" +
+                "<textarea name='arrayDescripcion[]' style='display: none' class='form-control'>" + editorDataDescripcionEdit + "</textarea>" +
                 "</td>" +
 
                 "<td>" +
@@ -412,12 +391,6 @@
             $('#modalDatosIdioma').modal('hide');
         }
 
-
-
-        function vistaAtras(){
-            let idplanbloquedetalle = {{ $infoPregunta->id_plan_block_detalle }};
-            window.location.href="{{ url('/admin/preguntas/vista') }}/" + idplanbloquedetalle;
-        }
 
         function preguntarGuardar(){
 
@@ -470,11 +443,7 @@
             var arrayIdIdioma = $("input[name='arrayIdioma[]']").map(function(){return $(this).attr("data-ididioma");}).get();
             var arrayIdBloquePreguntasTextos = $("input[name='arrayIdioma[]']").map(function(){return $(this).attr("data-idbloquepreguntastextos");}).get();
 
-            // OBTENER LOS DATOS ACTUALIZADOS PORQUE SE EDITAN
-            var arrayDescripcion = $("input[name='arrayDescripcion[]']").map(function() {
-                return $(this).data("txtdescripcion");
-            }).get();
-
+            var arrayDescripcion = $("textarea[name='arrayDescripcion[]']").map(function(){return $(this).val();}).get();
 
             for(var i = 0; i < arrayIdIdioma.length; i++){
                 let infoIdBloquePreguntaTextos = arrayIdBloquePreguntasTextos[i];

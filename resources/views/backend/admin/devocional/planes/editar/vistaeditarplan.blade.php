@@ -32,16 +32,6 @@
 
 <div id="divcontenedor" style="display: none">
 
-    <section class="content-header">
-        <div class="container-fluid">
-            <button type="button" style="font-weight: bold; background-color: #2339cc; color: white !important;" onclick="vistaAtrasPlanes()" class="button button-3d button-rounded button-pill button-small">
-                <i class="fas fa-arrow-left"></i>
-                Atras
-            </button>
-        </div>
-    </section>
-
-
     <section class="content" style="margin-top: 20px">
         <div class="container-fluid">
             <div class="card card-success">
@@ -648,8 +638,8 @@
                     closeLoading();
 
                     if(response.data.success === 1){
-                        var limpiarInput = document.getElementById('imagen-nuevo');
-                        limpiarInput.value = '';
+
+                        document.getElementById('imagen-nuevo').value = "";
                         toastr.success("Actualizado");
                     }
                     else {
@@ -694,8 +684,8 @@
 
                         toastr.success("Actualizado");
 
-                        var limpiarInput = document.getElementById('imagenportada-nuevo');
-                        limpiarInput.value = '';
+                        document.getElementById('imagenportada-nuevo').value = "";
+
                     }
                     else {
                         toastr.error('Error al actualizar');

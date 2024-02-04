@@ -43,6 +43,10 @@ class PreguntasController extends Controller
     {
         $arrayIdiomas = IdiomaPlanes::orderBy('id', 'ASC')->get();
         $arrayImagenes = ImagenPreguntas::orderBy('nombre', 'ASC')->get();
+
+
+
+
         return view('backend.admin.devocional.planes.bloques.bloquedetalle.preguntas.nuevo.vistanuevapregunta', compact('idplanbloquedetalle',
         'arrayIdiomas', 'arrayImagenes'));
     }

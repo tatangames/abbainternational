@@ -36,10 +36,6 @@
 
     <section class="content-header">
         <div class="container-fluid">
-            <button type="button" style="font-weight: bold; background-color: #2339cc; color: white !important;" onclick="vistaAtrasPlanesBloquesDeta()" class="button button-3d button-rounded button-pill button-small">
-                <i class="fas fa-arrow-left"></i>
-                Atras
-            </button>
         </div>
     </section>
 
