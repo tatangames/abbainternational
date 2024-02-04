@@ -60,6 +60,14 @@ class PlanesController extends Controller
         $fechaCarbon = Carbon::now('America/El_Salvador');
         $fechaActual = date("Y-m-d", strtotime($fechaCarbon));
 
+
+        // ESTO ES PARA QUE EL SELECT AL SELECCIONAR IDIOMA ME DEJE ESPANOL POR DEFECTO
+        // SI CON ES 0, YA QUE AGREGA CADA UNO DE UN SOLO A SERVIDOR
+        $conteoIdioma = 0;
+        /*if(PlanesTextos::where('id_bloque_detalle', $idplanbloquedetalle)->first()){
+            $conteoIdioma = 1;
+        }*/
+
         return view('backend.admin.devocional.planes.nuevoplan.vistanuevoplan', compact('arrayIdiomas', 'fechaActual'));
     }
 

@@ -72,8 +72,6 @@ class PreguntasController extends Controller
 
             $datosContenedor = json_decode($request->contenedorArray, true);
 
-            Log::info($request->all());
-
             if($info = BloquePreguntas::where('id_plan_block_detalle', $request->idplanbloquedetalle)
                 ->orderBy('posicion', 'DESC')
                 ->first()){

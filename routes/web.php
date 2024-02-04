@@ -156,7 +156,8 @@ Route::post('/admin/planes/activacion', [PlanesController::class,'activacionPlan
 
 // Editar plan
 Route::get('/admin/planes/vista/editar/index/{idplan}', [PlanesController::class,'indexEditarPlan']);
-Route::post('/admin/planes/datos/actualizar', [PlanesController::class,'actualizarPlanes']);
+Route::post('/admin/planes/datos/nuevo/idioma', [PlanesController::class,'actualizarPlanesIdiomaNuevo']); // agregar nuevo idioma
+Route::post('/admin/planes/datos/actualizar', [PlanesController::class,'actualizarPlanes']); // actualizar todas las filas
 Route::post('/admin/planes/imagen/actualizar', [PlanesController::class,'actualizarImagenPlanes']);
 Route::post('/admin/planes/imagenportada/actualizar', [PlanesController::class,'actualizarImagenPortadaPlanes']);
 

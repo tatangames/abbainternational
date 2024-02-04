@@ -6,15 +6,16 @@
 import { ClassicEditor } from '@ckeditor/ckeditor5-editor-classic';
 
 import { Alignment } from '@ckeditor/ckeditor5-alignment';
-import { Bold, Italic, Underline } from '@ckeditor/ckeditor5-basic-styles';
-import { BlockQuote } from '@ckeditor/ckeditor5-block-quote';
+import { Autoformat } from '@ckeditor/ckeditor5-autoformat';
+import { Bold, Code, Italic, Underline } from '@ckeditor/ckeditor5-basic-styles';
 import type { EditorConfig } from '@ckeditor/ckeditor5-core';
 import { Essentials } from '@ckeditor/ckeditor5-essentials';
 import { FontFamily, FontSize } from '@ckeditor/ckeditor5-font';
 import { Heading } from '@ckeditor/ckeditor5-heading';
 import { HorizontalLine } from '@ckeditor/ckeditor5-horizontal-line';
-import { Indent, IndentBlock } from '@ckeditor/ckeditor5-indent';
-import { List } from '@ckeditor/ckeditor5-list';
+import { HtmlComment } from '@ckeditor/ckeditor5-html-support';
+import { Indent } from '@ckeditor/ckeditor5-indent';
+import { List, ListProperties } from '@ckeditor/ckeditor5-list';
 import { Paragraph } from '@ckeditor/ckeditor5-paragraph';
 import {
 	SpecialCharacters,
@@ -30,17 +31,19 @@ import { Undo } from '@ckeditor/ckeditor5-undo';
 class Editor extends ClassicEditor {
 	public static override builtinPlugins = [
 		Alignment,
-		BlockQuote,
+		Autoformat,
 		Bold,
+		Code,
 		Essentials,
 		FontFamily,
 		FontSize,
 		Heading,
 		HorizontalLine,
+		HtmlComment,
 		Indent,
-		IndentBlock,
 		Italic,
 		List,
+		ListProperties,
 		Paragraph,
 		SpecialCharacters,
 		SpecialCharactersArrows,
@@ -63,13 +66,10 @@ class Editor extends ClassicEditor {
 				'outdent',
 				'indent',
 				'|',
-				'blockQuote',
 				'undo',
 				'redo',
-				'fontSize',
-				'fontFamily',
 				'alignment',
-				'horizontalLine',
+				'fontFamily',
 				'specialCharacters',
 				'underline'
 			]

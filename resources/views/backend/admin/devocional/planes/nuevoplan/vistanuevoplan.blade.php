@@ -333,8 +333,8 @@
 
                 "<td>" +
                 "<input name='arraySubtitulo[]' disabled value='" + subtitulo + "' class='form-control' type='text'>" +
-                "<input name='arrayDescripcion[]' style='display: none' data-txtdescripcion='" + editorDataDescripcion + "' class='form-control' type='text'>" +
-                "</td>" +
+                "<textarea name='arrayDescripcion[]' style='display: none' class='form-control'>" + editorDataDescripcion + "</textarea>" +
+               "</td>" +
 
                 "<td>" +
                 "<button type='button' class='btn btn-block btn-danger' onclick='borrarFila(this)'>Borrar</button>" +
@@ -440,8 +440,7 @@
             var arrayIdIdioma = $("input[name='arrayIdioma[]']").map(function(){return $(this).attr("data-ididioma");}).get();
             var arrayTitulo = $("input[name='arrayTitulo[]']").map(function(){return $(this).val();}).get();
             var arraySubtitulo = $("input[name='arraySubtitulo[]']").map(function(){return $(this).val();}).get();
-            var arrayDescripcion = $("input[name='arrayDescripcion[]']").map(function(){return $(this).attr("data-txtdescripcion");}).get();
-
+            var arrayDescripcion = $("textarea[name='arrayDescripcion[]']").map(function(){return $(this).val();}).get();
 
             for(var i = 0; i < arrayIdIdioma.length; i++){
 

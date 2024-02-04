@@ -176,8 +176,7 @@
 
                             <td>
                                 <input name="arraySubtitulo[]" disabled value="{{ $item->subtitulo }}" class="form-control" type="text">
-                                <input name="arrayDescripcion[]" disabled style="display: none" data-txtdescripcion="{{ $item->descripcion }}" class="form-control" type="text">
-
+                                <textarea name="arrayDescripcion[]" disabled style="display: none" class="form-control">{{ $item->descripcion }}</textarea>
                             </td>
 
                             <td>
@@ -238,7 +237,7 @@
                 </div>
                 <div class="modal-footer justify-content-between">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
-                    <button type="button" class="btn btn-success" onclick="AgregarFila()">Guardar</button>
+                    <button type="button" class="btn btn-success" onclick="AgregarNuevoIdioma()">Guardar</button>
                 </div>
             </div>
         </div>
@@ -362,8 +361,8 @@
             var valorInputSubtituloRef = fila.find('input[name="arraySubtitulo[]"]');
             referenciaArraySubtitulo = valorInputSubtituloRef;
 
-            var valorInputDescripcionRef = fila.find('input[name="arrayDescripcion[]"]');
-            var valorActualDescrip = valorInputDescripcionRef.data('txtdescripcion'); // ESTE ES EL DATA-
+            var valorInputDescripcion = fila.find('textarea[name="arrayDescripcion[]"]').val();
+            var valorInputDescripcionRef = fila.find('textarea[name="arrayDescripcion[]"]');
             referenciaArrayDescripcion = valorInputDescripcionRef;
 
             // limpiar modal
@@ -371,7 +370,7 @@
 
             $('#titulo-plan-editado').val(valorInputTitulo);
             $('#subtitulo-plan-editado').val(valorInputSubtitulo);
-            varGlobalEditorDescripcionEditados.setData(valorActualDescrip);
+            varGlobalEditorDescripcionEditados.setData(valorInputDescripcion);
 
             $('#modalDatosEditados').modal('show');
         }
@@ -399,7 +398,7 @@
             referenciaArrayTitulo.val(titulo);
             referenciaArraySubtitulo.val(subtitulo);
 
-            referenciaArrayDescripcion.data('txtdescripcion', editorDataDescripcionEdit);
+            referenciaArrayDescripcion.val(editorDataDescripcionEdit);
             $('#modalDatosEditados').modal('hide');
         }
 
@@ -430,7 +429,8 @@
         }
 
 
-        function AgregarFila(){
+        // AGREGAR NUEVO IDIOMA A LA FILAS PARA DESPUES ACTUALIZAR
+        function AgregarNuevoIdioma(){
 
             // verificar siempre
             var idIdiomaSelect = document.getElementById('select-idioma').value;
@@ -466,15 +466,15 @@
                 return;
             }
 
+
+            // agregar datos a la fila
             const editorDataDescripcion = varGlobalEditorDescripcion.getData();
 
+            // es nuevo idioma
+            let valorNull = 0;
 
 
             // AGREGAR A FILA
-
-
-            // COMO ES NUEVA FILA, SE IDENTIFICARA CON 0, PARA CREAR EL REGISTRO
-            let valorNull = 0;
 
             var nFilas = $('#matriz >tbody >tr').length;
             nFilas += 1;
@@ -486,7 +486,7 @@
                 "</td>" +
 
                 "<td>" +
-                "<input name='arrayIdioma[]' disabled    data-idplantexto='" + valorNull + "'  data-ididioma='" + idIdiomaSelect + "' value='" + selectedOptionText + "' class='form-control' type='text'>" +
+                "<input name='arrayIdioma[]' disabled data-idplantexto='" + valorNull + "'  data-ididioma='" + idIdiomaSelect + "' value='" + selectedOptionText + "' class='form-control' type='text'>" +
                 "</td>" +
 
 
@@ -496,8 +496,9 @@
 
                 "<td>" +
                 "<input name='arraySubtitulo[]' disabled value='" + subtitulo + "' class='form-control' type='text'>" +
-                "<input name='arrayDescripcion[]' disabled data-txtdescripcion='" + editorDataDescripcion + "' class='form-control' type='hidden'>" +
+                "<textarea name='arrayDescripcion[]' style='display: none' class='form-control'>" + editorDataDescripcion + "</textarea>" +
                 "</td>" +
+
 
                 "<td>" +
                 "<button type='button' class='btn btn-block btn-info' onclick='editarFila(this)'>Editar</button>" +
@@ -515,6 +516,7 @@
                 showConfirmButton: false,
                 timer: 1500
             })
+
 
 
             $('#modalDatosIdioma').modal('hide');
@@ -579,11 +581,7 @@
             var arrayIdPlanTexto = $("input[name='arrayIdioma[]']").map(function(){return $(this).attr("data-idplantexto");}).get();
             var arrayTitulo = $("input[name='arrayTitulo[]']").map(function(){return $(this).val();}).get();
             var arraySubtitulo = $("input[name='arraySubtitulo[]']").map(function(){return $(this).val();}).get();
-
-            // OBTENER LOS DATOS ACTUALIZADOS PORQUE SE EDITAN
-            var arrayDescripcion = $("input[name='arrayDescripcion[]']").map(function() {
-                return $(this).data("txtdescripcion");
-            }).get();
+            var arrayDescripcion = $("textarea[name='arrayDescripcion[]']").map(function(){return $(this).val();}).get();
 
 
             for(var i = 0; i < arrayIdIdioma.length; i++){
@@ -600,7 +598,6 @@
             formData.append('contenedorArray', JSON.stringify(contenedorArray));
             formData.append('fecha', fecha);
             formData.append('idplan', idplan);
-            formData.append('idplantexto', idplan);
 
             openLoading();
 
