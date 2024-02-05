@@ -26,6 +26,7 @@ return new class extends Migration
             // personalizado, el texto se obtiene de bloques textos
             $table->boolean('texto_personalizado');
 
+
             $table->foreign('id_planes')->references('id')->on('planes');
         });
     }

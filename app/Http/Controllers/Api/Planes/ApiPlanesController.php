@@ -392,7 +392,7 @@ class ApiPlanesController extends Controller
 
         $tokenApi = $request->header('Authorization');
 
-        $idiomaTextos = $this->reseteoIdiomaTextos($request->idiomaplan);
+        $idiomaTextos = $request->idiomaplan;
 
         if ($userToken = JWTAuth::user($tokenApi)) {
 
@@ -400,8 +400,8 @@ class ApiPlanesController extends Controller
 
             // obtener zona horaria
             $infoIglesia = Iglesias::where('id', $userToken->id_iglesia)->first();
-            $zonaHoraria = ZonaHoraria::where('id', $infoIglesia->id_zona_horaria)->first();
-
+            $infoDepartamento = Departamentos::where('id', $infoIglesia->id_departamento)->first();
+            $zonaHoraria = ZonaHoraria::where('id', $infoDepartamento->id_zona_horaria)->first();
 
             // obtener todos los bloques ordenados por fecha
             $arrayBloques = PlanesBloques::where('id_planes', $request->idplan)
@@ -417,6 +417,7 @@ class ApiPlanesController extends Controller
             // en la aplicacion
             $hayDiaActual = 0;
 
+
             foreach ($arrayBloques as $dato){
                 array_push($resultsBloque, $dato);
 
@@ -430,6 +431,7 @@ class ApiPlanesController extends Controller
                 // fecha-horario actual segun usuario zona horaria
                 $fecha2 = Carbon::parse(now(), $zonaHoraria->zona);
 
+
                 if($fecha1->isSameDay($fecha2)){
                     $dato->mismodia = 1;
                     $hayDiaActual = 1;
@@ -437,16 +439,15 @@ class ApiPlanesController extends Controller
                     $dato->mismodia = 0;
                 }
 
-                // para mostrar o no el bloque, OSEA ESPERAR FECHA PARA QUE APAREZCA
-                // SETEAR ESPERAR_FECHA PARA MOSTRAR BLOQUE
-                if($dato->esperar_fecha == 1){
+                // ESTA PARTE ERA QUE APARECIERA EL BLOQUE SEGUN FECHA DEL USUARIO
+                /*if($dato->esperar_fecha == 1){
 
                     //gte: mayor o igual
                     if($fecha2->gte($fecha1)){
                         // SET
                         $dato->esperar_fecha = 0;
                     }
-                }
+                }*/
 
 
                 // TEXTO PERSONALIZADO EN EL BLOQUE
@@ -459,15 +460,13 @@ class ApiPlanesController extends Controller
 
                 $dato->textopersonalizado = $textoPersonalizado;
 
-
                 // agregar detalle bloques
                 $arrayDetaBloque = PlanesBlockDetalle::where('id_planes_bloques', $dato->id)
+                    ->where('visible', 1)
                     ->orderBy('posicion', 'ASC')
                     ->get();
 
-
                 foreach ($arrayDetaBloque as $datoArr){
-
 
                     $datoArr->titulo = $this->retornoTituloBloquesTextos($idiomaTextos, $datoArr->id);
 
@@ -506,7 +505,6 @@ class ApiPlanesController extends Controller
             // le cambiara el estilo
             $idUltimoBloque = 0;
 
-
             if ($arrayBloques->isNotEmpty() && $hayDiaActual == 0) {
 
                 $encontroBloque = true;
@@ -535,8 +533,6 @@ class ApiPlanesController extends Controller
                 'haydiaactual' => $hayDiaActual,
                 'idultimobloque' => $idUltimoBloque,
                 'listado' => $arrayBloques,
-
-
                 ];
         }else{
             return ['success' => 99];
@@ -612,10 +608,8 @@ class ApiPlanesController extends Controller
 
             try {
 
-
                 // EL USUARIO PUEDE GUARDAR AUNQUE NO HAYA CONTESTADO PREGUNTAS, PORQUE PUEDE
                 // HABER DEVOCIONALES QUE NO LLEVEN PREGUNTAS
-
 
                 $planCompletado = 1;
 
@@ -639,7 +633,6 @@ class ApiPlanesController extends Controller
                     $detalle->completado = 1;
                     $detalle->save();
                 }
-
 
 
 
@@ -677,8 +670,6 @@ class ApiPlanesController extends Controller
                 // colocar plan continuar por defecto
                 $this->retornoActualizarPlanUsuarioContinuar($userToken->id, $infoPlanesBloques->id_planes);
 
-
-
                 DB::commit();
                 return ['success' => 1,
                     'plancompletado' => $planCompletado
@@ -701,8 +692,8 @@ class ApiPlanesController extends Controller
 
         $rules = array(
             'iduser' => 'required',
-            'idblockdeta' => 'required',
-            'idioma' => 'required'
+            'idblockdeta' => 'required', // tabla: planes_block_detalle
+            'idiomaplan' => 'required'
         );
 
         $validator = Validator::make($request->all(), $rules);
@@ -716,13 +707,13 @@ class ApiPlanesController extends Controller
 
         if ($userToken = JWTAuth::user($tokenApi)) {
 
-            $idiomaTextos = $this->reseteoIdiomaTextos($request->idiomaplan);
+            $idiomaTextos = $request->idiomaplan;
 
-            // comprueba que al menos haya un cuestionario disponible
+            // comprueba que al menos haya un cuestionario disponible de cualquier idioma
             if($info = BloqueCuestionarioTextos::where('id_bloque_detalle', $request->idblockdeta)
                 ->first()){
 
-                $titulo = $this->retornoTituloCuestionarioIdioma($info->id, $idiomaTextos);
+                $titulo = $this->retornoTituloCuestionarioIdioma($request->idblockdeta, $idiomaTextos);
 
                 return ['success' => 1,
                        'titulo' => $titulo,
@@ -740,7 +731,7 @@ class ApiPlanesController extends Controller
         }
     }
 
-
+    // RETORNA TEXTO DE UN CUESTIONARIO SEGUN IDIOMA
     private function retornoTituloCuestionarioIdioma($idBlockDeta, $idiomaTexto){
 
         if($infoTituloTexto = BloqueCuestionarioTextos::where('id_bloque_detalle', $idBlockDeta)
@@ -751,7 +742,6 @@ class ApiPlanesController extends Controller
 
         }else{
             // si no encuentra sera por defecto español
-
             $infoTituloTexto = BloqueCuestionarioTextos::where('id_bloque_detalle', $idBlockDeta)
                 ->where('id_idioma_planes', 1)
                 ->first();

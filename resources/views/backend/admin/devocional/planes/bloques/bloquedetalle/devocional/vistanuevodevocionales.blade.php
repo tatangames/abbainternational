@@ -101,6 +101,7 @@
                     <tr>
                         <th style="width: 4%">#</th>
                         <th style="width: 10%">Idioma</th>
+                        <th style="width: 10%">Título</th>
                         <th style="width: 6%">Opciones</th>
                     </tr>
                     </thead>
@@ -115,10 +116,12 @@
                             <td>
                                 <!-- data-ididioma se utiliza para comparar si falta agregar idioma nuevo -->
                                 <input name="arrayIdioma[]" disabled data-idblockcuestionario="{{ $item->id }}" data-ididioma="{{ $item->id_idioma_planes }}" value="{{ $item->idioma }}" class="form-control" type="text">
-
-                                <input name="arrayDescripcion[]" disabled style="display: none" data-txtdescripcion="{{ $item->texto }}" class="form-control" type="hidden">
+                                <textarea name="arrayDescripcion[]" disabled style="display: none" class="form-control">{{ $item->texto }}</textarea>
                             </td>
 
+                            <td>
+                                <input name="arrayTitulo[]" disabled value="{{ $item->titulo }}" class="form-control" type="text">
+                            </td>
                             <td>
                                 <button type="button" class="btn btn-block btn-info" onclick="editarFila(this)">Editar</button>
                             </td>
@@ -150,10 +153,14 @@
                         <div class="card-body">
                             <div class="col-md-12">
 
+                                <div class="form-group">
+                                    <label>Título (Opcional)</label>
+                                    <input name="content" maxlength="500" id="titulo-nuevo"  class="form-control">
+                                </div>
+
                                  <div class="form-group">
                                     <label>Devocional </label>
                                     <textarea name="content" id="editor-nuevo" rows="12" cols="50"></textarea>
-
                                 </div>
 
                             </div>
@@ -188,10 +195,14 @@
                             <div class="col-md-12">
 
                                 <div class="form-group">
+                                    <label>Título (Opcional)</label>
+                                    <input name="content" maxlength="500" id="titulo-editar"  class="form-control">
+                                </div>
+
+                                <div class="form-group">
                                     <label>Devocional </label>
                                     <input id="id-editar" type="hidden">
                                     <textarea name="content" id="editor-editar" rows="12" cols="50"></textarea>
-
                                 </div>
 
                             </div>
@@ -229,7 +240,6 @@
 
             window.varGlobalEditorNuevo;
             window.varGlobalEditorEditar;
-
 
             ClassicEditor
                 .create(document.querySelector('#editor-nuevo'), {
@@ -313,6 +323,13 @@
              }
 
 
+             var titulo = document.getElementById('titulo-nuevo').value;
+
+             if(titulo.length > 500){
+                 toastr.error('Título máximo 500 caracteres');
+                 return;
+             }
+
              let idplanbloquedeta = {{ $idplanbloquedetalle }};
 
              let formData = new FormData();
@@ -320,6 +337,7 @@
              formData.append('idblockdetalle', idplanbloquedeta);
              formData.append('ididioma', idIdiomaSelect);
              formData.append('devocional', editorDataDescripcionEdit);
+             formData.append('titulo', titulo);
 
              openLoading();
 
@@ -360,13 +378,17 @@
         function editarFila(e){
             var fila = $(e).closest('tr');
 
-            var valorInputDescripcionRef = fila.find('input[name="arrayDescripcion[]"]');
-            var valorActualDescrip = valorInputDescripcionRef.data('txtdescripcion'); // ESTE ES EL DATA-
-            varGlobalEditorEditar.setData(valorActualDescrip);
+            var valorInputTitulo = fila.find('input[name="arrayTitulo[]"]').val();
+            $('#titulo-editar').val(valorInputTitulo);
+
+
+            var valorInputDescripcion = fila.find('input[name="arrayDescripcion[]"]').val();
+            varGlobalEditorEditar.setData(valorInputDescripcion);
 
             // obtener id fila
             var valorArrayIdioma = fila.find('input[name="arrayIdioma[]"]');
             var idblockcuestionario = valorArrayIdioma.data('idblockcuestionario');
+
 
             $('#id-editar').val(idblockcuestionario);
 

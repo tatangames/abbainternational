@@ -856,7 +856,7 @@ class PlanesController extends Controller
             $dato->idioma = $infoIdioma->nombre;
         }
 
-        return view('backend.admin.devocional.planes.bloques.bloquedetalle.devocional.vistadevocionales', compact('idplanbloquedetalle',
+        return view('backend.admin.devocional.planes.bloques.bloquedetalle.devocional.vistanuevodevocionales', compact('idplanbloquedetalle',
         'arrayIdiomas', 'arrayCuestionario', 'conteoIdioma'));
     }
 
@@ -869,6 +869,8 @@ class PlanesController extends Controller
             'ididioma' => 'required',
             'devocional' => 'required',
         );
+
+        // titulo
 
         $validar = Validator::make($request->all(), $regla);
 
@@ -892,6 +894,7 @@ class PlanesController extends Controller
                     $detalle->id_bloque_detalle = $request->idblockdetalle;
                     $detalle->id_idioma_planes = $request->ididioma;
                     $detalle->texto = $request->devocional;
+                    $detalle->titulo = $request->titulo;
                     $detalle->save();
                 }
 
