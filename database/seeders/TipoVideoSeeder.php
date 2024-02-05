@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\TipoVideo;
 use Illuminate\Database\Seeder;
 
 class TipoVideoSeeder extends Seeder
@@ -12,15 +12,15 @@ class TipoVideoSeeder extends Seeder
      */
     public function run(): void
     {
-        TipoVideoSeeder::create([
+        TipoVideo::create([
             'nombre' => 'Facebook',
         ]);
 
-        TipoVideoSeeder::create([
+        TipoVideo::create([
             'nombre' => 'Instagram',
         ]);
 
-        TipoVideoSeeder::create([
+        TipoVideo::create([
             'nombre' => 'Youtube',
         ]);
     }
