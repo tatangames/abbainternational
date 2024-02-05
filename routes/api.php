@@ -49,7 +49,7 @@ Route::middleware('verificarToken')->group(function () {
 
 
 
-
+    // *****************************************************************
 
 
     // buscar planes que no esten agregados a mi usuario -> Paginate
@@ -58,20 +58,28 @@ Route::middleware('verificarToken')->group(function () {
     // ver informacion de un plan para poder seleccionarlo
     Route::post('app/plan/seleccionado/informacion', [ApiPlanesController::class,'informacionPlanSeleccionado']);
 
-
-
-
-
     // selecciona un plan para iniciarlo
     Route::post('app/plan/nuevo/seleccionar', [ApiPlanesController::class,'iniciarPlanNuevo']);
 
-
-    // devuelve lista de planes que no he seleccionado aun, por id contenedor
-    Route::post('app/plan/listado/planes/contenedor', [ApiPlanesController::class,'listadoPlanesContenedor']);
-
     // devuelve mis planes que he seleccionado, habra algunos que pasaran a 'completados' pero
-    // se verificaran dinamicamente
+    // se verificaran dinamicamente -> Paginate
     Route::post('app/plan/listado/misplanes', [ApiPlanesController::class,'listadoMisPlanes']);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     // devuelve informacion del plan a continuar, todos el bloque
     Route::post('app/plan/misplanes/informacion/bloque', [ApiPlanesController::class,'informacionBloqueMiPlan']);

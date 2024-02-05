@@ -7,6 +7,7 @@ use App\Models\BloqueCuestionarioTextos;
 use App\Models\BloquePreguntas;
 use App\Models\BloquePreguntasTextos;
 use App\Models\BloquePreguntasUsuarios;
+use App\Models\Departamentos;
 use App\Models\Iglesias;
 use App\Models\Planes;
 use App\Models\PlanesBlockDetalle;
@@ -171,58 +172,7 @@ class ApiPlanesController extends Controller
     }
 
 
-    // devuelve lista de planes que no he seleccionado aun, por id contenedor
-    public function listadoPlanesContenedor(Request $request){
 
-        $rules = array(
-            'idiomaplan' => 'required',
-            'iduser' => 'required',
-            'idcontenedor' => 'required'
-        );
-
-        $validator = Validator::make($request->all(), $rules);
-        if ( $validator->fails()){
-            return ['success' => 0, 'msj' => "validación incorrecta"];
-        }
-
-        $tokenApi = $request->header('Authorization');
-
-        // idioma, segun el usuario
-        $idiomaTextos = $this->reseteoIdiomaTextos($request->idiomaplan);
-
-        if ($userToken = JWTAuth::user($tokenApi)) {
-
-            // todos los planes de mi usuario
-            $arrayId = PlanesUsuarios::where('id_usuario', $userToken->id)
-                ->select('id_planes')
-                ->get();
-
-            $hayInfo = 0;
-
-            // todos los planes del contenedor, menos seleccionados por el usuario
-            $arrayPlanes = Planes::whereNotIn('id', $arrayId)
-                ->where('id_planes_contenedor', $request->idcontenedor)
-                ->get();
-
-            if ($arrayPlanes->isNotEmpty()) {
-                $hayInfo = 1;
-
-                foreach ($arrayPlanes as $item){
-                    $arrayRaw = $this->retornoTituloPlan($idiomaTextos, $item->id);
-                    $item->titulo = $arrayRaw['titulo'];
-                    $item->subtitulo = $arrayRaw['subtitulo'];
-                }
-            }
-
-            return [
-                'success' => 1,
-                'listaplanes' => $arrayPlanes,
-                'hayinfo' => $hayInfo
-            ];
-        }else{
-            return ['success' => 99];
-        }
-    }
 
 
     // selecciona un plan para iniciarlo
@@ -250,22 +200,21 @@ class ApiPlanesController extends Controller
             }else{
                 DB::beginTransaction();
 
-                $infoIglesia = Iglesias::where('id', $userToken->id_iglesia)->first();
-                $infoZonaHoraria = ZonaHoraria::where('id', $infoIglesia->id_zona_horaria)->first();
-                $zonaHoraria = $infoZonaHoraria->zona;
-
                 try {
+
+                    $zonaHoraria = $this->retornoZonaHorariaDepaCarbonNow($userToken->id_iglesia);
 
                     $nuevoPlan = new PlanesUsuarios();
                     $nuevoPlan->id_usuario = $userToken->id;
                     $nuevoPlan->id_planes = $request->idplan;
-                    $nuevoPlan->fecha = Carbon::now($zonaHoraria);
+                    $nuevoPlan->fecha = $zonaHoraria;
                     $nuevoPlan->save();
 
                     DB::commit();
                     return ['success' => 2];
 
                 }catch(\Throwable $e){
+                    Log::info("error: " . $e);
                     DB::rollback();
                     return ['success' => 99];
                 }
@@ -283,6 +232,8 @@ class ApiPlanesController extends Controller
         $rules = array(
             'idiomaplan' => 'required',
             'iduser' => 'required',
+            'page' => 'required',
+            'limit' => 'required'
         );
 
         $validator = Validator::make($request->all(), $rules);
@@ -292,7 +243,7 @@ class ApiPlanesController extends Controller
 
         $tokenApi = $request->header('Authorization');
 
-        $idiomaTextos = $this->reseteoIdiomaTextos($request->idiomaplan);
+        $idiomaTextos = $request->idiomaplan;
 
         if ($userToken = JWTAuth::user($tokenApi)) {
 
@@ -300,13 +251,9 @@ class ApiPlanesController extends Controller
             $arrayContinuar = null;
             $haycontinuar = 0;
 
-
-
             $arrayPlanUsuario = PlanesUsuarios::where('id_usuario', $userToken->id)
                 ->select('id_planes')
                 ->get();
-
-
 
             foreach ($arrayPlanUsuario as $dato){
 
@@ -380,19 +327,19 @@ class ApiPlanesController extends Controller
             }
 
 
-            // quiero evitar el plan continuar, haya o no haya
-         //   array_push($pilaIdPlanNoComplet, $idPlanContinuar);
+
+            // ***** AQUI INICIA LA PAGINACION *****
+
+            $page = $request->input('page', 1);
+            $limit = $request->input('limit', 10);
 
 
-            // obtener todos los planes menos el de Continuar
-           $arrayPlanesUser = PlanesUsuarios::where('id_usuario', $userToken->id)
-               ->whereIn('id_planes', $pilaIdPlanNoComplet)
-               ->whereNotIn('id_planes', [$idPlanContinuar])
-               ->get();
-
+            $arrayPlanesUser = PlanesUsuarios::where('id_usuario', $userToken->id)
+                ->whereIn('id_planes', $pilaIdPlanNoComplet)
+                ->whereNotIn('id_planes', [$idPlanContinuar])
+                ->paginate($limit, ['*'], 'page', $page);
 
             foreach ($arrayPlanesUser as $dato){
-
                 $titulosRaw = $this->retornoTituloPlan($idiomaTextos, $dato->id_planes);
 
                 $dato->titulo = $titulosRaw['titulo'];
@@ -404,15 +351,15 @@ class ApiPlanesController extends Controller
                 $dato->idplan = $infoP->id;
             }
 
+            // sortByDesc
+            $sortedResult = $arrayPlanesUser->getCollection()->sortBy('id')->values();
+            $arrayPlanesUser->setCollection($sortedResult);
 
-            $datosOrdenados = $arrayPlanesUser->sortBy('titulo')->values();
+
 
             $hayinfo = 0;
-            if ($arrayContinuar != null && $arrayContinuar->isNotEmpty() ) {
-                $hayinfo = 1;
-            }
-
-            if ($datosOrdenados != null && $datosOrdenados->isNotEmpty()) {
+            // EN LA APP: se verifica la primera vez con un boolean
+            if ($arrayPlanesUser->count() > 0) {
                 $hayinfo = 1;
             }
 
@@ -421,7 +368,7 @@ class ApiPlanesController extends Controller
                 'haycontinuar' => $haycontinuar,
                 'hayinfo' => $hayinfo,
                 'listacontinuar' => $arrayContinuar, // no usa barra progreso
-                'listaplanes' => $datosOrdenados,
+                'listado' => $arrayPlanesUser,
             ];
 
         }else{
@@ -1366,6 +1313,17 @@ class ApiPlanesController extends Controller
                 return "";
             }
         }
+    }
+
+
+
+    // RETORNO DE ZONA HORARIA SEGUN DEPARTAMENTO
+    private function retornoZonaHorariaDepaCarbonNow($idigleisa)
+    {
+        $infoIglesia = Iglesias::where('id', $idigleisa)->first();
+        $infoDepartamento = Departamentos::where('id', $infoIglesia->id_departamento)->first();
+        $infoZonaHorarioa = ZonaHoraria::where('id', $infoDepartamento->id_zona_horaria)->first();
+        return Carbon::now($infoZonaHorarioa->zona);
     }
 
 
