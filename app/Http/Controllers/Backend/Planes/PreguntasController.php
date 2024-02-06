@@ -96,10 +96,19 @@ class PreguntasController extends Controller
             // sus idiomas
             foreach ($datosContenedor as $filaArray) {
 
+                $contenidoHtmlConJavascript = "<html>
+                    <head>
+                    <meta charset='UTF-8'>
+                        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+                    </head>
+                    <body>" . $filaArray['infoDescripcion'] . "</body>
+                    </html>";
+
+
                 $detalle = new BloquePreguntasTextos();
                 $detalle->id_bloque_preguntas = $nuevo->id;
                 $detalle->id_idioma_planes = $filaArray['infoIdIdioma'];
-                $detalle->texto = $filaArray['infoDescripcion'];
+                $detalle->texto = $contenidoHtmlConJavascript;
                 $detalle->save();
             }
 
@@ -194,12 +203,22 @@ class PreguntasController extends Controller
             // sus idiomas
             foreach ($datosContenedor as $filaArray) {
 
+
+
+                $contenidoHtmlConJavascript = "<html>
+                    <head>
+                    <meta charset='UTF-8'>
+                        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+                    </head>
+                    <body>" . $filaArray['infoDescripcion'] . "</body>
+                    </html>";
+
                 // comprobar si existe para actualizar o crear segun idioma nuevo
                 if($infoPreguntaTexto = BloquePreguntasTextos::where('id', $filaArray['infoIdBloquePreguntaTextos'])->first()){
 
                     // actualizar
                     BloquePreguntasTextos::where('id', $infoPreguntaTexto->id)->update([
-                        'texto' => $filaArray['infoDescripcion'],
+                        'texto' => $contenidoHtmlConJavascript,
                     ]);
 
                 }else{
@@ -209,7 +228,7 @@ class PreguntasController extends Controller
                     $detalle = new BloquePreguntasTextos();
                     $detalle->id_bloque_preguntas = $request->idbloquepreguntas;
                     $detalle->id_idioma_planes = $filaArray['infoIdIdioma'];
-                    $detalle->texto = $filaArray['infoDescripcion'];
+                    $detalle->texto = $contenidoHtmlConJavascript;
                     $detalle->save();
                 }
             }

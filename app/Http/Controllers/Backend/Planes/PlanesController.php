@@ -678,6 +678,15 @@ class PlanesController extends Controller
             // sus idiomas
             foreach ($datosContenedor as $filaArray) {
 
+                $contenidoHtmlConJavascript = "<html>
+                    <head>
+                    <meta charset='UTF-8'>
+                        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+                    </head>
+                    <body>" . $filaArray['infoDescripcion'] . "</body>
+                    </html>";
+
+
                 // comprobar si existe para evitar duplicados o crear segun idioma nuevo
                 if(PlanesBlockDetaTextos::where('id_planes_block_detalle', $bloque->id)
                     ->where('id_idioma_planes', $filaArray['infoIdIdioma'])
@@ -691,7 +700,7 @@ class PlanesController extends Controller
                     $detalle->id_planes_block_detalle = $bloque->id;
                     $detalle->id_idioma_planes = $filaArray['infoIdIdioma'];
                     $detalle->titulo = $filaArray['infoTitulo'];
-                    $detalle->titulo_pregunta = $filaArray['infoDescripcion'];
+                    $detalle->titulo_pregunta = $contenidoHtmlConJavascript;
                     $detalle->save();
                 }
             }
@@ -799,13 +808,25 @@ class PlanesController extends Controller
             // sus idiomas
             foreach ($datosContenedor as $filaArray) {
 
+
+
+                $contenidoHtmlConJavascript = "<html>
+                    <head>
+                    <meta charset='UTF-8'>
+                        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+                    </head>
+                    <body>" . $filaArray['infoDescripcion'] . "</body>
+                    </html>";
+
+
+
                 // comprobar si existe para actualizar o crear segun idioma nuevo
                 if($infoBloqueDetaTexto = PlanesBlockDetaTextos::where('id', $filaArray['infoIdBloqueDetaTexto'])->first()){
 
                     // actualizar
                     PlanesBlockDetaTextos::where('id', $infoBloqueDetaTexto->id)->update([
                         'titulo' => $filaArray['infoTitulo'],
-                        'titulo_pregunta' => $filaArray['infoDescripcion'],
+                        'titulo_pregunta' => $contenidoHtmlConJavascript,
                     ]);
 
                 }else{
@@ -816,7 +837,7 @@ class PlanesController extends Controller
                     $detalle->id_planes_block_detalle = $request->idplanbloquedetalle;
                     $detalle->id_idioma_planes = $filaArray['infoIdIdioma'];
                     $detalle->titulo = $filaArray['infoTitulo'];
-                    $detalle->titulo_pregunta = $filaArray['infoDescripcion'];
+                    $detalle->titulo_pregunta = $contenidoHtmlConJavascript;
                     $detalle->save();
                 }
             }
@@ -888,12 +909,55 @@ class PlanesController extends Controller
 
                 }else{
 
-                    // como no encontro, se creara
+
+
+
+
+                    $contenidoHtmlConJavascript = "<html>
+                    <head>
+                    <meta charset='UTF-8'>
+                        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+                    <style>
+                        ";
+
+                    $contenidoHtmlConJavascript .= $this->retornoFuentesCSS();
+
+
+                    $contenidoHtmlConJavascript .= "</style>
+                        <script type='text/javascript'>
+                            function aumentarTamaño() {
+                                var elementos = document.getElementsByTagName('*');
+                                for (var i = 0; i < elementos.length; i++) {
+                                    var estilo = window.getComputedStyle(elementos[i], null).getPropertyValue('font-size');
+                                    var fontSize = parseFloat(estilo);
+                                    elementos[i].style.fontSize = (fontSize + 2) + 'px';
+                                }
+                            }
+
+                            function disminuirTamaño() {
+                                var elementos = document.getElementsByTagName('*');
+                                for (var i = 0; i < elementos.length; i++) {
+                                    var estilo = window.getComputedStyle(elementos[i], null).getPropertyValue('font-size');
+                                    var fontSize = parseFloat(estilo);
+                                    elementos[i].style.fontSize = (fontSize - 2) + 'px';
+                                }
+                            }
+                        </script>
+                    </head>
+                    <body>" . $request->devocional . "</body>
+                    </html>";
+
+
+
+
+
+
+
 
                     $detalle = new BloqueCuestionarioTextos();
                     $detalle->id_bloque_detalle = $request->idblockdetalle;
                     $detalle->id_idioma_planes = $request->ididioma;
-                    $detalle->texto = $request->devocional;
+                    $detalle->texto = $contenidoHtmlConJavascript;
                     $detalle->save();
                 }
 

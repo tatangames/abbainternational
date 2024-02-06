@@ -792,10 +792,7 @@ class ApiPlanesController extends Controller
                 ->where('visible', 1)
                 ->first()){
 
-                $arrayTiPre = $this->retornoTituloPrincipalPreguntaTextoIdioma($request->idblockdeta, $idiomaTextos);
-
-                $titulop = $arrayTiPre['titulo'];
-                $descripcionp = $arrayTiPre['descripcion'];
+                $descripcionPregunta = $this->retornoTituloPrincipalPreguntaTextoIdioma($request->idblockdeta, $idiomaTextos);
 
 
                 $arrayBloque = BloquePreguntas::where('id_plan_block_detalle', $request->idblockdeta)
@@ -825,7 +822,6 @@ class ApiPlanesController extends Controller
                     $dato->texto = $texto;
                 }
 
-
                 // verificar si hay preguntas ya guardadas
                 $hayrespuesta = 0;
                 if(BloquePreguntasUsuarios::where('id_bloque_preguntas', $infoBloquePre->id)
@@ -835,8 +831,7 @@ class ApiPlanesController extends Controller
                 }
 
                 return ['success' => 1,
-                    'titulop' => $titulop,
-                    'descripcion' => $descripcionp,
+                    'descripcion' => $descripcionPregunta,
                     'hayrespuesta' => $hayrespuesta,
                     'listado' => $arrayBloque
                 ];
@@ -862,8 +857,7 @@ class ApiPlanesController extends Controller
             ->where('id_idioma_planes', $idiomaTexto)
             ->first()){
 
-            return ['titulo' => $infoTituloTexto->titulo,
-                'descripcion' => $infoTituloTexto->titulo_pregunta];
+            return  $infoTituloTexto->titulo_pregunta;
 
         }else{
             // si no encuentra sera por defecto español
@@ -872,8 +866,7 @@ class ApiPlanesController extends Controller
                 ->where('id_idioma_planes', 1)
                 ->first();
 
-            return ['titulo' => $infoTituloTexto->titulo,
-                'descripcion' => $infoTituloTexto->titulo_pregunta];
+            return  $infoTituloTexto->titulo_pregunta;
         }
 
     }
