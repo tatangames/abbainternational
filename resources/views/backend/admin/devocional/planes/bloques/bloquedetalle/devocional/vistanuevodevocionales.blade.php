@@ -101,7 +101,6 @@
                     <tr>
                         <th style="width: 4%">#</th>
                         <th style="width: 10%">Idioma</th>
-                        <th style="width: 10%">Título</th>
                         <th style="width: 6%">Opciones</th>
                     </tr>
                     </thead>
@@ -117,7 +116,6 @@
                                 <!-- data-ididioma se utiliza para comparar si falta agregar idioma nuevo -->
                                 <input name="arrayIdioma[]" disabled data-idblockcuestionario="{{ $item->id }}" data-ididioma="{{ $item->id_idioma_planes }}" value="{{ $item->idioma }}" class="form-control" type="text">
                                 <textarea name="arrayDescripcion[]" disabled style="display: none" class="form-control">{{ $item->texto }}</textarea>
-                                <textarea name="arrayTitulo[]" disabled style="display: none" class="form-control">{{ $item->titulo }}</textarea>
                             </td>
 
 
@@ -152,10 +150,6 @@
                         <div class="card-body">
                             <div class="col-md-12">
 
-                                <div class="form-group">
-                                    <label>Título (Opcional)</label>
-                                    <textarea name="content" id="titulo-nuevo" rows="12" cols="50"></textarea>
-                                </div>
 
                                  <div class="form-group">
                                     <label>Devocional </label>
@@ -193,10 +187,7 @@
                         <div class="card-body">
                             <div class="col-md-12">
 
-                                <div class="form-group">
-                                    <label>Título (Opcional)</label>
-                                    <textarea name="content" id="titulo-editar" rows="12" cols="50"></textarea>
-                                </div>
+
                                 <div class="form-group">
                                     <label>Devocional </label>
                                     <input id="id-editar" type="hidden">
@@ -239,8 +230,7 @@
             window.varGlobalEditorNuevo;
             window.varGlobalEditorEditar;
 
-            window.varGlobalEditorNuevoTitulo;
-            window.varGlobalEditorEditarTitulo;
+
 
             ClassicEditor
                 .create(document.querySelector('#editor-nuevo'), {
@@ -263,30 +253,6 @@
                 .catch(error => {
 
                 });
-
-
-            ClassicEditor
-                .create(document.querySelector('#titulo-nuevo'), {
-                    language: 'es',
-                })
-                .then(editor => {
-                    varGlobalEditorNuevoTitulo = editor;
-                })
-                .catch(error => {
-
-                });
-
-            ClassicEditor
-                .create(document.querySelector('#titulo-editar'), {
-                    language: 'es',
-                })
-                .then(editor => {
-                    varGlobalEditorEditarTitulo = editor;
-                })
-                .catch(error => {
-
-                });
-
 
             document.getElementById("divcontenedor").style.display = "block";
         });
@@ -316,7 +282,6 @@
               // limpiar modal y ckeditor
 
               varGlobalEditorNuevo.setData("");
-              varGlobalEditorNuevoTitulo.setData("");
 
               $('#modalNuevoTexto').css('overflow-y', 'auto');
               $('#modalNuevoTexto').modal({backdrop: 'static', keyboard: false})
@@ -343,7 +308,6 @@
 
              // verificar que lleve texto el ckeditor
              const editorDataDescripcionEdit = varGlobalEditorNuevo.getData();
-             const editorDataDescripcionEditTitulo = varGlobalEditorNuevoTitulo.getData();
 
 
 
@@ -351,9 +315,6 @@
                  toastr.error("Devocional es requerido");
                  return;
              }
-
-             // titulo es opcional
-
 
 
              let idplanbloquedeta = {{ $idplanbloquedetalle }};
@@ -363,7 +324,6 @@
              formData.append('idblockdetalle', idplanbloquedeta);
              formData.append('ididioma', idIdiomaSelect);
              formData.append('devocional', editorDataDescripcionEdit);
-             formData.append('titulo', editorDataDescripcionEditTitulo);
 
              openLoading();
 
@@ -405,8 +365,6 @@
             var fila = $(e).closest('tr');
 
 
-            var valorInputDescripcionTitulo = fila.find('textarea[name="arrayTitulo[]"]').val();
-            varGlobalEditorEditarTitulo.setData(valorInputDescripcionTitulo);
 
 
             var valorInputDescripcion = fila.find('textarea[name="arrayDescripcion[]"]').val();
@@ -431,7 +389,6 @@
 
 
             const editorDataDescripcionEdit = varGlobalEditorEditar.getData();
-            const editorDataDescripcionEditTitulo = varGlobalEditorEditarTitulo.getData();
 
             if (editorDataDescripcionEdit.trim() === '') {
                 toastr.error("Devocional es requerido");
@@ -439,11 +396,9 @@
             }
 
 
-
             let formData = new FormData();
 
             formData.append('idcuestionario', idCuestionarioFila);
-            formData.append('titulo', editorDataDescripcionEditTitulo);
             formData.append('devocional', editorDataDescripcionEdit);
             openLoading();
 

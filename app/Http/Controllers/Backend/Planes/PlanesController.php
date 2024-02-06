@@ -871,7 +871,6 @@ class PlanesController extends Controller
             'devocional' => 'required',
         );
 
-        // titulo
 
         $validar = Validator::make($request->all(), $regla);
 
@@ -895,7 +894,6 @@ class PlanesController extends Controller
                     $detalle->id_bloque_detalle = $request->idblockdetalle;
                     $detalle->id_idioma_planes = $request->ididioma;
                     $detalle->texto = $request->devocional;
-                    $detalle->titulo = $request->titulo;
                     $detalle->save();
                 }
 
@@ -919,7 +917,6 @@ class PlanesController extends Controller
             'devocional' => 'required',
         );
 
-        // titulo
 
         $validar = Validator::make($request->all(), $regla);
 
@@ -928,10 +925,46 @@ class PlanesController extends Controller
 
         if ($info = BloqueCuestionarioTextos::where('id', $request->idcuestionario)->first()){
 
+
+            $contenidoHtmlConJavascript = "<html>
+                    <head>
+                    <meta charset='UTF-8'>
+                        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+                    <style>
+                        ";
+
+                $contenidoHtmlConJavascript .= $this->retornoFuentesCSS();
+
+
+                $contenidoHtmlConJavascript .= "</style>
+                        <script type='text/javascript'>
+                            function aumentarTamaño() {
+                                var elementos = document.getElementsByTagName('*');
+                                for (var i = 0; i < elementos.length; i++) {
+                                    var estilo = window.getComputedStyle(elementos[i], null).getPropertyValue('font-size');
+                                    var fontSize = parseFloat(estilo);
+                                    elementos[i].style.fontSize = (fontSize + 2) + 'px';
+                                }
+                            }
+
+                            function disminuirTamaño() {
+                                var elementos = document.getElementsByTagName('*');
+                                for (var i = 0; i < elementos.length; i++) {
+                                    var estilo = window.getComputedStyle(elementos[i], null).getPropertyValue('font-size');
+                                    var fontSize = parseFloat(estilo);
+                                    elementos[i].style.fontSize = (fontSize - 2) + 'px';
+                                }
+                            }
+                        </script>
+                    </head>
+                    <body>" . $request->devocional . "</body>
+                    </html>";
+
+
+
             // actualizar
             BloqueCuestionarioTextos::where('id', $info->id)->update([
-                'texto' => $request->devocional,
-                'titulo' => $request->titulo
+                'texto' => $contenidoHtmlConJavascript,
             ]);
         }
 
@@ -939,6 +972,40 @@ class PlanesController extends Controller
     }
 
 
+    private function retornoFuentesCSS(){
+
+        $fuentes = "
+                @font-face {
+                    font-family: 'Fuente1';
+                    src: url('file:///android_res/font/notosans_light.ttf') format('truetype'); /* Ruta de la tercera fuente */
+                 }
+
+                @font-face {
+                    font-family: 'Fuente2';
+                    src: url('file:///android_res/font/notosans_condensed_medium.ttf') format('truetype'); /* Ruta de la tercera fuente */
+                }
+
+                @font-face {
+                    font-family: 'Fuente3';
+                    src: url('file:///android_res/font/times_new_normal_regular.ttf') format('truetype'); /* Ruta de la tercera fuente */
+                }
+
+                /* Utilizar las fuentes según sea necesario */
+                .texto-fuente1 {
+                    font-family: 'Fuente1', sans-serif;
+                }
+
+                .texto-fuente2 {
+                    font-family: 'Fuente2', sans-serif;
+                }
+
+                .texto-fuente3 {
+                    font-family: 'Fuente3', sans-serif;
+                }
+        ";
+
+        return $fuentes;
+    }
 
 
 
