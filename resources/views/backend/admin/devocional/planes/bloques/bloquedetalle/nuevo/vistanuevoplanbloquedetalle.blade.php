@@ -419,7 +419,7 @@
                             confirmButtonText: 'Aceptar'
                         }).then((result) => {
                             if (result.isConfirmed) {
-                                vistaAtrasPlanesBloques();
+                                limpiarParaNuevoDato();
                             }
                         })
                     }
@@ -433,6 +433,11 @@
                 });
         }
 
+
+        function limpiarParaNuevoDato(){
+            var tbody = document.getElementById('matriz').querySelector('tbody');
+            tbody.innerHTML = '';
+        }
 
         function borrarFila(elemento){
             var tabla = elemento.parentNode.parentNode;

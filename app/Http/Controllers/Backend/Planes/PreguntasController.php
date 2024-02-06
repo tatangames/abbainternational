@@ -164,7 +164,8 @@ class PreguntasController extends Controller
         $regla = array(
             'idbloquepreguntas' => 'required',
             'idimagen' => 'required',
-            'toggle' => 'required'
+            'toggle' => 'required',
+            'togglevisible' => 'required'
         );
 
 
@@ -179,7 +180,6 @@ class PreguntasController extends Controller
 
         try {
 
-
             $datosContenedor = json_decode($request->contenedorArray, true);
 
 
@@ -187,6 +187,7 @@ class PreguntasController extends Controller
             BloquePreguntas::where('id', $request->idbloquepreguntas)->update([
                 'id_imagen_pregunta' => $request->idimagen,
                 'requerido' => $request->toggle,
+                'visible' => $request->togglevisible
             ]);
 
 

@@ -68,6 +68,18 @@
                             </div>
 
 
+                            <div class="form-group" style="margin-left: 5px">
+                                <label>Visible</label><br>
+                                <label class="switch" style="margin-top:10px">
+                                    <input type="checkbox" id="toggle-visible">
+                                    <div class="slider round">
+                                        <span class="on">Sí</span>
+                                        <span class="off">No</span>
+                                    </div>
+                                </label>
+                            </div>
+
+
                             <div class="form-group col-md-3" style="margin-top: 35px">
                                 <label class="control-label">Idioma</label>
                                 <select class="form-control" id="select-idioma">
@@ -264,9 +276,14 @@
 
 
             let valor = {{ $infoPregunta->requerido }};
+            let valorVisible = {{ $infoPregunta->visible }};
 
             if(valor == 1){
                 $("#toggle-requerida").prop("checked", true);
+            }
+
+            if(valorVisible == 1){
+                $("#toggle-visible").prop("checked", true);
             }
 
             document.getElementById("divcontenedor").style.display = "block";
@@ -437,6 +454,9 @@
             let t = document.getElementById('toggle-requerida').checked;
             let toggle = t ? 1 : 0;
 
+            let tv = document.getElementById('toggle-visible').checked;
+            let toggleVisible = tv ? 1 : 0;
+
 
             let formData = new FormData();
             const contenedorArray = [];
@@ -458,6 +478,7 @@
             formData.append('idbloquepreguntas', idbloquepreguntas);
             formData.append('idimagen', selectImagen);
             formData.append('toggle', toggle);
+            formData.append('togglevisible', toggleVisible);
 
             openLoading();
 

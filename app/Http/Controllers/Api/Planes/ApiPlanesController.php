@@ -9,6 +9,7 @@ use App\Models\BloquePreguntasTextos;
 use App\Models\BloquePreguntasUsuarios;
 use App\Models\Departamentos;
 use App\Models\Iglesias;
+use App\Models\ImagenPreguntas;
 use App\Models\Planes;
 use App\Models\PlanesBlockDetalle;
 use App\Models\PlanesBlockDetaTextos;
@@ -709,14 +710,18 @@ class ApiPlanesController extends Controller
 
             $idiomaTextos = $request->idiomaplan;
 
+
+
             // comprueba que al menos haya un cuestionario disponible de cualquier idioma
             if($info = BloqueCuestionarioTextos::where('id_bloque_detalle', $request->idblockdeta)
                 ->first()){
 
-                $titulo = $this->retornoTituloCuestionarioIdioma($request->idblockdeta, $idiomaTextos);
-
+                $datosArray = $this->retornoTituloCuestionarioIdioma($request->idblockdeta, $idiomaTextos);
+                $texto = $datosArray['texto'];
+                $titulo = $datosArray['titulo'];
                 return ['success' => 1,
                        'titulo' => $titulo,
+                       'texto' => $texto
                 ];
             }else{
 
@@ -737,8 +742,9 @@ class ApiPlanesController extends Controller
         if($infoTituloTexto = BloqueCuestionarioTextos::where('id_bloque_detalle', $idBlockDeta)
             ->where('id_idioma_planes', $idiomaTexto)
             ->first()){
-
-            return $infoTituloTexto->texto;
+            return ['titulo' => $infoTituloTexto->titulo,
+                    'texto' => $infoTituloTexto->texto
+            ];
 
         }else{
             // si no encuentra sera por defecto español
@@ -746,7 +752,11 @@ class ApiPlanesController extends Controller
                 ->where('id_idioma_planes', 1)
                 ->first();
 
-            return $infoTituloTexto->texto;
+            return ['titulo' => $infoTituloTexto->titulo,
+                'texto' => $infoTituloTexto->texto
+            ];
+
+
         }
     }
 
@@ -761,7 +771,7 @@ class ApiPlanesController extends Controller
         $rules = array(
             'iduser' => 'required',
             'idblockdeta' => 'required',
-            'idioma' => 'required'
+            'idiomaplan' => 'required'
         );
 
         $validator = Validator::make($request->all(), $rules);
@@ -775,7 +785,7 @@ class ApiPlanesController extends Controller
 
         if ($userToken = JWTAuth::user($tokenApi)) {
 
-            $idiomaTextos = $this->reseteoIdiomaTextos($request->idiomaplan);
+            $idiomaTextos = $request->idiomaplan;
 
             // comprueba que al menos haya una pregunta disponible
             if($infoBloquePre = BloquePreguntas::where('id_plan_block_detalle', $request->idblockdeta)
@@ -794,6 +804,12 @@ class ApiPlanesController extends Controller
                     ->get();
 
                 foreach ($arrayBloque as $dato){
+
+                    // informacion imagen
+                    $imagenData = ImagenPreguntas::where('id', $dato->id_imagen_pregunta)->first();
+                    $dato->imagen = $imagenData->imagen;
+
+
                     $titulo = $this->retornoTituloPreguntaTextoIdioma($dato->id, $idiomaTextos);
                     $dato->titulo = $titulo;
 
@@ -820,7 +836,7 @@ class ApiPlanesController extends Controller
 
                 return ['success' => 1,
                     'titulop' => $titulop,
-                    'descripcionp' => $descripcionp,
+                    'descripcion' => $descripcionp,
                     'hayrespuesta' => $hayrespuesta,
                     'listado' => $arrayBloque
                 ];
@@ -846,8 +862,8 @@ class ApiPlanesController extends Controller
             ->where('id_idioma_planes', $idiomaTexto)
             ->first()){
 
-            return ['titulo' => $infoTituloTexto->titulop,
-                'descripcion' => $infoTituloTexto->descripcionp];
+            return ['titulo' => $infoTituloTexto->titulo,
+                'descripcion' => $infoTituloTexto->titulo_pregunta];
 
         }else{
             // si no encuentra sera por defecto español
@@ -856,8 +872,8 @@ class ApiPlanesController extends Controller
                 ->where('id_idioma_planes', 1)
                 ->first();
 
-            return ['titulo' => $infoTituloTexto->titulop,
-                'descripcion' => $infoTituloTexto->descripcionp];
+            return ['titulo' => $infoTituloTexto->titulo,
+                'descripcion' => $infoTituloTexto->titulo_pregunta];
         }
 
     }
@@ -908,9 +924,7 @@ class ApiPlanesController extends Controller
 
         if ($userToken = JWTAuth::user($tokenApi)) {
 
-            $infoIglesia = Iglesias::where('id', $userToken->id_iglesia)->first();
-            $infoZonaHoraria = ZonaHoraria::where('id', $infoIglesia->id_zona_horaria)->first();
-            $zonaHoraria = $infoZonaHoraria->zona;
+            $zonaHorariaCarbon = $this->retornoZonaHorariaDepaCarbonNow($userToken->id_iglesia);
 
             DB::beginTransaction();
 
@@ -927,7 +941,7 @@ class ApiPlanesController extends Controller
                             BloquePreguntasUsuarios::where('id', $clave)
                                 ->update([
                                     'texto' => $valor['txtpregunta'],
-                                    'fecha_actualizo' => Carbon::now($zonaHoraria)
+                                    'fecha_actualizo' => $zonaHorariaCarbon
                                 ]);
 
                         }else{
@@ -935,7 +949,7 @@ class ApiPlanesController extends Controller
                             $pregunta->id_bloque_preguntas = $clave;
                             $pregunta->id_usuarios = $userToken->id;
                             $pregunta->texto = $valor['txtpregunta'];
-                            $pregunta->fecha = Carbon::now($zonaHoraria);
+                            $pregunta->fecha = $zonaHorariaCarbon;
                             $pregunta->fecha_actualizo = null;
                             $pregunta->save();
                         }
@@ -968,8 +982,7 @@ class ApiPlanesController extends Controller
 
     private function retornoActualizarPlanUsuarioContinuar($iduser, $idplan)
     {
-        if($idPlanUser = PlanesUsuariosContinuar::where('id_usuarios', $iduser)
-            ->first()){
+        if($idPlanUser = PlanesUsuariosContinuar::where('id_usuarios', $iduser)->first()){
             // solo actualizar
 
             PlanesUsuariosContinuar::where('id', $idPlanUser->id)

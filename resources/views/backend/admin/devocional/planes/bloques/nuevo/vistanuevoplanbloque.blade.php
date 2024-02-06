@@ -81,7 +81,6 @@
                             <p style="color: red">Los idiomas serán necesarios si se activa Texto Personalizado</p>
 
 
-
                         </div>
                     </div>
                 </div>
@@ -416,6 +415,8 @@
                 .then((response) => {
                     closeLoading();
 
+                    limpiarParaNuevoDato()
+
                    if(response.data.success === 1){
                         Swal.fire({
                             title: "Fecha Creada",
@@ -427,7 +428,7 @@
                             confirmButtonText: 'Aceptar'
                         }).then((result) => {
                             if (result.isConfirmed) {
-                                vistaAtrasPlanesBloques();
+
                             }
                         })
                     }
@@ -459,6 +460,12 @@
             }
         }
 
+
+
+        function limpiarParaNuevoDato(){
+            var tbody = document.getElementById('matriz').querySelector('tbody');
+            tbody.innerHTML = '';
+        }
 
 
     </script>

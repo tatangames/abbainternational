@@ -19,9 +19,7 @@ return new class extends Migration
             $table->bigInteger('id_idioma_planes')->unsigned();
 
             // titulo opcional
-            $table->string('titulo', 500)->nullable();
-
-
+            $table->string('titulo')->nullable();
             $table->text('texto');
 
             $table->foreign('id_bloque_detalle')->references('id')->on('planes_block_detalle');
