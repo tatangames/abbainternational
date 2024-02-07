@@ -84,22 +84,22 @@ Route::middleware('verificarToken')->group(function () {
     // devuelve textos de preguntas y respuestas para compartir
     Route::post('app/plan/misplanes/preguntas/infocompartir', [ApiPlanesController::class,'informacionPreguntasParaCompartir']);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    // informacion de todos los planes completados
+    // informacion de todos los planes completados -> Paginate
     Route::post('app/plan/misplanes/completados', [ApiPlanesController::class,'listadoMisPlanesCompletados']);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     // devuelve informacion del plan a continuar, todos el bloque pero esto solo es vista
     Route::post('app/plan/misplanes/info/bloque/vista', [ApiPlanesController::class,'informacionBloqueMiPlanVista']);

@@ -1091,26 +1091,29 @@ class ApiPlanesController extends Controller
 
         $tokenApi = $request->header('Authorization');
 
-        $idiomaTextos = $this->reseteoIdiomaTextos($request->idiomaplan);
+        $idiomaTextos = $request->idiomaplan;
 
         if ($userToken = JWTAuth::user($tokenApi)) {
-
 
             $arrayPlanUsuario = PlanesUsuarios::where('id_usuario', $userToken->id)
                 ->select('id_planes')
                 ->get();
 
-
             foreach ($arrayPlanUsuario as $dato){
 
-                $arrayPlanBloque = PlanesBloques::where('id_planes', $dato->id_planes)->get();
+                $arrayPlanBloque = PlanesBloques::where('id_planes', $dato->id_planes)
+                    ->where('visible', 1)
+                    ->get();
+
                 $planCompletado = 1;
 
                 if($arrayPlanBloque != null && $arrayPlanBloque->isNotEmpty()){
                     foreach ($arrayPlanBloque as $rec){ // cada bloque
 
                         // buscar el detalle de ese bloque
-                        $arrayListado = PlanesBlockDetalle::where('id_planes_bloques', $rec->id)->get();
+                        $arrayListado = PlanesBlockDetalle::where('id_planes_bloques', $rec->id)
+                            ->where('visible', 1)
+                            ->get();
 
                         foreach ($arrayListado as $datoLista){
 
@@ -1156,8 +1159,6 @@ class ApiPlanesController extends Controller
 
             $hayinfo = 0;
 
-
-
             foreach ($arrayPlanesUser as $dato){
                 $hayinfo = 1;
                 $titulosRaw = $this->retornoTituloPlan($idiomaTextos, $dato->id_planes);
@@ -1171,30 +1172,17 @@ class ApiPlanesController extends Controller
                 $dato->idplan = $infoP->id;
             }
 
+
             // PROCESO DE ORDENAR POR TITULO
 
-            // Obtener los resultados como un array
-            $resultadosArray = $arrayPlanesUser->items();
-
-            // Ordenar el array por el campo 'nombre'
-            usort($resultadosArray, function ($a, $b) {
-                return strcmp($a['titulo'], $b['titulo']);
-            });
-
-            // Configurar la paginación para el array ordenado
-            $porPagina = $limit; // Número de elementos por página
-            $paginaActual = Paginator::resolveCurrentPage($page) ?: 1;
-            $itemsPaginaActual = array_slice($resultadosArray, ($paginaActual - 1) * $porPagina, $porPagina);
-
-            // Crear un objeto LengthAwarePaginator para manejar la paginación
-            $paginador = new LengthAwarePaginator($itemsPaginaActual, count($resultadosArray), $porPagina, $paginaActual, [
-                'path' => Paginator::resolveCurrentPath(),
-            ]);
+            // sortByDesc
+            $sortedResult = $arrayPlanesUser->getCollection()->sortBy('titulo')->values();
+            $arrayPlanesUser->setCollection($sortedResult);
 
 
             return ['success' => 1,
                 'hayinfo' => $hayinfo,
-                'listaplanes' => $paginador,
+                'listaplanes' => $arrayPlanesUser,
             ];
 
         }else{
