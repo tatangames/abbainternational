@@ -265,7 +265,9 @@ class ApiPlanesController extends Controller
                     foreach ($arrayPlanBloque as $rec){ // cada bloque
 
                         // buscar el detalle de ese bloque
-                        $arrayListado = PlanesBlockDetalle::where('id_planes_bloques', $rec->id)->get();
+                        $arrayListado = PlanesBlockDetalle::where('id_planes_bloques', $rec->id)
+                            ->where('visible', 1)
+                            ->get();
 
                         foreach ($arrayListado as $datoLista){
 
@@ -643,10 +645,11 @@ class ApiPlanesController extends Controller
                 foreach ($arrayPlanBloque as $dato){
 
                     // buscar el detalle de cada bloque
-                    $arrayListado = PlanesBlockDetalle::where('id_planes_bloques', $dato->id)->get();
+                    $arrayListado = PlanesBlockDetalle::where('id_planes_bloques', $dato->id)
+                        ->where('visible', 1)
+                        ->get();
 
                     foreach ($arrayListado as $datoLista){
-
 
                         if($detauser = PlanesBlockDetaUsuario::where('id_usuario', $userToken->id)
                             ->where('id_planes_block_deta', $datoLista->id)
@@ -913,6 +916,7 @@ class ApiPlanesController extends Controller
             ];
         }
 
+
         $tokenApi = $request->header('Authorization');
 
         if ($userToken = JWTAuth::user($tokenApi)) {
@@ -927,11 +931,11 @@ class ApiPlanesController extends Controller
 
                     foreach ($request->idpregunta as $clave => $valor) {
 
-                        if(BloquePreguntasUsuarios::where('id_bloque_preguntas', $clave)
+                        if($infoFila = BloquePreguntasUsuarios::where('id_bloque_preguntas', $clave)
                             ->where('id_usuarios', $userToken->id)->first()){
 
                             // actualizar la preguntas
-                            BloquePreguntasUsuarios::where('id', $clave)
+                            BloquePreguntasUsuarios::where('id', $infoFila->id)
                                 ->update([
                                     'texto' => $valor['txtpregunta'],
                                     'fecha_actualizo' => $zonaHorariaCarbon
@@ -970,6 +974,83 @@ class ApiPlanesController extends Controller
             return ['success' => 99];
         }
     }
+
+
+    public function informacionPreguntasParaCompartir(Request $request)
+    {
+        $rules = array(
+            'iduser' => 'required',
+            'idblockdeta' => 'required',
+            'idiomaplan' => 'required'
+        );
+
+        $validator = Validator::make($request->all(), $rules);
+        if ( $validator->fails()){
+            return ['success' => 0,
+                'msj' => "validación incorrecta"
+            ];
+        }
+
+        $tokenApi = $request->header('Authorization');
+
+        if ($userToken = JWTAuth::user($tokenApi)) {
+
+            $idiomaTextos = $request->idiomaplan;
+
+            // comprueba que al menos haya una pregunta disponible
+            if(BloquePreguntas::where('id_plan_block_detalle', $request->idblockdeta)
+                ->where('visible', 1)
+                ->first()){
+
+                $descripcionPregunta = $this->retornoTituloPrincipalPreguntaTextoIdioma($request->idblockdeta, $idiomaTextos);
+
+                $arrayBloque = BloquePreguntas::where('id_plan_block_detalle', $request->idblockdeta)
+                    ->where('visible', 1)
+                    ->orderBy('posicion')
+                    ->get();
+
+
+                foreach ($arrayBloque as $dato){
+
+                    // informacion imagen
+                    $imagenData = ImagenPreguntas::where('id', $dato->id_imagen_pregunta)->first();
+                    $dato->imagen = $imagenData->imagen;
+
+
+                    $titulo = $this->retornoTituloPreguntaTextoIdioma($dato->id, $idiomaTextos);
+                    $dato->titulo = $titulo;
+
+                    $texto = "";
+                    // buscar texto de la pregunta contestada si existe
+                    if($detaPre = BloquePreguntasUsuarios::where('id_bloque_preguntas', $dato->id)
+                        ->where('id_usuarios', $userToken->id)
+                        ->first()){
+                        $texto = $detaPre->texto;
+                    }
+
+                    $dato->texto = $texto;
+                }
+
+                return ['success' => 1,
+                    'descripcion' => $descripcionPregunta,
+                    'listado' => $arrayBloque
+                ];
+            }else{
+
+                return ['success' => 2,
+                    'msg' => "No hay preguntas"
+                ];
+            }
+
+        }else{
+            return ['success' => 99];
+        }
+    }
+
+
+
+
+
 
 
 

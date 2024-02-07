@@ -61,6 +61,7 @@ Route::middleware('verificarToken')->group(function () {
     // selecciona un plan para iniciarlo
     Route::post('app/plan/nuevo/seleccionar', [ApiPlanesController::class,'iniciarPlanNuevo']);
 
+
     // devuelve mis planes que he seleccionado, habra algunos que pasaran a 'completados' pero
     // se verificaran dinamicamente -> Paginate
     Route::post('app/plan/listado/misplanes', [ApiPlanesController::class,'listadoMisPlanes']);
@@ -80,8 +81,8 @@ Route::middleware('verificarToken')->group(function () {
     // actualizar preguntas
     Route::post('app/plan/misplanes/preguntas/usuario/actualizar', [ApiPlanesController::class,'actualizarPreguntasUsuarioPlan']);
 
-
-
+    // devuelve textos de preguntas y respuestas para compartir
+    Route::post('app/plan/misplanes/preguntas/infocompartir', [ApiPlanesController::class,'informacionPreguntasParaCompartir']);
 
 
 
