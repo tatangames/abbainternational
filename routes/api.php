@@ -94,26 +94,23 @@ Route::middleware('verificarToken')->group(function () {
 
 
 
-
-
-
-
-
-
-
-    // devuelve informacion del plan a continuar, todos el bloque pero esto solo es vista
-    Route::post('app/plan/misplanes/info/bloque/vista', [ApiPlanesController::class,'informacionBloqueMiPlanVista']);
-
-
-
-
-
     //*** FRAGMENT INICIO
 
 
 
     // devuelve todos los elementos bloque inicio
     Route::post('app/inicio/bloque/completa', [ApiInicioController::class,'infoBloqueInicioCompleto']);
+
+
+
+
+
+
+
+
+
+
+
 
     // informacion de un plan, solo para vista, usando idblockdeta para buscar id plan
     Route::post('app/plan/informacion/solovista', [ApiInicioController::class,'infoPlanSoloVista']);

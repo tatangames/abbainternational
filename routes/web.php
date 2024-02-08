@@ -13,6 +13,8 @@ use App\Http\Controllers\Backend\Usuarios\UsuariosController;
 use App\Http\Controllers\Backend\Recursos\RecursosController;
 use App\Http\Controllers\Backend\Planes\PlanesController;
 use App\Http\Controllers\Backend\Planes\PreguntasController;
+use App\Http\Controllers\Backend\Recursos\DevoInicioController;
+
 
 Route::get('/', [LoginController::class,'index'])->name('login');
 
@@ -221,6 +223,25 @@ Route::post('/admin/videoshoy/borrar', [RecursosController::class,'borrarVideoUr
 Route::get('/admin/videoshoy/vista/editar/{idvideohoy}', [RecursosController::class,'indexVideosHoyEditar']);
 Route::post('/admin/videoshoy/imagen/actualizar', [RecursosController::class,'actualizarImagenVideosHoy']);
 Route::post('/admin/videoshoy/actualizar', [RecursosController::class,'actualizarVideosHoyTextos']);
+
+
+// --- DEVOCIONALES INICIO ---
+Route::get('/admin/devoinicio/vista', [DevoInicioController::class,'indexDevoInicio'])->name('admin.devo.inicio.index');
+Route::get('/admin/devoinicio/tabla', [DevoInicioController::class,'tablaDevoInicio']);
+
+// cargara todos los planes visibles para elegir
+Route::get('/admin/devoinicio/planes/vista', [DevoInicioController::class,'indexDevoInicioPlanes']);
+Route::get('/admin/devoinicio/planes/tabla', [DevoInicioController::class,'tablaDevoInicioPlanes']);
+
+// cargara todos los bloques fechas
+Route::get('/admin/devoinicio/planes/bloques/{idplan}', [DevoInicioController::class,'indexPlanesBloques']);
+Route::get('/admin/devoinicio/planes/bloquestabla/{idplan}', [DevoInicioController::class,'tablaPlanesBloques']);
+
+// cargara listado segun bloque fecha y se verificara si devocional esta creado
+Route::get('/admin/devoinicio/planes/bloquesdetalle/{idplanbloque}', [DevoInicioController::class,'indexPlanesBloquesDetalle']);
+Route::get('/admin/devoinicio/planes/bloquestabladetalle/{idplanbloque}', [DevoInicioController::class,'tablaPlanesBloquesDetalle']);
+Route::post('/admin/devoinicio/informacion/devocional', [DevoInicioController::class,'infoDevocionalTexto']);
+Route::post('/admin/devoinicio/seleccionar', [DevoInicioController::class,'seleccionarLecturaDia']);
 
 
 

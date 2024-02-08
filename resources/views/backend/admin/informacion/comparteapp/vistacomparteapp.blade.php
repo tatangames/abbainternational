@@ -44,7 +44,7 @@
                     <div>
                         <div class="col-md-12">
 
-                            <section style="margin-top: 35px">
+                            <section>
                                 <label class="control-label">Imagen</label>
 
                                 <div class="row">
@@ -70,34 +70,6 @@
             </div>
         </div>
     </section>
-
-
-    <section class="content-header">
-        <div class="row mb-12">
-            <div class="col-sm-12">
-                <section>
-                    <div class="row">
-
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label class="control-label">Idioma para Texto Personalizado:</label>
-                                <select class="form-control" id="select-idioma">
-                                    @foreach($arrayIdiomas as $item)
-                                        <option value="{{$item->id}}">{{$item->nombre}}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <button type="button" class="btn btn-info btn-sm" onclick="verificarIdiomaTabla()">Agregar Idioma</button>
-
-
-                </section>
-            </div>
-
-        </div>
-    </section>
-
 
 
 

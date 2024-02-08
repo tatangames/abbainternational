@@ -126,6 +126,14 @@
                     </a>
 
                     <ul class="nav nav-treeview">
+
+                        <li class="nav-item">
+                            <a href="{{ route('admin.devo.inicio.index') }}" target="frameprincipal" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Devocional Día</p>
+                            </a>
+                        </li>
+
                         <li class="nav-item">
                             <a href="{{ route('admin.imagenes.dia.index') }}" target="frameprincipal" class="nav-link">
                                 <i class="far fa-circle nav-icon"></i>

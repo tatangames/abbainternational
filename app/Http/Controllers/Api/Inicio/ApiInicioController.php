@@ -9,7 +9,7 @@ use App\Models\BloquePreguntasTextos;
 use App\Models\BloquePreguntasUsuarios;
 use App\Models\ComparteApp;
 use App\Models\ComparteAppTextos;
-use App\Models\ContenedorInicio;
+use App\Models\Departamentos;
 use App\Models\Iglesias;
 use App\Models\ImagenesDelDia;
 use App\Models\InsigniasTextos;
@@ -64,38 +64,21 @@ class ApiInicioController extends Controller
 
         $tokenApi = $request->header('Authorization');
 
-        $idiomaTextos = $this->reseteoIdiomaTextos($request->idiomaplan);
+        $idiomaTextos = $request->idiomaplan;
 
         if ($userToken = JWTAuth::user($tokenApi)) {
 
             // horario actual del cliente segun zona horaria
-            $zonaHorariaUsuario = $this->retornoZonaHorariaUsuario($userToken->id_iglesia);
+            $zonaHorariaUsuario = $this->retornoZonaHorariaDepaCarbonNow($userToken->id_iglesia);
 
             // Array Final
 
-            // Si se mostrara o no el array final
-            $mostrarFinalDevocional = 0;
-            $mostrarFinalVideo = 0;
-            $mostrarFinalImagenes = 0;
-            $mostrarFinalComparteApp = 0;
-            $mostrarFinalInsignias = 0;
 
 
-            // Conocer las posiciones que tendra cada bloque
-            $infoContenedorInicio = ContenedorInicio::all();
-            foreach ($infoContenedorInicio as $dato){
-                if($dato->id == 1){ // Devocional
-                    $mostrarFinalDevocional = $dato->visible;
-                }else if($dato->id == 2){ // Videos
-                    $mostrarFinalVideo = $dato->visible;
-                }else if($dato->id == 3){ // Imagenes
-                    $mostrarFinalImagenes = $dato->visible;
-                }else if($dato->id == 4){ // Comparte app
-                    $mostrarFinalComparteApp = $dato->visible;
-                }else if($dato->id == 5){ // Insignias
-                    $mostrarFinalInsignias = $dato->visible;
-                }
-            }
+            // TODOS LOS BLOQUES DEBERIAN MOSTRARSE
+
+
+
 
 
             // ************** BLOQUE DEVOCIONAL ******************
@@ -104,7 +87,7 @@ class ApiInicioController extends Controller
             $devo_cuestionario = "";
             $devo_idBlockDeta = 0; // Para redireccionar a sus preguntas
 
-            if($mostrarFinalDevocional == 1){
+
                 // si hay devocional para hoy segun zona horaria del usuario
                 if($arrayL = DB::table('lectura_dia AS le')
                     ->join('planes_block_detalle AS pblock', 'le.id_planes_block_detalle', '=', 'pblock.id')
@@ -117,7 +100,7 @@ class ApiInicioController extends Controller
                     $devo_idBlockDeta = $arrayL->idblockdeta;
                     $devo_cuestionario = $this->retornoTituloCuestionarioIdioma($arrayL->idblockdeta, $idiomaTextos);
                 }
-            }
+
 
 
 
@@ -142,6 +125,8 @@ class ApiInicioController extends Controller
             if($arrayFinalVideo != null && $arrayFinalVideo->isNotEmpty()){
                 $video_hayvideoshoy = 1;
             }
+
+
 
 
             // ************** BLOQUE IMAGENES DEL DIA ******************
@@ -260,12 +245,6 @@ class ApiInicioController extends Controller
 
             return ['success' => 1,
 
-                'mostrarbloquedevocional' => $mostrarFinalDevocional,
-                'mostrarbloquevideo' => $mostrarFinalVideo,
-                'mostrarbloqueimagenes' => $mostrarFinalImagenes,
-                'mostrarbloquecomparte' => $mostrarFinalComparteApp,
-                'mostrarbloqueinsignias' => $mostrarFinalInsignias,
-
                 'videomayor5' => $video_mayor5,
                 'imagenesmayor5' => $imagenes_mayor5,
                 'insigniasmayor5' => $insignias_mayor5,
@@ -291,9 +270,6 @@ class ApiInicioController extends Controller
                 'arrayfinalinsignias' => $arrayFinalInsignias,
 
                 ];
-
-
-
         }
         else{
             return ['success' => 99];
@@ -304,7 +280,7 @@ class ApiInicioController extends Controller
 
     private function retornoInformacionRacha($userToken){
 
-        $fechaFormatHorariaCarbon = $this->retornoZonaHorariaUsuario($userToken->id_iglesia);
+        $fechaFormatHorariaCarbon = $this->retornoZonaHorariaDepaCarbonNow($userToken->id_iglesia);
         $anioActual = $fechaFormatHorariaCarbon->year;
 
         $diasAppEsteAnio = RachaUsuario::where('id_usuarios', $userToken->id)
@@ -1027,7 +1003,8 @@ class ApiInicioController extends Controller
     // RETORNO HORARIO ACTUAL DEL USUARIO SEGUN ZONA HORARIA -> DEVUELVE SOLO FECHA
     private function retornoZonaHorariaUsuarioFormatFecha($idIglesia){
         $infoIglesia = Iglesias::where('id', $idIglesia)->first();
-        $infoZonaHoraria = ZonaHoraria::where('id', $infoIglesia->id_zona_horaria)->first();
+        $infoDepartamento = Departamentos::where('id', $infoIglesia->id_departamento)->first();
+        $infoZonaHoraria = ZonaHoraria::where('id', $infoDepartamento->id_zona_horaria)->first();
         $zonaHoraria = $infoZonaHoraria->zona;
 
         // horario actual del cliente segun zona horaria
@@ -1035,14 +1012,14 @@ class ApiInicioController extends Controller
         return Carbon::now($zonaHoraria)->format('Y-m-d');
     }
 
-    // RETORNO HORARIO ACTUAL DEL USUARIO SEGUN ZONA HORARIA
-    private function retornoZonaHorariaUsuario($idIglesia){
+
+    // RETORNO DE ZONA HORARIA SEGUN DEPARTAMENTO
+    private function retornoZonaHorariaDepaCarbonNow($idIglesia)
+    {
         $infoIglesia = Iglesias::where('id', $idIglesia)->first();
-        $infoZonaHoraria = ZonaHoraria::where('id', $infoIglesia->id_zona_horaria)->first();
-        $zonaHoraria = $infoZonaHoraria->zona;
-
-        // horario actual del cliente segun zona horaria
-
-        return Carbon::now($zonaHoraria);
+        $infoDepartamento = Departamentos::where('id', $infoIglesia->id_departamento)->first();
+        $infoZonaHoraria = ZonaHoraria::where('id', $infoDepartamento->id_zona_horaria)->first();
+        return Carbon::now($infoZonaHoraria->zona);
     }
+
 }
