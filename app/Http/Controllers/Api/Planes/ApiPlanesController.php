@@ -1099,11 +1099,15 @@ class ApiPlanesController extends Controller
                 ->select('id_planes')
                 ->get();
 
+
+
+
             foreach ($arrayPlanUsuario as $dato){
 
-                $arrayPlanBloque = PlanesBloques::where('id_planes', $dato->id_planes)
-                    ->where('visible', 1)
-                    ->get();
+                // NO SE FILTRARA POR VISIBLES
+                $arrayPlanBloque = PlanesBloques::where('id_planes', $dato->id_planes)->get();
+
+
 
                 $planCompletado = 1;
 
@@ -1150,8 +1154,11 @@ class ApiPlanesController extends Controller
             }
 
 
+
+
             $page = $request->input('page', 1);
             $limit = $request->input('limit', 10);
+
 
             $arrayPlanesUser = PlanesUsuarios::where('id_usuario', $userToken->id)
                 ->whereIn('id_planes', $pilaIdPlanComplet)
@@ -1182,7 +1189,7 @@ class ApiPlanesController extends Controller
 
             return ['success' => 1,
                 'hayinfo' => $hayinfo,
-                'listaplanes' => $arrayPlanesUser,
+                'listado' => $arrayPlanesUser,
             ];
 
         }else{
