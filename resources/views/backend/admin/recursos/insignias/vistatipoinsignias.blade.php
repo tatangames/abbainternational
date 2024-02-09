@@ -88,6 +88,12 @@
             window.location.href="{{ url('/admin/tipoinsignias/vistaeditar') }}/" + idtipoinsignia;
         }
 
+        function infoVerNiveles(idtipoinsignia){
+            window.location.href="{{ url('/admin/tipoinsignias/vista/niveles') }}/" + idtipoinsignia;
+        }
+
+
+
 
     </script>
 

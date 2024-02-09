@@ -257,6 +257,10 @@ Route::get('/admin/tipoinsignias/vistaeditar/{idtipoinsignia}', [InsigniasContro
 Route::post('/admin/tipoinsignias/actualizar/imagen', [InsigniasController::class,'actualizarImagen']);
 Route::post('/admin/tipoinsignias/actualizar/datos', [InsigniasController::class,'actualizarTiposInsiginias']);
 
+Route::get('/admin/tipoinsignias/vista/niveles/{idtipoinsignia}', [InsigniasController::class,'indexVistaInsigniaNiveles']);
+Route::get('/admin/tipoinsignias/vista/tablaniveles/{idtipoinsignia}', [InsigniasController::class,'tablaVistaInsigniaNiveles']);
+Route::post('/admin/tipoinsignias/niveles/registrar', [InsigniasController::class,'registrarNuevoNivel']);
+
 
 
 

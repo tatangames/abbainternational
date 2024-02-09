@@ -237,14 +237,57 @@ class InsigniasController extends Controller
     }
 
 
-    private function retornoTituloInsigniasAppIdioma($idInsignia){
-
-        $infoTexto = InsigniasTextos::where('id_idioma_planes', 1)
-            ->where('id_tipo_insignia', $idInsignia)
-            ->first();
-
-        return ['titulo' => $infoTexto->texto_1,
-            'descripcion' => $infoTexto->texto_2];
+    public function indexVistaInsigniaNiveles($idtipoinsignia){
+        return view('backend.admin.recursos.insignias.niveles.vistanivelesinsignias', compact('idtipoinsignia'));
     }
+
+    public function tablaVistaInsigniaNiveles($idtipoinsignia){
+
+        $listado = NivelesInsignias::where('id_tipo_insignia', $idtipoinsignia)
+            ->orderBy('nivel', 'ASC')
+            ->get();
+
+        return view('backend.admin.recursos.insignias.niveles.tablanivelesinsignias', compact('listado'));
+    }
+
+
+    public function registrarNuevoNivel(Request $request){
+
+        $regla = array(
+            'nivel' => 'required',
+            'idtipoinsignia' => 'required'
+        );
+
+        $validar = Validator::make($request->all(), $regla);
+
+        if ($validar->fails()){ return ['success' => 0];}
+
+        if(NivelesInsignias::where('id_tipo_insignia', $request->idtipoinsignia)
+            ->where('nivel', $request->nivel)->first()){
+            // solo decir que fue registrado
+            return ['succcess' => 2];
+        }else{
+
+
+            // verificar que no sea igual o menor a algun niveles repetidos.
+
+            $numeroMayor = NivelesInsignias::where('id_tipo_insignia', $request->idtipoinsignia)
+                ->max('nivel');
+
+            // no se puede registrar un numero igual o menor a los niveles ya registrados
+            if($request->nivel <= $numeroMayor){
+                return ['success' => 1];
+            }
+
+
+            $nuevo = new NivelesInsignias();
+            $nuevo->id_tipo_insignia = $request->idtipoinsignia;
+            $nuevo->nivel = $request->nivel;
+            $nuevo->save();
+
+            return ['succcess' => 1];
+        }
+    }
+
 
 }
