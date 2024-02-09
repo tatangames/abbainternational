@@ -50,6 +50,31 @@ class DevoInicioController extends Controller
         return view('backend.admin.recursos.devocionalinicio.tabladevoinicio', compact('listado'));
     }
 
+    public function borrarDevoInicio(Request $request){
+
+        $rules = array(
+            'id' => 'required',
+        );
+
+        $validator = Validator::make($request->all(), $rules);
+
+        if ($validator->fails()) {
+            return ['success' => 0];
+        }
+
+        if(LecturaDia::where('id', $request->id)->first()){
+
+            LecturaDia::where('id', $request->id)->delete();
+
+            // borrada
+            return ['success' => 1];
+        }else{
+            // decir que fue borrada
+            return ['success' => 1];
+        }
+    }
+
+
 
     public function indexDevoInicioPlanes(){
         return view('backend.admin.recursos.devocionalinicio.listaplanes.vistadevoplanesinicio');

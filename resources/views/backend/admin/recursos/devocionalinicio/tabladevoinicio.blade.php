@@ -22,6 +22,10 @@
                                         <button type="button" class="btn btn-info btn-xs" onclick="infoVerDevocional({{ $dato->id_planes_block_detalle }})">
                                             <i class="fas fa-eye" title="Devocional"></i>&nbsp; Devocional
                                         </button>
+
+                                        <button type="button" class="btn btn-danger btn-xs" onclick="modalBorrar({{ $dato->id }})">
+                                            <i class="fas fa-trash" title="Borrar"></i>&nbsp; Borrar
+                                        </button>
                                     </td>
                                 </tr>
                             @endforeach

@@ -490,7 +490,6 @@ class ApiPlanesController extends Controller
                     $hayPreguntas = 0;
                     $arrayPreguntas = BloquePreguntas::where('id_plan_block_detalle', $datoArr->id)
                         ->where('visible', 1)
-                        ->orderBy('posicion', 'ASC')
                         ->count();
 
                     if ($arrayPreguntas > 0) {

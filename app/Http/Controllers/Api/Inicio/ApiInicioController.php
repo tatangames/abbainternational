@@ -85,7 +85,7 @@ class ApiInicioController extends Controller
 
             $devo_haydevocional = 0; // Seguro para saber si hay devocional hoy
             $devo_idBlockDeta = 0; // Para redireccionar a sus preguntas
-
+            $devo_preguntas = 1; // defecto para cuestionario nomas
             $devo_lecturaDia = "";
 
                 // si hay devocional para hoy segun zona horaria del usuario
@@ -102,6 +102,16 @@ class ApiInicioController extends Controller
                     $devoDatos = $this->retornoTituloCuestionarioIdioma($arrayL->idblockdeta, $idiomaTextos);
 
                     $devo_lecturaDia = $devoDatos['textodia'];
+
+                    // saver si tiene preguntas, y ver que esten activas al menos 1
+                    $arrayBloqueP = BloquePreguntas::where('id_plan_block_detalle', $arrayL->idblockdeta)->get();
+
+                    foreach ($arrayBloqueP as $bl){
+                        if($bl->visible == 1){
+                            $devo_preguntas = 2; // si mostrar fragment preguntas
+                            break;
+                        }
+                    }
                 }
 
 
@@ -263,6 +273,8 @@ class ApiInicioController extends Controller
                 'comparteappdescrip' => $comparte_descripcion,
 
                 'insigniashay' => $insignia_hayInsignias,
+
+                'devopreguntas' => $devo_preguntas,
 
 
                 'arrayracha' => [$infoTotalRachas], // se mete en llaves
@@ -453,49 +465,6 @@ class ApiInicioController extends Controller
 
 
 
-    public function infoPlanSoloVista(Request $request)
-    {
-        $rules = array(
-            'idiomaplan' => 'required',
-            'idblockdeta' => 'required'
-        );
-
-        $validator = Validator::make($request->all(), $rules);
-        if ( $validator->fails()){
-            return ['success' => 0, 'msj' => "validación incorrecta"];
-        }
-
-        if($infoBlockDeta = PlanesBlockDetalle::where('id', $request->idblockdeta)->first()){
-
-            $infoPlanBloque = PlanesBloques::where('id', $infoBlockDeta->id_planes_bloques)->first();
-            $infoPlan = Planes::where('id', $infoPlanBloque->id_planes)->first();
-
-
-            $idiomaTextos = $this->reseteoIdiomaTextos($request->idiomaplan);
-
-            $titulo = "";
-            $subtitulo = null;
-            $descripcion = null;
-
-            if($infoPlanTextos = PlanesTextos::where('id_planes', $infoPlan->id)
-                ->where('id_idioma_planes', $idiomaTextos)
-                ->first()){
-                $titulo = $infoPlanTextos->titulo;
-                $subtitulo = $infoPlanTextos->subtitulo;
-                $descripcion = $infoPlanTextos->descripcion;
-            }
-
-            return ['success' => 1,
-                'imagen' => $infoPlan->imagenportada,
-                'titulo' => $titulo,
-                'subtitulo' => $subtitulo,
-                'descripcion' => $descripcion
-            ];
-        }else{
-            return ['success' => 99];
-        }
-    }
-
 
 
 
@@ -520,9 +489,7 @@ class ApiInicioController extends Controller
 
         if ($userToken = JWTAuth::user($tokenApi)) {
 
-            $infoIglesia = Iglesias::where('id', $userToken->id_iglesia)->first();
-            $infoZonaHoraria = ZonaHoraria::where('id', $infoIglesia->id_zona_horaria)->first();
-            $zonaHoraria = $infoZonaHoraria->zona;
+            $zonaHoraria = $this->retornoZonaHorariaDepaCarbonNow($userToken->id_iglesia);
 
             DB::beginTransaction();
 
@@ -542,10 +509,9 @@ class ApiInicioController extends Controller
                         $nuevo = new PlanesUsuarios();
                         $nuevo->id_usuario = $userToken->id;
                         $nuevo->id_planes = $infoPlan->id;
-                        $nuevo->fecha = Carbon::now($zonaHoraria);
+                        $nuevo->fecha = $zonaHoraria;
                         $nuevo->save();
                     }
-
 
                     if ($request->has('idpregunta')) {
 
@@ -558,7 +524,7 @@ class ApiInicioController extends Controller
                                 BloquePreguntasUsuarios::where('id', $clave)
                                     ->update([
                                         'texto' => $valor['txtpregunta'],
-                                        'fecha_actualizo' => Carbon::now($zonaHoraria)
+                                        'fecha_actualizo' => $zonaHoraria
                                     ]);
 
                             }else{
@@ -566,7 +532,7 @@ class ApiInicioController extends Controller
                                 $pregunta->id_bloque_preguntas = $clave;
                                 $pregunta->id_usuarios = $userToken->id;
                                 $pregunta->texto = $valor['txtpregunta'];
-                                $pregunta->fecha = Carbon::now($zonaHoraria);
+                                $pregunta->fecha = $zonaHoraria;
                                 $pregunta->fecha_actualizo = null;
                                 $pregunta->save();
                             }

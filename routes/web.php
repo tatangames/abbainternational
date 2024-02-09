@@ -228,6 +228,8 @@ Route::post('/admin/videoshoy/actualizar', [RecursosController::class,'actualiza
 // --- DEVOCIONALES INICIO ---
 Route::get('/admin/devoinicio/vista', [DevoInicioController::class,'indexDevoInicio'])->name('admin.devo.inicio.index');
 Route::get('/admin/devoinicio/tabla', [DevoInicioController::class,'tablaDevoInicio']);
+Route::post('/admin/devoinicio/borrar', [DevoInicioController::class,'borrarDevoInicio']);
+
 
 // cargara todos los planes visibles para elegir
 Route::get('/admin/devoinicio/planes/vista', [DevoInicioController::class,'indexDevoInicioPlanes']);

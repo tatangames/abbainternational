@@ -105,28 +105,27 @@ Route::middleware('verificarToken')->group(function () {
     Route::post('app/inicio/todos/losvideos', [ApiInicioController::class,'listadoTodosLosVideos']);
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-    // informacion de un plan, solo para vista, usando idblockdeta para buscar id plan
-    Route::post('app/plan/informacion/solovista', [ApiInicioController::class,'infoPlanSoloVista']);
+    // obtener listado de todos las imagenes
+    Route::post('app/inicio/todos/lasimagenes', [ApiInicioController::class,'listadoTodosLasImagenes']);
 
     // guardar preguntas del cuestionario, registrar usuario al plan, set check a true,
     Route::post('app/plan/inicio/preguntas/guardar/actualizar', [ApiInicioController::class,'preguntasInicioGuardarActualizar']);
 
 
 
-    // obtener listado de todos las imagenes
-    Route::post('app/inicio/todos/lasimagenes', [ApiInicioController::class,'listadoTodosLasImagenes']);
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     // obtener listado de todas las insignias
     Route::post('app/inicio/todos/lasinsignias', [ApiInicioController::class,'listadoTodosLasInsignias']);

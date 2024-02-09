@@ -81,7 +81,7 @@
                                 <div class="form-group">
                                     <div>
                                         <label>Imagen</label>
-                                        <p>Tamaño no superar: 1000 x 1000 px</p>
+                                        <p>Recomendación no superar: 800 x 800 px</p>
                                     </div>
                                     <br>
                                     <div class="col-md-10">
@@ -102,50 +102,6 @@
     </div>
 </div>
 
-
-<!-- modal editar-->
-<div class="modal fade" id="modalEditar" >
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">Editar Imagen</h4>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form id="formulario-editar">
-                    <div class="card-body">
-                        <div class="col-md-12">
-
-                            <div class="form-group">
-                                <label>Descripción</label>
-                                <input type="hidden" id="id-editar">
-                                <input type="text" maxlength="100" autocomplete="off" class="form-control" id="descripcion-editar">
-                            </div>
-
-                            <div class="form-group">
-                                <div>
-                                    <label>Imagen</label>
-                                    <p>Tamaño no superar: 1000 x 1000 px</p>
-                                </div>
-                                <br>
-                                <div class="col-md-10">
-                                    <input type="file" style="color:#191818" id="imagen-editar" accept="image/jpeg, image/jpg, image/png"/>
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer justify-content-between">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
-                <button type="button" class="btn btn-success" onclick="editar()">Guardar</button>
-            </div>
-        </div>
-    </div>
-</div>
 
 @extends('backend.menus.footerjs')
 @section('archivos-js')

@@ -166,6 +166,48 @@
                 });
         }
 
+        function modalBorrar(id){
+            // VIENE ID DE TABLA: lectura_dia
+
+            Swal.fire({
+                title: 'Borrar?',
+                text: "",
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonColor: '#28a745',
+                cancelButtonColor: '#d33',
+                cancelButtonText: 'Cancelar',
+                confirmButtonText: 'Si'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    solicitarBorrar(id);
+                }
+            })
+        }
+
+        function solicitarBorrar(id){
+
+            openLoading();
+
+            axios.post('/admin/devoinicio/borrar',{
+                'id': id
+            })
+                .then((response) => {
+                    closeLoading();
+                    if(response.data.success === 1){
+
+                        toastr.success('Eliminado');
+                        recargar();
+                    }else{
+                        toastr.error('Error al borrar');
+                    }
+                })
+                .catch((error) => {
+                    toastr.error('Error al borrar');
+                    closeLoading();
+                });
+        }
+
 
     </script>
 
