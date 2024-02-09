@@ -18,8 +18,12 @@ return new class extends Migration
             $table->bigInteger('id_bloque_detalle')->unsigned();
             $table->bigInteger('id_idioma_planes')->unsigned();
 
-
+            // TEXTO DEL DEVOCIONAL, QUE SE CARGA EN UN WEBVIEW
             $table->text('texto');
+
+            // EL MISMO TEXTO PERO ESTE SE CARGA EN TEXTVIEW
+            $table->text('texto_dia');
+
 
             $table->foreign('id_bloque_detalle')->references('id')->on('planes_block_detalle');
             $table->foreign('id_idioma_planes')->references('id')->on('idioma_planes');

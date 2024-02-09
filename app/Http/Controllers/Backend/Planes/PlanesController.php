@@ -909,10 +909,6 @@ class PlanesController extends Controller
 
                 }else{
 
-
-
-
-
                     $contenidoHtmlConJavascript = "<html>
                     <head>
                     <meta charset='UTF-8'>
@@ -949,15 +945,13 @@ class PlanesController extends Controller
 
 
 
-
-
-
-
-
                     $detalle = new BloqueCuestionarioTextos();
                     $detalle->id_bloque_detalle = $request->idblockdetalle;
                     $detalle->id_idioma_planes = $request->ididioma;
                     $detalle->texto = $contenidoHtmlConJavascript;
+                    $detalle->texto_dia = $request->devocional;
+
+
                     $detalle->save();
                 }
 
@@ -1026,9 +1020,15 @@ class PlanesController extends Controller
 
 
 
+            $contenidoHtml = "<html>
+                <body>" . $request->devocional . "</body>
+                    </html>";
+
+
             // actualizar
             BloqueCuestionarioTextos::where('id', $info->id)->update([
                 'texto' => $contenidoHtmlConJavascript,
+                'texto_dia' => $contenidoHtml
             ]);
         }
 

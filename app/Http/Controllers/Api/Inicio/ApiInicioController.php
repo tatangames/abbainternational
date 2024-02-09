@@ -84,9 +84,9 @@ class ApiInicioController extends Controller
             // ************** BLOQUE DEVOCIONAL ******************
 
             $devo_haydevocional = 0; // Seguro para saber si hay devocional hoy
-            $devo_cuestionario = "";
             $devo_idBlockDeta = 0; // Para redireccionar a sus preguntas
 
+            $devo_lecturaDia = "";
 
                 // si hay devocional para hoy segun zona horaria del usuario
                 if($arrayL = DB::table('lectura_dia AS le')
@@ -98,9 +98,11 @@ class ApiInicioController extends Controller
 
                     $devo_haydevocional = 1;
                     $devo_idBlockDeta = $arrayL->idblockdeta;
-                    $devo_cuestionario = $this->retornoTituloCuestionarioIdioma($arrayL->idblockdeta, $idiomaTextos);
-                }
 
+                    $devoDatos = $this->retornoTituloCuestionarioIdioma($arrayL->idblockdeta, $idiomaTextos);
+
+                    $devo_lecturaDia = $devoDatos['textodia'];
+                }
 
 
 
@@ -250,7 +252,6 @@ class ApiInicioController extends Controller
                 'insigniasmayor5' => $insignias_mayor5,
 
                 'devohaydevocional' => $devo_haydevocional,
-                'devocuestionario' => $devo_cuestionario,
                 'devoidblockdeta' => $devo_idBlockDeta,
 
                 'videohayvideos' => $video_hayvideoshoy,
@@ -268,6 +269,8 @@ class ApiInicioController extends Controller
                 'arrayfinalvideo' => $arrayFinalVideo,
                 'arrayfinalimagenes' => $arrayFinalImagenes,
                 'arrayfinalinsignias' => $arrayFinalInsignias,
+
+                'devocuestionario' => $devo_lecturaDia
 
                 ];
         }
@@ -613,7 +616,7 @@ class ApiInicioController extends Controller
 
         if ($userToken = JWTAuth::user($tokenApi)) {
 
-            $idiomaTextos = $this->reseteoIdiomaTextos($request->idiomaplan);
+            $idiomaTextos = $request->idiomaplan;
 
             $arrayVideos = VideosHoy::orderBy('posicion', 'ASC')->get();
 
@@ -917,9 +920,7 @@ class ApiInicioController extends Controller
         }else{
             // si no encuentra sera por defecto español
 
-            $infoTexto = VideosTextos::where('id_idioma_planes', 1)
-                ->first();
-
+            $infoTexto = VideosTextos::where('id_idioma_planes', 1)->first();
             return $infoTexto->titulo;
         }
     }
@@ -975,7 +976,7 @@ class ApiInicioController extends Controller
             ->where('id_idioma_planes', $idiomaTexto)
             ->first()){
 
-            return $infoTituloTexto->texto;
+            return ['texto' => $infoTituloTexto->texto, 'textodia' => $infoTituloTexto->texto_dia];
 
         }else{
             // si no encuentra sera por defecto español
@@ -984,7 +985,7 @@ class ApiInicioController extends Controller
                 ->where('id_idioma_planes', 1)
                 ->first();
 
-            return $infoTituloTexto->texto;
+            return ['texto' => $infoTituloTexto->texto, 'textodia' => $infoTituloTexto->texto_dia];
         }
     }
 
