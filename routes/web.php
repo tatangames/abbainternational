@@ -14,7 +14,7 @@ use App\Http\Controllers\Backend\Recursos\RecursosController;
 use App\Http\Controllers\Backend\Planes\PlanesController;
 use App\Http\Controllers\Backend\Planes\PreguntasController;
 use App\Http\Controllers\Backend\Recursos\DevoInicioController;
-
+use App\Http\Controllers\Backend\Recursos\InsigniasController;
 
 Route::get('/', [LoginController::class,'index'])->name('login');
 
@@ -244,6 +244,25 @@ Route::get('/admin/devoinicio/planes/bloquesdetalle/{idplanbloque}', [DevoInicio
 Route::get('/admin/devoinicio/planes/bloquestabladetalle/{idplanbloque}', [DevoInicioController::class,'tablaPlanesBloquesDetalle']);
 Route::post('/admin/devoinicio/informacion/devocional', [DevoInicioController::class,'infoDevocionalTexto']);
 Route::post('/admin/devoinicio/seleccionar', [DevoInicioController::class,'seleccionarLecturaDia']);
+
+
+// --- INSIGNIAS ---
+Route::get('/admin/tipoinsignias/vista', [InsigniasController::class,'indexTipoInsignias'])->name('admin.tipoinsignias.index');
+Route::get('/admin/tipoinsignias/tabla', [InsigniasController::class,'tablaTipoInsignias']);
+Route::get('/admin/tipoinsignias/vistanuevo', [InsigniasController::class,'indexVistaNuevoTipoInsignias']);
+Route::post('/admin/tipoinsignias/registrar', [InsigniasController::class,'registrarTipoInsignia']);
+
+Route::get('/admin/tipoinsignias/vistaeditar/{idtipoinsignia}', [InsigniasController::class,'indexVistaEditarTipoInsignia']);
+
+Route::post('/admin/tipoinsignias/actualizar/imagen', [InsigniasController::class,'actualizarImagen']);
+Route::post('/admin/tipoinsignias/actualizar/datos', [InsigniasController::class,'actualizarTiposInsiginias']);
+
+
+
+
+
+
+
 
 
 

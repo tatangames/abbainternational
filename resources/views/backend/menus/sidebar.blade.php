@@ -114,6 +114,29 @@
                 </li>
 
 
+                <li class="nav-item">
+
+                    <a href="#" class="nav-link nav-">
+                        <i class="far fa-edit"></i>
+                        <p>
+                            Insignias
+                            <i class="fas fa-angle-left right"></i>
+                        </p>
+                    </a>
+
+                    <ul class="nav nav-treeview">
+
+                        <li class="nav-item">
+                            <a href="{{ route('admin.tipoinsignias.index') }}" target="frameprincipal" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Lista Insignias</p>
+                            </a>
+                        </li>
+
+                    </ul>
+                </li>
+
+
 
                 <li class="nav-item">
 
