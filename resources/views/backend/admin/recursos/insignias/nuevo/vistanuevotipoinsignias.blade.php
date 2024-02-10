@@ -398,8 +398,12 @@
 
 
         function limpiarTodo(){
-            document.getElementById("matriz").innerHTML = ""
             document.getElementById("imagen-nuevo").value = "";
+
+            var tbody = document.querySelector("#matriz tbody");
+
+            // Limpiar el contenido del cuerpo de la tabla
+            tbody.innerHTML = "";
         }
 
         function borrarFila(elemento){

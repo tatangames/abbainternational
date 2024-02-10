@@ -170,7 +170,13 @@
                 .then((response) => {
                     closeLoading();
 
+                    console.log(response)
+
                     if(response.data.success === 1){
+                        toastr.error('El nivel ya esta registrado');
+                    }
+
+                    else if(response.data.success === 2){
 
                         Swal.fire({
                             title: "No Guardado",
@@ -186,8 +192,7 @@
                             }
                         })
                     }
-
-                    else if(response.data.success === 2){
+                    else if(response.data.success === 3){
                         toastr.success('Registrado correctamente');
                         $('#modalAgregar').modal('hide');
                         recargar();

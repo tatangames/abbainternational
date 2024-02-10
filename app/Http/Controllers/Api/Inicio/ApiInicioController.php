@@ -38,6 +38,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
@@ -75,9 +76,14 @@ class ApiInicioController extends Controller
 
 
 
+
             // TODOS LOS BLOQUES DEBERIAN MOSTRARSE
 
 
+            DB::beginTransaction();
+
+
+            try {
 
 
 
@@ -177,6 +183,7 @@ class ApiInicioController extends Controller
             $insignia_arrayInsignias = InsigniasUsuarios::where('id_usuario', $userToken->id)
                 ->take(5)
                 ->get();
+
             $insignia_hayInsignias = 0;
             $insignias_mayor5 = 0;
 
@@ -187,20 +194,29 @@ class ApiInicioController extends Controller
 
             foreach ($insignia_arrayInsignias as $dato){
 
+
+
                 $infoTitulos = $this->retornoTituloInsigniasAppIdioma($dato->id_tipo_insignia, $idiomaTextos);
                 $dato->titulo = $infoTitulos['titulo'];
                 $dato->descripcion = $infoTitulos['descripcion'];
 
 
                 // Conocer que nivel voy (ejemplo devuelve 5)
-                $hito_infoNivelVoy = DB::table('insignias_usuarios_detalle AS indeta')
+                $datoHitoNivel = DB::table('insignias_usuarios_detalle AS indeta')
                     ->join('niveles_insignias AS nil', 'indeta.id_niveles_insignias', '=', 'nil.id')
                     ->join('tipo_insignias AS tipo', 'nil.id_tipo_insignia', '=', 'tipo.id')
                     ->select('nil.nivel', 'nil.id AS idnivelinsignia')
                     ->where('nil.id_tipo_insignia', $dato->id_tipo_insignia)
                     ->max('nil.nivel');
 
-                $dato->nivelvoy = $hito_infoNivelVoy;
+                $hito_infoNivelVoy = 1;
+
+                if($datoHitoNivel != null){
+                    $dato->nivelvoy = $datoHitoNivel;
+                    $hito_infoNivelVoy = $datoHitoNivel;
+                }else{
+                    $dato->nivelvoy = 1;
+                }
 
 
                 // ------ INFORMACION DEL HITO DE CADA INSIGNIA ------
@@ -223,8 +239,6 @@ class ApiInicioController extends Controller
                     array_push($pilaIdYaGanados, $item->id);
                 }
 
-
-
                 // buscar el siguiente nivel que falta y cuanto me falta
                 if($infoNivelSiguiente = NivelesInsignias::where('id_tipo_insignia', $dato->id_tipo_insignia)
                     ->whereNotIn('id', $pilaIdYaGanados)
@@ -240,9 +254,13 @@ class ApiInicioController extends Controller
 
                 $dato->hitohaynextlevel = $hito_haySiguienteNivel;
                 $dato->hitocuantofalta = $hito_cuantoFaltan;
+
+
             }
 
-            $arrayFinalInsignias = $insignia_arrayInsignias->sortBy('titulo');
+
+            $arrayFinalInsignias = $insignia_arrayInsignias->sortBy('titulo')->values();
+
 
             $conteoInsignias = InsigniasUsuarios::where('id_usuario', $userToken->id)->count();
 
@@ -285,6 +303,16 @@ class ApiInicioController extends Controller
                 'devocuestionario' => $devo_lecturaDia
 
                 ];
+
+
+            }catch(\Throwable $e){
+                Log::info("error" . $e);
+                DB::rollback();
+                return ['success' => 99];
+            }
+
+
+
         }
         else{
             return ['success' => 99];
@@ -663,14 +691,23 @@ class ApiInicioController extends Controller
 
 
                 // Conocer que nivel voy (ejemplo devuelve 5)
-                $hito_infoNivelVoy = DB::table('insignias_usuarios_detalle AS indeta')
+                $datoHitoNivel = DB::table('insignias_usuarios_detalle AS indeta')
                     ->join('niveles_insignias AS nil', 'indeta.id_niveles_insignias', '=', 'nil.id')
                     ->join('tipo_insignias AS tipo', 'nil.id_tipo_insignia', '=', 'tipo.id')
                     ->select('nil.nivel', 'nil.id AS idnivelinsignia')
                     ->where('nil.id_tipo_insignia', $dato->id_tipo_insignia)
                     ->max('nil.nivel');
 
-                $dato->nivelvoy = $hito_infoNivelVoy;
+                $hito_infoNivelVoy = 0;
+
+                if($datoHitoNivel != null){
+                    $dato->nivelvoy = $datoHitoNivel;
+                    $hito_infoNivelVoy = $datoHitoNivel;
+                }else{
+                    $dato->nivelvoy = 1;
+                }
+
+
 
 
                 // ------ INFORMACION DEL HITO DE CADA INSIGNIA ------
@@ -710,7 +747,7 @@ class ApiInicioController extends Controller
                 $dato->hitocuantofalta = $hito_cuantoFaltan;
             }
 
-            $arrayFinalInsignias = $insignia_arrayInsignias->sortBy('titulo');
+            $arrayFinalInsignias = $insignia_arrayInsignias->sortBy('titulo')->values();
 
             return ['success' => 1,
                 'arrayfinalinsignias' => $arrayFinalInsignias];
@@ -753,15 +790,19 @@ class ApiInicioController extends Controller
 
 
             // Conocer que nivel voy (ejemplo devuelve 5)
-            $hito_infoNivelVoy = DB::table('insignias_usuarios_detalle AS indeta')
+            $datoHitoNivel = DB::table('insignias_usuarios_detalle AS indeta')
                 ->join('niveles_insignias AS nil', 'indeta.id_niveles_insignias', '=', 'nil.id')
                 ->join('tipo_insignias AS tipo', 'nil.id_tipo_insignia', '=', 'tipo.id')
                 ->select('nil.nivel', 'nil.id AS idnivelinsignia')
                 ->where('nil.id_tipo_insignia', $infoInsignia->id)
                 ->max('nil.nivel');
 
-            // nivel que voy de insginia
-            $nivelvoy = $hito_infoNivelVoy;
+            $hito_infoNivelVoy = 1;
+
+            if($datoHitoNivel != null){
+                $hito_infoNivelVoy = $datoHitoNivel;
+            }
+
 
 
             // ------ INFORMACION DEL HITO DE CADA INSIGNIA ------
@@ -810,7 +851,7 @@ class ApiInicioController extends Controller
                 'titulo' => $tituloInsignia,
                 'descripcion' => $descripcionInsignia,
                 'imagen' => $infoInsignia->imagen,
-                'nivelvoy' => $nivelvoy,
+                'nivelvoy' => $hito_infoNivelVoy,
                 'hitocuantofalta' => $hito_cuantoFaltan,
                 'hitohaynextlevel' => $hito_haySiguienteNivel,
                 'cualnextlevel' => $cualNextLevel,

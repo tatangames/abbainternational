@@ -161,7 +161,7 @@ class ApiComunidadController extends Controller
             }
 
             // ordenar array por correo
-            $arrayAceptadosSort = $arrayAceptados->sortBy('correo');
+            $arrayAceptadosSort = $arrayAceptados->sortBy('correo')->values();
 
 
             return ['success' => 1,

@@ -265,7 +265,7 @@ class InsigniasController extends Controller
         if(NivelesInsignias::where('id_tipo_insignia', $request->idtipoinsignia)
             ->where('nivel', $request->nivel)->first()){
             // solo decir que fue registrado
-            return ['succcess' => 2];
+            return ['success' => 1];
         }else{
 
 
@@ -276,7 +276,7 @@ class InsigniasController extends Controller
 
             // no se puede registrar un numero igual o menor a los niveles ya registrados
             if($request->nivel <= $numeroMayor){
-                return ['success' => 1];
+                return ['success' => 2];
             }
 
 
@@ -285,7 +285,7 @@ class InsigniasController extends Controller
             $nuevo->nivel = $request->nivel;
             $nuevo->save();
 
-            return ['succcess' => 1];
+            return ['success' => 3];
         }
     }
 

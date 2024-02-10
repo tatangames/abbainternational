@@ -479,7 +479,10 @@
 
 
         function limpiarTodo(){
-            document.getElementById("matriz").innerHTML = ""
+            var tbody = document.querySelector("#matriz tbody");
+
+            // Limpiar el contenido del cuerpo de la tabla
+            tbody.innerHTML = "";
 
             document.getElementById("imagen-nuevo").value = "";
             document.getElementById("imagenportada-nuevo").value = "";

@@ -112,6 +112,8 @@ Route::middleware('verificarToken')->group(function () {
     Route::post('app/plan/inicio/preguntas/guardar/actualizar', [ApiInicioController::class,'preguntasInicioGuardarActualizar']);
 
 
+    // informacion de una insignia
+    Route::post('app/insignia/individual/informacion', [ApiInicioController::class,'informacionInsigniaIndividual']);
 
 
 
@@ -130,8 +132,6 @@ Route::middleware('verificarToken')->group(function () {
     // obtener listado de todas las insignias
     Route::post('app/inicio/todos/lasinsignias', [ApiInicioController::class,'listadoTodosLasInsignias']);
 
-    // informacion de una insignia
-    Route::post('app/insignia/individual/informacion', [ApiInicioController::class,'informacionInsigniaIndividual']);
 
 
     //*** COMUNIDAD
