@@ -43,13 +43,17 @@ class ApiComunidadController extends Controller
                 ->where('id', '!=', $userToken->id)
                 ->first()){
 
-                if(ComunidadSolicitud::where('id_usuario', $userToken->id)
+                if($infoComu = ComunidadSolicitud::where('id_usuario_envia', $userToken->id)
                     ->where('id_usuario_recibe', $infoEncontrado->id)->first()){
 
-                    // solo decir que se envio solicitud
+                    if($infoComu->estado == 0){
+                        // solicitud pendiente de aceptacion
+                        return ['success' => 1, 'msg' => "solicitud esta pendiente de aceptacion"];
+                    }else{
+                        // solitud ya esta aceptada
+                        return ['success' => 1, 'msg' => "solicitud ya esta aceptada"];
+                    }
 
-                    return ['success' => 2,
-                            'msg' => "solicitud enviada"];
                 }else{
                     // registrar y enviar notificacion en segundo plano
 
@@ -63,7 +67,7 @@ class ApiComunidadController extends Controller
                     $nuevo->save();
                 }
 
-                return ['success' => 2,
+                return ['success' => 3,
                     'msg' => "solicitud enviada"];
             }else{
                 return ['success' => 1,
@@ -80,7 +84,6 @@ class ApiComunidadController extends Controller
 
         $rules = array(
             'iduser' => 'required',
-            'idiomaplan' => 'required',
         );
 
 
@@ -95,17 +98,20 @@ class ApiComunidadController extends Controller
 
         if ($userToken = JWTAuth::user($tokenApi)) {
 
-            $idiomaTextos = $this->reseteoIdiomaTextos($request->idiomaplan);
-
             $arrayPendientes = ComunidadSolicitud::where('id_usuario_envia', $userToken->id)
                 ->where('estado', 0)
                 ->orderBy('fecha', 'DESC')
                 ->get();
 
+
+            // los datos que vera el usuario son: correo, enviada
+
             foreach ($arrayPendientes as $dato){
                 $infoUsuario = Usuarios::where('id', $dato->id)->first();
 
-                $dato->nombre = $infoUsuario->nombre;
+                $dato->correo = $infoUsuario->correo;
+                $fecha = date("d-m-Y", strtotime($dato->fecha));
+                $dato->fecha = $fecha;
             }
 
             return ['success' => 1,
@@ -122,7 +128,6 @@ class ApiComunidadController extends Controller
 
         $rules = array(
             'iduser' => 'required',
-            'idiomaplan' => 'required',
         );
 
 
@@ -137,8 +142,6 @@ class ApiComunidadController extends Controller
 
         if ($userToken = JWTAuth::user($tokenApi)) {
 
-            $idiomaTextos = $this->reseteoIdiomaTextos($request->idiomaplan);
-
             $arrayAceptados = ComunidadSolicitud::where('id_usuario_envia', $userToken->id)
                 ->where('estado', 1) // slo aceptadas
                 ->get();
@@ -149,15 +152,19 @@ class ApiComunidadController extends Controller
                 $infoDepartamento = Departamentos::where('id', $infoIglesia->id_departamento)->first();
                 $infoPais = Pais::where('id', $infoDepartamento->id_pais)->first();
 
-                $nombreFull = $infoUsuario->nombre;
-                if($infoUsuario->apellido != null){
-                    $nombreFull = $nombreFull . " " . $infoUsuario->apellido;
-                }
+                // siempre es requerido apellido
+                $nombreFull = $infoUsuario->nombre . " " . $infoUsuario->apellido;
 
                 $dato->nombre = $nombreFull;
                 $dato->iglesia = $infoIglesia->nombre;
                 $dato->correo = $infoUsuario->correo;
                 $dato->pais = $infoPais->nombre;
+                $dato->idpais = $infoPais->id;
+            }
+
+            $hayinfo = 0;
+            if($arrayAceptados != null && $arrayAceptados->isNotEmpty()){
+                $hayinfo = 1;
             }
 
             // ordenar array por correo
@@ -165,6 +172,7 @@ class ApiComunidadController extends Controller
 
 
             return ['success' => 1,
+                'hayinfo' => $hayinfo,
                 'listado' => $arrayAceptadosSort];
         }
         else{
@@ -192,8 +200,10 @@ class ApiComunidadController extends Controller
         if ($userToken = JWTAuth::user($tokenApi)) {
 
             // borrar solicitud de amistad
-            if(ComunidadSolicitud::where('id', $request->idsolicitud)->first()){
-                ComunidadSolicitud::where('id', $request->idsolicitud)->delete();
+            if($info = ComunidadSolicitud::where('id', $request->idsolicitud)
+                ->where('id_usuario_envia', $userToken->id)->first()){
+
+                ComunidadSolicitud::where('id', $info->id)->delete();
             }
 
             return ['success' => 1];
@@ -245,23 +255,11 @@ class ApiComunidadController extends Controller
 
     private function retornoZonaHorariaUsuario($idIglesia){
         $infoIglesia = Iglesias::where('id', $idIglesia)->first();
-        $infoZonaHoraria = ZonaHoraria::where('id', $infoIglesia->id_zona_horaria)->first();
-        $zonaHoraria = $infoZonaHoraria->zona;
-
-        // horario actual del cliente segun zona horaria
-
-        return Carbon::now($zonaHoraria);
+        $infoDepartamento = Departamentos::where('id', $infoIglesia->id_departamento)->first();
+        $infoZonaHoraria = ZonaHoraria::where('id', $infoDepartamento->id_zona_horaria)->first();
+        return Carbon::now($infoZonaHoraria->zona);
     }
 
 
 
-    // COMO IDIOMATEXTOS DEVUELVE 0 POR DEFECTO, Y EL ID 1 ES MINIMO EN LA BASE DE DATOS
-    private function reseteoIdiomaTextos($idiomatextos)
-    {
-        if($idiomatextos == 0){
-            $idiomatextos = 1;
-        }
-
-        return $idiomatextos;
-    }
 }

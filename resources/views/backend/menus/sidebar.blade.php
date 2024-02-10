@@ -82,12 +82,9 @@
                             </a>
                         </li>
 
-
-
                     </ul>
                 </li>
                 @endcan
-
 
 
                 <li class="nav-item">

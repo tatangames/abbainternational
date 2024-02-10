@@ -180,9 +180,15 @@ class ApiInicioController extends Controller
             // ************** BLOQUE INSIGNIAS ******************
 
             // ordenar por fechas ganadas deberia ser mejor
-            $insignia_arrayInsignias = InsigniasUsuarios::where('id_usuario', $userToken->id)
-                ->take(5)
-                ->get();
+            // solo visibles
+
+                $insignia_arrayInsignias = DB::table('tipo_insignias AS t')
+                    ->join('insignias_usuarios AS i', 'i.id_tipo_insignia', '=', 't.id')
+                    ->where('i.id_usuario', $userToken->id)
+                    ->select('t.visible', 'i.id_usuario', 'i.id_tipo_insignia', 'i.fecha')
+                    ->take(5)
+                    ->get();
+
 
             $insignia_hayInsignias = 0;
             $insignias_mayor5 = 0;
@@ -193,8 +199,6 @@ class ApiInicioController extends Controller
             }
 
             foreach ($insignia_arrayInsignias as $dato){
-
-
 
                 $infoTitulos = $this->retornoTituloInsigniasAppIdioma($dato->id_tipo_insignia, $idiomaTextos);
                 $dato->titulo = $infoTitulos['titulo'];
@@ -1029,5 +1033,69 @@ class ApiInicioController extends Controller
         $infoZonaHoraria = ZonaHoraria::where('id', $infoDepartamento->id_zona_horaria)->first();
         return Carbon::now($infoZonaHoraria->zona);
     }
+
+
+
+
+    public function listadoInsigniasFaltantesPorGanar(Request $request)
+    {
+        $rules = array(
+            'iduser' => 'required',
+            'idiomaplan' => 'required',
+        );
+
+
+        $validator = Validator::make($request->all(), $rules);
+        if ( $validator->fails()){
+            return ['success' => 0,
+                'msj' => "validación incorrecta"
+            ];
+        }
+
+        $tokenApi = $request->header('Authorization');
+
+        if ($userToken = JWTAuth::user($tokenApi)) {
+
+            $idiomaTexto = $request->idiomaplan;
+
+            $insigniasGanadas = InsigniasUsuarios::where('id_usuario', $userToken->id)
+                ->select('id_tipo_insignia')
+                ->get();
+
+            $listado = TipoInsignias::whereNotIn('id', $insigniasGanadas)
+                ->where('visible', 1)
+                ->get();
+
+            $hayinfo = 0;
+            if($listado != null && $listado->isNotEmpty()){
+                $hayinfo = 1;
+            }
+
+            foreach ($listado as $dato){
+
+                $datosRaw = $this->retornoTituloInsigniasAppIdioma($dato->id, $idiomaTexto);
+                $titulo = $datosRaw['titulo'];
+                $descripcion = $datosRaw['descripcion'];
+
+                $dato->titulo = $titulo;
+                $dato->descripcion = $descripcion;
+            }
+
+            $arrayFinalInsignias = $listado->sortBy('titulo')->values();
+
+
+            return ['success' => 1,
+                'hayinfo' => $hayinfo,
+                'listado' => $arrayFinalInsignias];
+        }else{
+            return ['success' => 99];
+        }
+    }
+
+
+
+
+
+
 
 }

@@ -73,7 +73,7 @@ class InsigniasController extends Controller
 
                 $nuevo = new TipoInsignias();
                 $nuevo->imagen = $nombreFoto;
-                $nuevo->visible = 0; // sino es visible el usuario ya no puede ver ni ganar
+                $nuevo->visible = 1;
                 $nuevo->save();
                 $datosContenedor = json_decode($request->contenedorArray, true);
 
@@ -130,8 +130,11 @@ class InsigniasController extends Controller
             $dato->contador = $contador;
         }
 
+        $infoTipoInsignia = TipoInsignias::where('id', $idtipoinsignia)->first();
+        $visible = $infoTipoInsignia->visible;
+
         return view('backend.admin.recursos.insignias.editar.vistaeditartipoinsignias', compact('idtipoinsignia',
-            'arrayIdiomas', 'arrayInsigniaTexto'));
+            'arrayIdiomas', 'arrayInsigniaTexto', 'visible'));
     }
 
     public function actualizarImagen(Request $request){
@@ -187,6 +190,7 @@ class InsigniasController extends Controller
     {
         $regla = array(
             'idtipoinsignia' => 'required',
+            'toggle' => 'required'
         );
 
         // array: infoIdInsigniaTexto, infoIdIdioma, infoTitulo, infoSubtitulo
@@ -198,6 +202,13 @@ class InsigniasController extends Controller
         DB::beginTransaction();
 
         try {
+
+            TipoInsignias::where('id', $request->idtipoinsignia)->update([
+                'visible' => $request->toggle,
+            ]);
+
+
+
 
             $datosContenedor = json_decode($request->contenedorArray, true);
 

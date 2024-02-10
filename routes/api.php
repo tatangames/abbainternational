@@ -115,22 +115,14 @@ Route::middleware('verificarToken')->group(function () {
     // informacion de una insignia
     Route::post('app/insignia/individual/informacion', [ApiInicioController::class,'informacionInsigniaIndividual']);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     // obtener listado de todas las insignias
     Route::post('app/inicio/todos/lasinsignias', [ApiInicioController::class,'listadoTodosLasInsignias']);
+
+
+    // listado de todas las insignias faltantes
+    Route::post('app/listado/insignias/faltantes', [ApiInicioController::class,'listadoInsigniasFaltantesPorGanar']);
+
+
 
 
 
@@ -138,6 +130,7 @@ Route::middleware('verificarToken')->group(function () {
 
     // enviar solicitud a un amigo
     Route::post('app/comunidad/enviar/solicitud', [ApiComunidadController::class,'enviarSolicitudAmigo']);
+
 
     // listado de solicutes pendientes que yo he enviado
     Route::post('app/comunidad/listado/solicitud/pendientes', [ApiComunidadController::class,'listadoSolicitudesPendientes']);
@@ -147,6 +140,17 @@ Route::middleware('verificarToken')->group(function () {
 
     // eliminar una solicitud
     Route::post('app/comunidad/solicitud/eliminar', [ApiComunidadController::class,'eliminarSolicitud']);
+
+
+
+
+
+
+
+
+
+
+
 
     // mostrar listado de insignias del usuario de comunidad
     Route::post('app/comunidad/informacion/insignias', [ApiComunidadController::class,'informacionInsigniaAmigo']);
