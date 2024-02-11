@@ -455,6 +455,14 @@ class PlanesController extends Controller
 
             $datosContenedor = json_decode($request->contenedorArray, true);
 
+            // Evitar bloques que sean de la misma fecha a los ya registrados
+            if(PlanesBloques::where('id_planes', $request->idplan)
+                ->whereDate('fecha_inicio', $request->fecha)->first()){
+                return ['success' => 1];
+            }
+
+
+
             // crear un plan bloque
             $bloque = new PlanesBloques();
             $bloque->id_planes = $request->idplan;
@@ -490,7 +498,7 @@ class PlanesController extends Controller
 
             // completado y actualizado
             DB::commit();
-            return ['success' => 1];
+            return ['success' => 2];
         }catch(\Throwable $e){
             Log::info('error: ' . $e);
             DB::rollback();
@@ -565,6 +573,17 @@ class PlanesController extends Controller
 
         try {
 
+            $infoPlanBloque = PlanesBloques::where('id', $request->idplanbloque)->first();
+
+            // Evitar bloques que sean de la misma fecha a los ya registrados
+            if(PlanesBloques::where('id_planes', $infoPlanBloque->id_planes)
+                ->where('id', '!=', $infoPlanBloque->id)
+                ->whereDate('fecha_inicio', $request->fecha)
+                ->first()){
+                return ['success' => 1];
+            }
+
+
             PlanesBloques::where('id', $request->idplanbloque)->update([
                 'fecha_inicio' => $request->fecha,
                 'texto_personalizado' => $request->toggle
@@ -597,7 +616,7 @@ class PlanesController extends Controller
 
             // completado y actualizado
             DB::commit();
-            return ['success' => 1];
+            return ['success' => 2];
         }catch(\Throwable $e){
             Log::info('error: ' . $e);
             DB::rollback();
@@ -644,7 +663,6 @@ class PlanesController extends Controller
 
         $regla = array(
             'idplanbloque' => 'required',
-            'fecha' => 'required',
         );
 
         // array: infoIdIdioma, infoTitulo, infoDescripcion
@@ -890,6 +908,7 @@ class PlanesController extends Controller
             'idblockdetalle' => 'required',
             'ididioma' => 'required',
             'devocional' => 'required',
+            'titulo' => 'required',
         );
 
 
@@ -908,6 +927,55 @@ class PlanesController extends Controller
                     // no hacer nada
 
                 }else{
+
+
+                    // *************** TITULO ****************************
+
+
+
+
+
+                    $contenidoHtmlConJavascriptTitulo = "<html>
+                    <head>
+                    <meta charset='UTF-8'>
+                        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+                    <style>
+                        ";
+
+                    $contenidoHtmlConJavascriptTitulo .= $this->retornoFuentesCSS();
+
+
+                    $contenidoHtmlConJavascriptTitulo .= "</style>
+                        <script type='text/javascript'>
+                            function aumentarTamaño() {
+                                var elementos = document.getElementsByTagName('*');
+                                for (var i = 0; i < elementos.length; i++) {
+                                    var estilo = window.getComputedStyle(elementos[i], null).getPropertyValue('font-size');
+                                    var fontSize = parseFloat(estilo);
+                                    elementos[i].style.fontSize = (fontSize + 2) + 'px';
+                                }
+                            }
+
+                            function disminuirTamaño() {
+                                var elementos = document.getElementsByTagName('*');
+                                for (var i = 0; i < elementos.length; i++) {
+                                    var estilo = window.getComputedStyle(elementos[i], null).getPropertyValue('font-size');
+                                    var fontSize = parseFloat(estilo);
+                                    elementos[i].style.fontSize = (fontSize - 2) + 'px';
+                                }
+                            }
+                        </script>
+                    </head>
+                    <body>" . $request->titulo . "</body>
+                    </html>";
+
+
+
+
+
+                    // ****************** DESCRIPCION ************************
+
+
 
                     $contenidoHtmlConJavascript = "<html>
                     <head>
@@ -945,12 +1013,21 @@ class PlanesController extends Controller
 
 
 
+                    $contenidoHtmlTitulo = "<html>
+                <body>" . $request->titulo . "</body>
+                    </html>";
+
+                    $contenidoHtml = "<html>
+                <body>" . $request->devocional . "</body>
+                    </html>";
+
                     $detalle = new BloqueCuestionarioTextos();
                     $detalle->id_bloque_detalle = $request->idblockdetalle;
                     $detalle->id_idioma_planes = $request->ididioma;
                     $detalle->texto = $contenidoHtmlConJavascript;
-                    $detalle->texto_dia = $request->devocional;
-
+                    $detalle->texto_dia = $contenidoHtml;
+                    $detalle->titulo = $contenidoHtmlConJavascriptTitulo;
+                    $detalle->titulo_dia = $contenidoHtmlTitulo;
 
                     $detalle->save();
                 }
@@ -973,6 +1050,7 @@ class PlanesController extends Controller
         $regla = array(
             'idcuestionario' => 'required',
             'devocional' => 'required',
+            'titulo' => 'required'
         );
 
 
@@ -982,6 +1060,50 @@ class PlanesController extends Controller
 
 
         if ($info = BloqueCuestionarioTextos::where('id', $request->idcuestionario)->first()){
+
+
+            // *************  TITULO *******************
+
+            $contenidoHtmlConJavascriptTitulo = "<html>
+                    <head>
+                    <meta charset='UTF-8'>
+                        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+                    <style>
+                        ";
+
+            $contenidoHtmlConJavascriptTitulo .= $this->retornoFuentesCSS();
+
+
+            $contenidoHtmlConJavascriptTitulo .= "</style>
+                        <script type='text/javascript'>
+                            function aumentarTamaño() {
+                                var elementos = document.getElementsByTagName('*');
+                                for (var i = 0; i < elementos.length; i++) {
+                                    var estilo = window.getComputedStyle(elementos[i], null).getPropertyValue('font-size');
+                                    var fontSize = parseFloat(estilo);
+                                    elementos[i].style.fontSize = (fontSize + 2) + 'px';
+                                }
+                            }
+
+                            function disminuirTamaño() {
+                                var elementos = document.getElementsByTagName('*');
+                                for (var i = 0; i < elementos.length; i++) {
+                                    var estilo = window.getComputedStyle(elementos[i], null).getPropertyValue('font-size');
+                                    var fontSize = parseFloat(estilo);
+                                    elementos[i].style.fontSize = (fontSize - 2) + 'px';
+                                }
+                            }
+                        </script>
+                    </head>
+                    <body>" . $request->titulo . "</body>
+                    </html>";
+
+
+
+
+
+            // *************  DESCRIPCION *******************
+
 
 
             $contenidoHtmlConJavascript = "<html>
@@ -1020,6 +1142,11 @@ class PlanesController extends Controller
 
 
 
+            $contenidoHtmlTitulo = "<html>
+                <body>" . $request->titulo . "</body>
+                    </html>";
+
+
             $contenidoHtml = "<html>
                 <body>" . $request->devocional . "</body>
                     </html>";
@@ -1028,7 +1155,9 @@ class PlanesController extends Controller
             // actualizar
             BloqueCuestionarioTextos::where('id', $info->id)->update([
                 'texto' => $contenidoHtmlConJavascript,
-                'texto_dia' => $contenidoHtml
+                'texto_dia' => $contenidoHtml,
+                'titulo' => $contenidoHtmlConJavascriptTitulo,
+                'titulo_dia' => $contenidoHtmlTitulo,
             ]);
         }
 

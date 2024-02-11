@@ -524,6 +524,21 @@
                     closeLoading();
 
                     if(response.data.success === 1){
+                        Swal.fire({
+                            title: "No Creado",
+                            text: "La fecha a registrar ya se encuentra registrada",
+                            icon: 'info',
+                            showCancelButton: false,
+                            allowOutsideClick: false,
+                            confirmButtonColor: '#28a745',
+                            confirmButtonText: 'Aceptar'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+
+                            }
+                        })
+                    }
+                    else if(response.data.success === 2){
                         toastr.success("Actualizado");
                     }
                     else {

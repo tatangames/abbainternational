@@ -117,7 +117,9 @@ class RegionesController extends Controller
         $infoPais = Pais::where('id', $idpais)->first();
         $nombrePais = $infoPais->nombre;
 
-        return view('backend.admin.regiones.departamentos.vistadepartamentos', compact('idpais', 'nombrePais'));
+        $arrayZona = ZonaHoraria::where('id_pais', $idpais)->get();
+
+        return view('backend.admin.regiones.departamentos.vistadepartamentos', compact('idpais', 'nombrePais', 'arrayZona'));
     }
 
     // regresa tabla con los departamentos
@@ -143,7 +145,8 @@ class RegionesController extends Controller
 
         $rules = array(
             'idpais' => 'required',
-            'nombre' => 'required'
+            'nombre' => 'required',
+            'idzona' => 'required'
         );
 
         $validator = Validator::make($request->all(), $rules);
@@ -158,6 +161,7 @@ class RegionesController extends Controller
             $nuevo = new Departamentos();
             $nuevo->id_pais = $request->idpais;
             $nuevo->nombre = $request->nombre;
+            $nuevo->id_zona_horaria = $request->idzona;
             $nuevo->save();
 
             // registrado correctamente

@@ -54,7 +54,7 @@
                 @can('sidebar.dashboard')
                 <li class="nav-item">
                     <a href="{{ route('admin.dashboard.index') }}" target="frameprincipal" class="nav-link">
-                        <i class="far fa-circle nav-icon"></i>
+                        <i class="far fa-address-book nav-icon"></i>
                         <p>Estadísticas</p>
                     </a>
                 </li>
@@ -67,7 +67,7 @@
                 <li class="nav-item">
 
                     <a href="#" class="nav-link nav-">
-                        <i class="far fa-edit"></i>
+                        <i class="fa fa-globe"></i>
                         <p>
                             Regiones
                             <i class="fas fa-angle-left right"></i>
@@ -90,7 +90,7 @@
                 <li class="nav-item">
 
                     <a href="#" class="nav-link nav-">
-                        <i class="far fa-edit"></i>
+                        <i class="far fa-user"></i>
                         <p>
                             Usuarios
                             <i class="fas fa-angle-left right"></i>
@@ -114,7 +114,7 @@
                 <li class="nav-item">
 
                     <a href="#" class="nav-link nav-">
-                        <i class="far fa-edit"></i>
+                        <i class="fa fa-list"></i>
                         <p>
                             Insignias
                             <i class="fas fa-angle-left right"></i>
@@ -182,7 +182,7 @@
                 <li class="nav-item">
 
                     <a href="#" class="nav-link nav-">
-                        <i class="far fa-edit"></i>
+                        <i class="fa fa-book-open"></i>
                         <p>
                             Devocionales
                             <i class="fas fa-angle-left right"></i>
@@ -205,7 +205,7 @@
                 <li class="nav-item">
 
                     <a href="#" class="nav-link nav-">
-                        <i class="far fa-edit"></i>
+                        <i class="fa fa-info"></i>
                         <p>
                             Información
                             <i class="fas fa-angle-left right"></i>

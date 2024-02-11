@@ -415,9 +415,26 @@
                 .then((response) => {
                     closeLoading();
 
-                    limpiarParaNuevoDato()
+                    if(response.data.success === 1){
+                        Swal.fire({
+                            title: "No Creado",
+                            text: "La fecha a registrar ya se encuentra registrada",
+                            icon: 'info',
+                            showCancelButton: false,
+                            allowOutsideClick: false,
+                            confirmButtonColor: '#28a745',
+                            confirmButtonText: 'Aceptar'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
 
-                   if(response.data.success === 1){
+                            }
+                        })
+                    }
+
+                   else if(response.data.success === 2){
+
+                        limpiarParaNuevoDato()
+
                         Swal.fire({
                             title: "Fecha Creada",
                             text: "Se deberan registrar el Detalle para esta Fecha",

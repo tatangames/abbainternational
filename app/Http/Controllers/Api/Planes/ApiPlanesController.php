@@ -712,15 +712,13 @@ class ApiPlanesController extends Controller
 
             $idiomaTextos = $request->idiomaplan;
 
-
-
             // comprueba que al menos haya un cuestionario disponible de cualquier idioma
-            if($info = BloqueCuestionarioTextos::where('id_bloque_detalle', $request->idblockdeta)
+            if(BloqueCuestionarioTextos::where('id_bloque_detalle', $request->idblockdeta)
                 ->first()){
 
                 $datosArray = $this->retornoTituloCuestionarioIdioma($request->idblockdeta, $idiomaTextos);
-                $texto = $datosArray['texto'];
                 $titulo = $datosArray['titulo'];
+                $texto = $datosArray['texto'];
                 return ['success' => 1,
                        'titulo' => $titulo,
                        'texto' => $texto
@@ -744,8 +742,10 @@ class ApiPlanesController extends Controller
         if($infoTituloTexto = BloqueCuestionarioTextos::where('id_bloque_detalle', $idBlockDeta)
             ->where('id_idioma_planes', $idiomaTexto)
             ->first()){
-            return ['titulo' => $infoTituloTexto->titulo,
-                    'texto' => $infoTituloTexto->texto
+            return ['texto' => $infoTituloTexto->texto,
+                    'texto_dia' => $infoTituloTexto->texto_dia,
+                    'titulo' => $infoTituloTexto->titulo,
+                    'titulo_dia' => $infoTituloTexto->titulo_dia
             ];
 
         }else{
@@ -754,8 +754,10 @@ class ApiPlanesController extends Controller
                 ->where('id_idioma_planes', 1)
                 ->first();
 
-            return ['titulo' => $infoTituloTexto->titulo,
-                'texto' => $infoTituloTexto->texto
+            return ['texto' => $infoTituloTexto->texto,
+                'texto_dia' => $infoTituloTexto->texto_dia,
+                'titulo' => $infoTituloTexto->titulo,
+                'titulo_dia' => $infoTituloTexto->titulo_dia
             ];
 
 

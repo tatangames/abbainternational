@@ -35,7 +35,6 @@
 <div id="divcontenedor" style="display: none">
 
 
-
     <section class="content" style="margin-top: 20px">
         <div class="container-fluid">
             <div class="card card-success">
@@ -46,20 +45,7 @@
                     <div class="row">
                         <div class="col-md-12">
 
-                            <section>
-                                <div class="row">
 
-                                    <div class="col-md-3">
-                                        <div class="form-group">
-                                            <label class="control-label">Fecha:</label>
-                                            <input type="date" class="form-control" id="fecha" value="{{ $fechaActual }}">
-                                        </div>
-                                    </div>
-                                </div>
-
-                            </section>
-
-                            <hr><br>
 
                         </div>
                     </div>
@@ -358,14 +344,7 @@
 
         function guardarBloqueFinal(){
 
-            var fecha = document.getElementById('fecha').value;
             var selectIdioma = document.getElementById("select-idioma");
-
-            if(fecha === ''){
-                toastr.error('Fecha es Requerida');
-                return;
-            }
-
 
             // Verificar que haya ingresado todos los idiomas
             let conteoIdioma = selectIdioma.length;
@@ -398,7 +377,6 @@
             }
 
             formData.append('contenedorArray', JSON.stringify(contenedorArray));
-            formData.append('fecha', fecha);
             formData.append('idplanbloque', idplanbloque);
 
             openLoading();

@@ -24,6 +24,11 @@ return new class extends Migration
             // EL MISMO TEXTO PERO ESTE SE CARGA EN TEXTVIEW
             $table->text('texto_dia');
 
+            // TITULO QUE AL TOCARLO ME MANDA A A BIBLIA
+            $table->text('titulo');
+
+            // EL MISMO TEXTO DE TITULO PERO SE CARGARA EN TEXTIEW
+            $table->text('titulo_dia');
 
             $table->foreign('id_bloque_detalle')->references('id')->on('planes_block_detalle');
             $table->foreign('id_idioma_planes')->references('id')->on('idioma_planes');

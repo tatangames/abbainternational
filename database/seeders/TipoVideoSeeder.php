@@ -23,5 +23,9 @@ class TipoVideoSeeder extends Seeder
         TipoVideo::create([
             'nombre' => 'Youtube',
         ]);
+
+        TipoVideo::create([
+            'nombre' => 'Tik Tok',
+        ]);
     }
 }

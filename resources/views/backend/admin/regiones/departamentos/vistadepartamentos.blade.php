@@ -76,6 +76,16 @@
                                         <input type="text" maxlength="50" class="form-control" id="nombre-nuevo" autocomplete="off">
                                     </div>
 
+                                        <div class="form-group">
+                                            <label class="control-label">Zona Horaria</label>
+                                            <select class="form-control" id="select-zona">
+                                                @foreach($arrayZona as $item)
+                                                    <option value="{{$item->id}}">{{$item->zona}}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+
+
                                 </div>
                             </div>
                         </div>
@@ -170,6 +180,8 @@
         // envia datos de nuevo departamento al servidor
         function nuevo(){
             var nombre = document.getElementById('nombre-nuevo').value;
+            var zona = document.getElementById('select-zona').value;
+
 
             if(nombre === ''){
                 toastr.error('Departamento es requerido');
@@ -188,6 +200,7 @@
             let formData = new FormData();
             formData.append('idpais', idpais);
             formData.append('nombre', nombre);
+            formData.append('idzona', zona);
 
             axios.post('/admin/region/departamento/nuevo', formData, {
             })

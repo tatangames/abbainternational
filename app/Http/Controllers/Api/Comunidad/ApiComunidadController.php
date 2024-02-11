@@ -51,7 +51,7 @@ class ApiComunidadController extends Controller
                         return ['success' => 1, 'msg' => "solicitud esta pendiente de aceptacion"];
                     }else{
                         // solitud ya esta aceptada
-                        return ['success' => 1, 'msg' => "solicitud ya esta aceptada"];
+                        return ['success' => 2, 'msg' => "solicitud ya esta aceptada"];
                     }
 
                 }else{
@@ -70,7 +70,7 @@ class ApiComunidadController extends Controller
                 return ['success' => 3,
                     'msg' => "solicitud enviada"];
             }else{
-                return ['success' => 1,
+                return ['success' => 4,
                         'msg' => "Correo no encontrado"];
             }
         }
@@ -105,16 +105,20 @@ class ApiComunidadController extends Controller
 
 
             // los datos que vera el usuario son: correo, enviada
-
+            $hayinfo = 0;
             foreach ($arrayPendientes as $dato){
-                $infoUsuario = Usuarios::where('id', $dato->id)->first();
+                $hayinfo = 1;
+
+                $infoUsuario = Usuarios::where('id', $dato->id_usuario_recibe)->first();
 
                 $dato->correo = $infoUsuario->correo;
                 $fecha = date("d-m-Y", strtotime($dato->fecha));
                 $dato->fecha = $fecha;
             }
 
+
             return ['success' => 1,
+                'hayinfo' => $hayinfo,
                 'listado' => $arrayPendientes];
         }
         else{
