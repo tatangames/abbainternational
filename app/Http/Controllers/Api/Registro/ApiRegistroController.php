@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Registro;
 
 use App\Http\Controllers\Controller;
 use App\Models\Iglesias;
+use App\Models\RachaAlta;
 use App\Models\UsuarioNotificaciones;
 use App\Models\Usuarios;
 use Illuminate\Http\Request;
@@ -69,6 +70,11 @@ class ApiRegistroController extends Controller
             $token = JWTAuth::fromUser($nuevoUsuario);
 
 
+            // REGISTRAR RACHA ALTA POR DEFECTO
+            $rachaAlta = new RachaAlta();
+            $rachaAlta->id_usuarios = $nuevoUsuario->id;
+            $rachaAlta->contador = 0;
+            $rachaAlta->save();
 
 
             $idOneSignal = $request->idonesignal;

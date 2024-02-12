@@ -21,6 +21,7 @@ use App\Models\PlanesContenedorTextos;
 use App\Models\PlanesTextos;
 use App\Models\PlanesUsuarios;
 use App\Models\PlanesUsuariosContinuar;
+use App\Models\RachaDevocional;
 use App\Models\ZonaHoraria;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -609,6 +610,20 @@ class ApiPlanesController extends Controller
             DB::beginTransaction();
 
             try {
+
+
+                if(RachaDevocional::where('id_usuario', $userToken->id)
+                    ->where('id_plan_block_deta', $request->idblockdeta)->first()){
+                    // no guardar
+                }else{
+                    // GUARDAR UNA RACHA DEVOCIONAL
+                    $nuevaRacha = new RachaDevocional();
+                    $nuevaRacha->id_usuario = $userToken->id;
+                    $nuevaRacha->id_plan_block_deta = $request->idblockdeta;
+                    $nuevaRacha->fecha = $this->retornoZonaHorariaDepaCarbonNow($userToken->id_iglesia);
+                    $nuevaRacha->save();
+                }
+
 
                 // EL USUARIO PUEDE GUARDAR AUNQUE NO HAYA CONTESTADO PREGUNTAS, PORQUE PUEDE
                 // HABER DEVOCIONALES QUE NO LLEVEN PREGUNTAS

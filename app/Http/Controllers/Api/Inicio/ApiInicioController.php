@@ -29,7 +29,7 @@ use App\Models\PlanesTextos;
 use App\Models\PlanesUsuarios;
 use App\Models\PlanesUsuariosContinuar;
 use App\Models\RachaAlta;
-use App\Models\RachaUsuario;
+use App\Models\RachaDevocional;
 use App\Models\TipoInsignias;
 use App\Models\VideosHoy;
 use App\Models\VideosTextos;
@@ -277,6 +277,9 @@ class ApiInicioController extends Controller
 
             $infoTotalRachas = $this->retornoInformacionRacha($userToken);
 
+            // guardar modificaciones
+            DB::commit();
+
             return ['success' => 1,
 
                 'videomayor5' => $video_mayor5,
@@ -330,47 +333,66 @@ class ApiInicioController extends Controller
         $fechaFormatHorariaCarbon = $this->retornoZonaHorariaDepaCarbonNow($userToken->id_iglesia);
         $anioActual = $fechaFormatHorariaCarbon->year;
 
-        $diasAppEsteAnio = RachaUsuario::where('id_usuarios', $userToken->id)
+        // dias en la aplicacion este anio
+        $diasAppEsteAnio = RachaDevocional::where('id_usuario', $userToken->id)
             ->whereYear('fecha', $anioActual)
             ->count();
 
-        $arrayRachaUser = RachaUsuario::where('id_usuarios', $userToken->id)
+        // EL USUARIO CUANDO SE REGISTRA SE CREA EL RACHA ALTA
+
+
+        $infoRachaAlta = RachaAlta::where('id_usuarios', $userToken->id)->first();
+
+
+        $arrayRachaUserDevocional = RachaDevocional::where('id_usuario', $userToken->id)
             ->where('fecha', '<=', $fechaFormatHorariaCarbon)
             ->orderBy('fecha', 'DESC')
             ->get();
 
         $fechaActualH = $this->retornoZonaHorariaUsuarioFormatFecha($userToken->id_iglesia);
-
         $fechaActual = Carbon::parse($fechaActualH);
-        $diasConsecutivos = 0;
 
-        $pilaIdFechasSeguidas = array();
+        $devocionalConsecutivos = 0;
 
-        foreach ($arrayRachaUser as $dato) {
-            // Convertir la cadena de fecha a un objeto DateTime
+
+        // ESTAMOS CONTANDO LOS DIAS SEGUIDOS UNICAMENTE
+        foreach ($arrayRachaUserDevocional as $dato) {
+
             $fechaObjeto = Carbon::parse($dato->fecha);
 
-            array_push($pilaIdFechasSeguidas, $dato->id);
-
-            // Verificar si la fecha actual es igual a la fecha en el bucle
-
+            // si es fecha actual, se sumara 1
             if ($fechaObjeto->equalTo($fechaActual)) {
-
-                // Ignorar la fecha actual y continuar con la próxima iteración
+                $devocionalConsecutivos++;
                 continue;
             }
 
             // Verificar si la fecha en el bucle es un día antes de la fecha actual
             if ($fechaObjeto->equalTo($fechaActual->copy()->subDay())) {
-                // Incrementar el contador de días consecutivos
-                $diasConsecutivos++;
+                // Incrementar el contador de devocional consecutivos
+                $devocionalConsecutivos++;
                 // Actualizar la fecha actual para la próxima iteración
                 $fechaActual = $fechaObjeto;
             } else {
-                // Si no es un día antes, salir del bucle
+                // si estra aqui, la cadena de fechas se rompe
                 break;
             }
         }
+
+        $miRachaAlta = $infoRachaAlta->contador;
+
+        // actualizar rachaAlta si requiere
+        if($devocionalConsecutivos > $infoRachaAlta->contador){
+            $miRachaAlta = $devocionalConsecutivos;
+
+            // se debe actualizar
+            RachaAlta::where('id_usuarios', $userToken->id)
+                ->update([
+                    'contador' => $devocionalConsecutivos,
+                ]);
+        }
+
+
+        // VER QUE DIAS HIZO EL DEVOCIONAL
 
 
         $diaDomingo = 0;
@@ -382,109 +404,47 @@ class ApiInicioController extends Controller
         $diaSabado = 0;
 
 
-
-
         // obtener los dias de estas fechas seguidas
-        $arrayFechaDias = RachaUsuario::where('id_usuarios', $userToken->id)
+        $arrayFechaDias = RachaDevocional::where('id_usuario', $userToken->id)
             ->where('fecha', '<=', $fechaFormatHorariaCarbon)
             ->orderBy('fecha', 'DESC')
+            ->take(7) // por seguridad nomas
             ->get();
-
-
-        $fechaServidorRestar = $fechaFormatHorariaCarbon;
-
-        if ($fechaServidorRestar->isMonday()) {
-           $diaLunes = 1;
-        }else{
-
-            // pero sino es dia lunes
-
-            foreach ($arrayFechaDias as $dato){
-
-                // para recorrer todas las fechas
-                foreach ($arrayFechaDias as $info){
-
-                    $fechaCarbonParse = Carbon::parse($info->fecha);
-
-                    if($fechaServidorRestar->equalTo($fechaCarbonParse)){
-
-                        // si encontro, ver que dia es
-                        $encontro = false;
-
-                        switch ($fechaServidorRestar->dayOfWeek){
-                            case 0: // domingo
-                                $encontro = true;
-                                $diaDomingo = 1;
-                                break;
-                            case 1: // lunes no hacer nada
-                                $encontro = true;
-                                break;
-                            case 2: // martes
-                                $encontro = true;
-                                $diaMartes = 1;
-                                break;
-                            case 3: // miercoles
-                                $encontro = true;
-                                $diaMiercoles = 1;
-                                break;
-                            case 4: // jueves
-                                $encontro = true;
-                                $diaJueves = 1;
-                                break;
-                            case 5: // viernes
-                                $encontro = true;
-                                $diaViernes = 1;
-                                break;
-                            case 6: // sabado
-                                $encontro = true;
-                                $diaSabado = 1;
-                                break;
-                        }
-
-                        if($encontro){
-                            break;
-                        }
-                    }
-                }
-
-                $fechaServidorRestar->subDay();
-            }
-        }
-
-
-        // REPARAR ESTA PARTE PORQUE METE DIA NO VALIDO
 
         foreach ($arrayFechaDias as $dato){
 
-            $fechaObjeto = Carbon::parse($dato->fecha);
-            $diaSemana = $fechaObjeto->dayOfWeek;
-
-            if($diaSemana == 0){ // domingo
-                $diaDomingo = 1;
-            }else if ($diaSemana == 1){ // lunes
+            if(Carbon::parse($dato->fecha)->isMonday()){
                 $diaLunes = 1;
-            }else if ($diaSemana == 2){ // martes
+            }
+
+            if(Carbon::parse($dato->fecha)->isTuesday()){
                 $diaMartes = 1;
-            }else if ($diaSemana == 3){ // miercoles
+            }
+
+            if(Carbon::parse($dato->fecha)->isWednesday()){
                 $diaMiercoles = 1;
-            }else if ($diaSemana == 4){ // jueves
+            }
+
+            if(Carbon::parse($dato->fecha)->isThursday()){
                 $diaJueves = 1;
-            }else if ($diaSemana == 5){ // viernes
+            }
+
+            if(Carbon::parse($dato->fecha)->isFriday()){
                 $diaViernes = 1;
-            }else if ($diaSemana == 6){ // sabado
+            }
+
+            if(Carbon::parse($dato->fecha)->isSaturday()){
                 $diaSabado = 1;
+            }
+
+            if(Carbon::parse($dato->fecha)->isSunday()){
+                $diaDomingo = 1;
             }
         }
 
-
-        $nivelRachaAlta = 0;
-        if($infoRa = RachaAlta::where('id_usuarios', $userToken->id)->first()){
-            $nivelRachaAlta = $infoRa->contador;
-        }
-
         return ['diasesteanio' => $diasAppEsteAnio,
-            'diasconcecutivos' => $diasConsecutivos,
-            'nivelrachaalta' => $nivelRachaAlta,
+            'diasconcecutivos' => $devocionalConsecutivos,
+            'nivelrachaalta' => $miRachaAlta,
             'domingo' => $diaDomingo,
             'lunes' => $diaLunes,
             'martes' => $diaMartes,

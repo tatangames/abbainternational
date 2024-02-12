@@ -14,6 +14,8 @@ return new class extends Migration
         Schema::create('racha_alta', function (Blueprint $table) {
             $table->id();
             $table->bigInteger('id_usuarios')->unsigned();
+
+            // esto seria la racha alta que queda guardada
             $table->integer('contador');
 
             $table->foreign('id_usuarios')->references('id')->on('usuarios');
