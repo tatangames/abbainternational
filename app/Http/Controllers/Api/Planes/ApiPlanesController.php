@@ -612,17 +612,6 @@ class ApiPlanesController extends Controller
             try {
 
 
-                if(RachaDevocional::where('id_usuario', $userToken->id)
-                    ->where('id_plan_block_deta', $request->idblockdeta)->first()){
-                    // no guardar
-                }else{
-                    // GUARDAR UNA RACHA DEVOCIONAL
-                    $nuevaRacha = new RachaDevocional();
-                    $nuevaRacha->id_usuario = $userToken->id;
-                    $nuevaRacha->id_plan_block_deta = $request->idblockdeta;
-                    $nuevaRacha->fecha = $this->retornoZonaHorariaDepaCarbonNow($userToken->id_iglesia);
-                    $nuevaRacha->save();
-                }
 
 
                 // EL USUARIO PUEDE GUARDAR AUNQUE NO HAYA CONTESTADO PREGUNTAS, PORQUE PUEDE
@@ -942,6 +931,21 @@ class ApiPlanesController extends Controller
             DB::beginTransaction();
 
             try {
+
+
+                // COMO GUARDO PREGUNTAS, GUARDAR RACHA DEVOCIONAL
+                if(RachaDevocional::where('id_usuario', $userToken->id)
+                    ->where('id_plan_block_deta', $request->idblockdeta)->first()){
+                    // no guardar
+                }else{
+                    // GUARDAR UNA RACHA DEVOCIONAL
+                    $nuevaRacha = new RachaDevocional();
+                    $nuevaRacha->id_usuario = $userToken->id;
+                    $nuevaRacha->id_plan_block_deta = $request->idblockdeta;
+                    $nuevaRacha->fecha = $zonaHorariaCarbon;
+                    $nuevaRacha->save();
+                }
+
 
                 if ($request->has('idpregunta')) {
 

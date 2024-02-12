@@ -19,6 +19,10 @@ return new class extends Migration
             $table->string('texto_1', 200);
             $table->string('texto_2', 200)->nullable();
 
+            // textos para notificaciones
+            $table->string('titulo_notificacion', 50);
+            $table->string('descripcion_notificacion', 60);
+
             $table->foreign('id_tipo_insignia')->references('id')->on('tipo_insignias');
             $table->foreign('id_idioma_planes')->references('id')->on('idioma_planes');
         });

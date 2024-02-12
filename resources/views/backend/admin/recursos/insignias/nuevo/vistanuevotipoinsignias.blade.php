@@ -149,6 +149,18 @@
                                     <input type="text" maxlength="200" autocomplete="off" class="form-control" id="subtitulo-plan">
                                 </div>
 
+
+                                <div class="form-group">
+                                    <label>Título Notificación</label>
+                                    <input type="text" maxlength="50" autocomplete="off" class="form-control" id="titulo-notificacion">
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Descripción Notificación</label>
+                                    <input type="text" maxlength="60" autocomplete="off" class="form-control" id="descripcion-notificacion">
+                                </div>
+
+
                             </div>
                         </div>
                     </form>
@@ -236,6 +248,9 @@
             var titulo = document.getElementById('titulo-plan').value;
             var subtitulo = document.getElementById('subtitulo-plan').value; // opcional
 
+            var tituloNotificacion = document.getElementById('titulo-notificacion').value;
+            var descripcionNotificacion = document.getElementById('descripcion-notificacion').value;
+
             if(titulo === ''){
                 toastr.error('Título es requerido')
                 return;
@@ -244,6 +259,17 @@
             // subtitulo y descripcion son opcionales
             if(subtitulo.length > 200){
                 toastr.error('Subtitulo 200 caracteres máximo')
+                return;
+            }
+
+
+            if(tituloNotificacion === ''){
+                toastr.error('Título Notificación es requerido')
+                return;
+            }
+
+            if(descripcionNotificacion === ''){
+                toastr.error('Descripción Notificación es requerido')
                 return;
             }
 
@@ -269,7 +295,13 @@
 
                 "<td>" +
                 "<input name='arraySubtitulo[]' disabled value='" + subtitulo + "' class='form-control' type='text'>" +
+
+
+                "<input name='arrayTiNoti[]' style='display: none' disabled value='" + tituloNotificacion + "' class='form-control' type='text'>" +
+                "<input name='arrayDesNoti[]' style='display: none' disabled value='" + descripcionNotificacion + "' class='form-control' type='text'>" +
+
                 "</td>" +
+
 
                 "<td>" +
                 "<button type='button' class='btn btn-block btn-danger' onclick='borrarFila(this)'>Borrar</button>" +
@@ -351,14 +383,22 @@
             var arrayTitulo = $("input[name='arrayTitulo[]']").map(function(){return $(this).val();}).get();
             var arraySubtitulo = $("input[name='arraySubtitulo[]']").map(function(){return $(this).val();}).get();
 
+
+            var arrayTiNoti = $("input[name='arrayTiNoti[]']").map(function(){return $(this).val();}).get();
+            var arrayDesNoti = $("input[name='arrayDesNoti[]']").map(function(){return $(this).val();}).get();
+
+
             for(var i = 0; i < arrayIdIdioma.length; i++){
 
                 let infoIdIdioma = arrayIdIdioma[i];
                 let infoTitulo = arrayTitulo[i];
                 let infoSubtitulo = arraySubtitulo[i];
 
+                let infoTiNoti = arrayTiNoti[i];
+                let infoDesNoti = arrayDesNoti[i];
+
                 // ESTOS NOMBRES SE UTILIZAN EN CONTROLADOR
-                contenedorArray.push({ infoIdIdioma, infoTitulo, infoSubtitulo});
+                contenedorArray.push({ infoIdIdioma, infoTitulo, infoSubtitulo, infoTiNoti, infoDesNoti});
             }
 
             formData.append('contenedorArray', JSON.stringify(contenedorArray));

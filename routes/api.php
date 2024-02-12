@@ -96,8 +96,6 @@ Route::middleware('verificarToken')->group(function () {
 
     //*** FRAGMENT INICIO
 
-
-
     // devuelve todos los elementos bloque inicio
     Route::post('app/inicio/bloque/completa', [ApiInicioController::class,'infoBloqueInicioCompleto']);
 
@@ -122,7 +120,9 @@ Route::middleware('verificarToken')->group(function () {
     // listado de todas las insignias faltantes
     Route::post('app/listado/insignias/faltantes', [ApiInicioController::class,'listadoInsigniasFaltantesPorGanar']);
 
-
+    // guardar las veces que comparte aplicacion
+    // listado de todas las insignias faltantes
+    Route::post('app/compartir/aplicacion', [ApiInicioController::class,'compartirAplicacion']);
 
 
 
@@ -145,17 +145,14 @@ Route::middleware('verificarToken')->group(function () {
 
 
 
-
-
-
-
-
-
+    // *** INSIGNIAS
 
     // mostrar listado de insignias del usuario de comunidad
     Route::post('app/comunidad/informacion/insignias', [ApiComunidadController::class,'informacionInsigniaAmigo']);
 
-    // listado de planes de ese usuario amigo para ver sus preguntas
+
+
+
 
 
 
@@ -163,7 +160,41 @@ Route::middleware('verificarToken')->group(function () {
 });
 
 
-
+/**
+ *
+ * $listado = UsuarioNotificaciones::where('id_usuario', 1)->get();
+ *
+ * $pilaIdentificadores = array();
+ *
+ * foreach ($listado as $item){
+ * array_push($pilaIdentificadores, $item->onesignal);
+ * }
+ *
+ * if($listado != null && $listado->isNotEmpty()){
+ *
+ * $tituloNoti = "Ejemplo";
+ * $mensajeNoti = "Muchas Gracias";
+ *
+ * $AppId = config('googleapi.IdApp_Cliente');
+ *
+ *
+ * $contents = array(
+ * "en" => $mensajeNoti
+ * );
+ *
+ * $params = array(
+ * 'app_id' => $AppId,
+ * 'contents' => $contents,
+ * 'include_player_ids' => is_array($pilaIdentificadores) ? $pilaIdentificadores : array($pilaIdentificadores)
+ * );
+ *
+ * $params['headings'] = array(
+ * "en" => $tituloNoti
+ * );
+ *
+ * OneSignal::sendNotificationCustom($params);
+* }
+ */
 
 
 

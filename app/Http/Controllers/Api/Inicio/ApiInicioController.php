@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Inicio;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\EnviarNotificacion;
 use App\Models\BloqueCuestionarioTextos;
 use App\Models\BloquePreguntas;
 use App\Models\BloquePreguntasTextos;
@@ -14,6 +15,7 @@ use App\Models\Iglesias;
 use App\Models\ImagenesDelDia;
 use App\Models\InsigniasTextos;
 use App\Models\InsigniasUsuarios;
+use App\Models\InsigniasUsuariosConteo;
 use App\Models\InsigniasUsuariosDetalle;
 use App\Models\LecturaDia;
 use App\Models\NivelesInsignias;
@@ -30,7 +32,9 @@ use App\Models\PlanesUsuarios;
 use App\Models\PlanesUsuariosContinuar;
 use App\Models\RachaAlta;
 use App\Models\RachaDevocional;
+use App\Models\RachaDias;
 use App\Models\TipoInsignias;
+use App\Models\UsuarioNotificaciones;
 use App\Models\VideosHoy;
 use App\Models\VideosTextos;
 use App\Models\ZonaHoraria;
@@ -44,16 +48,15 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use DateTime;
-
+use OneSignal;
 
 class ApiInicioController extends Controller
 {
 
-
     // devuelve todos los elementos bloque inicio
     public function infoBloqueInicioCompleto(Request $request){
 
-        $rules = array(
+       $rules = array(
             'idiomaplan' => 'required',
             'iduser' => 'required',
         );
@@ -69,23 +72,17 @@ class ApiInicioController extends Controller
 
         if ($userToken = JWTAuth::user($tokenApi)) {
 
+
             // horario actual del cliente segun zona horaria
             $zonaHorariaUsuario = $this->retornoZonaHorariaDepaCarbonNow($userToken->id_iglesia);
 
             // Array Final
 
 
-
-
             // TODOS LOS BLOQUES DEBERIAN MOSTRARSE
 
-
             DB::beginTransaction();
-
-
             try {
-
-
 
             // ************** BLOQUE DEVOCIONAL ******************
 
@@ -273,6 +270,18 @@ class ApiInicioController extends Controller
             }
 
 
+            // GUARDAR REGISTRO QUE VIO LA APLICACION
+            if(RachaDias::where('id_usuario', $userToken->id)
+                ->whereDate('fecha', $zonaHorariaUsuario)->first()){
+                // no guardar
+            }else{
+                $nuevoDia = new RachaDias();
+                $nuevoDia->id_usuario = $userToken->id;
+                $nuevoDia->fecha = $zonaHorariaUsuario;
+                $nuevoDia->save();
+            }
+
+
             //******* NIVEL DE RACHA  //***********
 
             $infoTotalRachas = $this->retornoInformacionRacha($userToken);
@@ -333,8 +342,8 @@ class ApiInicioController extends Controller
         $fechaFormatHorariaCarbon = $this->retornoZonaHorariaDepaCarbonNow($userToken->id_iglesia);
         $anioActual = $fechaFormatHorariaCarbon->year;
 
-        // dias en la aplicacion este anio
-        $diasAppEsteAnio = RachaDevocional::where('id_usuario', $userToken->id)
+        // LOS DIAS EN LA APLICACION ESTE ANIO
+        $diasAppEsteAnio = RachaDias::where('id_usuario', $userToken->id)
             ->whereYear('fecha', $anioActual)
             ->count();
 
@@ -488,6 +497,22 @@ class ApiInicioController extends Controller
             try {
 
                 if($infoBlockDeta = PlanesBlockDetalle::where('id', $request->idblockdeta)->first()) {
+
+
+
+                    // COMO GUARDO PREGUNTAS, GUARDAR RACHA DEVOCIONAL
+                    if(RachaDevocional::where('id_usuario', $userToken->id)
+                        ->where('id_plan_block_deta', $request->idblockdeta)->first()){
+                        // no guardar
+                    }else{
+                        // GUARDAR UNA RACHA DEVOCIONAL
+                        $nuevaRacha = new RachaDevocional();
+                        $nuevaRacha->id_usuario = $userToken->id;
+                        $nuevaRacha->id_plan_block_deta = $request->idblockdeta;
+                        $nuevaRacha->fecha = $zonaHoraria;
+                        $nuevaRacha->save();
+                    }
+
 
                     $infoPlanBloque = PlanesBloques::where('id', $infoBlockDeta->id_planes_bloques)->first();
                     $infoPlan = Planes::where('id', $infoPlanBloque->id_planes)->first();
@@ -1054,8 +1079,79 @@ class ApiInicioController extends Controller
 
 
 
+    public function compartirAplicacion(Request $request)
+    {
+
+        $rules = array(
+            'iduser' => 'required',
+            'idiomaplan' => 'required',
+        );
 
 
+        $validator = Validator::make($request->all(), $rules);
+        if ($validator->fails()) {
+            return ['success' => 0,
+                'msj' => "validación incorrecta"
+            ];
+        }
 
+        $tokenApi = $request->header('Authorization');
+
+        if ($userToken = JWTAuth::user($tokenApi)) {
+
+            // GUARDAR PUNTO DE COMPARTIR APLICACION
+
+            DB::beginTransaction();
+            try {
+
+                $fechaCarbon = retornoZonaHorariaDepaCarbonNow($userToken->id_iglesia);
+
+                // se debe crear la insiginia si es primera vez
+                // ID: 3 - COMPARTIR APLICACION
+                if(InsigniasUsuarios::where('id_tipo_insignia', 3)
+                    ->where('id_usuario', $userToken->id)->first()){
+                    //ya esta registrado, se debera sumar un punto
+
+                }else{
+
+                    $nuevaInsignia = new InsigniasUsuarios();
+                    $nuevaInsignia->id_tipo_insignia = 3;
+                    $nuevaInsignia->id_usuario = $userToken->id;
+                    $nuevaInsignia->fecha = $fechaCarbon;
+                    $nuevaInsignia->save();
+
+                    $nuevoConteo = new InsigniasUsuariosConteo();
+                    $nuevoConteo->id_tipo_insignia = 3;
+                    $nuevoConteo->id_usuarios = $userToken->id;
+                    $nuevoConteo->conteo = 1;
+                    $nuevoConteo->save();
+
+                    $arrayOneSignal = UsuarioNotificaciones::where('id_usuario', $userToken)->get();
+                    $pilaOneSignal = array();
+                    $hayIdOne = false;
+                    foreach ($arrayOneSignal as $item){
+                        if($item->onesignal != null){
+                            $hayIdOne = true;
+                            array_push($pilaOneSignal, $item->onesignal);
+                        }
+                    }
+
+                    if($hayIdOne){
+                        // como es primera vez, se necesita enviar notificacion
+                        dispatch(new EnviarNotificacion($pilaOneSignal, $tituloOne, $descripcionOne));
+                    }
+                }
+
+
+                DB::commit();
+                return ['success' => 1];
+            }catch(\Throwable $e) {
+                DB::rollback();
+                Log::info("error: " . $e);
+            }
+        }else{
+            return ['success' => 2];
+        }
+    }
 
 }

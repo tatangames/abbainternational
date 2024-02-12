@@ -85,6 +85,8 @@ class InsigniasController extends Controller
                     $detalle->id_idioma_planes = $filaArray['infoIdIdioma'];
                     $detalle->texto_1 = $filaArray['infoTitulo'];
                     $detalle->texto_2 = $filaArray['infoSubtitulo'];
+                    $detalle->titulo_notificacion = $filaArray['infoTiNoti'];
+                    $detalle->descripcion_notificacion = $filaArray['infoDesNoti'];
                     $detalle->save();
                 }
 
@@ -208,8 +210,6 @@ class InsigniasController extends Controller
             ]);
 
 
-
-
             $datosContenedor = json_decode($request->contenedorArray, true);
 
             // sus idiomas
@@ -222,6 +222,8 @@ class InsigniasController extends Controller
                     InsigniasTextos::where('id', $infoTexto->id)->update([
                         'texto_1' => $filaArray['infoTitulo'],
                         'texto_2' => $filaArray['infoSubtitulo'],
+                        'titulo_notificacion' => $filaArray['infoTiNoti'],
+                        'descripcion_notificacion' => $filaArray['infoDesNoti'],
                     ]);
 
                 }else{
@@ -233,6 +235,8 @@ class InsigniasController extends Controller
                     $detalle->id_idioma_planes = $filaArray['infoIdIdioma'];
                     $detalle->titulo = $filaArray['infoTitulo'];
                     $detalle->subtitulo = $filaArray['infoSubtitulo'];
+                    $detalle->titulo_notificacion = $filaArray['infoTiNoti'];
+                    $detalle->descripcion_notificacion = $filaArray['infoDesNoti'];
                     $detalle->save();
                 }
             }
