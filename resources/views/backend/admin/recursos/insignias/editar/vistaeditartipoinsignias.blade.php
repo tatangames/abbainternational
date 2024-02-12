@@ -149,10 +149,6 @@
 
                             <td>
                                 <input name="arraySubtitulo[]" disabled value="{{ $item->texto_2 }}" class="form-control" type="text">
-
-                                <input name="arrayNoti[]" style="display: none" disabled value="{{ $item->titulo_notificacion }}" class="form-control" type="text">
-                                <input name="arraySubtitulo[]" style="display: none" disabled value="{{ $item->descripcion_notificacion }}" class="form-control" type="text">
-
                             </td>
 
                             <td>
@@ -201,18 +197,6 @@
                                     <input type="text" maxlength="200" autocomplete="off" class="form-control" id="subtitulo-plan">
                                 </div>
 
-
-
-                                <div class="form-group">
-                                    <label>Título Notificación</label>
-                                    <input type="text" maxlength="50" autocomplete="off" class="form-control" id="titulo-notificacion">
-                                </div>
-
-                                <div class="form-group">
-                                    <label>Descripción Notificación</label>
-                                    <input type="text" maxlength="60" autocomplete="off" class="form-control" id="descripcion-notificacion">
-                                </div>
-
                             </div>
                         </div>
                     </form>
@@ -251,17 +235,6 @@
                                 <div class="form-group">
                                     <label>Descripción (Opcional)</label>
                                     <input type="text" maxlength="200" autocomplete="off" class="form-control" id="subtitulo-plan-editado">
-                                </div>
-
-
-                                <div class="form-group">
-                                    <label>Título Notificación</label>
-                                    <input type="text" maxlength="50" autocomplete="off" class="form-control" id="titulo-notificacion-editado">
-                                </div>
-
-                                <div class="form-group">
-                                    <label>Descripción Notificación</label>
-                                    <input type="text" maxlength="60" autocomplete="off" class="form-control" id="descripcion-notificacion-editado">
                                 </div>
 
                             </div>
@@ -358,9 +331,6 @@
             var titulo = document.getElementById('titulo-plan-editado').value;
             var subtitulo = document.getElementById('subtitulo-plan-editado').value; // opcional
 
-            var tituloNoti = document.getElementById('titulo-notificacion-editado').value;
-            var descripcionNoti = document.getElementById('descripcion-notificacion-editado').value; // opcional
-
 
 
             if(titulo === ''){
@@ -375,24 +345,9 @@
             }
 
 
-            if(tituloNoti === ''){
-                toastr.error('Título Notificación es requerido')
-                return;
-            }
-
-            if(descripcionNoti === ''){
-                toastr.error('Descripción Notificación es requerido')
-                return;
-            }
-
-
-
             // Actualizar la fila con las referencias
             referenciaArrayTitulo.val(titulo);
             referenciaArraySubtitulo.val(subtitulo);
-
-            referenciaArrayTituloNoti.val(tituloNoti);
-            referenciaArrayDesNoti.val(descripcionNoti);
 
             $('#modalDatosEditados').modal('hide');
         }
@@ -449,10 +404,6 @@
             var titulo = document.getElementById('titulo-plan').value;
             var subtitulo = document.getElementById('subtitulo-plan').value; // opcional
 
-
-            var tituloNoti = document.getElementById('titulo-notificacion').value;
-            var desNoti = document.getElementById('descripcion-notificacion').value; // opcional
-
             if(titulo === ''){
                 toastr.error('Título es requerido')
                 return;
@@ -463,20 +414,6 @@
                 toastr.error('Descripción 200 caracteres máximo')
                 return;
             }
-
-
-            if(tituloNoti === ''){
-                toastr.error('Título Notificación es requerido')
-                return;
-            }
-
-            if(desNoti === ''){
-                toastr.error('Descripción Notificación es requerido')
-                return;
-            }
-
-
-
 
             // es nuevo idioma
             let valorNull = 0;
@@ -504,8 +441,6 @@
 
                 "<td>" +
                 "<input name='arraySubtitulo[]' disabled value='" + subtitulo + "' class='form-control' type='text'>" +
-                "<input name='arrayNoti[]' style='display: none' disabled value='" + tituloNoti + "' class='form-control' type='text'>" +
-                "<input name='arraySubtitulo[]' style='display: none' disabled value='" + desNoti + "' class='form-control' type='text'>" +
                 "</td>" +
 
 
@@ -587,20 +522,15 @@
             var arrayTitulo = $("input[name='arrayTitulo[]']").map(function(){return $(this).val();}).get();
             var arraySubtitulo = $("input[name='arraySubtitulo[]']").map(function(){return $(this).val();}).get();
 
-            var arrayTiNoti = $("input[name='arrayTiNoti[]']").map(function(){return $(this).val();}).get();
-            var arrayDesNoti = $("input[name='arrayDesNoti[]']").map(function(){return $(this).val();}).get();
-
 
             for(var i = 0; i < arrayIdIdioma.length; i++){
                 let infoIdInsigniaTexto = arrayIdInsigniaTexto[i];
                 let infoIdIdioma = arrayIdIdioma[i];
                 let infoTitulo = arrayTitulo[i];
                 let infoSubtitulo = arraySubtitulo[i];
-                let infoTiNoti = arrayTiNoti[i];
-                let infoDesNoti = arrayDesNoti[i];
 
                 // ESTOS NOMBRES SE UTILIZAN EN CONTROLADOR
-                contenedorArray.push({ infoIdInsigniaTexto, infoIdIdioma, infoTitulo, infoSubtitulo, infoTiNoti, infoDesNoti});
+                contenedorArray.push({ infoIdInsigniaTexto, infoIdIdioma, infoTitulo, infoSubtitulo});
             }
 
             formData.append('contenedorArray', JSON.stringify(contenedorArray));

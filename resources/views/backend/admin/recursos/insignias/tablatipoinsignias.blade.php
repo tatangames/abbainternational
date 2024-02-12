@@ -7,6 +7,7 @@
                         <table id="tabla" class="table table-bordered table-striped">
                             <thead>
                             <tr>
+                                <th style="width: 4%">ID</th>
                                 <th style="width: 8%">Título</th>
                                 <th style="width: 8%">Imagen</th>
                                 <th style="width: 4%">Opciones</th>
@@ -16,6 +17,7 @@
 
                             @foreach($listado as $dato)
                                 <tr>
+                                    <td style="width: 4%">{{ $dato->id }}</td>
                                     <td style="width: 8%">{{ $dato->titulo }}</td>
                                     <td>
                                         <center><img alt="Imagenes" src="{{ url('storage/archivos/'.$dato->imagen) }}" width="100px" height="100px" /></center>

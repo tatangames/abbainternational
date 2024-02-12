@@ -1079,23 +1079,19 @@ class ApiInicioController extends Controller
 
 
 
-    public function compartirAplicacion(Request $request)
-    {
+    public function compartirAplicacion(Request $request){
 
         $rules = array(
             'iduser' => 'required',
             'idiomaplan' => 'required',
         );
 
-
         $validator = Validator::make($request->all(), $rules);
-        if ($validator->fails()) {
-            return ['success' => 0,
-                'msj' => "validación incorrecta"
-            ];
-        }
+        if ($validator->fails()) { return ['success' => 0,'msj' => "validación incorrecta" ]; }
 
         $tokenApi = $request->header('Authorization');
+
+
 
         if ($userToken = JWTAuth::user($tokenApi)) {
 
@@ -1104,7 +1100,9 @@ class ApiInicioController extends Controller
             DB::beginTransaction();
             try {
 
-                $fechaCarbon = retornoZonaHorariaDepaCarbonNow($userToken->id_iglesia);
+                $idiomaTexto = $request->idiomaplan;
+
+                $fechaCarbon = $this->retornoZonaHorariaDepaCarbonNow($userToken->id_iglesia);
 
                 // se debe crear la insiginia si es primera vez
                 // ID: 3 - COMPARTIR APLICACION
@@ -1112,7 +1110,59 @@ class ApiInicioController extends Controller
                     ->where('id_usuario', $userToken->id)->first()){
                     //ya esta registrado, se debera sumar un punto
 
+                    Log::info("creacion conteo");
+
+                    $infoConteo = InsigniasUsuariosConteo::where('id_tipo_insignia', 3)
+                        ->where('id_usuarios', $userToken->id)
+                        ->first();
+
+                    $conteo = $infoConteo->conteo;
+                    $conteo++;
+
+                    $arrayNiveles = NivelesInsignias::where('id_tipo_insignia', 3)
+                        ->orderBy('nivel', 'ASC')
+                        ->get();
+
+                    // verificar si ya alcanzo nivel
+                    foreach ($arrayNiveles as $dato){
+
+                        if($conteo >= $dato->nivel){
+                            // pero verificar que no este el hito registrado
+                            if(InsigniasUsuariosDetalle::where('id_niveles_insignias', $dato->id)
+                                ->where('id_usuarios', $userToken->id)
+                                ->first()){
+                                // no hacer nada porque ya esta el hito
+
+                            }else{
+                                // registrar hito - nivel y salir bucle
+                                $nuevoDeta = new InsigniasUsuariosDetalle();
+                                $nuevoDeta->id_niveles_insignias = $dato->id;
+                                $nuevoDeta->id_usuarios = $userToken->id;
+                                $nuevoDeta->fecha = $fechaCarbon;
+                                $nuevoDeta->save();
+                                Log::info("hito registrado");
+                                break;
+                            }
+                        }
+                    }
+
+                    // maximo nivel
+                    $maxNiveles = NivelesInsignias::where('id_tipo_insignia', 3)->max('nivel');
+
+                    if($conteo <= $maxNiveles){
+
+                       // solo actualizar conteo
+
+                        InsigniasUsuariosConteo::where('id_tipo_insignia', 3)
+                            ->where('id_usuarios', $userToken->id)
+                            ->update(['conteo' => $conteo]);
+
+                        Log::info("conteo actualizado");
+                    }
+
                 }else{
+
+                    Log::info("nueva creacion");
 
                     $nuevaInsignia = new InsigniasUsuarios();
                     $nuevaInsignia->id_tipo_insignia = 3;
@@ -1126,6 +1176,19 @@ class ApiInicioController extends Controller
                     $nuevoConteo->conteo = 1;
                     $nuevoConteo->save();
 
+                    // Que ID tiene nivel 1 del insignia compartir App
+                    // SIEMPRE EXISTE NIVEL 1
+                    $infoIdNivel = NivelesInsignias::where('id_tipo_insignia', 3)
+                        ->where('nivel', 1)
+                        ->first();
+
+                    // hito - por defecto nivel 1
+                    $nuevoHito = new InsigniasUsuariosDetalle();
+                    $nuevoHito->id_niveles_insignias = $infoIdNivel->id;
+                    $nuevoHito->id_usuarios = $userToken->id;
+                    $nuevoHito->fecha = $fechaCarbon;
+                    $nuevoHito->save();
+
                     $arrayOneSignal = UsuarioNotificaciones::where('id_usuario', $userToken)->get();
                     $pilaOneSignal = array();
                     $hayIdOne = false;
@@ -1137,11 +1200,17 @@ class ApiInicioController extends Controller
                     }
 
                     if($hayIdOne){
+                        // 3: INSIGNIA DE COMPARTIR
+                        $datosRaw = $this->retornoTitulosNotificaciones(3, $idiomaTexto);
+                        $tiNo = $datosRaw['titulo'];
+                        $desNo = $datosRaw['descripcion'];
+
+                        Log::info("se envio notificacion");
+
                         // como es primera vez, se necesita enviar notificacion
-                        dispatch(new EnviarNotificacion($pilaOneSignal, $tituloOne, $descripcionOne));
+                        dispatch(new EnviarNotificacion($pilaOneSignal, $tiNo, $desNo));
                     }
                 }
-
 
                 DB::commit();
                 return ['success' => 1];
@@ -1153,5 +1222,30 @@ class ApiInicioController extends Controller
             return ['success' => 2];
         }
     }
+
+
+
+    // RETORNO TITULO Y DESCRIPCION PARA NOTIFICACIONES
+    private function retornoTitulosNotificaciones($idInsignia, $idiomaTexto){
+
+        if($infoTexto = InsigniasTextos::where('id_idioma_planes', $idiomaTexto)
+            ->where('id_tipo_insignia', $idInsignia)
+            ->first()){
+
+            return ['titulo' => $infoTexto->titulo_notificacion,
+                'descripcion' => $infoTexto->descripcion_notificacion];
+
+        }else{
+            // si no encuentra sera por defecto español
+
+            $infoTexto = InsigniasTextos::where('id_idioma_planes', 1)
+                ->where('id_tipo_insignia', $idInsignia)
+                ->first();
+
+            return ['titulo' => $infoTexto->titulo_notificacion,
+                'descripcion' => $infoTexto->descripcion_notificacion];
+        }
+    }
+
 
 }

@@ -7,19 +7,18 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * TITULO DE LA INSIGINIAS Y DESCRIPCIONES
+     * Run the migrations.
      */
     public function up(): void
     {
-        Schema::create('insignias_textos', function (Blueprint $table) {
+        Schema::create('notificacion_textos', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('id_tipo_insignia')->unsigned();
+            $table->bigInteger('id_tiponoti_textos')->unsigned();
             $table->bigInteger('id_idioma_planes')->unsigned();
 
-            $table->string('texto_1', 200);
-            $table->string('texto_2', 200)->nullable();
+            $table->string('descripción', 60);
 
-            $table->foreign('id_tipo_insignia')->references('id')->on('tipo_insignias');
+            $table->foreign('id_tiponoti_textos')->references('id')->on('tipo_notificacion_textos');
             $table->foreign('id_idioma_planes')->references('id')->on('idioma_planes');
         });
     }
@@ -29,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('insignias_textos');
+        Schema::dropIfExists('notificacion_textos');
     }
 };

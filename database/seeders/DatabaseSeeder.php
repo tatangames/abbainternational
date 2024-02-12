@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
         $this->call(IdiomaPlanesSeeder::class);
         $this->call(TipoVideoSeeder::class);
         $this->call(ComparteAppSeeder::class);
+        $this->call(NotificacionTextoSeeder::class);
 
     }
 }
