@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * TIPO DE NOTIFICACION PARA LOS TEXTOS
      */
     public function up(): void
     {

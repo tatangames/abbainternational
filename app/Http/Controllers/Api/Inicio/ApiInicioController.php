@@ -19,6 +19,7 @@ use App\Models\InsigniasUsuariosConteo;
 use App\Models\InsigniasUsuariosDetalle;
 use App\Models\LecturaDia;
 use App\Models\NivelesInsignias;
+use App\Models\NotificacionTextos;
 use App\Models\Planes;
 use App\Models\PlanesBlockDetalle;
 use App\Models\PlanesBlockDetaTextos;
@@ -1092,8 +1093,8 @@ class ApiInicioController extends Controller
         $tokenApi = $request->header('Authorization');
 
 
-
         if ($userToken = JWTAuth::user($tokenApi)) {
+
 
             // GUARDAR PUNTO DE COMPARTIR APLICACION
 
@@ -1101,16 +1102,26 @@ class ApiInicioController extends Controller
             try {
 
                 $idiomaTexto = $request->idiomaplan;
-
                 $fechaCarbon = $this->retornoZonaHorariaDepaCarbonNow($userToken->id_iglesia);
 
-                // se debe crear la insiginia si es primera vez
-                // ID: 3 - COMPARTIR APLICACION
+
+                $arrayOneSignal = UsuarioNotificaciones::where('id_usuario', $userToken->id)->get();
+                $pilaOneSignal = array();
+                $hayIdOne = false;
+                foreach ($arrayOneSignal as $item){
+                    if($item->onesignal != null){
+                        $hayIdOne = true;
+                        array_push($pilaOneSignal, $item->onesignal);
+                    }
+                }
+
+
+                // COMPARTIR APLICACION
                 if(InsigniasUsuarios::where('id_tipo_insignia', 3)
                     ->where('id_usuario', $userToken->id)->first()){
                     //ya esta registrado, se debera sumar un punto
 
-                    Log::info("creacion conteo");
+                    // AQUI SE SUMA CONTADOR Y SE VERIFICA SI GANARA EL HITO
 
                     $infoConteo = InsigniasUsuariosConteo::where('id_tipo_insignia', 3)
                         ->where('id_usuarios', $userToken->id)
@@ -1123,6 +1134,10 @@ class ApiInicioController extends Controller
                         ->orderBy('nivel', 'ASC')
                         ->get();
 
+                    $enviarNoti = false;
+
+
+
                     // verificar si ya alcanzo nivel
                     foreach ($arrayNiveles as $dato){
 
@@ -1131,18 +1146,33 @@ class ApiInicioController extends Controller
                             if(InsigniasUsuariosDetalle::where('id_niveles_insignias', $dato->id)
                                 ->where('id_usuarios', $userToken->id)
                                 ->first()){
-                                // no hacer nada porque ya esta el hito
+                                // no hacer nada porque ya esta el hito, se debe seguir el siguiente nivel
 
                             }else{
+                                $enviarNoti = true;
+
                                 // registrar hito - nivel y salir bucle
                                 $nuevoDeta = new InsigniasUsuariosDetalle();
                                 $nuevoDeta->id_niveles_insignias = $dato->id;
                                 $nuevoDeta->id_usuarios = $userToken->id;
                                 $nuevoDeta->fecha = $fechaCarbon;
                                 $nuevoDeta->save();
-                                Log::info("hito registrado");
                                 break;
                             }
+                        }
+                    }
+
+                    if($enviarNoti){
+
+                        if($hayIdOne){
+                            // ID 2: NOTIFICACION PORQUE GANO HITO
+                            $datosRaw = $this->retornoTitulosNotificaciones(1, $idiomaTexto);
+                            $tiNo = $datosRaw['titulo'];
+                            $desNo = $datosRaw['descripcion'];
+
+
+                            // como es primera vez, se necesita enviar notificacion
+                            dispatch(new EnviarNotificacion($pilaOneSignal, $tiNo, $desNo));
                         }
                     }
 
@@ -1157,12 +1187,11 @@ class ApiInicioController extends Controller
                             ->where('id_usuarios', $userToken->id)
                             ->update(['conteo' => $conteo]);
 
-                        Log::info("conteo actualizado");
                     }
 
                 }else{
 
-                    Log::info("nueva creacion");
+                    // PRIMERA VEZ GANANDO INSIGNIA
 
                     $nuevaInsignia = new InsigniasUsuarios();
                     $nuevaInsignia->id_tipo_insignia = 3;
@@ -1189,23 +1218,11 @@ class ApiInicioController extends Controller
                     $nuevoHito->fecha = $fechaCarbon;
                     $nuevoHito->save();
 
-                    $arrayOneSignal = UsuarioNotificaciones::where('id_usuario', $userToken)->get();
-                    $pilaOneSignal = array();
-                    $hayIdOne = false;
-                    foreach ($arrayOneSignal as $item){
-                        if($item->onesignal != null){
-                            $hayIdOne = true;
-                            array_push($pilaOneSignal, $item->onesignal);
-                        }
-                    }
-
                     if($hayIdOne){
-                        // 3: INSIGNIA DE COMPARTIR
-                        $datosRaw = $this->retornoTitulosNotificaciones(3, $idiomaTexto);
+                        // ID 1: GANO INSIGNIA COMPARTIR APP
+                        $datosRaw = $this->retornoTitulosNotificaciones(1, $idiomaTexto);
                         $tiNo = $datosRaw['titulo'];
                         $desNo = $datosRaw['descripcion'];
-
-                        Log::info("se envio notificacion");
 
                         // como es primera vez, se necesita enviar notificacion
                         dispatch(new EnviarNotificacion($pilaOneSignal, $tiNo, $desNo));
@@ -1217,6 +1234,7 @@ class ApiInicioController extends Controller
             }catch(\Throwable $e) {
                 DB::rollback();
                 Log::info("error: " . $e);
+                return ['success' => 99];
             }
         }else{
             return ['success' => 2];
@@ -1226,24 +1244,25 @@ class ApiInicioController extends Controller
 
 
     // RETORNO TITULO Y DESCRIPCION PARA NOTIFICACIONES
-    private function retornoTitulosNotificaciones($idInsignia, $idiomaTexto){
+    private function retornoTitulosNotificaciones($idTipoNoti, $idiomaTexto){
 
-        if($infoTexto = InsigniasTextos::where('id_idioma_planes', $idiomaTexto)
-            ->where('id_tipo_insignia', $idInsignia)
+        if($infoTexto = NotificacionTextos::where('id_tiponoti_textos', $idTipoNoti)
+            ->where('id_idioma_planes', $idiomaTexto)
             ->first()){
 
-            return ['titulo' => $infoTexto->titulo_notificacion,
-                'descripcion' => $infoTexto->descripcion_notificacion];
+            return ['titulo' => $infoTexto->titulo,
+                    'descripcion' => $infoTexto->descripcion,
+                ];
 
         }else{
             // si no encuentra sera por defecto español
 
-            $infoTexto = InsigniasTextos::where('id_idioma_planes', 1)
-                ->where('id_tipo_insignia', $idInsignia)
+            $infoTexto = NotificacionTextos::where('id_tiponoti_textos', $idTipoNoti)
+                ->where('id_idioma_planes', 1)
                 ->first();
 
-            return ['titulo' => $infoTexto->titulo_notificacion,
-                'descripcion' => $infoTexto->descripcion_notificacion];
+            return ['titulo' => $infoTexto->titulo,
+                'descripcion' => $infoTexto->descripcion];
         }
     }
 
