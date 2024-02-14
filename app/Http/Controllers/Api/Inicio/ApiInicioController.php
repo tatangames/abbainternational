@@ -1061,7 +1061,7 @@ class ApiInicioController extends Controller
                                 // SUBIO NIVEL HITO - COMPARTIR APLICACION
                                 $notiHistorial = new NotificacionUsuario();
                                 $notiHistorial->id_usuario = $userToken->id;
-                                $notiHistorial->tipo_tipo_notificacion = 2;
+                                $notiHistorial->id_tipo_notificacion = 2;
                                 $notiHistorial->fecha = $fechaCarbon;
                                 $notiHistorial->save();
 
@@ -1137,7 +1137,7 @@ class ApiInicioController extends Controller
                         // Guardar Historial Notificacion Usuario
                         $notiHistorial = new NotificacionUsuario();
                         $notiHistorial->id_usuario = $userToken->id;
-                        $notiHistorial->tipo_tipo_notificacion = 1; // POR GANAR PRIMERA INSIGNIA COMPARTIR APLICACION
+                        $notiHistorial->id_tipo_notificacion = 1; // POR GANAR PRIMERA INSIGNIA COMPARTIR APLICACION
                         $notiHistorial->fecha = $fechaCarbon;
                         $notiHistorial->save();
 
@@ -1251,7 +1251,7 @@ class ApiInicioController extends Controller
                                 // SUBIO NIVEL HITO - INSIGNIA COMPARTIR DEVOCIONAL
                                 $notiHistorial = new NotificacionUsuario();
                                 $notiHistorial->id_usuario = $userToken->id;
-                                $notiHistorial->tipo_tipo_notificacion = 4;
+                                $notiHistorial->id_tipo_notificacion = 4;
                                 $notiHistorial->fecha = $fechaCarbon;
                                 $notiHistorial->save();
 
@@ -1323,7 +1323,7 @@ class ApiInicioController extends Controller
                     // PRIMERA VEZ - INSIGNIA COMPARTIR DEVOCIONAL
                     $notiHistorial = new NotificacionUsuario();
                     $notiHistorial->id_usuario = $userToken->id;
-                    $notiHistorial->tipo_tipo_notificacion = 3;
+                    $notiHistorial->id_tipo_notificacion = 3;
                     $notiHistorial->fecha = $fechaCarbon;
                     $notiHistorial->save();
 

@@ -753,7 +753,7 @@ class ApiPlanesController extends Controller
                                     // SUBIO NIVEL HITO - INSIGNIA COMPARTIR DEVOCIONAL
                                     $notiHistorial = new NotificacionUsuario();
                                     $notiHistorial->id_usuario = $userToken->id;
-                                    $notiHistorial->tipo_tipo_notificacion = 4;
+                                    $notiHistorial->id_tipo_notificacion = 4;
                                     $notiHistorial->fecha = $fechaCarbon;
                                     $notiHistorial->save();
 
@@ -830,7 +830,7 @@ class ApiPlanesController extends Controller
                     // PRIMERA VEZ - INSIGNIA COMPARTIR DEVOCIONAL
                     $notiHistorial = new NotificacionUsuario();
                     $notiHistorial->id_usuario = $userToken->id;
-                    $notiHistorial->tipo_tipo_notificacion = 3;
+                    $notiHistorial->id_tipo_notificacion = 3;
                     $notiHistorial->fecha = $fechaCarbon;
                     $notiHistorial->save();
 
@@ -992,7 +992,7 @@ class ApiPlanesController extends Controller
                                 // SUBIO NIVEL HITO - PLAN FINALIZADO
                                 $notiHistorial = new NotificacionUsuario();
                                 $notiHistorial->id_usuario = $userToken->id;
-                                $notiHistorial->tipo_tipo_notificacion = 6;
+                                $notiHistorial->id_tipo_notificacion = 6;
                                 $notiHistorial->fecha = $fechaCarbon;
                                 $notiHistorial->save();
 
@@ -1077,7 +1077,7 @@ class ApiPlanesController extends Controller
                     // Guardar Historial Notificacion Usuario
                     $notiHistorial = new NotificacionUsuario();
                     $notiHistorial->id_usuario = $userToken->id;
-                    $notiHistorial->tipo_tipo_notificacion = 5; // POR GANAR PRIMERA INSIGNIA PLAN FINALIZADO
+                    $notiHistorial->id_tipo_notificacion = 5; // POR GANAR PRIMERA INSIGNIA PLAN FINALIZADO
                     $notiHistorial->fecha = $fechaCarbon;
                     $notiHistorial->save();
 
@@ -1564,7 +1564,7 @@ class ApiPlanesController extends Controller
                                     // SUBIO NIVEL INSIGNIA COMPARTIR DEVOCIONAL
                                     $notiHistorial = new NotificacionUsuario();
                                     $notiHistorial->id_usuario = $userToken->id;
-                                    $notiHistorial->tipo_tipo_notificacion = 4;
+                                    $notiHistorial->id_tipo_notificacion = 4;
                                     $notiHistorial->fecha = $fechaCarbon;
                                     $notiHistorial->save();
 
@@ -1635,7 +1635,7 @@ class ApiPlanesController extends Controller
                         // INSIGNIA COMPARTIR DEVOCIONAL
                         $notiHistorial = new NotificacionUsuario();
                         $notiHistorial->id_usuario = $userToken->id;
-                        $notiHistorial->tipo_tipo_notificacion = 3;
+                        $notiHistorial->id_tipo_notificacion = 3;
                         $notiHistorial->fecha = $fechaCarbon;
                         $notiHistorial->save();
 

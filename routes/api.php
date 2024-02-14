@@ -179,7 +179,8 @@ Route::middleware('verificarToken')->group(function () {
 
 
 
-
+    // Listado notificaciones para el usuario -> Paginate
+    Route::post('app/notificaciones/listado', [ApiComunidadController::class,'listadoNotificaciones']);
 
 
 

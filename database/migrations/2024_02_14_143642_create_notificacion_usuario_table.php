@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('notificacion_usuario', function (Blueprint $table) {
             $table->id();
             $table->bigInteger('id_usuario')->unsigned();
-            $table->bigInteger('tipo_tipo_notificacion')->unsigned();
+            $table->bigInteger('id_tipo_notificacion')->unsigned();
 
             $table->date('fecha');
 

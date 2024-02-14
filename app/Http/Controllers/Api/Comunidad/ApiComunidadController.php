@@ -7,6 +7,8 @@ use App\Models\ComunidadSolicitud;
 use App\Models\Departamentos;
 use App\Models\Iglesias;
 use App\Models\InsigniasUsuarios;
+use App\Models\NotificacionTextos;
+use App\Models\NotificacionUsuario;
 use App\Models\Pais;
 use App\Models\Usuarios;
 use App\Models\ZonaHoraria;
@@ -252,9 +254,78 @@ class ApiComunidadController extends Controller
         else{
             return ['success' => 99];
         }
-
     }
 
+
+
+    public function listadoNotificaciones(Request $request){
+        $rules = array(
+            'idiomaplan' => 'required',
+            'iduser' => 'required',
+            'page' => 'required',
+            'limit' => 'required'
+        );
+
+        $validator = Validator::make($request->all(), $rules);
+        if ( $validator->fails()){
+            return ['success' => 0, 'msj' => "validación incorrecta"];
+        }
+
+        $tokenApi = $request->header('Authorization');
+
+        // idioma, segun el usuario
+        $idiomaTextos = $request->idiomaplan;
+
+        if ($userToken = JWTAuth::user($tokenApi)) {
+
+            $hayInfo = 0;
+            $conteoNoti = NotificacionUsuario::where('id_usuario', $userToken->id)
+                ->orderBy('fecha', 'DESC')
+                ->count();
+
+            if ($conteoNoti != null && $conteoNoti > 0) {
+                $hayInfo = 1;
+            }
+
+            $page = $request->input('page', 1);
+            $limit = $request->input('limit', 10);
+
+            $arrayNotificacion = NotificacionUsuario::where('id_usuario', $userToken->id)
+                ->orderBy('fecha', 'DESC')
+                ->paginate($limit, ['*'], 'page', $page);
+
+            foreach ($arrayNotificacion as $dato){
+
+               $arrayRaw = $this->retornoTituloNotificacion($dato->id_tipo_notificacion, $idiomaTextos);
+               $dato->titulo = $arrayRaw['titulo'];
+               $dato->descripcion = $arrayRaw['descripcion'];
+            }
+
+            return [
+                'success' => 1,
+                'hayinfo' => $hayInfo,
+                'listado' => $arrayNotificacion
+            ];
+        }else{
+            return ['success' => 99];
+        }
+    }
+
+    private function retornoTituloNotificacion($idtiponoti, $idiomaplan){
+
+        if($infoTexto = NotificacionTextos::where('id_tipo_notificacion', $idtiponoti)
+            ->where('id_idioma_planes', $idiomaplan)->first()){
+
+            return ['titulo' => $infoTexto->titulo,
+                    'descripcion' => $infoTexto->descripcion];
+        }else{
+            $infoTexto = NotificacionTextos::where('id_tipo_notificacion', $idtiponoti)
+                ->where('id_idioma_planes', 1)->first();
+
+            return ['titulo' => $infoTexto->titulo,
+                'descripcion' => $infoTexto->descripcion];
+        }
+    }
 
 
     private function retornoZonaHorariaUsuario($idIglesia){
