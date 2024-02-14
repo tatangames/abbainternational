@@ -84,19 +84,19 @@ class InsigniasTextosSeeder extends Seeder
         ]);
 
 
-        // 5- PLANES FINALIZADOS EN GRUPOS
+        // 5- DEVOCIONAL FINALIZADOS EN GRUPOS
 
         InsigniasTextos::create([
             'id_tipo_insignia' => '5',
             'id_idioma_planes' => '1',
-            'texto_1' => 'Planes en grupos',
+            'texto_1' => 'Devocional en grupos',
             'texto_2' => 'Al compartir con tus amigos el plan, ganas puntos si tus amigos completan los devocionales y aumentar de nivel tu Insignia',
         ]);
 
         InsigniasTextos::create([
             'id_tipo_insignia' => '5',
             'id_idioma_planes' => '2',
-            'texto_1' => 'Group plans',
+            'texto_1' => 'Devotional in groups',
             'texto_2' => 'By sharing the plan with your friends, you earn points if your friends complete the devotions and level up your Badge',
         ]);
 

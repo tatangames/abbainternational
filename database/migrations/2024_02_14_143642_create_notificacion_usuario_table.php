@@ -7,17 +7,18 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * CADA VEZ QUE HABRA LA APP SE CONTARA COMO FECHA REGISTRADA
-     * // PARA MOSTRAR LOS X DIAS EN LA APP ESTE AÑO
+     * HISTORIAL DE NOTIFICACIONES PARA EL USUARIO
      */
     public function up(): void
     {
-        Schema::create('racha_dias', function (Blueprint $table) {
+        Schema::create('notificacion_usuario', function (Blueprint $table) {
             $table->id();
             $table->bigInteger('id_usuario')->unsigned();
+            $table->bigInteger('tipo_tipo_notificacion')->unsigned();
 
             $table->date('fecha');
 
+            $table->foreign('tipo_tipo_notificacion')->references('id')->on('tipo_notificacion');
             $table->foreign('id_usuario')->references('id')->on('usuarios');
         });
     }
@@ -27,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('racha_dias');
+        Schema::dropIfExists('notificacion_usuario');
     }
 };

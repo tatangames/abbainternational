@@ -7,17 +7,16 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * CADA VEZ QUE HABRA LA APP SE CONTARA COMO FECHA REGISTRADA
-     * // PARA MOSTRAR LOS X DIAS EN LA APP ESTE AÑO
+     * SE LLEVA UN CONTROL DE LOS PLANES FINALIZADOS POR USUARIO
      */
     public function up(): void
     {
-        Schema::create('racha_dias', function (Blueprint $table) {
+        Schema::create('planes_finalizado_usuario', function (Blueprint $table) {
             $table->id();
+            $table->bigInteger('id_planes')->unsigned();
             $table->bigInteger('id_usuario')->unsigned();
 
-            $table->date('fecha');
-
+            $table->foreign('id_planes')->references('id')->on('planes');
             $table->foreign('id_usuario')->references('id')->on('usuarios');
         });
     }
@@ -27,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('racha_dias');
+        Schema::dropIfExists('planes_finalizado_usuario');
     }
 };

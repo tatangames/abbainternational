@@ -39,7 +39,7 @@ class InsigniasSeeder extends Seeder
             'visible' => 1
         ]);
 
-        // 5- PLANES FINALIZADOS EN GRUPO
+        // 5- DEVOCIONAL FINALIZADO EN GRUPOS
         TipoInsignias::create([
             'imagen' => 'xx',
             'visible' => 1

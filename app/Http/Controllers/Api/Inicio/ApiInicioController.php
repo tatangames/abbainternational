@@ -20,6 +20,7 @@ use App\Models\InsigniasUsuariosDetalle;
 use App\Models\LecturaDia;
 use App\Models\NivelesInsignias;
 use App\Models\NotificacionTextos;
+use App\Models\NotificacionUsuario;
 use App\Models\Planes;
 use App\Models\PlanesBlockDetalle;
 use App\Models\PlanesBlockDetaTextos;
@@ -92,11 +93,16 @@ class ApiInicioController extends Controller
             $devo_preguntas = 1; // defecto para cuestionario nomas
             $devo_lecturaDia = "";
 
+            $arrayPlanesSeleccionado = PlanesUsuarios::where('id_usuario', $userToken)
+                ->select('id_planes')
+                ->get();
+
                 // si hay devocional para hoy segun zona horaria del usuario
                 if($arrayL = DB::table('lectura_dia AS le')
                     ->join('planes_block_detalle AS pblock', 'le.id_planes_block_detalle', '=', 'pblock.id')
                     ->join('planes_bloques AS p', 'pblock.id_planes_bloques', '=', 'p.id')
-                    ->select('p.fecha_inicio', 'pblock.id AS idblockdeta')
+                    ->select('p.fecha_inicio', 'pblock.id AS idblockdeta', 'p.id_planes')
+                    ->whereIn('p.id_planes', $arrayPlanesSeleccionado) // solo si usuario ya tiene seleccioando
                     ->whereDate('p.fecha_inicio', '=', $zonaHorariaUsuario)
                     ->first()){
 
@@ -470,114 +476,6 @@ class ApiInicioController extends Controller
 
 
 
-    public function preguntasInicioGuardarActualizar(Request $request)
-    {
-
-        $rules = array(
-            'iduser' => 'required',
-            'idblockdeta' => 'required'
-        );
-
-        // Map listado
-
-        $validator = Validator::make($request->all(), $rules);
-        if ( $validator->fails()){
-            return ['success' => 0,
-                'msj' => "validación incorrecta"
-            ];
-        }
-
-        $tokenApi = $request->header('Authorization');
-
-        if ($userToken = JWTAuth::user($tokenApi)) {
-
-            $zonaHoraria = $this->retornoZonaHorariaDepaCarbonNow($userToken->id_iglesia);
-
-            DB::beginTransaction();
-
-            try {
-
-                if($infoBlockDeta = PlanesBlockDetalle::where('id', $request->idblockdeta)->first()) {
-
-                    // COMO GUARDO PREGUNTAS, GUARDAR RACHA DEVOCIONAL
-                    if(RachaDevocional::where('id_usuario', $userToken->id)
-                        ->where('id_plan_block_deta', $request->idblockdeta)->first()){
-                        // no guardar
-                    }else{
-                        // GUARDAR UNA RACHA DEVOCIONAL
-                        $nuevaRacha = new RachaDevocional();
-                        $nuevaRacha->id_usuario = $userToken->id;
-                        $nuevaRacha->id_plan_block_deta = $request->idblockdeta;
-                        $nuevaRacha->fecha = $zonaHoraria;
-                        $nuevaRacha->save();
-                    }
-
-
-                    $infoPlanBloque = PlanesBloques::where('id', $infoBlockDeta->id_planes_bloques)->first();
-                    $infoPlan = Planes::where('id', $infoPlanBloque->id_planes)->first();
-
-                    // Verificar si usuario tiene registrado el plan, sino registrar
-                    if(PlanesUsuarios::where('id_usuario', $userToken->id)
-                        ->where('id_planes')->first()){
-                        // no hacer nada porque esta registrado
-                    }else{
-                        // vincular el plan al usuario
-                        $nuevo = new PlanesUsuarios();
-                        $nuevo->id_usuario = $userToken->id;
-                        $nuevo->id_planes = $infoPlan->id;
-                        $nuevo->fecha = $zonaHoraria;
-                        $nuevo->save();
-                    }
-
-                    if ($request->has('idpregunta')) {
-
-                        foreach ($request->idpregunta as $clave => $valor) {
-
-                            if(BloquePreguntasUsuarios::where('id_bloque_preguntas', $clave)
-                                ->where('id_usuarios', $userToken->id)->first()){
-
-                                // actualizar porque ya estan registradas
-                                BloquePreguntasUsuarios::where('id', $clave)
-                                    ->update([
-                                        'texto' => $valor['txtpregunta'],
-                                        'fecha_actualizo' => $zonaHoraria
-                                    ]);
-
-                            }else{
-                                $pregunta = new BloquePreguntasUsuarios();
-                                $pregunta->id_bloque_preguntas = $clave;
-                                $pregunta->id_usuarios = $userToken->id;
-                                $pregunta->texto = $valor['txtpregunta'];
-                                $pregunta->fecha = $zonaHoraria;
-                                $pregunta->fecha_actualizo = null;
-                                $pregunta->save();
-                            }
-                        }
-                    }
-
-
-                    // colocar plan continuar por defecto
-                    $this->retornoActualizarPlanUsuarioContinuar($userToken->id, $infoPlan->id);
-
-
-                    DB::commit();
-                    return ['success' => 1];
-                }else{
-                    return ['success' => 99];
-                }
-            }catch(\Throwable $e){
-                DB::rollback();
-                Log::info("error: " . $e);
-                return ['success' => 99];
-            }
-
-        }else{
-            return ['success' => 99];
-        }
-    }
-
-
-
     public function listadoTodosLosVideos(Request $request)
     {
 
@@ -826,10 +724,14 @@ class ApiInicioController extends Controller
                 ->where('nivel', '>', $hito_infoNivelVoy)
                 ->first()){
 
+                $infoConteo = InsigniasUsuariosConteo::where('id_tipo_insignia', $request->idinsignia)->first();
+
                 $cualNextLevel = $infoNivelSiguiente->nivel;
                 $hito_haySiguienteNivel = 1; // Si hay siguiente nivel
-                $hito_cuantoFaltan = $infoNivelSiguiente->nivel - $hito_infoNivelVoy;
+                $hito_cuantoFaltan = $infoNivelSiguiente->nivel - $infoConteo->conteo;
             }
+
+            $arrayHitoOrdenado = $hito_arrayObtenidos->sortByDesc('nivel')->values();
 
 
             $textoFalta = $this->retornoMensajeHito($idiomaTextos);
@@ -844,7 +746,7 @@ class ApiInicioController extends Controller
                 'hitohaynextlevel' => $hito_haySiguienteNivel,
                 'cualnextlevel' => $cualNextLevel,
                 'textofalta' => $textoFalta['texto2'],
-                'hitoarray' => $hito_arrayObtenidos
+                'hitoarray' => $arrayHitoOrdenado
                 ];
 
         }else{
@@ -1155,6 +1057,14 @@ class ApiInicioController extends Controller
                                 $nuevoDeta->id_usuarios = $userToken->id;
                                 $nuevoDeta->fecha = $fechaCarbon;
                                 $nuevoDeta->save();
+
+                                // SUBIO NIVEL HITO - COMPARTIR APLICACION
+                                $notiHistorial = new NotificacionUsuario();
+                                $notiHistorial->id_usuario = $userToken->id;
+                                $notiHistorial->tipo_tipo_notificacion = 2;
+                                $notiHistorial->fecha = $fechaCarbon;
+                                $notiHistorial->save();
+
                                 break;
                             }
                         }
@@ -1163,11 +1073,10 @@ class ApiInicioController extends Controller
                     if($enviarNoti){
 
                         if($hayIdOne){
-                            // 1: ES EL ID INSIGNIA COMPARTIR APP
-                            $datosRaw = $this->retornoTitulosNotificaciones($idTipoInsignia, $idiomaTexto);
+                            // SUBI DE NIVEL INSIGNIA COMPARTIR APP
+                            $datosRaw = $this->retornoTitulosNotificaciones(2, $idiomaTexto);
                             $tiNo = $datosRaw['titulo'];
-                            $desNo = $datosRaw['descripcionhito'];
-
+                            $desNo = $datosRaw['descripcion'];
 
                             // como es primera vez, se necesita enviar notificacion
                             dispatch(new EnviarNotificacion($pilaOneSignal, $tiNo, $desNo));
@@ -1184,7 +1093,6 @@ class ApiInicioController extends Controller
                         InsigniasUsuariosConteo::where('id_tipo_insignia', $idTipoInsignia)
                             ->where('id_usuarios', $userToken->id)
                             ->update(['conteo' => $conteo]);
-
                     }
 
                 }else{
@@ -1219,10 +1127,21 @@ class ApiInicioController extends Controller
                     $nuevoHito->save();
 
                     if($hayIdOne){
-                        // ID 1: TIPO DE INSIGNIA COMPARTIR APP
-                        $datosRaw = $this->retornoTitulosNotificaciones($idTipoInsignia, $idiomaTexto);
+                        // GANE INSIGNIA COMPARTIR APP
+                        $datosRaw = $this->retornoTitulosNotificaciones(1, $idiomaTexto);
                         $tiNo = $datosRaw['titulo'];
                         $desNo = $datosRaw['descripcion'];
+
+
+
+                        // Guardar Historial Notificacion Usuario
+                        $notiHistorial = new NotificacionUsuario();
+                        $notiHistorial->id_usuario = $userToken->id;
+                        $notiHistorial->tipo_tipo_notificacion = 1; // POR GANAR PRIMERA INSIGNIA COMPARTIR APLICACION
+                        $notiHistorial->fecha = $fechaCarbon;
+                        $notiHistorial->save();
+
+
 
                         // como es primera vez, se necesita enviar notificacion
                         dispatch(new EnviarNotificacion($pilaOneSignal, $tiNo, $desNo));
@@ -1327,6 +1246,15 @@ class ApiInicioController extends Controller
                                 $nuevoDeta->id_usuarios = $userToken->id;
                                 $nuevoDeta->fecha = $fechaCarbon;
                                 $nuevoDeta->save();
+
+
+                                // SUBIO NIVEL HITO - INSIGNIA COMPARTIR DEVOCIONAL
+                                $notiHistorial = new NotificacionUsuario();
+                                $notiHistorial->id_usuario = $userToken->id;
+                                $notiHistorial->tipo_tipo_notificacion = 4;
+                                $notiHistorial->fecha = $fechaCarbon;
+                                $notiHistorial->save();
+
                                 break;
                             }
                         }
@@ -1335,10 +1263,10 @@ class ApiInicioController extends Controller
                     if($enviarNoti){
 
                         if($hayIdOne){
-                            // 2: ES EL ID INSIGNIA COMPARTIR DEVOCIONAL
-                            $datosRaw = $this->retornoTitulosNotificaciones($idTipoInsignia, $idiomaTexto);
+                            // SUBI DE NIVEL INSIGNIA COMPARTIR DEVOCIONAL
+                            $datosRaw = $this->retornoTitulosNotificaciones(4, $idiomaTexto);
                             $tiNo = $datosRaw['titulo'];
-                            $desNo = $datosRaw['descripcionhito'];
+                            $desNo = $datosRaw['descripcion'];
 
 
                             // como es primera vez, se necesita enviar notificacion
@@ -1390,9 +1318,20 @@ class ApiInicioController extends Controller
                     $nuevoHito->fecha = $fechaCarbon;
                     $nuevoHito->save();
 
+
+
+                    // PRIMERA VEZ - INSIGNIA COMPARTIR DEVOCIONAL
+                    $notiHistorial = new NotificacionUsuario();
+                    $notiHistorial->id_usuario = $userToken->id;
+                    $notiHistorial->tipo_tipo_notificacion = 3;
+                    $notiHistorial->fecha = $fechaCarbon;
+                    $notiHistorial->save();
+
+
+
                     if($hayIdOne){
-                        // ID 1: TIPO DE INSIGNIA COMPARTIR APP
-                        $datosRaw = $this->retornoTitulosNotificaciones($idTipoInsignia, $idiomaTexto);
+                        // GANE INSIGNIA COMPARTIR DEVOCIONAL
+                        $datosRaw = $this->retornoTitulosNotificaciones(3, $idiomaTexto);
                         $tiNo = $datosRaw['titulo'];
                         $desNo = $datosRaw['descripcion'];
 
@@ -1425,27 +1364,25 @@ class ApiInicioController extends Controller
 
 
     // RETORNO TITULO Y DESCRIPCION PARA NOTIFICACIONES
-    private function retornoTitulosNotificaciones($idTipoInsignia, $idiomaTexto){
+    private function retornoTitulosNotificaciones($idTipoNotificacion, $idiomaTexto){
 
-        if($infoTexto = NotificacionTextos::where('id_tipo_insignia', $idTipoInsignia)
+        if($infoTexto = NotificacionTextos::where('id_tipo_notificacion', $idTipoNotificacion)
             ->where('id_idioma_planes', $idiomaTexto)
             ->first()){
 
             return ['titulo' => $infoTexto->titulo,
                     'descripcion' => $infoTexto->descripcion,
-                    'descripcionhito' => $infoTexto->descripcion_hito,
                 ];
 
         }else{
 
             // si no encuentra sera por defecto español
-            $infoTexto = NotificacionTextos::where('id_tipo_insignia', $idTipoInsignia)
+            $infoTexto = NotificacionTextos::where('id_tipo_notificacion', $idTipoNotificacion)
                 ->where('id_idioma_planes', 1)
                 ->first();
 
             return ['titulo' => $infoTexto->titulo,
                 'descripcion' => $infoTexto->descripcion,
-                'descripcionhito' => $infoTexto->descripcion_hito,
             ];
         }
     }

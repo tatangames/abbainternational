@@ -8,7 +8,10 @@ use App\Models\ComparteAppTextos;
 use App\Models\IdiomaPlanes;
 use App\Models\ImagenesDelDia;
 use App\Models\ImagenPreguntas;
+use App\Models\NotificacionTextos;
+use App\Models\NotificacionUsuario;
 use App\Models\Planes;
+use App\Models\TipoNotificacion;
 use App\Models\TipoVideo;
 use App\Models\VideosHoy;
 use App\Models\VideosTextos;
@@ -731,14 +734,167 @@ class RecursosController extends Controller
             DB::rollback();
             return ['success' => 99];
         }
-
-
-
-
     }
 
 
 
+
+
+    //****************** NOTIFICACIONES  *****************************************
+
+
+    public function indexNotificacion(){
+        return view('backend.admin.recursos.notificacion.vistanotificacion');
+    }
+
+
+    public function tablaNotificacion(){
+
+        $listado = TipoNotificacion::orderBy('id', 'ASC')->get();
+
+        foreach ($listado as $dato){
+
+            $datosRaw = $this->retornoTituloTipoNotificacion($dato->id);
+            $dato->titulo = $datosRaw->titulo;
+            $dato->descripcion = $datosRaw->descripcion;
+            $dato->descripcionhito = $datosRaw->descripcion_hito;
+        }
+
+        return view('backend.admin.recursos.notificacion.tablanotificacion', compact('listado'));
+    }
+
+
+    private function retornoTituloTipoNotificacion($idtipoNoti){
+
+        // solo buscar tipo español
+
+        $infoTexto = NotificacionTextos::where('id_tipo_notificacion', $idtipoNoti)
+            ->where('id_idioma_planes', 1)->first();
+
+        return $infoTexto;
+    }
+
+
+
+    public function indexNotificacionEditar($idTipoNoti){ // tabla notificacion_textos
+
+
+        $arrayIdiomas = IdiomaPlanes::orderBy('id', 'ASC')->get();
+
+        $listado = NotificacionTextos::where('id_tipo_notificacion', $idTipoNoti)->get();
+
+        $contador = 0;
+        foreach ($listado as $dato){
+            $contador++;
+            $dato->contador = $contador;
+
+            $infoIdioma = IdiomaPlanes::where('id', $dato->id_idioma_planes)->first();
+            $dato->idioma = $infoIdioma->nombre;
+        }
+
+        return view('backend.admin.recursos.notificacion.editar.vistanotificacioneditar', compact('arrayIdiomas', 'idTipoNoti', 'listado'));
+    }
+
+
+    public function borrarImagenTipoNotificacion(Request $request){
+
+        $rules = array(
+            'idtiponoti' => 'required',
+        );
+
+        $validator = Validator::make($request->all(), $rules);
+
+        if ($validator->fails()) {
+            return ['success' => 0];
+        }
+
+        $infoTipoNoti = TipoNotificacion::where('id', $request->idtiponoti)->first();
+        $imagenOld = $infoTipoNoti->imagen;
+
+        if($imagenOld != null){
+            if(Storage::disk('archivos')->exists($imagenOld)){
+                Storage::disk('archivos')->delete($imagenOld);
+            }
+
+            TipoNotificacion::where('id', $infoTipoNoti->id)->update([
+                'imagen' => null,
+            ]);
+        }
+
+        return ['success' => 1];
+    }
+
+
+    public function actualizarImagenTipoNotificacion(Request $request){
+
+        $rules = array(
+            'idtiponoti' => 'required',
+        );
+
+        $validator = Validator::make($request->all(), $rules);
+
+        if ($validator->fails()) {
+            return ['success' => 0];
+        }
+
+        if($infoTipo = TipoNotificacion::where('id', $request->idtiponoti)->first()){
+
+            $cadena = Str::random(15);
+            $tiempo = microtime();
+            $union = $cadena . $tiempo;
+            $nombre = str_replace(' ', '_', $union);
+
+            $extension = '.' . $request->imagen->getClientOriginalExtension();
+            $nombreFoto = $nombre . strtolower($extension);
+            $avatar = $request->file('imagen');
+            $upload = Storage::disk('archivos')->put($nombreFoto, \File::get($avatar));
+
+            if($upload){
+
+                $imagenOld = $infoTipo->imagen;
+
+                if($imagenOld != null){
+                    if(Storage::disk('archivos')->exists($imagenOld)){
+                        Storage::disk('archivos')->delete($imagenOld);
+                    }
+                }
+
+                TipoNotificacion::where('id', $infoTipo->id)->update([
+                    'imagen' => $nombreFoto,
+                ]);
+
+                return ['success' => 1];
+            }else{
+                return ['success' => 99];
+            }
+
+        }else{
+            return ['success' => 1];
+        }
+    }
+
+
+    public function actualizarTextosNotificacion(Request $request){
+
+        $rules = array(
+            'idfila' => 'required',
+            'titulo' => 'required',
+            'descripcion' => 'required',
+        );
+
+        $validator = Validator::make($request->all(), $rules);
+
+        if ($validator->fails()) {
+            return ['success' => 0];
+        }
+
+        NotificacionTextos::where('id', $request->idfila)->update([
+            'titulo' => $request->titulo,
+            'descripcion' => $request->descripcion,
+        ]);
+
+        return ['success' => 1];
+    }
 
 
 }

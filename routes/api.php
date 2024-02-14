@@ -69,8 +69,7 @@ Route::middleware('verificarToken')->group(function () {
     // devuelve informacion del plan a continuar, todos el bloque
     Route::post('app/plan/misplanes/informacion/bloque', [ApiPlanesController::class,'informacionBloqueMiPlan']);
 
-    // actualizar el check de cada plan
-    Route::post('app/plan/misplanes/actualizar/check', [ApiPlanesController::class,'actualizarCheckBloqueMiPlan']);
+
 
     // informacion de un cuestionario de un bloque detalle
     Route::post('app/plan/misplanes/cuestionario/bloque', [ApiPlanesController::class,'informacionCuestionarioBloque']);
@@ -105,9 +104,6 @@ Route::middleware('verificarToken')->group(function () {
     // obtener listado de todos las imagenes
     Route::post('app/inicio/todos/lasimagenes', [ApiInicioController::class,'listadoTodosLasImagenes']);
 
-    // guardar preguntas del cuestionario, registrar usuario al plan, no hacer check a true
-    Route::post('app/plan/inicio/preguntas/guardar/actualizar', [ApiInicioController::class,'preguntasInicioGuardarActualizar']);
-
 
     // informacion de una insignia
     Route::post('app/insignia/individual/informacion', [ApiInicioController::class,'informacionInsigniaIndividual']);
@@ -140,6 +136,15 @@ Route::middleware('verificarToken')->group(function () {
     // devuelve textos de preguntas y respuestas para compartir -> One Signal insignia
     // utilizado en MisPlanesBloquesFechaActivity
     Route::post('app/plan/misplanes/preguntas/infocompartir', [ApiPlanesController::class,'informacionPreguntasParaCompartir']);
+
+
+    // actualizar el check de cada plan -> onesignal
+    // INSIGNIA RACHA DIA LECTURA
+    // INSIGNIA COMPLETAR PLAN
+    Route::post('app/plan/misplanes/actualizar/check', [ApiPlanesController::class,'actualizarCheckBloqueMiPlan']);
+
+
+
 
 
 
@@ -182,41 +187,6 @@ Route::middleware('verificarToken')->group(function () {
 });
 
 
-/**
- *
- * $listado = UsuarioNotificaciones::where('id_usuario', 1)->get();
- *
- * $pilaIdentificadores = array();
- *
- * foreach ($listado as $item){
- * array_push($pilaIdentificadores, $item->onesignal);
- * }
- *
- * if($listado != null && $listado->isNotEmpty()){
- *
- * $tituloNoti = "Ejemplo";
- * $mensajeNoti = "Muchas Gracias";
- *
- * $AppId = config('googleapi.IdApp_Cliente');
- *
- *
- * $contents = array(
- * "en" => $mensajeNoti
- * );
- *
- * $params = array(
- * 'app_id' => $AppId,
- * 'contents' => $contents,
- * 'include_player_ids' => is_array($pilaIdentificadores) ? $pilaIdentificadores : array($pilaIdentificadores)
- * );
- *
- * $params['headings'] = array(
- * "en" => $tituloNoti
- * );
- *
- * OneSignal::sendNotificationCustom($params);
-* }
- */
 
 
 

@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * AQUI GUARDA LAS PREGUNTAS CONTESTADAS EL USUARIO
      */
     public function up(): void
     {

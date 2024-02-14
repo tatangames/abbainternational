@@ -262,7 +262,14 @@ Route::get('/admin/tipoinsignias/vista/tablaniveles/{idtipoinsignia}', [Insignia
 Route::post('/admin/tipoinsignias/niveles/registrar', [InsigniasController::class,'registrarNuevoNivel']);
 
 
+// --- TEXTOS NOTIFICACIONES ---
+Route::get('/admin/notificacion/vista', [RecursosController::class,'indexNotificacion'])->name('admin.notificacion.textos');
+Route::get('/admin/notificacion/tabla', [RecursosController::class,'tablaNotificacion']);
 
+Route::get('/admin/notificacion/vistaeditar/{idnoti}', [RecursosController::class,'indexNotificacionEditar']);
+Route::post('/admin/notificacion/borrar/imagen', [RecursosController::class,'borrarImagenTipoNotificacion']);
+Route::post('/admin/notificacion/imagen/actualizar', [RecursosController::class,'actualizarImagenTipoNotificacion']);
+Route::post('/admin/notificacion/actualizar/textos', [RecursosController::class,'actualizarTextosNotificacion']);
 
 
 
