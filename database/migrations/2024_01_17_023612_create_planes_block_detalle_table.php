@@ -19,6 +19,9 @@ return new class extends Migration
             $table->integer('posicion');
             $table->boolean('visible');
 
+            // TRUE: IGNORA EL PRIMER CUADRO PARA COMPARTIR PREGUNTA
+            $table->boolean('ignorar_pregunta');
+
             $table->foreign('id_planes_bloques')->references('id')->on('planes_bloques');
         });
     }

@@ -499,8 +499,6 @@ class ApiInicioController extends Controller
 
                 if($infoBlockDeta = PlanesBlockDetalle::where('id', $request->idblockdeta)->first()) {
 
-
-
                     // COMO GUARDO PREGUNTAS, GUARDAR RACHA DEVOCIONAL
                     if(RachaDevocional::where('id_usuario', $userToken->id)
                         ->where('id_plan_block_deta', $request->idblockdeta)->first()){
@@ -1079,7 +1077,7 @@ class ApiInicioController extends Controller
     }
 
 
-
+    // COMPARTIR APLICACION -> ONE SIGNAL
     public function compartirAplicacion(Request $request){
 
         $rules = array(
@@ -1095,8 +1093,8 @@ class ApiInicioController extends Controller
 
         if ($userToken = JWTAuth::user($tokenApi)) {
 
+            $idTipoInsignia = 1; // COMPARTIR APLICACION
 
-            // GUARDAR PUNTO DE COMPARTIR APLICACION
 
             DB::beginTransaction();
             try {
@@ -1117,20 +1115,20 @@ class ApiInicioController extends Controller
 
 
                 // COMPARTIR APLICACION
-                if(InsigniasUsuarios::where('id_tipo_insignia', 3)
+                if(InsigniasUsuarios::where('id_tipo_insignia', $idTipoInsignia)
                     ->where('id_usuario', $userToken->id)->first()){
                     //ya esta registrado, se debera sumar un punto
 
                     // AQUI SE SUMA CONTADOR Y SE VERIFICA SI GANARA EL HITO
 
-                    $infoConteo = InsigniasUsuariosConteo::where('id_tipo_insignia', 3)
+                    $infoConteo = InsigniasUsuariosConteo::where('id_tipo_insignia', $idTipoInsignia)
                         ->where('id_usuarios', $userToken->id)
                         ->first();
 
                     $conteo = $infoConteo->conteo;
                     $conteo++;
 
-                    $arrayNiveles = NivelesInsignias::where('id_tipo_insignia', 3)
+                    $arrayNiveles = NivelesInsignias::where('id_tipo_insignia', $idTipoInsignia)
                         ->orderBy('nivel', 'ASC')
                         ->get();
 
@@ -1165,10 +1163,10 @@ class ApiInicioController extends Controller
                     if($enviarNoti){
 
                         if($hayIdOne){
-                            // ID 2: NOTIFICACION PORQUE GANO HITO
-                            $datosRaw = $this->retornoTitulosNotificaciones(1, $idiomaTexto);
+                            // 1: ES EL ID INSIGNIA COMPARTIR APP
+                            $datosRaw = $this->retornoTitulosNotificaciones($idTipoInsignia, $idiomaTexto);
                             $tiNo = $datosRaw['titulo'];
-                            $desNo = $datosRaw['descripcion'];
+                            $desNo = $datosRaw['descripcionhito'];
 
 
                             // como es primera vez, se necesita enviar notificacion
@@ -1177,13 +1175,13 @@ class ApiInicioController extends Controller
                     }
 
                     // maximo nivel
-                    $maxNiveles = NivelesInsignias::where('id_tipo_insignia', 3)->max('nivel');
+                    $maxNiveles = NivelesInsignias::where('id_tipo_insignia', $idTipoInsignia)->max('nivel');
 
                     if($conteo <= $maxNiveles){
 
                        // solo actualizar conteo
 
-                        InsigniasUsuariosConteo::where('id_tipo_insignia', 3)
+                        InsigniasUsuariosConteo::where('id_tipo_insignia', $idTipoInsignia)
                             ->where('id_usuarios', $userToken->id)
                             ->update(['conteo' => $conteo]);
 
@@ -1194,20 +1192,22 @@ class ApiInicioController extends Controller
                     // PRIMERA VEZ GANANDO INSIGNIA
 
                     $nuevaInsignia = new InsigniasUsuarios();
-                    $nuevaInsignia->id_tipo_insignia = 3;
+                    $nuevaInsignia->id_tipo_insignia = $idTipoInsignia; // compartir App
                     $nuevaInsignia->id_usuario = $userToken->id;
                     $nuevaInsignia->fecha = $fechaCarbon;
                     $nuevaInsignia->save();
 
+
+
                     $nuevoConteo = new InsigniasUsuariosConteo();
-                    $nuevoConteo->id_tipo_insignia = 3;
+                    $nuevoConteo->id_tipo_insignia = $idTipoInsignia;
                     $nuevoConteo->id_usuarios = $userToken->id;
                     $nuevoConteo->conteo = 1;
                     $nuevoConteo->save();
 
                     // Que ID tiene nivel 1 del insignia compartir App
                     // SIEMPRE EXISTE NIVEL 1
-                    $infoIdNivel = NivelesInsignias::where('id_tipo_insignia', 3)
+                    $infoIdNivel = NivelesInsignias::where('id_tipo_insignia', $idTipoInsignia)
                         ->where('nivel', 1)
                         ->first();
 
@@ -1219,8 +1219,8 @@ class ApiInicioController extends Controller
                     $nuevoHito->save();
 
                     if($hayIdOne){
-                        // ID 1: GANO INSIGNIA COMPARTIR APP
-                        $datosRaw = $this->retornoTitulosNotificaciones(1, $idiomaTexto);
+                        // ID 1: TIPO DE INSIGNIA COMPARTIR APP
+                        $datosRaw = $this->retornoTitulosNotificaciones($idTipoInsignia, $idiomaTexto);
                         $tiNo = $datosRaw['titulo'];
                         $desNo = $datosRaw['descripcion'];
 
@@ -1243,26 +1243,210 @@ class ApiInicioController extends Controller
 
 
 
-    // RETORNO TITULO Y DESCRIPCION PARA NOTIFICACIONES
-    private function retornoTitulosNotificaciones($idTipoNoti, $idiomaTexto){
 
-        if($infoTexto = NotificacionTextos::where('id_tiponoti_textos', $idTipoNoti)
+
+
+
+    // COMPARTIR DEVOCIONAL -> ONE SIGNAL
+    public function compartirDevocional(Request $request){
+
+        $rules = array(
+            'iduser' => 'required',
+            'idiomaplan' => 'required',
+        );
+
+        $validator = Validator::make($request->all(), $rules);
+        if ($validator->fails()) { return ['success' => 0,'msj' => "validación incorrecta" ]; }
+
+        $tokenApi = $request->header('Authorization');
+
+        if ($userToken = JWTAuth::user($tokenApi)) {
+
+
+            // GUARDAR PUNTO DE COMPARTIR APLICACION
+
+            DB::beginTransaction();
+            try {
+
+
+                $idTipoInsignia = 2; // COMPARTIR DEVOCIONAL
+
+                $idiomaTexto = $request->idiomaplan;
+                $fechaCarbon = $this->retornoZonaHorariaDepaCarbonNow($userToken->id_iglesia);
+
+
+                $arrayOneSignal = UsuarioNotificaciones::where('id_usuario', $userToken->id)->get();
+                $pilaOneSignal = array();
+                $hayIdOne = false;
+                foreach ($arrayOneSignal as $item){
+                    if($item->onesignal != null){
+                        $hayIdOne = true;
+                        array_push($pilaOneSignal, $item->onesignal);
+                    }
+                }
+
+
+                // COMPARTIR DEVOCIONAL
+                if(InsigniasUsuarios::where('id_tipo_insignia', $idTipoInsignia)
+                    ->where('id_usuario', $userToken->id)->first()){
+                    //ya esta registrado, se debera sumar un punto
+
+                    // AQUI SE SUMA CONTADOR Y SE VERIFICA SI GANARA EL HITO
+
+                    $infoConteo = InsigniasUsuariosConteo::where('id_tipo_insignia', $idTipoInsignia)
+                        ->where('id_usuarios', $userToken->id)
+                        ->first();
+
+                    $conteo = $infoConteo->conteo;
+                    $conteo++;
+
+                    $arrayNiveles = NivelesInsignias::where('id_tipo_insignia', $idTipoInsignia)
+                        ->orderBy('nivel', 'ASC')
+                        ->get();
+
+                    $enviarNoti = false;
+
+
+
+                    // verificar si ya alcanzo nivel
+                    foreach ($arrayNiveles as $dato){
+
+                        if($conteo >= $dato->nivel){
+                            // pero verificar que no este el hito registrado
+                            if(InsigniasUsuariosDetalle::where('id_niveles_insignias', $dato->id)
+                                ->where('id_usuarios', $userToken->id)
+                                ->first()){
+                                // no hacer nada porque ya esta el hito, se debe seguir el siguiente nivel
+
+                            }else{
+                                $enviarNoti = true;
+
+                                // registrar hito - nivel y salir bucle
+                                $nuevoDeta = new InsigniasUsuariosDetalle();
+                                $nuevoDeta->id_niveles_insignias = $dato->id;
+                                $nuevoDeta->id_usuarios = $userToken->id;
+                                $nuevoDeta->fecha = $fechaCarbon;
+                                $nuevoDeta->save();
+                                break;
+                            }
+                        }
+                    }
+
+                    if($enviarNoti){
+
+                        if($hayIdOne){
+                            // 2: ES EL ID INSIGNIA COMPARTIR DEVOCIONAL
+                            $datosRaw = $this->retornoTitulosNotificaciones($idTipoInsignia, $idiomaTexto);
+                            $tiNo = $datosRaw['titulo'];
+                            $desNo = $datosRaw['descripcionhito'];
+
+
+                            // como es primera vez, se necesita enviar notificacion
+                            dispatch(new EnviarNotificacion($pilaOneSignal, $tiNo, $desNo));
+                        }
+                    }
+
+                    // maximo nivel
+                    $maxNiveles = NivelesInsignias::where('id_tipo_insignia', $idTipoInsignia)->max('nivel');
+
+                    if($conteo <= $maxNiveles){
+
+                        // solo actualizar conteo
+
+                        InsigniasUsuariosConteo::where('id_tipo_insignia', $idTipoInsignia)
+                            ->where('id_usuarios', $userToken->id)
+                            ->update(['conteo' => $conteo]);
+
+                    }
+
+                }else{
+
+                    // PRIMERA VEZ GANANDO INSIGNIA
+
+                    $nuevaInsignia = new InsigniasUsuarios();
+                    $nuevaInsignia->id_tipo_insignia = $idTipoInsignia;
+                    $nuevaInsignia->id_usuario = $userToken->id;
+                    $nuevaInsignia->fecha = $fechaCarbon;
+                    $nuevaInsignia->save();
+
+
+
+                    $nuevoConteo = new InsigniasUsuariosConteo();
+                    $nuevoConteo->id_tipo_insignia = $idTipoInsignia;
+                    $nuevoConteo->id_usuarios = $userToken->id;
+                    $nuevoConteo->conteo = 1;
+                    $nuevoConteo->save();
+
+                    // Que ID tiene nivel 1 del insignia compartir App
+                    // SIEMPRE EXISTE NIVEL 1
+                    $infoIdNivel = NivelesInsignias::where('id_tipo_insignia', $idTipoInsignia)
+                        ->where('nivel', 1)
+                        ->first();
+
+                    // hito - por defecto nivel 1
+                    $nuevoHito = new InsigniasUsuariosDetalle();
+                    $nuevoHito->id_niveles_insignias = $infoIdNivel->id;
+                    $nuevoHito->id_usuarios = $userToken->id;
+                    $nuevoHito->fecha = $fechaCarbon;
+                    $nuevoHito->save();
+
+                    if($hayIdOne){
+                        // ID 1: TIPO DE INSIGNIA COMPARTIR APP
+                        $datosRaw = $this->retornoTitulosNotificaciones($idTipoInsignia, $idiomaTexto);
+                        $tiNo = $datosRaw['titulo'];
+                        $desNo = $datosRaw['descripcion'];
+
+                        // como es primera vez, se necesita enviar notificacion
+                        dispatch(new EnviarNotificacion($pilaOneSignal, $tiNo, $desNo));
+                    }
+                }
+
+                DB::commit();
+                return ['success' => 1];
+            }catch(\Throwable $e) {
+                DB::rollback();
+                Log::info("error: " . $e);
+                return ['success' => 99];
+            }
+        }else{
+            return ['success' => 2];
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+    // RETORNO TITULO Y DESCRIPCION PARA NOTIFICACIONES
+    private function retornoTitulosNotificaciones($idTipoInsignia, $idiomaTexto){
+
+        if($infoTexto = NotificacionTextos::where('id_tipo_insignia', $idTipoInsignia)
             ->where('id_idioma_planes', $idiomaTexto)
             ->first()){
 
             return ['titulo' => $infoTexto->titulo,
                     'descripcion' => $infoTexto->descripcion,
+                    'descripcionhito' => $infoTexto->descripcion_hito,
                 ];
 
         }else{
-            // si no encuentra sera por defecto español
 
-            $infoTexto = NotificacionTextos::where('id_tiponoti_textos', $idTipoNoti)
+            // si no encuentra sera por defecto español
+            $infoTexto = NotificacionTextos::where('id_tipo_insignia', $idTipoInsignia)
                 ->where('id_idioma_planes', 1)
                 ->first();
 
             return ['titulo' => $infoTexto->titulo,
-                'descripcion' => $infoTexto->descripcion];
+                'descripcion' => $infoTexto->descripcion,
+                'descripcionhito' => $infoTexto->descripcion_hito,
+            ];
         }
     }
 

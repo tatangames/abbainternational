@@ -44,6 +44,30 @@
                     <div>
                         <div class="col-md-12">
 
+
+                            <!-- IGNORAR PRIMER CUADRO PARA COMPARTIR -->
+
+
+
+                            <div class="form-group">
+                                <label>Ignora Primera Cuadro Pregunta para Compartir</label><br>
+                                <label class="switch" style="margin-top:10px">
+                                    <input type="checkbox" id="toggle">
+                                    <div class="slider round">
+                                        <span class="on">Si</span>
+                                        <span class="off">No</span>
+                                    </div>
+                                </label>
+                            </div>
+
+
+
+
+
+
+
+
+
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <label class="control-label">Idioma</label>
@@ -244,6 +268,16 @@
                 .catch(error => {
 
                 });
+
+
+            let ignorar = {{ $infoBloque->ignorar_pregunta }};
+
+
+            if(ignorar === 1){
+                $("#toggle").prop("checked", true);
+            }else{
+                $("#toggle").prop("checked", false);
+            }
 
             document.getElementById("divcontenedor").style.display = "block";
         });
@@ -479,8 +513,14 @@
                 contenedorArray.push({ infoIdBloqueDetaTexto, infoIdIdioma, infoTitulo, infoDescripcion});
             }
 
+
+            let t = document.getElementById('toggle').checked;
+            let togglePersonalizado = t ? 1 : 0;
+
+
             formData.append('contenedorArray', JSON.stringify(contenedorArray));
             formData.append('idplanbloquedetalle', idplanbloquedetalle);
+            formData.append('toggle', togglePersonalizado);
 
             openLoading();
 

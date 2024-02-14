@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Planes;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\EnviarNotificacion;
 use App\Models\BloqueCuestionarioTextos;
 use App\Models\BloquePreguntas;
 use App\Models\BloquePreguntasTextos;
@@ -10,6 +11,10 @@ use App\Models\BloquePreguntasUsuarios;
 use App\Models\Departamentos;
 use App\Models\Iglesias;
 use App\Models\ImagenPreguntas;
+use App\Models\InsigniasUsuarios;
+use App\Models\InsigniasUsuariosConteo;
+use App\Models\InsigniasUsuariosDetalle;
+use App\Models\NivelesInsignias;
 use App\Models\Planes;
 use App\Models\PlanesBlockDetalle;
 use App\Models\PlanesBlockDetaTextos;
@@ -22,6 +27,7 @@ use App\Models\PlanesTextos;
 use App\Models\PlanesUsuarios;
 use App\Models\PlanesUsuariosContinuar;
 use App\Models\RachaDevocional;
+use App\Models\UsuarioNotificaciones;
 use App\Models\ZonaHoraria;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -612,10 +618,37 @@ class ApiPlanesController extends Controller
             try {
 
 
+                // comprobar si hay preguntas, por lo menos 1 visible y requerida
+                $arrayPreguntas = BloquePreguntas::where('id_plan_block_detalle', $request->idblockdeta)
+                    ->where('visible', 1)
+                    ->where('requerido', 1)
+                    ->get();
+
+                $hayVerificar = false;
+                $hayRespondidas = false;
+
+                // verificar que haya al menos preguntas ya guardadas
+                foreach ($arrayPreguntas as $dato){
+                    $hayVerificar = true;
+
+                    if(BloquePreguntasUsuarios::where('id_bloque_preguntas', $dato->id)
+                        ->where('id_usuarios', $userToken->id)->first()){
+                          $hayRespondidas = true;
+                          break;
+                    }
+                }
 
 
-                // EL USUARIO PUEDE GUARDAR AUNQUE NO HAYA CONTESTADO PREGUNTAS, PORQUE PUEDE
-                // HABER DEVOCIONALES QUE NO LLEVEN PREGUNTAS
+                if($hayVerificar){
+                    if(!$hayRespondidas){
+                        return ['success' => 1, 'msg' => "falta responder preguntas"];
+                    }
+                }
+
+
+
+                //*******************************
+
 
                 $planCompletado = 1;
 
@@ -678,7 +711,7 @@ class ApiPlanesController extends Controller
                 $this->retornoActualizarPlanUsuarioContinuar($userToken->id, $infoPlanesBloques->id_planes);
 
                 DB::commit();
-                return ['success' => 1,
+                return ['success' => 2,
                     'plancompletado' => $planCompletado
                 ];
 
@@ -1014,54 +1047,237 @@ class ApiPlanesController extends Controller
         $tokenApi = $request->header('Authorization');
 
         if ($userToken = JWTAuth::user($tokenApi)) {
-
             $idiomaTextos = $request->idiomaplan;
 
-            // comprueba que al menos haya una pregunta disponible
-            if(BloquePreguntas::where('id_plan_block_detalle', $request->idblockdeta)
-                ->where('visible', 1)
-                ->first()){
 
-                $descripcionPregunta = $this->retornoTituloPrincipalPreguntaTextoIdioma($request->idblockdeta, $idiomaTextos);
 
-                $arrayBloque = BloquePreguntas::where('id_plan_block_detalle', $request->idblockdeta)
+            DB::beginTransaction();
+
+            try {
+
+                // comprueba que al menos haya una pregunta disponible
+                if(BloquePreguntas::where('id_plan_block_detalle', $request->idblockdeta)
                     ->where('visible', 1)
-                    ->orderBy('posicion')
-                    ->get();
+                    ->first()){
 
 
-                foreach ($arrayBloque as $dato){
+                    // VERIFICAR QUE HAYA CONTESTADO YA PREGUNTAS
 
-                    // informacion imagen
-                    $imagenData = ImagenPreguntas::where('id', $dato->id_imagen_pregunta)->first();
-                    $dato->imagen = $imagenData->imagen;
+                    // comprobar si hay preguntas, por lo menos 1 visible y requerida
+                    $arrayPreguntasVe = BloquePreguntas::where('id_plan_block_detalle', $request->idblockdeta)
+                        ->where('visible', 1)
+                        ->where('requerido', 1)
+                        ->get();
 
+                    $hayVerificar = false;
+                    $hayRespondidas = false;
 
-                    $titulo = $this->retornoTituloPreguntaTextoIdioma($dato->id, $idiomaTextos);
-                    $dato->titulo = $titulo;
+                    // verificar que haya al menos preguntas ya guardadas
+                    foreach ($arrayPreguntasVe as $dato){
+                        $hayVerificar = true;
 
-                    $texto = "";
-                    // buscar texto de la pregunta contestada si existe
-                    if($detaPre = BloquePreguntasUsuarios::where('id_bloque_preguntas', $dato->id)
-                        ->where('id_usuarios', $userToken->id)
-                        ->first()){
-                        $texto = $detaPre->texto;
+                        if(BloquePreguntasUsuarios::where('id_bloque_preguntas', $dato->id)
+                            ->where('id_usuarios', $userToken->id)->first()){
+                            $hayRespondidas = true;
+                            break;
+                        }
                     }
 
-                    $dato->texto = $texto;
+
+                    if($hayVerificar){
+                        if(!$hayRespondidas){
+                            return ['success' => 1, 'msg' => "falta responder preguntas"];
+                        }
+                    }
+
+
+                    $arrayBloque = BloquePreguntas::where('id_plan_block_detalle', $request->idblockdeta)
+                        ->where('visible', 1)
+                        ->orderBy('posicion')
+                        ->get();
+
+
+                    foreach ($arrayBloque as $dato){
+
+                        // informacion imagen
+                        $imagenData = ImagenPreguntas::where('id', $dato->id_imagen_pregunta)->first();
+                        $dato->imagen = $imagenData->imagen;
+
+
+                        $titulo = $this->retornoTituloPreguntaTextoIdioma($dato->id, $idiomaTextos);
+                        $dato->titulo = $titulo;
+
+                        $texto = "";
+                        // buscar texto de la pregunta contestada si existe
+                        if($detaPre = BloquePreguntasUsuarios::where('id_bloque_preguntas', $dato->id)
+                            ->where('id_usuarios', $userToken->id)
+                            ->first()){
+                            $texto = $detaPre->texto;
+                        }
+
+                        $dato->texto = $texto;
+                    }
+
+                    $infoBlockDeta = PlanesBlockDetalle::where('id', $request->idblockdeta)->first();
+                    $ignorarpre = $infoBlockDeta->ignorar_pregunta;
+                    $descrip = $this->retornoTituloBloquesTextos($idiomaTextos, $request->idblockdeta);
+
+
+
+                    // ACTUALIZAR INSIGNIA COMPARTIR DEVOCIONAL
+
+
+                    $idTipoInsignia = 2; // COMPARTIR DEVOCIONAL
+
+                    $idiomaTexto = $request->idiomaplan;
+                    $fechaCarbon = $this->retornoZonaHorariaDepaCarbonNow($userToken->id_iglesia);
+
+
+                    $arrayOneSignal = UsuarioNotificaciones::where('id_usuario', $userToken->id)->get();
+                    $pilaOneSignal = array();
+                    $hayIdOne = false;
+                    foreach ($arrayOneSignal as $item){
+                        if($item->onesignal != null){
+                            $hayIdOne = true;
+                            array_push($pilaOneSignal, $item->onesignal);
+                        }
+                    }
+
+
+                    // COMPARTIR DEVOCIONAL
+                    if(InsigniasUsuarios::where('id_tipo_insignia', $idTipoInsignia)
+                        ->where('id_usuario', $userToken->id)->first()){
+                        //ya esta registrado, se debera sumar un punto
+
+                        // AQUI SE SUMA CONTADOR Y SE VERIFICA SI GANARA EL HITO
+
+                        $infoConteo = InsigniasUsuariosConteo::where('id_tipo_insignia', $idTipoInsignia)
+                            ->where('id_usuarios', $userToken->id)
+                            ->first();
+
+                        $conteo = $infoConteo->conteo;
+                        $conteo++;
+
+                        $arrayNiveles = NivelesInsignias::where('id_tipo_insignia', $idTipoInsignia)
+                            ->orderBy('nivel', 'ASC')
+                            ->get();
+
+                        $enviarNoti = false;
+
+
+
+                        // verificar si ya alcanzo nivel
+                        foreach ($arrayNiveles as $dato){
+
+                            if($conteo >= $dato->nivel){
+                                // pero verificar que no este el hito registrado
+                                if(InsigniasUsuariosDetalle::where('id_niveles_insignias', $dato->id)
+                                    ->where('id_usuarios', $userToken->id)
+                                    ->first()){
+                                    // no hacer nada porque ya esta el hito, se debe seguir el siguiente nivel
+
+                                }else{
+                                    $enviarNoti = true;
+
+                                    // registrar hito - nivel y salir bucle
+                                    $nuevoDeta = new InsigniasUsuariosDetalle();
+                                    $nuevoDeta->id_niveles_insignias = $dato->id;
+                                    $nuevoDeta->id_usuarios = $userToken->id;
+                                    $nuevoDeta->fecha = $fechaCarbon;
+                                    $nuevoDeta->save();
+                                    break;
+                                }
+                            }
+                        }
+
+                        if($enviarNoti){
+
+                            if($hayIdOne){
+                                // 2: ES EL ID INSIGNIA COMPARTIR DEVOCIONAL
+                                $datosRaw = $this->retornoTitulosNotificaciones($idTipoInsignia, $idiomaTexto);
+                                $tiNo = $datosRaw['titulo'];
+                                $desNo = $datosRaw['descripcionhito'];
+
+
+                                // como es primera vez, se necesita enviar notificacion
+                                dispatch(new EnviarNotificacion($pilaOneSignal, $tiNo, $desNo));
+                            }
+                        }
+
+                        // maximo nivel
+                        $maxNiveles = NivelesInsignias::where('id_tipo_insignia', $idTipoInsignia)->max('nivel');
+
+                        if($conteo <= $maxNiveles){
+
+                            // solo actualizar conteo
+
+                            InsigniasUsuariosConteo::where('id_tipo_insignia', $idTipoInsignia)
+                                ->where('id_usuarios', $userToken->id)
+                                ->update(['conteo' => $conteo]);
+
+                        }
+
+                    }else{
+
+                        // PRIMERA VEZ GANANDO INSIGNIA
+
+                        $nuevaInsignia = new InsigniasUsuarios();
+                        $nuevaInsignia->id_tipo_insignia = $idTipoInsignia;
+                        $nuevaInsignia->id_usuario = $userToken->id;
+                        $nuevaInsignia->fecha = $fechaCarbon;
+                        $nuevaInsignia->save();
+
+
+
+                        $nuevoConteo = new InsigniasUsuariosConteo();
+                        $nuevoConteo->id_tipo_insignia = $idTipoInsignia;
+                        $nuevoConteo->id_usuarios = $userToken->id;
+                        $nuevoConteo->conteo = 1;
+                        $nuevoConteo->save();
+
+                        // Que ID tiene nivel 1 del insignia compartir App
+                        // SIEMPRE EXISTE NIVEL 1
+                        $infoIdNivel = NivelesInsignias::where('id_tipo_insignia', $idTipoInsignia)
+                            ->where('nivel', 1)
+                            ->first();
+
+                        // hito - por defecto nivel 1
+                        $nuevoHito = new InsigniasUsuariosDetalle();
+                        $nuevoHito->id_niveles_insignias = $infoIdNivel->id;
+                        $nuevoHito->id_usuarios = $userToken->id;
+                        $nuevoHito->fecha = $fechaCarbon;
+                        $nuevoHito->save();
+
+                        if($hayIdOne){
+                            // ID 1: TIPO DE INSIGNIA COMPARTIR APP
+                            $datosRaw = $this->retornoTitulosNotificaciones($idTipoInsignia, $idiomaTexto);
+                            $tiNo = $datosRaw['titulo'];
+                            $desNo = $datosRaw['descripcion'];
+
+                            // como es primera vez, se necesita enviar notificacion
+                            dispatch(new EnviarNotificacion($pilaOneSignal, $tiNo, $desNo));
+                        }
+                    }
+
+
+                    DB::commit();
+
+                    return ['success' => 2,
+                        'descripcion' => $descrip,
+                        'listado' => $arrayBloque,
+                        'ignorarpre' => $ignorarpre
+                    ];
+                }else{
+
+                    return ['success' => 3,
+                        'msg' => "No hay preguntas, que esten activas"
+                    ];
                 }
-
-                return ['success' => 1,
-                    'descripcion' => $descripcionPregunta,
-                    'listado' => $arrayBloque
-                ];
-            }else{
-
-                return ['success' => 2,
-                    'msg' => "No hay preguntas"
-                ];
+            }catch(\Throwable $e){
+                Log::info("error: " . $e);
+                DB::rollback();
+                return ['success' => 99];
             }
-
         }else{
             return ['success' => 99];
         }

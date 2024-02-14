@@ -690,6 +690,7 @@ class PlanesController extends Controller
             $bloque->id_planes_bloques = $request->idplanbloque;
             $bloque->posicion = $nuevaPosicion;
             $bloque->visible = 0;
+            $bloque->ignorar_pregunta = 1;
             $bloque->save();
 
 
@@ -807,6 +808,7 @@ class PlanesController extends Controller
 
         $regla = array(
             'idplanbloquedetalle' => 'required',
+            'toggle' => 'required'
         );
 
         // array: infoIdBloqueDetaTexto, infoIdIdioma, infoTitulo, infoDescripcion
@@ -818,6 +820,13 @@ class PlanesController extends Controller
         DB::beginTransaction();
 
         try {
+
+            // actualizar toggle
+            PlanesBlockDetalle::where('id', $request->idplanbloquedetalle)->update([
+                'ignorar_pregunta' => $request->toggle,
+            ]);
+
+
 
             // TABLA: planes_block_detalle  no hay nada que actualizar
 

@@ -81,8 +81,7 @@ Route::middleware('verificarToken')->group(function () {
     // actualizar preguntas
     Route::post('app/plan/misplanes/preguntas/usuario/actualizar', [ApiPlanesController::class,'actualizarPreguntasUsuarioPlan']);
 
-    // devuelve textos de preguntas y respuestas para compartir
-    Route::post('app/plan/misplanes/preguntas/infocompartir', [ApiPlanesController::class,'informacionPreguntasParaCompartir']);
+
 
     // informacion de todos los planes completados -> Paginate
     Route::post('app/plan/misplanes/completados', [ApiPlanesController::class,'listadoMisPlanesCompletados']);
@@ -106,7 +105,7 @@ Route::middleware('verificarToken')->group(function () {
     // obtener listado de todos las imagenes
     Route::post('app/inicio/todos/lasimagenes', [ApiInicioController::class,'listadoTodosLasImagenes']);
 
-    // guardar preguntas del cuestionario, registrar usuario al plan, set check a true,
+    // guardar preguntas del cuestionario, registrar usuario al plan, no hacer check a true
     Route::post('app/plan/inicio/preguntas/guardar/actualizar', [ApiInicioController::class,'preguntasInicioGuardarActualizar']);
 
 
@@ -120,9 +119,32 @@ Route::middleware('verificarToken')->group(function () {
     // listado de todas las insignias faltantes
     Route::post('app/listado/insignias/faltantes', [ApiInicioController::class,'listadoInsigniasFaltantesPorGanar']);
 
-    // guardar las veces que comparte aplicacion
-    // listado de todas las insignias faltantes
+
+
+
+
+
+
+
+    // guardar las veces que comparte aplicacion -> onesignal
     Route::post('app/compartir/aplicacion', [ApiInicioController::class,'compartirAplicacion']);
+
+    // compartir devocional
+    // AQUI SE UTILIZA EN PANTALLAS BOTON COMPARTIR EN 2
+    // FragmentCuestionarioPreguntasInicioBloque
+    // FragmentPreguntasPlanBloque
+    // Es al llenar todos los input edit text, puede darle al boton compartir
+    // aqui no se mostrara titulo de blockdeta
+    Route::post('app/compartir/devocional', [ApiInicioController::class,'compartirDevocional']);
+
+    // devuelve textos de preguntas y respuestas para compartir -> One Signal insignia
+    // utilizado en MisPlanesBloquesFechaActivity
+    Route::post('app/plan/misplanes/preguntas/infocompartir', [ApiPlanesController::class,'informacionPreguntasParaCompartir']);
+
+
+
+
+
 
 
 

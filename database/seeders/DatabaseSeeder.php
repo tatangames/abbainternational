@@ -22,6 +22,9 @@ class DatabaseSeeder extends Seeder
         $this->call(TextoIdiomaSistemaSeeder::class);
         $this->call(IdiomaPlanesSeeder::class);
         $this->call(TipoVideoSeeder::class);
+        $this->call(InsigniasSeeder::class);
+        $this->call(InsigniasTextosSeeder::class);
+        $this->call(InsigniasNivelesSeeder::class);
         $this->call(ComparteAppSeeder::class);
         $this->call(NotificacionTextoSeeder::class);
 
