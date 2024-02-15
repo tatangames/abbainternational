@@ -144,6 +144,9 @@ Route::middleware('verificarToken')->group(function () {
     Route::post('app/plan/misplanes/actualizar/check', [ApiPlanesController::class,'actualizarCheckBloqueMiPlan']);
 
 
+    // Listado notificaciones para el usuario -> Paginate
+    Route::post('app/notificaciones/listado', [ApiComunidadController::class,'listadoNotificaciones']);
+
 
 
 
@@ -173,21 +176,12 @@ Route::middleware('verificarToken')->group(function () {
     // aceptar una solicitud que he recibido
     Route::post('app/comunidad/aceptarsolicitud/recibido', [ApiComunidadController::class,'aceptarSolicitudRecibido']);
 
-
-
-
-
-
-
-    // *** INSIGNIAS
-
-    // mostrar listado de insignias del usuario de comunidad
+    // informacion insignia amigo
     Route::post('app/comunidad/informacion/insignias', [ApiComunidadController::class,'informacionInsigniaAmigo']);
 
 
 
-    // Listado notificaciones para el usuario -> Paginate
-    Route::post('app/notificaciones/listado', [ApiComunidadController::class,'listadoNotificaciones']);
+
 
 
 

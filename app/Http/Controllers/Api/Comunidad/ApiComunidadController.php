@@ -7,10 +7,13 @@ use App\Jobs\EnviarNotificacion;
 use App\Models\ComunidadSolicitud;
 use App\Models\Departamentos;
 use App\Models\Iglesias;
+use App\Models\InsigniasTextos;
 use App\Models\InsigniasUsuarios;
+use App\Models\NivelesInsignias;
 use App\Models\NotificacionTextos;
 use App\Models\NotificacionUsuario;
 use App\Models\Pais;
+use App\Models\TipoInsignias;
 use App\Models\UsuarioNotificaciones;
 use App\Models\Usuarios;
 use App\Models\ZonaHoraria;
@@ -293,8 +296,17 @@ class ApiComunidadController extends Controller
                 ->where('estado', 1)
                 ->get();
 
+
             foreach ($arrayAceptados as $dato){
-                $infoUsuario = Usuarios::where('id', $dato->id_usuario_recibe)->first();
+
+                // datos de cual usuario quiero
+                if($dato->id_usuario_envia == $userToken->id){
+                    $infoUsuario = Usuarios::where('id', $dato->id_usuario_recibe)->first();
+                }else{
+                    $infoUsuario = Usuarios::where('id', $dato->id_usuario_envia)->first();
+                }
+
+
                 $infoIglesia = Iglesias::where('id', $infoUsuario->id_iglesia)->first();
                 $infoDepartamento = Departamentos::where('id', $infoIglesia->id_departamento)->first();
                 $infoPais = Pais::where('id', $infoDepartamento->id_pais)->first();
@@ -364,6 +376,7 @@ class ApiComunidadController extends Controller
 
         $rules = array(
             'idsolicitud' => 'required',
+            'idioma' => 'required'
         );
 
         $validator = Validator::make($request->all(), $rules);
@@ -377,16 +390,71 @@ class ApiComunidadController extends Controller
 
         if ($userToken = JWTAuth::user($tokenApi)) {
 
+
+            $idiomaTextos = $userToken->idioma;
+
+
             if($infoComu = ComunidadSolicitud::where('id', $request->idsolicitud)->first()){
 
-                $arrayInsignias = InsigniasUsuarios::where('id_usuario', $infoComu->id_usuario_recibe)->get();
 
-                foreach ($arrayInsignias as $dato){
-
+                // datos de cual usuario quiero
+                if($infoComu->id_usuario_envia == $userToken->id){
+                    $infoUsuario = Usuarios::where('id', $infoComu->id_usuario_recibe)->first();
+                }else{
+                    $infoUsuario = Usuarios::where('id', $infoComu->id_usuario_envia)->first();
                 }
 
+
+                // ************** BLOQUE INSIGNIAS ******************
+
+                // ordenar por fechas ganadas deberia ser mejor
+                // solo visibles
+
+                $insignia_arrayInsignias = DB::table('tipo_insignias AS t')
+                    ->join('insignias_usuarios AS i', 'i.id_tipo_insignia', '=', 't.id')
+                    ->where('i.id_usuario', $infoUsuario->id)
+                    ->select('t.visible', 'i.id_usuario', 'i.id_tipo_insignia', 'i.fecha')
+                    ->get();
+
+
+                $hayInsignias = 0;
+
+                if($insignia_arrayInsignias != null && $insignia_arrayInsignias->isNotEmpty()){
+                    $hayInsignias = 1;
+                }
+
+                foreach ($insignia_arrayInsignias as $dato){
+
+                    $infoTitulos = $this->retornoTituloInsigniasAppIdioma($dato->id_tipo_insignia, $idiomaTextos);
+                    $dato->titulo = $infoTitulos['titulo'];
+                    $dato->descripcion = $infoTitulos['descripcion'];
+
+
+                    // Conocer que nivel voy (ejemplo devuelve 5)
+                    $datoHitoNivel = DB::table('insignias_usuarios_detalle AS indeta')
+                        ->join('niveles_insignias AS nil', 'indeta.id_niveles_insignias', '=', 'nil.id')
+                        ->join('tipo_insignias AS tipo', 'nil.id_tipo_insignia', '=', 'tipo.id')
+                        ->select('nil.nivel', 'nil.id AS idnivelinsignia')
+                        ->where('nil.id_tipo_insignia', $dato->id_tipo_insignia)
+                        ->max('nil.nivel');
+
+                    $hito_infoNivelVoy = 1;
+
+                    if($datoHitoNivel != null){
+                        $dato->nivelvoy = $datoHitoNivel;
+                        $hito_infoNivelVoy = $datoHitoNivel;
+                    }else{
+                        $dato->nivelvoy = 1;
+                    }
+                }
+
+
+                $arrayFinalInsignias = $insignia_arrayInsignias->sortBy('titulo')->values();
+
+
                 return ['success' => 1,
-                    'listado' => $arrayInsignias];
+                    'hayinfo' => $hayInsignias,
+                    'listado' => $arrayFinalInsignias];
 
             }else{
                 return ['success' => 99];
@@ -396,6 +464,30 @@ class ApiComunidadController extends Controller
             return ['success' => 99];
         }
     }
+
+
+    // RETORNO TITULO Y DESCRIPCION DE LAS INSIGNIAS
+    private function retornoTituloInsigniasAppIdioma($idInsignia, $idiomaTexto){
+
+        if($infoTexto = InsigniasTextos::where('id_idioma_planes', $idiomaTexto)
+            ->where('id_tipo_insignia', $idInsignia)
+            ->first()){
+
+            return ['titulo' => $infoTexto->texto_1,
+                'descripcion' => $infoTexto->texto_2];
+
+        }else{
+            // si no encuentra sera por defecto español
+
+            $infoTexto = InsigniasTextos::where('id_idioma_planes', 1)
+                ->where('id_tipo_insignia', $idInsignia)
+                ->first();
+
+            return ['titulo' => $infoTexto->texto_1,
+                'descripcion' => $infoTexto->texto_2];
+        }
+    }
+
 
 
 
