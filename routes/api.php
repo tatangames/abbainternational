@@ -167,7 +167,7 @@ Route::middleware('verificarToken')->group(function () {
     // listado de solicitudes pendientes que yo he recibido
     Route::post('app/comunidad/listado/solicitud/pendientes/recibidas', [ApiComunidadController::class,'listadoSolicitudesPendientesRecibidas']);
 
-    // listado de solicitudes aceptadas que yo he enviado
+    // listado de solicitudes aceptadas
     Route::post('app/comunidad/listado/solicitud/aceptadas', [ApiComunidadController::class,'listadoSolicitudesAceptadas']);
 
     // eliminar una solicitud
@@ -178,6 +178,9 @@ Route::middleware('verificarToken')->group(function () {
 
     // informacion insignia amigo
     Route::post('app/comunidad/informacion/insignias', [ApiComunidadController::class,'informacionInsigniaAmigo']);
+
+    // iniciar plan con amigos
+    Route::post('app/comunidadplan/iniciar/plan/amigos', [ApiComunidadController::class,'iniciarPlanConAmigos']);
 
 
 

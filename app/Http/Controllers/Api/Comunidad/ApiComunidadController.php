@@ -13,7 +13,10 @@ use App\Models\NivelesInsignias;
 use App\Models\NotificacionTextos;
 use App\Models\NotificacionUsuario;
 use App\Models\Pais;
+use App\Models\PlanesAmigos;
+use App\Models\PlanesUsuarios;
 use App\Models\TipoInsignias;
+use App\Models\TipoNotificacion;
 use App\Models\UsuarioNotificaciones;
 use App\Models\Usuarios;
 use App\Models\ZonaHoraria;
@@ -58,18 +61,28 @@ class ApiComunidadController extends Controller
                     ->where('id', '!=', $userToken->id)
                     ->first()){
 
-                    if($infoComu = ComunidadSolicitud::where('id_usuario_envia', $userToken->id)
-                        ->where('id_usuario_recibe', $infoEncontrado->id)->first()){
+                    // necesito saber si el usuario envia (userToken) y el recibe (encontrado)
+                    // NO esten ya una fila registrada y con estado 0 o 1
 
-                        if($infoComu->estado == 0){
-                            // solicitud pendiente de aceptacion
-                            return ['success' => 1, 'msg' => "solicitud esta pendiente de aceptacion"];
-                        }else{
-                            // solitud ya esta aceptada
-                            return ['success' => 2, 'msg' => "solicitud ya esta aceptada"];
-                        }
+                    if($busquedaEnvia = ComunidadSolicitud::where('id_usuario_envia', $userToken->id)
+                        ->where('id_usuario_recibe', $infoEncontrado->id)
+                        ->whereIn('estado', [0,1])
+                        ->first()){
 
-                    }else{
+                        // 0: pendiente de aceptar solicitud
+                        $estado = $busquedaEnvia->estado;
+                        return ['success' => 1, 'estado' => $estado];
+                    }
+
+                    if($busquedaRecibe = ComunidadSolicitud::where('id_usuario_envia', $infoEncontrado->id)
+                        ->where('id_usuario_recibe', $userToken->id)
+                        ->whereIn('estado', [0,1])
+                        ->first()){
+
+                        $estado = $busquedaRecibe->estado;
+                        return ['success' => 1, 'estado' => $estado];
+                    }
+
                         // registrar y enviar notificacion en segundo plano
 
                         $fechaActual = $this->retornoZonaHorariaUsuario($userToken->id_iglesia);
@@ -82,7 +95,6 @@ class ApiComunidadController extends Controller
                         $nuevo->save();
 
 
-                        // INSIGNIA COMPARTIR DEVOCIONAL
                         $notiHistorial = new NotificacionUsuario();
                         $notiHistorial->id_usuario = $infoEncontrado->id;
                         $notiHistorial->id_tipo_notificacion = 11;
@@ -109,12 +121,13 @@ class ApiComunidadController extends Controller
                             // como es primera vez, se necesita enviar notificacion
                             dispatch(new EnviarNotificacion($pilaOneSignal, $tiNo, $desNo));
                         }
-                    }
 
-                    return ['success' => 3,
+
+                    //DB::commit();
+                    return ['success' => 2,
                         'msg' => "solicitud enviada"];
                 }else{
-                    return ['success' => 4,
+                    return ['success' => 3,
                         'msg' => "Correo no encontrado"];
                 }
 
@@ -182,7 +195,6 @@ class ApiComunidadController extends Controller
 
             $hayinfo = 0;
 
-            Log::info("token: " . $userToken->id);
 
             $arrayPendientes = ComunidadSolicitud::where('id_usuario_envia', $userToken->id)
                 ->where('estado', 0)
@@ -314,6 +326,9 @@ class ApiComunidadController extends Controller
                 // siempre es requerido apellido
                 $nombreFull = $infoUsuario->nombre . " " . $infoUsuario->apellido;
 
+                // este is usuario, se agregara a tabla planes_amigos_detalle
+                // ya que son los que daran puntos a usuario en tabla planes_amigos
+                $dato->idusuario = $infoUsuario->id;
                 $dato->nombre = $nombreFull;
                 $dato->iglesia = $infoIglesia->nombre;
                 $dato->correo = $infoUsuario->correo;
@@ -376,7 +391,8 @@ class ApiComunidadController extends Controller
 
         $rules = array(
             'idsolicitud' => 'required',
-            'idioma' => 'required'
+            'idiomaplan' => 'required',
+            'iduser' => 'required'
         );
 
         $validator = Validator::make($request->all(), $rules);
@@ -391,7 +407,7 @@ class ApiComunidadController extends Controller
         if ($userToken = JWTAuth::user($tokenApi)) {
 
 
-            $idiomaTextos = $userToken->idioma;
+            $idiomaTextos = $userToken->idiomaplan;
 
 
             if($infoComu = ComunidadSolicitud::where('id', $request->idsolicitud)->first()){
@@ -457,7 +473,7 @@ class ApiComunidadController extends Controller
                     'listado' => $arrayFinalInsignias];
 
             }else{
-                return ['success' => 99];
+                return ['success' => 99, 'msg' => "Solicitud no encontrada"];
             }
         }
         else{
@@ -487,8 +503,6 @@ class ApiComunidadController extends Controller
                 'descripcion' => $infoTexto->texto_2];
         }
     }
-
-
 
 
     public function listadoNotificaciones(Request $request){
@@ -529,6 +543,16 @@ class ApiComunidadController extends Controller
 
             foreach ($arrayNotificacion as $dato){
 
+               $infoTipoNoti = TipoNotificacion::where('id', $dato->id_tipo_notificacion)->first();
+               $hayimagen = 0;
+               if($infoTipoNoti->imagen != null){
+                   $hayimagen = 1;
+                   $dato->imagen = $infoTipoNoti->imagen;
+               } else{
+                   $dato->imagen = null;
+               }
+
+               $dato->hayimagen = $hayimagen;
                $arrayRaw = $this->retornoTituloNotificacion($dato->id_tipo_notificacion, $idiomaTextos);
                $dato->titulo = $arrayRaw['descripcion'];
             }
@@ -588,15 +612,62 @@ class ApiComunidadController extends Controller
 
         if ($userToken = JWTAuth::user($tokenApi)) {
 
-            // PASAR A ESTADO 0
-            if($info = ComunidadSolicitud::where('id', $request->idsolicitud)->first()){
+            DB::beginTransaction();
 
-                ComunidadSolicitud::where('id', $info->id)
-                    ->update(['estado' => 1]);
+            try {
+
+
+                // PASAR A ESTADO 1
+                if($info = ComunidadSolicitud::where('id', $request->idsolicitud)->first()){
+
+                    // datos de cual usuario quiero
+                    if($info->id_usuario_envia == $userToken->id){
+                        $infoUsuario = Usuarios::where('id', $info->id_usuario_recibe)->first();
+                    }else{
+                        $infoUsuario = Usuarios::where('id', $info->id_usuario_envia)->first();
+                    }
+
+
+                    $fechaActual = $this->retornoZonaHorariaUsuario($infoUsuario->id_iglesia);
+
+                    // registrar un historial
+                    $notiHistorial = new NotificacionUsuario();
+                    $notiHistorial->id_usuario = $infoUsuario->id;
+                    $notiHistorial->id_tipo_notificacion = 12; // solicitud aceptada
+                    $notiHistorial->fecha = $fechaActual;
+                    $notiHistorial->save();
+
+                    $arrayOneSignal = UsuarioNotificaciones::where('id_usuario', $infoUsuario->id)->get();
+                    $pilaOneSignal = array();
+                    $hayIdOne = false;
+                    foreach ($arrayOneSignal as $item){
+                        if($item->onesignal != null){
+                            $hayIdOne = true;
+                            array_push($pilaOneSignal, $item->onesignal);
+                        }
+                    }
+
+                    if($hayIdOne){
+                        // UN AMIGO TE ACABA DE ENVIAR UNA SOLICITUD
+                        $datosRaw = $this->retornoTitulosNotificaciones(12, $infoUsuario->idioma_noti);
+                        $tiNo = $datosRaw['titulo'];
+                        $desNo = $datosRaw['descripcion'];
+
+                        // como es primera vez, se necesita enviar notificacion
+                        dispatch(new EnviarNotificacion($pilaOneSignal, $tiNo, $desNo));
+                    }
+
+                    ComunidadSolicitud::where('id', $info->id)->update(['estado' => 1]);
+                }
+
+                DB::commit();
+                return ['success' => 1];
+
+            }catch(\Throwable $e){
+                Log::info("error" . $e);
+                DB::rollback();
+                return ['success' => 99];
             }
-
-            // solo decir que fue actualizado
-            return ['success' => 1];
         }
         else{
             return ['success' => 99];
@@ -604,6 +675,84 @@ class ApiComunidadController extends Controller
     }
 
 
+    public function iniciarPlanConAmigos(Request $request){
+
+        Log::info($request->all());
+
+        return "dato";
+
+        $rules = array(
+            'iduser' => 'required',
+            'idplan' => 'required',
+            'idiomaplan' => 'required',
+        );
+
+        $validator = Validator::make($request->all(), $rules);
+        if ( $validator->fails()){
+            return ['success' => 0,
+                'msj' => "validación incorrecta"
+            ];
+        }
+
+        $tokenApi = $request->header('Authorization');
+
+        if ($userToken = JWTAuth::user($tokenApi)) {
+
+            DB::beginTransaction();
+
+            try {
+
+
+
+
+
+
+
+                // VERIFICAR QUE USUARIO Y PLANES NO ESTE REGISTRADO
+                if(PlanesUsuarios::where('id_usuario', $userToken->id)
+                    ->where('id_planes', $request->idplan)->first()){
+                    //
+                    return ['success' => 1, 'msg' => "no registrado, ya hay registos en tabla"];
+                }
+
+
+                // VERIFICAR QUE EXISTE LA SOLICITUD
+
+
+
+
+
+
+
+
+
+
+                if ($request->has('idsolicitud')) {
+
+                    foreach ($request->idsolicitud as $clave => $valor) {
+
+                        // Registrar
+                        $detalle = new PlanesAmigos();
+                        $detalle->id_comunidad_solicitud = $clave;
+                        $detalle->id_planes = $request->idplan;
+                        $detalle->save();
+                    }
+                }
+
+
+                //DB::commit();
+                return ['success' => 3];
+
+            }catch(\Throwable $e){
+                Log::info("error: " . $e);
+                DB::rollback();
+                return ['success' => 99];
+            }
+
+        }else{
+            return ['success' => 99];
+        }
+    }
 
 
 }

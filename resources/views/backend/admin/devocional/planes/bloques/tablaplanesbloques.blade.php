@@ -39,21 +39,21 @@
                                     <td style="width: 3%">{{ $dato->textoPersonalizado }}</td>
 
                                     <td style="width: 4%">
-                                        <button type="button" class="btn btn-info btn-xs" onclick="informacionEditar({{ $dato->id }})">
+                                        <button style="margin: 8px" type="button" class="btn btn-info btn-xs" onclick="informacionEditar({{ $dato->id }})">
                                             <i class="fas fa-eye" title="Editar"></i>&nbsp; Editar
                                         </button>
 
-                                        <button type="button" class="btn btn-success btn-xs" onclick="informacionDetalleBloque({{ $dato->id }})">
+                                        <button style="margin: 8px" type="button" class="btn btn-success btn-xs" onclick="informacionDetalleBloque({{ $dato->id }})">
                                             <i class="fas fa-eye" title="Detalle"></i>&nbsp; Detalle
                                         </button>
 
 
                                         @if($dato->visible == 1)
-                                            <button type="button" class="btn btn-danger btn-xs" onclick="preguntaDeshabilitar({{ $dato->id }})">
+                                            <button style="margin: 8px" type="button" class="btn btn-danger btn-xs" onclick="preguntaDeshabilitar({{ $dato->id }})">
                                                 <i class="fas fa-edit" title="Deshabilitar"></i>&nbsp; Deshabilitar
                                             </button>
                                         @else
-                                            <button type="button" class="btn btn-success btn-xs" onclick="preguntaActivar({{ $dato->id }})">
+                                            <button style="margin: 8px" type="button" class="btn btn-success btn-xs" onclick="preguntaActivar({{ $dato->id }})">
                                                 <i class="fas fa-edit" title="Activar"></i>&nbsp; Activar
                                             </button>
                                         @endif
