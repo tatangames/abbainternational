@@ -158,15 +158,22 @@ Route::middleware('verificarToken')->group(function () {
     // enviar solicitud a un amigo
     Route::post('app/comunidad/enviar/solicitud', [ApiComunidadController::class,'enviarSolicitudAmigo']);
 
+    // listado de solicitudes pendientes que yo he enviado
+    Route::post('app/comunidad/listado/solicitud/pendientes/enviadas', [ApiComunidadController::class,'listadoSolicitudesPendientesEnviadas']);
 
-    // listado de solicutes pendientes que yo he enviado
-    Route::post('app/comunidad/listado/solicitud/pendientes', [ApiComunidadController::class,'listadoSolicitudesPendientes']);
+    // listado de solicitudes pendientes que yo he recibido
+    Route::post('app/comunidad/listado/solicitud/pendientes/recibidas', [ApiComunidadController::class,'listadoSolicitudesPendientesRecibidas']);
 
-    // listado de solicutes aceptadas que yo he enviado
+    // listado de solicitudes aceptadas que yo he enviado
     Route::post('app/comunidad/listado/solicitud/aceptadas', [ApiComunidadController::class,'listadoSolicitudesAceptadas']);
 
     // eliminar una solicitud
     Route::post('app/comunidad/solicitud/eliminar', [ApiComunidadController::class,'eliminarSolicitud']);
+
+    // aceptar una solicitud que he recibido
+    Route::post('app/comunidad/aceptarsolicitud/recibido', [ApiComunidadController::class,'aceptarSolicitudRecibido']);
+
+
 
 
 

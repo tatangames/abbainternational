@@ -37,6 +37,7 @@ use App\Models\RachaDevocional;
 use App\Models\RachaDias;
 use App\Models\TipoInsignias;
 use App\Models\UsuarioNotificaciones;
+use App\Models\Usuarios;
 use App\Models\VideosHoy;
 use App\Models\VideosTextos;
 use App\Models\ZonaHoraria;
@@ -85,6 +86,12 @@ class ApiInicioController extends Controller
 
             DB::beginTransaction();
             try {
+
+                // actualizar primero el idioma
+                Usuarios::where('id', $userToken->id)
+                    ->update([
+                        'idioma_noti' => $idiomaTextos,
+                    ]);
 
             // ************** BLOQUE DEVOCIONAL ******************
 

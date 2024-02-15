@@ -18,7 +18,7 @@ return new class extends Migration
 
             $table->date('fecha');
 
-            $table->foreign('tipo_tipo_notificacion')->references('id')->on('tipo_notificacion');
+            $table->foreign('id_tipo_notificacion')->references('id')->on('tipo_notificacion');
             $table->foreign('id_usuario')->references('id')->on('usuarios');
         });
     }

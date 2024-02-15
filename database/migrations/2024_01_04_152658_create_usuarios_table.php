@@ -30,6 +30,11 @@ return new class extends Migration
             // para que usuario pueda desactivar sus notificaciones
             $table->boolean('notificacion_general');
 
+            // en Comunidad, cuando se envia una solicitud a un amigo
+            // el otro telefono recibe notificacion y hay que saber su idioma
+            // esto se setea al iniciar Fragment inicio siempre
+            $table->integer('idioma_noti');
+
             $table->foreign('id_iglesia')->references('id')->on('iglesia');
             $table->foreign('id_genero')->references('id')->on('generos');
         });
