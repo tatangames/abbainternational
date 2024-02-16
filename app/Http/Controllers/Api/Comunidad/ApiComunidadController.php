@@ -12,9 +12,16 @@ use App\Models\InsigniasUsuarios;
 use App\Models\NivelesInsignias;
 use App\Models\NotificacionTextos;
 use App\Models\NotificacionUsuario;
+use App\Models\OcultarPlanes;
 use App\Models\Pais;
+use App\Models\Planes;
 use App\Models\PlanesAmigos;
 use App\Models\PlanesAmigosDetalle;
+use App\Models\PlanesBlockDetalle;
+use App\Models\PlanesBlockDetaTextos;
+use App\Models\PlanesBlockDetaUsuario;
+use App\Models\PlanesBloques;
+use App\Models\PlanesTextos;
 use App\Models\PlanesUsuarios;
 use App\Models\TipoInsignias;
 use App\Models\TipoNotificacion;
@@ -327,7 +334,7 @@ class ApiComunidadController extends Controller
                 // siempre es requerido apellido
                 $nombreFull = $infoUsuario->nombre . " " . $infoUsuario->apellido;
 
-                // este is usuario, se agregara a tabla planes_amigos_detalle
+                // este es usuario, se agregara a tabla planes_amigos_detalle
                 // ya que son los que daran puntos a usuario en tabla planes_amigos
                 $dato->idusuario = $infoUsuario->id;
                 $dato->nombre = $nombreFull;
@@ -455,11 +462,9 @@ class ApiComunidadController extends Controller
                         ->where('nil.id_tipo_insignia', $dato->id_tipo_insignia)
                         ->max('nil.nivel');
 
-                    $hito_infoNivelVoy = 1;
 
                     if($datoHitoNivel != null){
                         $dato->nivelvoy = $datoHitoNivel;
-                        $hito_infoNivelVoy = $datoHitoNivel;
                     }else{
                         $dato->nivelvoy = 1;
                     }
@@ -771,6 +776,207 @@ class ApiComunidadController extends Controller
             return ['success' => 99];
         }
     }
+
+
+    public function informacionPlanesAmigo(Request $request){
+
+        $rules = array(
+            'idsolicitud' => 'required',
+            'idiomaplan' => 'required',
+            'iduser' => 'required'
+        );
+
+        $validator = Validator::make($request->all(), $rules);
+        if ( $validator->fails()){
+            return ['success' => 0,
+                'msj' => "validación incorrecta"
+            ];
+        }
+
+        $tokenApi = $request->header('Authorization');
+
+        if ($userToken = JWTAuth::user($tokenApi)) {
+
+            $idiomaTextos = $userToken->idiomaplan;
+
+
+            if($infoComu = ComunidadSolicitud::where('id', $request->idsolicitud)->first()){
+
+
+                // datos de cual usuario quiero
+                if($infoComu->id_usuario_envia == $userToken->id){
+                    $infoUsuario = Usuarios::where('id', $infoComu->id_usuario_recibe)->first();
+                }else{
+                    $infoUsuario = Usuarios::where('id', $infoComu->id_usuario_envia)->first();
+                }
+
+
+                // ************** BLOQUE PLANES ******************
+
+
+                // Obtener todos los id que estan ocultos por el usuario
+                $noPlanes = OcultarPlanes::where('id_usuario', $userToken->id)
+                    ->select('id_planes')
+                    ->get();
+
+                $arrayPlanes = PlanesUsuarios::where('id_usuario', $infoUsuario->id)
+                    ->whereNotIn('id_planes', $noPlanes)
+                    ->get();
+
+                $hayinfo = 0;
+
+                foreach ($arrayPlanes as $dato){
+                    $hayinfo = 1;
+
+                    $infoPlan = Planes::where('id', $dato->id_planes)->first();
+                    $dato->imagen = $infoPlan->imagen;
+
+                    $datosRaw = $this->retornoTituloPlan($idiomaTextos, $dato->id_planes);
+                    $dato->titulo = $datosRaw['titulo'];
+                }
+
+                $arrayPlanesOrdenado = $arrayPlanes->sortBy('titulo')->values();
+
+
+                return ['success' => 1,
+                    'usuariobuscado' => $infoUsuario->id, // con este usuario buscar items y preguntas
+                    'hayinfo' => $hayinfo,
+                    'listado' => $arrayPlanesOrdenado];
+
+            }else{
+                return ['success' => 99, 'msg' => "Solicitud no encontrada"];
+            }
+        }
+        else{
+            return ['success' => 99];
+        }
+    }
+
+
+    private function retornoTituloPlan($idiomaplan, $idplan){
+
+        // si encuentra idioma solicitado
+        if($infoPlanTexto = PlanesTextos::where('id_planes', $idplan)
+            ->where('id_idioma_planes', $idiomaplan)
+            ->first()){
+
+            return ['titulo' => $infoPlanTexto->titulo,
+                'subtitulo' => $infoPlanTexto->subtitulo
+            ];
+
+        }else{
+            // si no encuentra sera por defecto español
+
+            $infoPlanTexto = PlanesTextos::where('id_planes', $idplan)
+                ->where('id_idioma_planes', 1)
+                ->first();
+
+            return ['titulo' => $infoPlanTexto->titulo,
+                'subtitulo' => $infoPlanTexto->subtitulo
+            ];
+        }
+    }
+
+
+
+    public function informacionPlanesAmigoItems(Request $request){
+
+        $rules = array(
+            'idplan' => 'required',
+            'idiomaplan' => 'required',
+            'idusuariobuscar' => 'required', // con este usuario se busca los items
+            'iduser' => 'required'
+        );
+
+        $validator = Validator::make($request->all(), $rules);
+        if ( $validator->fails()){
+            return ['success' => 0,
+                'msj' => "validación incorrecta"
+            ];
+        }
+
+        $tokenApi = $request->header('Authorization');
+
+        if ($userToken = JWTAuth::user($tokenApi)) {
+
+            $idiomaTextos = $userToken->idiomaplan;
+
+            // OBTENER TODOS LOS ITEMS
+
+
+            $arrayItemsLista = DB::table('planes AS p')
+                ->join('planes_bloques AS pb', 'pb.id_planes', '=', 'p.id')
+                ->join('planes_block_detalle AS pbd', 'pbd.id_planes_bloques', '=', 'pb.id')
+                ->select('pbd.id')
+                ->whereIn('p.id', $request->idplan)
+                ->get();
+
+            $pilaItems = array();
+
+            foreach ($arrayItemsLista as $item){
+                array_push($pilaItems, $item->id);
+            }
+
+            $arrayItems = PlanesBlockDetaUsuario::where('id_usuario', $request->idusuariobuscar)
+                ->whereIn('id_planes_block_deta', $pilaItems)
+                ->where('completado', 1)
+                ->get();
+
+            $hayinfo = 0;
+            foreach ($arrayItems as $dato){
+                $hayinfo = 1;
+
+                $titulo = $this->retornoTituloBloquesTextos($idiomaTextos, $dato->id_planes_block_deta);
+                $dato->titulo = $titulo;
+
+                $infoPlanesBlockDeta = PlanesBlockDetalle::where('id', $dato->id_planes_block_deta)->first();
+                $infoPlanesBloques = PlanesBloques::where('id', $infoPlanesBlockDeta->id_planes_bloques)->first();
+
+                $dato->fecha = $infoPlanesBloques->fecha_inicio;
+            }
+
+            $arrayItemsOrdenados = $arrayItems->sortBy('fecha')->values();
+
+            return ['success' => 1,
+                'hayinfo' => $hayinfo,
+                'listado' => $arrayItemsOrdenados];
+        }
+        else{
+            return ['success' => 99];
+        }
+
+    }
+
+
+    // RETORNA TITULO DEL BLOQUE DETALLE TEXTOS
+    private function retornoTituloBloquesTextos($idiomaTextos, $idBlockDetalle){
+
+        if($infoTituloTexto = PlanesBlockDetaTextos::where('id_planes_block_detalle', $idBlockDetalle)
+            ->where('id_idioma_planes', $idiomaTextos)
+            ->first()){
+
+            return $infoTituloTexto->titulo;
+
+        }else{
+            // si no encuentra sera por defecto español
+
+            $infoTituloTexto = PlanesBlockDetaTextos::where('id_planes_block_detalle', $idBlockDetalle)
+                ->where('id_idioma_planes', 1)
+                ->first();
+
+            return $infoTituloTexto->titulo;
+        }
+    }
+
+
+
+    public function informacionPlanesAmigoItemsPreguntas(Request $request){
+
+
+
+    }
+
+
 
 
 }

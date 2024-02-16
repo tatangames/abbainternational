@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->bigInteger('id_videos_hoy')->unsigned();
             $table->bigInteger('id_idioma_planes')->unsigned();
-            $table->string('titulo', 100);
+            $table->string('titulo', 100)->nullable();
 
             $table->foreign('id_videos_hoy')->references('id')->on('videos_hoy');
             $table->foreign('id_idioma_planes')->references('id')->on('idioma_planes');

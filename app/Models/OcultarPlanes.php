@@ -5,9 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class ComunidadBlockOcultos extends Model
+class OcultarPlanes extends Model
 {
     use HasFactory;
-    protected $table = 'comunidad_block_ocultos';
+    protected $table = 'ocultar_planes';
     public $timestamps = false;
 }

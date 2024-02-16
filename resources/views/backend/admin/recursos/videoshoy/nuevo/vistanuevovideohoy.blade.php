@@ -268,16 +268,7 @@
             // verificar datos cada uno
             var titulo = document.getElementById('titulo-nuevo').value;
 
-            if(titulo === ''){
-                toastr.error('Título es requerido')
-                return;
-            }
-
-            if(titulo.length > 100){
-                toastr.error('Título 100 caracteres máximo')
-                return;
-            }
-
+            // titulo es opcional
 
             // AGREGAR A FILA
 
