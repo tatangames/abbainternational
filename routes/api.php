@@ -141,6 +141,7 @@ Route::middleware('verificarToken')->group(function () {
     // actualizar el check de cada plan -> onesignal
     // INSIGNIA RACHA DIA LECTURA
     // INSIGNIA COMPLETAR PLAN
+    // INSIGNIA PLANES COMPARTIDOS EN GRUPOS
     Route::post('app/plan/misplanes/actualizar/check', [ApiPlanesController::class,'actualizarCheckBloqueMiPlan']);
 
 

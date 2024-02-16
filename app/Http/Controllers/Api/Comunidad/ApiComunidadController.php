@@ -14,6 +14,7 @@ use App\Models\NotificacionTextos;
 use App\Models\NotificacionUsuario;
 use App\Models\Pais;
 use App\Models\PlanesAmigos;
+use App\Models\PlanesAmigosDetalle;
 use App\Models\PlanesUsuarios;
 use App\Models\TipoInsignias;
 use App\Models\TipoNotificacion;
@@ -123,7 +124,7 @@ class ApiComunidadController extends Controller
                         }
 
 
-                    //DB::commit();
+                    DB::commit();
                     return ['success' => 2,
                         'msg' => "solicitud enviada"];
                 }else{
@@ -677,10 +678,6 @@ class ApiComunidadController extends Controller
 
     public function iniciarPlanConAmigos(Request $request){
 
-        Log::info($request->all());
-
-        return "dato";
-
         $rules = array(
             'iduser' => 'required',
             'idplan' => 'required',
@@ -702,46 +699,67 @@ class ApiComunidadController extends Controller
 
             try {
 
-
-
-
-
-
-
-                // VERIFICAR QUE USUARIO Y PLANES NO ESTE REGISTRADO
+                // TAMBIEN VERIFICAR QUE PLAN NO ESTE INICIADO YA
                 if(PlanesUsuarios::where('id_usuario', $userToken->id)
                     ->where('id_planes', $request->idplan)->first()){
-                    //
-                    return ['success' => 1, 'msg' => "no registrado, ya hay registos en tabla"];
+
+                    return ['success' => 1, 'msg' => 'plan ya estaba registrado'];
                 }
 
+                $zonaHoraria = $this->retornoZonaHorariaUsuario($userToken->id_iglesia);
 
-                // VERIFICAR QUE EXISTE LA SOLICITUD
-
-
-
-
-
-
-
-
-
+                // registrar plan a usuario
+                $nuevoPlan = new PlanesUsuarios();
+                $nuevoPlan->id_usuario = $userToken->id;
+                $nuevoPlan->id_planes = $request->idplan;
+                $nuevoPlan->fecha = $zonaHoraria;
+                $nuevoPlan->save();
 
                 if ($request->has('idsolicitud')) {
 
                     foreach ($request->idsolicitud as $clave => $valor) {
 
                         // Registrar
-                        $detalle = new PlanesAmigos();
+                        $detalle = new PlanesAmigosDetalle();
+                        $detalle->id_planes_usuarios = $nuevoPlan->id;
                         $detalle->id_comunidad_solicitud = $clave;
-                        $detalle->id_planes = $request->idplan;
+                        $detalle->id_usuario = $valor['idusuario'];
                         $detalle->save();
+
+
+
+                        // NOTIFICACION A USUARIOS QUE FUE UNIDO A UN PLAN GRUPAL
+
+
+                        $arrayOneSignal = UsuarioNotificaciones::where('id_usuario', $valor['idusuario'])->get();
+                        $pilaOneSignal = array();
+                        $hayIdOne = false;
+                        foreach ($arrayOneSignal as $item){
+                            if($item->onesignal != null){
+                                $hayIdOne = true;
+                                array_push($pilaOneSignal, $item->onesignal);
+                            }
+                        }
+
+                        if($hayIdOne){
+
+                            $infoUsuario = Usuarios::where('id', $valor['idusuario']->first());
+
+                            // UN AMIGO TE ACABA DE ENVIAR UNA SOLICITUD
+                            $datosRaw = $this->retornoTitulosNotificaciones(12, $infoUsuario->idioma_noti);
+                            $tiNo = $datosRaw['titulo'];
+                            $desNo = $datosRaw['descripcion'];
+
+                            // como es primera vez, se necesita enviar notificacion
+                            dispatch(new EnviarNotificacion($pilaOneSignal, $tiNo, $desNo));
+                        }
+
+
                     }
                 }
 
-
-                //DB::commit();
-                return ['success' => 3];
+                DB::commit();
+                return ['success' => 2];
 
             }catch(\Throwable $e){
                 Log::info("error: " . $e);

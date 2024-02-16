@@ -8,6 +8,7 @@ use App\Models\BloqueCuestionarioTextos;
 use App\Models\BloquePreguntas;
 use App\Models\BloquePreguntasTextos;
 use App\Models\BloquePreguntasUsuarios;
+use App\Models\ComunidadSolicitud;
 use App\Models\Departamentos;
 use App\Models\Iglesias;
 use App\Models\ImagenPreguntas;
@@ -18,6 +19,7 @@ use App\Models\NivelesInsignias;
 use App\Models\NotificacionTextos;
 use App\Models\NotificacionUsuario;
 use App\Models\Planes;
+use App\Models\PlanesAmigosDetalle;
 use App\Models\PlanesBlockDetalle;
 use App\Models\PlanesBlockDetaTextos;
 use App\Models\PlanesBlockDetaUsuario;
@@ -604,7 +606,8 @@ class ApiPlanesController extends Controller
             'iduser' => 'required',
             'idblockdeta' => 'required',
             'valor' => 'required',
-            'idplan' => 'required'
+            'idplan' => 'required',
+            'idiomaplan' => 'required'
         );
 
         $validator = Validator::make($request->all(), $rules);
@@ -620,7 +623,12 @@ class ApiPlanesController extends Controller
 
             try {
 
-                $activarNotificaciones = true;
+                $permitirNotificacion = true;
+                $idiomaTexto = $request->idiomaplan;
+                $fechaCarbon = $this->retornoZonaHorariaDepaCarbonNow($userToken->id_iglesia);
+
+
+                // ****************** BLOQUE 1 *********************
 
 
                 // comprobar si hay preguntas, por lo menos 1 visible y requerida
@@ -680,16 +688,11 @@ class ApiPlanesController extends Controller
                     $primeraVezItem = true;
                 }
 
-
-
-
                 // INSIGNIAS
 
 
                 $idTipoInsignia = 4; // RACHA DEVOCIONAL
 
-                $idiomaTexto = $request->idiomaplan;
-                $fechaCarbon = $this->retornoZonaHorariaDepaCarbonNow($userToken->id_iglesia);
 
 
                 $arrayOneSignal = UsuarioNotificaciones::where('id_usuario', $userToken->id)->get();
@@ -772,9 +775,10 @@ class ApiPlanesController extends Controller
 
 
                                 // como es primera vez, se necesita enviar notificacion
-                                if($activarNotificaciones){
+                                if($permitirNotificacion) {
                                     dispatch(new EnviarNotificacion($pilaOneSignal, $tiNo, $desNo));
                                 }
+
 
                             }
                         }
@@ -842,10 +846,11 @@ class ApiPlanesController extends Controller
                         $tiNo = $datosRaw['titulo'];
                         $desNo = $datosRaw['descripcion'];
 
-                        if($activarNotificaciones) {
-                            // como es primera vez, se necesita enviar notificacion
+                        // como es primera vez, se necesita enviar notificacion
+                        if($permitirNotificacion) {
                             dispatch(new EnviarNotificacion($pilaOneSignal, $tiNo, $desNo));
                         }
+
                     }
                 }
 
@@ -884,14 +889,380 @@ class ApiPlanesController extends Controller
 
 
 
-                // VERIFICAR EN OTRO FUNCTION PARA INSIGNIA COMPLETAR PLAN
-                if($planCompletado == 1){
-                $this->verificarInsigniaCompletarPlan($userToken, $infoPlanesBloques->id_planes, $activarNotificaciones, $idiomaTexto);
+
+
+
+
+                // ******************* BLOQUE 2 *******************************
+
+                if($planCompletado){
+
+                    $idTipoInsigniaBloque2 = 3; // PLANES FINALIZADOS
+
+                    if(InsigniasUsuarios::where('id_tipo_insignia', $idTipoInsigniaBloque2)
+                        ->where('id_usuario', $userToken->id)->first()){
+
+
+
+                        // SE DEBE EVITAR QUE SE AUMENTE PUNTO POR EL MISMO PLAN
+                        if(PlanesFinalizadosUsuario::where('id_usuario', $userToken->id)
+                            ->where('id_planes', $infoPlanesBloques->id_planes)->first()){
+                            // no registrar nada
+                        }else{
+
+                            // es nuevo plan finalizado, aumentar punto
+                            // AQUI SE SUMA CONTADOR Y SE VERIFICA SI GANARA EL HITO
+
+
+                            // REGISTRAR QUE FINALIZO PLAN USUARIO
+                            $finalizado = new PlanesFinalizadosUsuario();
+                            $finalizado->id_planes = $infoPlanesBloques->id_planes;
+                            $finalizado->id_usuario = $userToken->id;
+                            $finalizado->save();
+
+
+                            $infoConteo = InsigniasUsuariosConteo::where('id_tipo_insignia', $idTipoInsigniaBloque2)
+                                ->where('id_usuarios', $userToken->id)
+                                ->first();
+
+                            $conteo = $infoConteo->conteo;
+                            $conteo++;
+
+                            $arrayNiveles = NivelesInsignias::where('id_tipo_insignia', $idTipoInsigniaBloque2)
+                                ->orderBy('nivel', 'ASC')
+                                ->get();
+
+                            $enviarNoti = false;
+
+
+
+                            // verificar si ya alcanzo nivel
+                            foreach ($arrayNiveles as $dato){
+
+                                if($conteo >= $dato->nivel){
+                                    // pero verificar que no este el hito registrado
+                                    if(InsigniasUsuariosDetalle::where('id_niveles_insignias', $dato->id)
+                                        ->where('id_usuarios', $userToken->id)
+                                        ->first()){
+                                        // no hacer nada porque ya esta el hito, se debe seguir el siguiente nivel
+
+                                    }else{
+                                        $enviarNoti = true;
+
+                                        // registrar hito - nivel y salir bucle
+                                        $nuevoDeta = new InsigniasUsuariosDetalle();
+                                        $nuevoDeta->id_niveles_insignias = $dato->id;
+                                        $nuevoDeta->id_usuarios = $userToken->id;
+                                        $nuevoDeta->fecha = $fechaCarbon;
+                                        $nuevoDeta->save();
+
+                                        // SUBIO NIVEL HITO - PLAN FINALIZADO
+                                        $notiHistorial = new NotificacionUsuario();
+                                        $notiHistorial->id_usuario = $userToken->id;
+                                        $notiHistorial->id_tipo_notificacion = 6;
+                                        $notiHistorial->fecha = $fechaCarbon;
+                                        $notiHistorial->save();
+
+                                        break;
+                                    }
+                                }
+                            }
+
+                            if($enviarNoti){
+
+                                if($hayIdOne){
+                                    // SUBI DE NIVEL INSIGNIA PLANES FINALIZADOS
+                                    $datosRaw = $this->retornoTitulosNotificaciones(6, $idiomaTexto);
+                                    $tiNo = $datosRaw['titulo'];
+                                    $desNo = $datosRaw['descripcion'];
+
+                                    if($permitirNotificacion) {
+                                        dispatch(new EnviarNotificacion($pilaOneSignal, $tiNo, $desNo));
+                                    }
+
+                                }
+                            }
+
+                            // maximo nivel
+                            $maxNiveles = NivelesInsignias::where('id_tipo_insignia', $idTipoInsigniaBloque2)->max('nivel');
+
+                            if($conteo <= $maxNiveles){
+
+                                // solo actualizar conteo
+
+                                InsigniasUsuariosConteo::where('id_tipo_insignia', $idTipoInsigniaBloque2)
+                                    ->where('id_usuarios', $userToken->id)
+                                    ->update(['conteo' => $conteo]);
+                            }
+
+
+                        }
+                    }else{
+
+                        // PRIMERA VEZ GANANDO INSIGNIA PLAN FINALIZADO
+
+                        $nuevaInsignia = new InsigniasUsuarios();
+                        $nuevaInsignia->id_tipo_insignia = $idTipoInsigniaBloque2; // compartir App
+                        $nuevaInsignia->id_usuario = $userToken->id;
+                        $nuevaInsignia->fecha = $fechaCarbon;
+                        $nuevaInsignia->save();
+
+                        $nuevoConteo = new InsigniasUsuariosConteo();
+                        $nuevoConteo->id_tipo_insignia = $idTipoInsigniaBloque2;
+                        $nuevoConteo->id_usuarios = $userToken->id;
+                        $nuevoConteo->conteo = 1;
+                        $nuevoConteo->save();
+
+                        // Que ID tiene nivel 1 del insignia Planes Finalizados
+                        // SIEMPRE EXISTE NIVEL 1
+                        $infoIdNivel = NivelesInsignias::where('id_tipo_insignia', $idTipoInsigniaBloque2)
+                            ->where('nivel', 1)
+                            ->first();
+
+                        // hito - por defecto nivel 1
+                        $nuevoHito = new InsigniasUsuariosDetalle();
+                        $nuevoHito->id_niveles_insignias = $infoIdNivel->id;
+                        $nuevoHito->id_usuarios = $userToken->id;
+                        $nuevoHito->fecha = $fechaCarbon;
+                        $nuevoHito->save();
+
+
+                        // REGISTRAR QUE FINALIZO PLAN USUARIO
+                        $finalizado = new PlanesFinalizadosUsuario();
+                        $finalizado->id_planes = $infoPlanesBloques->id_planes;
+                        $finalizado->id_usuario = $userToken->id;
+                        $finalizado->save();
+
+
+                        if($hayIdOne){
+                            // GANE INSIGNIA PLANES FINALIZADOS
+                            $datosRaw = $this->retornoTitulosNotificaciones(5, $idiomaTexto);
+                            $tiNo = $datosRaw['titulo'];
+                            $desNo = $datosRaw['descripcion'];
+
+
+                            // Guardar Historial Notificacion Usuario
+                            $notiHistorial = new NotificacionUsuario();
+                            $notiHistorial->id_usuario = $userToken->id;
+                            $notiHistorial->id_tipo_notificacion = 5; // POR GANAR PRIMERA INSIGNIA PLAN FINALIZADO
+                            $notiHistorial->fecha = $fechaCarbon;
+                            $notiHistorial->save();
+
+
+                            // como es primera vez, se necesita enviar notificacion
+                            if($permitirNotificacion) {
+                                dispatch(new EnviarNotificacion($pilaOneSignal, $tiNo, $desNo));
+                            }
+                        }
+                    }
                 }
 
 
-                // colocar plan continuar por defecto
-                $this->retornoActualizarPlanUsuarioContinuar($userToken->id, $infoPlanesBloques->id_planes);
+
+
+
+
+                // ******************* BLOQUE 3 *******************************
+                if($planCompletado){
+
+                    $arrayPlanesAmigos = DB::table('planes_usuarios AS p')
+                        ->join('planes_amigos_detalle AS d', 'd.id_planes_usuarios', '=', 'p.id')
+                        ->select('p.id_usuario AS idusuariogana', 'd.id_comunidad_solicitud')
+                        ->where('d.id_usuario', $userToken->id)
+                        ->where('p.id_planes', $infoPlanesBloques->id_planes)
+                        ->get();
+
+
+                    $idTipoInsigniaBloque3 = 5; // planes compartidos en grupos
+
+                    // verificar a quien se sumara puntos
+                    foreach ($arrayPlanesAmigos as $dato){
+
+
+                        // fecha del que gana puntos
+                        $fechaCarbonGana = $this->retornoZonaHorariaDepaCarbonNow($dato->idusuariogana);
+
+
+                        // solo solicitudes aceptadas
+                        $infoComuni = ComunidadSolicitud::where('id', $dato->id_comunidad_solicitud)->first();
+
+                        if($infoComuni->estado == 1){
+
+                            // aqui va la insignia de planes compartidos en grupos y al finalizar todos se envia notificacion
+
+
+                            // OBTENER PILA ONE SIGNAL DEL USUARIO QUE GANO PUNTOS
+
+                            $arrayOneSignal = UsuarioNotificaciones::where('id_usuario', $dato->idusuariogana)->get();
+                            $pilaOneSignal = array();
+                            $hayIdOne = false;
+                            foreach ($arrayOneSignal as $item){
+                                if($item->onesignal != null){
+                                    $hayIdOne = true;
+                                    array_push($pilaOneSignal, $item->onesignal);
+                                }
+                            }
+
+
+                            if(InsigniasUsuarios::where('id_tipo_insignia', $idTipoInsigniaBloque3)
+                                ->where('id_usuario', $dato->idusuariogana)->first()){
+                                //ya esta registrado, se debera sumar un punto
+
+                                // AQUI SE SUMA CONTADOR Y SE VERIFICA SI GANARA EL HITO
+
+                                $infoConteo = InsigniasUsuariosConteo::where('id_tipo_insignia', $idTipoInsigniaBloque3)
+                                    ->where('id_usuarios', $dato->idusuariogana)
+                                    ->first();
+
+                                $conteo = $infoConteo->conteo;
+                                $conteo++;
+
+                                $arrayNiveles = NivelesInsignias::where('id_tipo_insignia', $idTipoInsigniaBloque3)
+                                    ->orderBy('nivel', 'ASC')
+                                    ->get();
+
+                                $enviarNoti = false;
+
+
+
+                                // verificar si ya alcanzo nivel
+                                foreach ($arrayNiveles as $datoNivel){
+
+                                    if($conteo >= $datoNivel->nivel){
+                                        // pero verificar que no este el hito registrado
+                                        if(InsigniasUsuariosDetalle::where('id_niveles_insignias', $datoNivel->id)
+                                            ->where('id_usuarios', $dato->idusuariogana)
+                                            ->first()){
+                                            // no hacer nada porque ya esta el hito, se debe seguir el siguiente nivel
+
+                                        }else{
+                                            $enviarNoti = true;
+
+                                            // registrar hito - nivel y salir bucle
+                                            $nuevoDeta = new InsigniasUsuariosDetalle();
+                                            $nuevoDeta->id_niveles_insignias = $datoNivel->id;
+                                            $nuevoDeta->id_usuarios = $dato->idusuariogana;
+                                            $nuevoDeta->fecha = $fechaCarbonGana;
+                                            $nuevoDeta->save();
+
+                                            // SUBIO NIVEL HITO - PLANES COMPARTIDOS EN GRUPOS
+                                            $notiHistorial = new NotificacionUsuario();
+                                            $notiHistorial->id_usuario = $dato->idusuariogana;
+                                            $notiHistorial->id_tipo_notificacion = 10;
+                                            $notiHistorial->fecha = $fechaCarbonGana;
+                                            $notiHistorial->save();
+
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                if($enviarNoti){
+
+                                    if($hayIdOne){
+                                        // SUBI DE NIVEL INSIGNIA PLANES FINALIZADOS EN GRUPOS
+                                        $datosRaw = $this->retornoTitulosNotificaciones(10, $idiomaTexto);
+                                        $tiNo = $datosRaw['titulo'];
+                                        $desNo = $datosRaw['descripcion'];
+
+                                        // como es primera vez, se necesita enviar notificacion
+                                        if($permitirNotificacion) {
+                                            dispatch(new EnviarNotificacion($pilaOneSignal, $tiNo, $desNo));
+                                        }
+                                    }
+                                }
+
+                                // maximo nivel
+                                $maxNiveles = NivelesInsignias::where('id_tipo_insignia', $idTipoInsigniaBloque3)->max('nivel');
+
+                                if($conteo <= $maxNiveles){
+
+                                    // solo actualizar conteo
+
+                                    InsigniasUsuariosConteo::where('id_tipo_insignia', $idTipoInsigniaBloque3)
+                                        ->where('id_usuarios', $dato->idusuariogana)
+                                        ->update(['conteo' => $conteo]);
+                                }
+
+                            }else{
+
+                                // PRIMERA VEZ GANANDO INSIGNIA
+
+                                $nuevaInsignia = new InsigniasUsuarios();
+                                $nuevaInsignia->id_tipo_insignia = $idTipoInsigniaBloque3; // planes compartidos
+                                $nuevaInsignia->id_usuario = $dato->idusuariogana;
+                                $nuevaInsignia->fecha = $fechaCarbonGana;
+                                $nuevaInsignia->save();
+
+
+                                $nuevoConteo = new InsigniasUsuariosConteo();
+                                $nuevoConteo->id_tipo_insignia = $idTipoInsigniaBloque3;
+                                $nuevoConteo->id_usuarios = $dato->idusuariogana;
+                                $nuevoConteo->conteo = 1;
+                                $nuevoConteo->save();
+
+                                // Que ID tiene nivel 1 del insignia planes compartidos en grupos
+                                // SIEMPRE EXISTE NIVEL 1
+                                $infoIdNivel = NivelesInsignias::where('id_tipo_insignia', $idTipoInsigniaBloque3)
+                                    ->where('nivel', 1)
+                                    ->first();
+
+                                // hito - por defecto nivel 1
+                                $nuevoHito = new InsigniasUsuariosDetalle();
+                                $nuevoHito->id_niveles_insignias = $infoIdNivel->id;
+                                $nuevoHito->id_usuarios = $dato->idusuariogana;
+                                $nuevoHito->fecha = $fechaCarbonGana;
+                                $nuevoHito->save();
+
+                                if($hayIdOne){
+                                    // GANE INSIGNIA PLAN COMPARTIDO EN GRUPO
+                                    $datosRaw = $this->retornoTitulosNotificaciones(9, $idiomaTexto);
+                                    $tiNo = $datosRaw['titulo'];
+                                    $desNo = $datosRaw['descripcion'];
+
+
+                                    // Guardar Historial Notificacion Usuario
+                                    $notiHistorial = new NotificacionUsuario();
+                                    $notiHistorial->id_usuario = $dato->idusuariogana;
+                                    $notiHistorial->id_tipo_notificacion = 9; // POR GANAR PRIMERA INSIGNIA PLAN COMPARTIDO EN GRUPO
+                                    $notiHistorial->fecha = $fechaCarbonGana;
+                                    $notiHistorial->save();
+
+
+                                    // como es primera vez, se necesita enviar notificacion
+                                    if($permitirNotificacion) {
+                                        dispatch(new EnviarNotificacion($pilaOneSignal, $tiNo, $desNo));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+
+
+
+
+                //*** BLOQUE PLANES CONTINUAR  *******
+
+
+                if($idPlanUser = PlanesUsuariosContinuar::where('id_usuarios', $userToken->id)->first()){
+                    // solo actualizar
+
+                    PlanesUsuariosContinuar::where('id', $idPlanUser->id)
+                        ->update([
+                            'id_planes' => $infoPlanesBloques->id_planes,
+                        ]);
+                }
+                else{
+                    // crear
+                    $dato = new PlanesUsuariosContinuar();
+                    $dato->id_usuarios = $userToken->id;
+                    $dato->id_planes = $infoPlanesBloques->id_planes;
+                    $dato->save();
+                }
+
+
 
                 DB::commit();
                 return ['success' => 2,
@@ -909,194 +1280,6 @@ class ApiPlanesController extends Controller
         }
     }
 
-
-    private function verificarInsigniaCompletarPlan($userToken, $idplanes, $activarNotificaciones, $idiomaTexto){
-
-
-        $idTipoInsignia = 3; // PLANES FINALIZADOS
-
-        DB::beginTransaction();
-        try {
-
-            $fechaCarbon = $this->retornoZonaHorariaDepaCarbonNow($userToken->id_iglesia);
-
-
-            $arrayOneSignal = UsuarioNotificaciones::where('id_usuario', $userToken->id)->get();
-            $pilaOneSignal = array();
-            $hayIdOne = false;
-            foreach ($arrayOneSignal as $item){
-                if($item->onesignal != null){
-                    $hayIdOne = true;
-                    array_push($pilaOneSignal, $item->onesignal);
-                }
-            }
-
-
-            if(InsigniasUsuarios::where('id_tipo_insignia', $idTipoInsignia)
-                ->where('id_usuario', $userToken->id)->first()){
-
-
-
-                // SE DEBE EVITAR QUE SE AUMENTE PUNTO POR EL MISMO PLAN
-                if(PlanesFinalizadosUsuario::where('id_usuario', $userToken->id)
-                    ->where('id_planes', $idplanes)->first()){
-                    // no registrar nada
-                }else{
-
-                    // es nuevo plan finalizado, aumentar punto
-                    // AQUI SE SUMA CONTADOR Y SE VERIFICA SI GANARA EL HITO
-
-
-                    // REGISTRAR QUE FINALIZO PLAN USUARIO
-                    $finalizado = new PlanesFinalizadosUsuario();
-                    $finalizado->id_planes = $idplanes;
-                    $finalizado->id_usuario = $userToken->id;
-                    $finalizado->save();
-
-
-                    $infoConteo = InsigniasUsuariosConteo::where('id_tipo_insignia', $idTipoInsignia)
-                        ->where('id_usuarios', $userToken->id)
-                        ->first();
-
-                    $conteo = $infoConteo->conteo;
-                    $conteo++;
-
-                    $arrayNiveles = NivelesInsignias::where('id_tipo_insignia', $idTipoInsignia)
-                        ->orderBy('nivel', 'ASC')
-                        ->get();
-
-                    $enviarNoti = false;
-
-
-
-                    // verificar si ya alcanzo nivel
-                    foreach ($arrayNiveles as $dato){
-
-                        if($conteo >= $dato->nivel){
-                            // pero verificar que no este el hito registrado
-                            if(InsigniasUsuariosDetalle::where('id_niveles_insignias', $dato->id)
-                                ->where('id_usuarios', $userToken->id)
-                                ->first()){
-                                // no hacer nada porque ya esta el hito, se debe seguir el siguiente nivel
-
-                            }else{
-                                $enviarNoti = true;
-
-                                // registrar hito - nivel y salir bucle
-                                $nuevoDeta = new InsigniasUsuariosDetalle();
-                                $nuevoDeta->id_niveles_insignias = $dato->id;
-                                $nuevoDeta->id_usuarios = $userToken->id;
-                                $nuevoDeta->fecha = $fechaCarbon;
-                                $nuevoDeta->save();
-
-                                // SUBIO NIVEL HITO - PLAN FINALIZADO
-                                $notiHistorial = new NotificacionUsuario();
-                                $notiHistorial->id_usuario = $userToken->id;
-                                $notiHistorial->id_tipo_notificacion = 6;
-                                $notiHistorial->fecha = $fechaCarbon;
-                                $notiHistorial->save();
-
-                                break;
-                            }
-                        }
-                    }
-
-                    if($enviarNoti){
-
-                        if($hayIdOne){
-                            // SUBI DE NIVEL INSIGNIA PLANES FINALIZADOS
-                            $datosRaw = $this->retornoTitulosNotificaciones(6, $idiomaTexto);
-                            $tiNo = $datosRaw['titulo'];
-                            $desNo = $datosRaw['descripcion'];
-
-                            if($activarNotificaciones){
-                                dispatch(new EnviarNotificacion($pilaOneSignal, $tiNo, $desNo));
-                            }
-
-                        }
-                    }
-
-                    // maximo nivel
-                    $maxNiveles = NivelesInsignias::where('id_tipo_insignia', $idTipoInsignia)->max('nivel');
-
-                    if($conteo <= $maxNiveles){
-
-                        // solo actualizar conteo
-
-                        InsigniasUsuariosConteo::where('id_tipo_insignia', $idTipoInsignia)
-                            ->where('id_usuarios', $userToken->id)
-                            ->update(['conteo' => $conteo]);
-                    }
-
-
-                }
-            }else{
-
-                // PRIMERA VEZ GANANDO INSIGNIA PLAN FINALIZADO
-
-                $nuevaInsignia = new InsigniasUsuarios();
-                $nuevaInsignia->id_tipo_insignia = $idTipoInsignia; // compartir App
-                $nuevaInsignia->id_usuario = $userToken->id;
-                $nuevaInsignia->fecha = $fechaCarbon;
-                $nuevaInsignia->save();
-
-                $nuevoConteo = new InsigniasUsuariosConteo();
-                $nuevoConteo->id_tipo_insignia = $idTipoInsignia;
-                $nuevoConteo->id_usuarios = $userToken->id;
-                $nuevoConteo->conteo = 1;
-                $nuevoConteo->save();
-
-                // Que ID tiene nivel 1 del insignia Planes Finalizados
-                // SIEMPRE EXISTE NIVEL 1
-                $infoIdNivel = NivelesInsignias::where('id_tipo_insignia', $idTipoInsignia)
-                    ->where('nivel', 1)
-                    ->first();
-
-                // hito - por defecto nivel 1
-                $nuevoHito = new InsigniasUsuariosDetalle();
-                $nuevoHito->id_niveles_insignias = $infoIdNivel->id;
-                $nuevoHito->id_usuarios = $userToken->id;
-                $nuevoHito->fecha = $fechaCarbon;
-                $nuevoHito->save();
-
-
-                // REGISTRAR QUE FINALIZO PLAN USUARIO
-                $finalizado = new PlanesFinalizadosUsuario();
-                $finalizado->id_planes = $idplanes;
-                $finalizado->id_usuario = $userToken->id;
-                $finalizado->save();
-
-
-                if($hayIdOne){
-                    // GANE INSIGNIA PLANES FINALIZADOS
-                    $datosRaw = $this->retornoTitulosNotificaciones(5, $idiomaTexto);
-                    $tiNo = $datosRaw['titulo'];
-                    $desNo = $datosRaw['descripcion'];
-
-
-                    // Guardar Historial Notificacion Usuario
-                    $notiHistorial = new NotificacionUsuario();
-                    $notiHistorial->id_usuario = $userToken->id;
-                    $notiHistorial->id_tipo_notificacion = 5; // POR GANAR PRIMERA INSIGNIA PLAN FINALIZADO
-                    $notiHistorial->fecha = $fechaCarbon;
-                    $notiHistorial->save();
-
-
-                    // como es primera vez, se necesita enviar notificacion
-                    if($activarNotificaciones) {
-                        dispatch(new EnviarNotificacion($pilaOneSignal, $tiNo, $desNo));
-                    }
-                }
-            }
-
-            DB::commit();
-            return ['success' => 1];
-        }catch(\Throwable $e) {
-            DB::rollback();
-            Log::info("error: " . $e);
-            return ['success' => 99];
-        }
-    }
 
 
 

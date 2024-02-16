@@ -257,5 +257,23 @@ class NotificacionTextoSeeder extends Seeder
         ]);
 
 
+
+        // ** XX ACABA DE UNIRTE A UN PLAN GRUPAL **
+
+
+        NotificacionTextos::create([
+            'id_tipo_notificacion' => '13',
+            'id_idioma_planes' => '1',
+            'titulo' => 'Plan Grupal',
+            'descripcion' => 'te acaba de unir a su Plan Grupal',
+        ]);
+
+
+        NotificacionTextos::create([
+            'id_tipo_notificacion' => '13',
+            'id_idioma_planes' => '2',
+            'titulo' => 'Group Plan',
+            'descripcion' => 'just joined you to his Group Plan',
+        ]);
     }
 }

@@ -103,7 +103,9 @@ class TipoNotificacionSeeder extends Seeder
         ]);
 
 
-
-
+        // ** XX ACABA DE UNIRTE A UN PLAN GRUPAL **
+        TipoNotificacion::create([ // ID: 13
+            'imagen' => null,
+        ]);
     }
 }
