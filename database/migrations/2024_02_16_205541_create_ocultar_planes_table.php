@@ -16,6 +16,8 @@ return new class extends Migration
             $table->bigInteger('id_usuario')->unsigned();
             $table->bigInteger('id_planes')->unsigned();
 
+            $table->boolean('estado');
+
             $table->foreign('id_usuario')->references('id')->on('usuarios');
             $table->foreign('id_planes')->references('id')->on('planes');
         });

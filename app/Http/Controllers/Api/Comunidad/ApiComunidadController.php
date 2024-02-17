@@ -978,5 +978,129 @@ class ApiComunidadController extends Controller
 
 
 
+    public function infoPlanesUsuarios(Request $request)
+    {
+        $rules = array(
+            'idiomaplan' => 'required',
+            'iduser' => 'required'
+        );
+
+        $validator = Validator::make($request->all(), $rules);
+        if ( $validator->fails()){
+            return ['success' => 0,
+                'msj' => "validación incorrecta"
+            ];
+        }
+
+        $tokenApi = $request->header('Authorization');
+
+        if ($userToken = JWTAuth::user($tokenApi)) {
+
+            $idiomaTextos = $userToken->idiomaplan;
+
+            $arrayPlanes = PlanesUsuarios::where('id_usuario', $userToken->id)->get();
+
+            foreach ($arrayPlanes as $dato){
+                $hayinfo = 1;
+
+                $infoPlan = Planes::where('id', $dato->id_planes)->first();
+                $dato->imagen = $infoPlan->imagen;
+
+                $datosRaw = $this->retornoTituloPlan($idiomaTextos, $dato->id_planes);
+                $dato->titulo = $datosRaw['titulo'];
+
+                $marcado = false;
+
+
+                if($infoOc = OcultarPlanes::where('id_usuario', $userToken->id)
+                    ->where('id_planes', $dato->id_planes)->first()){
+                    if($infoOc->estado == 1){
+                        $marcado = true;
+                    }
+                }
+                $dato->estado = $marcado;
+            }
+
+            $arrayPlanesOrdenado = $arrayPlanes->sortBy('titulo')->values();
+
+            return ['success' => 1,
+                'hayinfo' => $hayinfo,
+                'listado' => $arrayPlanesOrdenado];
+        }
+        else{
+            return ['success' => 99];
+        }
+    }
+
+
+    public function actualizarPlanesOcultos(Request $request)
+    {
+
+        $rules = array(
+            'iduser' => 'required',
+        );
+
+        $validator = Validator::make($request->all(), $rules);
+        if ( $validator->fails()){
+            return ['success' => 0,
+                'msj' => "validación incorrecta"
+            ];
+        }
+
+        $tokenApi = $request->header('Authorization');
+
+        if ($userToken = JWTAuth::user($tokenApi)) {
+
+            DB::beginTransaction();
+
+            try {
+
+                if ($request->has('idplan')) {
+
+                    foreach ($request->idplan as $clave => $valor) {
+
+
+                        // si existe solo actualizar
+                        if($fila = OcultarPlanes::where('id_usuario', $userToken->id)
+                            ->where('id_planes', $clave)->first()){
+
+                            OcultarPlanes::where('id', $fila->id)
+                                ->update(['estado' => $valor['estado']]);
+
+                        }else{
+
+                            // crear
+                            $nuevo = new OcultarPlanes();
+                            $nuevo->id_usuario = $userToken->id;
+                            $nuevo->id_planes = $clave;
+                            $nuevo->estado = $valor['estado'];
+                            $nuevo->save();
+                        }
+                    }
+                }else{
+                    // viene vacio, todos pasaran a false
+
+                    OcultarPlanes::where('id_usuario', $userToken->id)
+                        ->update(['estado' => 0]);
+                }
+
+
+
+                DB::commit();
+                return ['success' => 1];
+
+            }catch(\Throwable $e){
+                Log::info("error: " . $e);
+                DB::rollback();
+                return ['success' => 99];
+            }
+
+        }else{
+            return ['success' => 99];
+        }
+
+    }
+
+
 
 }

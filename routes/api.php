@@ -194,6 +194,11 @@ Route::middleware('verificarToken')->group(function () {
 
 
 
+    // listado de planes para ver y ocultar
+    Route::post('app/comunidad/planes/usuarios', [ApiComunidadController::class,'infoPlanesUsuarios']);
+
+    // actualizar planes para ver y ocultar
+    Route::post('app/comunidad/actualizarplanes/ocultos', [ApiComunidadController::class,'actualizarPlanesOcultos']);
 
 });
 
