@@ -8,28 +8,28 @@ use Illuminate\Database\Seeder;
 class DatabaseSeeder extends Seeder
 {
     /**
-     * Seed the application's database.
+     * SEMILLAS
      */
     public function run(): void
     {
-        $this->call(RolesSeeder::class);
-        $this->call(AdministradorSeeder::class);
-        $this->call(GenerosSeeder::class);
-        $this->call(PaisSeeder::class);
-        $this->call(ZonaHorariaSeed::class);
-        $this->call(DepartamentoSeeder::class);
-        $this->call(IglesiaSeeder::class);
-        $this->call(TextoIdiomaSistemaSeeder::class);
-        $this->call(IdiomaPlanesSeeder::class);
-        $this->call(TipoVideoSeeder::class);
+        $this->call(RolesSeeder::class); // roles
+        $this->call(AdministradorSeeder::class); // usuarios administrador
+        $this->call(GenerosSeeder::class); // 2 tipos de generos
+        $this->call(PaisSeeder::class); // paises
+        $this->call(ZonaHorariaSeed::class); // zonas horarias para el pais
+        $this->call(DepartamentoSeeder::class); // departamentos para x pais
+        $this->call(IglesiaSeeder::class); // iglesias para x departamentos
+        $this->call(TextoIdiomaSistemaSeeder::class); // idioma para textos de sistema, ejemplo recuperar password
+        $this->call(IdiomaPlanesSeeder::class); // diferentes idiomas lectura de todos los textos
+        $this->call(TipoVideoSeeder::class); // tipos de video para cada url
 
         $this->call(InsigniasSeeder::class); // 5 insignias
         $this->call(InsigniasTextosSeeder::class); // texto cada insignia
         $this->call(InsigniasNivelesSeeder::class); // niveles cada insignia
         $this->call(ComparteAppSeeder::class); // texto comparte app
 
-        $this->call(TipoNotificacionSeeder::class);
-        $this->call(NotificacionTextoSeeder::class);
+        $this->call(TipoNotificacionSeeder::class); // tipo notificacion para usuario
+        $this->call(NotificacionTextoSeeder::class); // textos de las notificaciones
 
     }
 }

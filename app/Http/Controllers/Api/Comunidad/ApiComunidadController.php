@@ -4,6 +4,9 @@ namespace App\Http\Controllers\api\Comunidad;
 
 use App\Http\Controllers\Controller;
 use App\Jobs\EnviarNotificacion;
+use App\Models\BloquePreguntas;
+use App\Models\BloquePreguntasTextos;
+use App\Models\BloquePreguntasUsuarios;
 use App\Models\ComunidadSolicitud;
 use App\Models\Departamentos;
 use App\Models\Iglesias;
@@ -811,12 +814,15 @@ class ApiComunidadController extends Controller
                 }
 
 
+
+
                 // ************** BLOQUE PLANES ******************
 
 
                 // Obtener todos los id que estan ocultos por el usuario
                 $noPlanes = OcultarPlanes::where('id_usuario', $userToken->id)
                     ->select('id_planes')
+                    ->where('estado', 0) // no ocultos
                     ->get();
 
                 $arrayPlanes = PlanesUsuarios::where('id_usuario', $infoUsuario->id)
@@ -841,7 +847,7 @@ class ApiComunidadController extends Controller
                 return ['success' => 1,
                     'usuariobuscado' => $infoUsuario->id, // con este usuario buscar items y preguntas
                     'hayinfo' => $hayinfo,
-                    'listado' => $arrayPlanesOrdenado];
+                    'listadoplan' => $arrayPlanesOrdenado];
 
             }else{
                 return ['success' => 99, 'msg' => "Solicitud no encontrada"];
@@ -904,11 +910,12 @@ class ApiComunidadController extends Controller
             // OBTENER TODOS LOS ITEMS
 
 
+
             $arrayItemsLista = DB::table('planes AS p')
                 ->join('planes_bloques AS pb', 'pb.id_planes', '=', 'p.id')
                 ->join('planes_block_detalle AS pbd', 'pbd.id_planes_bloques', '=', 'pb.id')
                 ->select('pbd.id')
-                ->whereIn('p.id', $request->idplan)
+                ->whereIn('p.id', [$request->idplan])
                 ->get();
 
             $pilaItems = array();
@@ -932,19 +939,18 @@ class ApiComunidadController extends Controller
                 $infoPlanesBlockDeta = PlanesBlockDetalle::where('id', $dato->id_planes_block_deta)->first();
                 $infoPlanesBloques = PlanesBloques::where('id', $infoPlanesBlockDeta->id_planes_bloques)->first();
 
-                $dato->fecha = $infoPlanesBloques->fecha_inicio;
+                $dato->fecha = date("d-m-Y", strtotime($infoPlanesBloques->fecha_inicio));
             }
 
             $arrayItemsOrdenados = $arrayItems->sortBy('fecha')->values();
 
             return ['success' => 1,
                 'hayinfo' => $hayinfo,
-                'listado' => $arrayItemsOrdenados];
+                'listadoplan' => $arrayItemsOrdenados];
         }
         else{
             return ['success' => 99];
         }
-
     }
 
 
@@ -972,11 +978,94 @@ class ApiComunidadController extends Controller
 
     public function informacionPlanesAmigoItemsPreguntas(Request $request){
 
+        $rules = array(
+            'idplanblockdetauser' => 'required',
+            'idiomaplan' => 'required',
+            'idusuariobuscar' => 'required'
+        );
+
+
+        $validator = Validator::make($request->all(), $rules);
+        if ( $validator->fails()){
+            return ['success' => 0,
+                'msj' => "validación incorrecta"
+            ];
+        }
+
+        $tokenApi = $request->header('Authorization');
+
+        if ($userToken = JWTAuth::user($tokenApi)) {
+
+            if($info = PlanesBlockDetaUsuario::where('id', $request->idplanblockdetauser)->first()){
+                $idiomaTexto = $request->idiomaplan;
+
+                $idplanblockdeta = $info->id_planes_block_deta;
+
+                $listadoPreguntas = BloquePreguntas::where('id_plan_block_detalle', $idplanblockdeta)
+                    ->orderBy('posicion', 'ASC')
+                    ->get();
+
+                $hayinfo = 0;
+
+                foreach ($listadoPreguntas as $dato){
+                    $hayinfo = 1;
+
+                    $titulo = $this->retornoTituloPreguntaTextoIdioma($dato->id, $idiomaTexto);
+                    $dato->titulo = $titulo;
+
+                    $respuesta = "";
+
+                    // hoy buscar la respuesta, de ese usuario para esta pregunta
+                    if($infoPre = BloquePreguntasUsuarios::where('id_bloque_preguntas', $dato->id)
+                        ->where('id_usuarios', $request->idusuariobuscar)->first()){
+
+                        $respuesta = $infoPre->texto;
+                    }
+
+                    $dato->respuesta = $respuesta;
+                }
+
+                return ['success' => 1,
+                    'hayinfo' => $hayinfo,
+                    'listado' => $listadoPreguntas];
+            }else{
+                return ['success' => 99];
+            }
+        }
+        else{
+            return ['success' => 99];
+        }
 
 
     }
 
 
+
+
+
+    // RETORNO DE TITULO DE PREGUNTA SEGUN IDIOMA
+    private function retornoTituloPreguntaTextoIdioma($idPregunta, $idiomaTexto){
+
+        if($infoTituloTexto = BloquePreguntasTextos::where('id_bloque_preguntas', $idPregunta)
+            ->where('id_idioma_planes', $idiomaTexto)
+            ->first()){
+
+            return $infoTituloTexto->texto;
+
+        }else{
+            // si no encuentra sera por defecto español
+
+            $infoTituloTexto = BloquePreguntasTextos::where('id_bloque_preguntas', $idPregunta)
+                ->where('id_idioma_planes', 1)
+                ->first();
+
+            return $infoTituloTexto->texto;
+        }
+
+    }
+
+
+    // DEVUELTE TEXTO CON IDIOMA DE LO ESCRITOP
 
     public function infoPlanesUsuarios(Request $request)
     {

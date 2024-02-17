@@ -183,6 +183,8 @@ Route::middleware('verificarToken')->group(function () {
     // iniciar plan con amigos
     Route::post('app/comunidadplan/iniciar/plan/amigos', [ApiComunidadController::class,'iniciarPlanConAmigos']);
 
+
+
     // listado de planes que tiene ese amigo de comunidad
     Route::post('app/comunidad/informacion/planes', [ApiComunidadController::class,'informacionPlanesAmigo']);
 

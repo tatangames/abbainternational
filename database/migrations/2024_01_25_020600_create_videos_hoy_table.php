@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * LOS VIDEOS QUE SE MUESTRAN SEGUN TIPO URL
      */
     public function up(): void
     {

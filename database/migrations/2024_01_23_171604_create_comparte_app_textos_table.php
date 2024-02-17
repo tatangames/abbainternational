@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * TEXTOS DE COMPARTIR APP SEGUN IDIOMAS
      */
     public function up(): void
     {
