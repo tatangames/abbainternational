@@ -23,6 +23,8 @@
                                     <td>
                                         @if($dato->imagen != null)
                                             <center><img alt="Imagenes" src="{{ url('storage/archivos/'.$dato->imagen) }}" width="100px" height="100px" /></center>
+                                        @else
+                                        Mostrara icono de campana por defecto
                                         @endif
                                     </td>
 

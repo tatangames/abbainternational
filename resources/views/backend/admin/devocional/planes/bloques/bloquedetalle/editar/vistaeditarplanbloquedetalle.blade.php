@@ -50,7 +50,7 @@
 
 
                             <div class="form-group">
-                                <label>Ignora Primera Cuadro Pregunta para Compartir</label><br>
+                                <label>Cuando un usuario comparte un Devocional, el Primer Cuadro de texto será ignorado?</label><br>
                                 <label class="switch" style="margin-top:10px">
                                     <input type="checkbox" id="toggle">
                                     <div class="slider round">

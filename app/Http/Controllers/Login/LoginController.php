@@ -21,6 +21,11 @@ class LoginController extends Controller
     }
 
     public function index(){
+
+        if (Auth::guard('admin')->check()) {
+            return redirect('/panel');
+        }
+
         return view('frontend.login.vistalogin');
     }
 

@@ -45,7 +45,7 @@
                         <div class="col-md-12">
 
                             <section>
-                                <label class="control-label">Imagen</label>
+                                <label class="control-label">Imagen (Ejemplo 600x400 px)</label>
 
                                 <div class="row">
 

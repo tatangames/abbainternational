@@ -62,7 +62,7 @@
                             </div>
 
                             <div class="form-group" style="max-width: 20%">
-                                <label class="control-label">Tipo Video</label>
+                                <label class="control-label">Tipo Video (Solo es informativo, no afecta en la URL)</label>
                                 <select class="form-control" id="select-tipovideo">
                                     @foreach($arrayTipo as $item)
                                         @if($infoVideo->id_tipo_video == $item->id)

@@ -178,6 +178,8 @@
 
                 });
 
+            $("#toggle-requerida").prop("checked", true);
+
             document.getElementById("divcontenedor").style.display = "block";
         });
     </script>
