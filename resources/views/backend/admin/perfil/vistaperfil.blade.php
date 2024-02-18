@@ -79,9 +79,6 @@
             var passwordRepetida = document.getElementById('password1').value;
 
 
-
-
-
             if(correo === ''){
                 toastr.error('Correo es requerido');
                 return;
@@ -92,52 +89,60 @@
                 return;
             }
 
-            if(passwordNueva === ''){
-                toastr.error('Contraseña nueva es requerida');
-                return;
-            }
+            var actualizarPass = 0;
 
-            if(passwordRepetida === ''){
-                toastr.error('Contraseña repetida es requerida');
-                return;
-            }
+            if(passwordNueva.length > 0 || passwordRepetida.length > 0){
+                if(passwordNueva === ''){
+                    toastr.error('Contraseña nueva es requerida');
+                    return;
+                }
 
-            if(passwordNueva.length > 16){
-                toastr.error('Máximo 16 caracteres para contraseña nueva');
-                return;
-            }
+                if(passwordRepetida === ''){
+                    toastr.error('Contraseña repetida es requerida');
+                    return;
+                }
 
-            if(passwordNueva.length < 4){
-                toastr.error('Mínimo 4 caracteres para contraseña nueva');
-                return;
-            }
+                if(passwordNueva.length > 16){
+                    toastr.error('Máximo 16 caracteres para contraseña nueva');
+                    return;
+                }
 
-            if(passwordRepetida.length > 16){
-                toastr.error('Máximo 16 caracteres para contraseña repetida');
-                return;
-            }
+                if(passwordNueva.length < 4){
+                    toastr.error('Mínimo 4 caracteres para contraseña nueva');
+                    return;
+                }
 
-            if(passwordRepetida.length < 4){
-                toastr.error('Mínimo 4 caracteres para contraseña repetida');
-                return;
-            }
+                if(passwordRepetida.length > 16){
+                    toastr.error('Máximo 16 caracteres para contraseña repetida');
+                    return;
+                }
 
-            if(passwordNueva !== passwordRepetida){
-                toastr.error('Las contraseñas no coinciden');
-                return;
-            }
+                if(passwordRepetida.length < 4){
+                    toastr.error('Mínimo 4 caracteres para contraseña repetida');
+                    return;
+                }
 
+                if(passwordNueva !== passwordRepetida){
+                    toastr.error('Las contraseñas no coinciden');
+                    return;
+                }
+
+                actualizarPass = 1;
+            }
 
 
             openLoading()
             var formData = new FormData();
             formData.append('password', passwordNueva);
             formData.append('correo', correo);
+            formData.append('actualizarpass', actualizarPass);
 
             axios.post('/admin/perfil/actualizar/todo', formData, {
             })
                 .then((response) => {
                     closeLoading()
+
+                    console.log(response)
 
                     if (response.data.success === 1) {
                         toastr.success('Contraseña Actualizada');

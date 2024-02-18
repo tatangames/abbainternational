@@ -10,7 +10,7 @@
                                 <th style="width: 2%">País</th>
                                 <th style="width: 8%">Total Departamentos</th>
                                 <th style="width: 8%">Total Iglesias</th>
-                                <th style="width: 8%">Total Usuarios</th>
+                                <th style="width: 8%">Total Usuarios por País</th>
                                 <th style="width: 4%">Opciones</th>
                             </tr>
                             </thead>

@@ -25,9 +25,10 @@
                                             <i class="fas fa-eye" title="Editar"></i>&nbsp; Editar
                                         </button>
 
-                                        <button type="button" style="color: white" class="btn btn-success btn-xs" onclick="vistaIglesias({{ $dato->id }})">
+                                        <button type="button" style="color: white; margin: 4px" class="btn btn-success btn-xs" onclick="vistaIglesias({{ $dato->id }})">
                                             <i class="fas fa-edit" style="color: white;" title="Iglesias"></i>&nbsp; Iglesias
                                         </button>
+
                                     </td>
                                 </tr>
                             @endforeach

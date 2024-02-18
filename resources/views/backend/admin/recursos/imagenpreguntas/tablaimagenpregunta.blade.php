@@ -7,7 +7,7 @@
                         <table id="tabla" class="table table-bordered table-striped">
                             <thead>
                             <tr>
-                                <th style="width: 8%">Nombre</th>
+                                <th style="width: 8%">Descripción (No visible en la App)</th>
                                 <th style="width: 8%">Imagen</th>
                                 <th style="width: 4%">Opciones</th>
                             </tr>

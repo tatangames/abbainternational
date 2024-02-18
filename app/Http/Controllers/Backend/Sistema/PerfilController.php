@@ -7,6 +7,7 @@ use App\Models\Administrador;
 use App\Models\IdiomaSistema;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 
@@ -27,9 +28,11 @@ class PerfilController extends Controller
     // editar contraseña del usuario
     public function editarUsuario(Request $request){
 
+        Log::info($request->all());
+
         $regla = array(
             'correo' => 'required',
-            'password' => 'required',
+            'actualizarpass' => 'required'
         );
 
         $validar = Validator::make($request->all(), $regla);
@@ -40,10 +43,16 @@ class PerfilController extends Controller
 
         $usuario = auth()->user();
 
-        Administrador::where('id', $usuario->id)
-            ->update([
-                'email' => $request->correo,
-                'password' => Hash::make($request->password)]);
+        if($request->actualizarpass == 1){
+            Administrador::where('id', $usuario->id)
+                ->update([
+                    'email' => $request->correo,
+                    'password' => Hash::make($request->password)]);
+        }else{
+            Administrador::where('id', $usuario->id)
+                ->update([
+                    'email' => $request->correo]);
+        }
 
         return ['success' => 1];
     }

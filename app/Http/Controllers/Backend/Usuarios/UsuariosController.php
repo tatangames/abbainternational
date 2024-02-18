@@ -33,13 +33,14 @@ class UsuariosController extends Controller
             $arrayDepa = Departamentos::where('id_pais', $dato->id)
                 ->select('id')
                 ->get();
+
             $conteoDepa = count($arrayDepa);
 
             $arrayIglesia = Iglesias::whereIn('id_departamento', $arrayDepa)
                 ->select('id')
                 ->get();
-            $conteoIglesia = count($arrayIglesia);
 
+            $conteoIglesia = count($arrayIglesia);
 
             $conteoUsuarios = Usuarios::whereIn('id_iglesia', $arrayIglesia)->count();
 

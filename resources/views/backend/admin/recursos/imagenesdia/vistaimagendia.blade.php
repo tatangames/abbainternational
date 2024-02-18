@@ -73,7 +73,7 @@
                             <div class="col-md-12">
 
                                 <div class="form-group">
-                                    <label>Descripción</label>
+                                    <label>Descripción (No visible en la App)</label>
                                     <input type="text" maxlength="100" autocomplete="off" class="form-control" id="descripcion-nuevo" placeholder="Descripción">
                                 </div>
 

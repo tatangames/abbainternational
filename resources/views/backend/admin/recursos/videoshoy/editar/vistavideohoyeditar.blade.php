@@ -80,9 +80,7 @@
                                 <input type="text" maxlength="100" class="form-control" id="url-nuevo" value="{{ $infoVideo->url_video }}">
                             </div>
 
-
-
-                                <label class="control-label">Imagen</label>
+                                <label class="control-label">Imagen (recomendación máximo 800 x 800 px)</label>
 
                                 <div class="row">
 

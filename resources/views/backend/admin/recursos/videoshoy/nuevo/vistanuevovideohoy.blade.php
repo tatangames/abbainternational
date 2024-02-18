@@ -66,15 +66,15 @@
                                 <div class="row">
                                     <div class="form-group">
                                         <div class="form-group">
-                                            <label class="control-label">Imagen</label>
+                                            <label class="control-label">Imagen (recomendación máximo 800 x 800 px)</label>
                                             <input type="file" class="form-control" style="color:#191818" id="imagen-nuevo" accept="image/jpeg, image/jpg, image/png"/>
                                         </div>
                                     </div>
                                 </div>
 
 
-                                <div class="form-group" style="max-width: 20%">
-                                    <label class="control-label">Tipo Video</label>
+                                <div class="form-group" style="max-width: 25%">
+                                    <label class="control-label">Tipo Video (Solo es informativo, no afecta en la URL)</label>
                                     <select class="form-control" id="select-tipovideo">
                                         @foreach($arrayTipo as $item)
                                             <option value="{{$item->id}}">{{$item->nombre}}</option>
@@ -82,10 +82,11 @@
                                     </select>
                                 </div>
 
+                                <hr>
 
                                 <div class="form-group" style="max-width: 35%">
                                     <label class="control-label">URL Video</label>
-                                    <input type="text" maxlength="100" class="form-control" id="url-nuevo" >
+                                    <input type="text" maxlength="100" autocomplete="off" class="form-control" id="url-nuevo" >
                                 </div>
 
                             </section>

@@ -23,11 +23,11 @@
                                             <i class="fas fa-eye" title="Editar"></i>&nbsp; Editar
                                         </button>
 
-                                        <button type="button" style="color: white" class="btn btn-success btn-xs" onclick="vistaDepartamentos({{ $dato->id }})">
+                                        <button type="button" style="color: white; margin: 4px" class="btn btn-success btn-xs" onclick="vistaDepartamentos({{ $dato->id }})">
                                             <i class="fas fa-edit" style="color: white;" title="Departamentos"></i>&nbsp; Departamentos
                                         </button>
 
-                                        <button type="button" style="color: white" class="btn btn-warning btn-xs" onclick="vistaZonaHoraria({{ $dato->id }})">
+                                        <button type="button" style="color: white; margin: 4px" class="btn btn-warning btn-xs" onclick="vistaZonaHoraria({{ $dato->id }})">
                                             <i class="fas fa-edit" style="color: white;" title="Zona Horaria"></i>&nbsp; Zona Horaria
                                         </button>
                                     </td>
