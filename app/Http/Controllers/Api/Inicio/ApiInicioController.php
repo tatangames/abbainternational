@@ -100,7 +100,7 @@ class ApiInicioController extends Controller
             $devo_preguntas = 1; // defecto para cuestionario nomas
             $devo_lecturaDia = "";
 
-            $arrayPlanesSeleccionado = PlanesUsuarios::where('id_usuario', $userToken)
+            $arrayPlanesSeleccionado = PlanesUsuarios::where('id_usuario', $userToken->id)
                 ->select('id_planes')
                 ->get();
 

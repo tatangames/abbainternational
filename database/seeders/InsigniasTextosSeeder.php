@@ -18,7 +18,7 @@ class InsigniasTextosSeeder extends Seeder
         InsigniasTextos::create([
             'id_tipo_insignia' => '1',
             'id_idioma_planes' => '1',
-            'texto_1' => 'Compartir Aplicacición',
+            'texto_1' => 'Compartir Aplicación',
             'texto_2' => 'Entre más compartas la aplicación aumentas tu nivel de insignia',
         ]);
 

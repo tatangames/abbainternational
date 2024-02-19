@@ -157,7 +157,7 @@
                                 </div>
 
                                  <div class="form-group">
-                                    <label>Descripción Devocional</label>
+                                    <label>Descripción Devocional <span style="color: red">(Al final del Texto dar espacio)</span></label>
                                     <textarea name="content" id="editor-nuevo" rows="12" cols="50"></textarea>
                                 </div>
 
@@ -198,7 +198,7 @@
                                 </div>
 
                                 <div class="form-group">
-                                    <label>Descripción Devocional </label>
+                                    <label>Descripción Devocional <span style="color: red">(Al final del Texto dar espacio)</span></label>
                                     <input id="id-editar" type="hidden">
                                     <textarea name="content" id="editor-editar" rows="12" cols="50"></textarea>
                                 </div>

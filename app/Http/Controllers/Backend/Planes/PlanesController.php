@@ -806,6 +806,8 @@ class PlanesController extends Controller
     public function actualizarPlanesBloquesDetaTextos(Request $request)
     {
 
+
+
         $regla = array(
             'idplanbloquedetalle' => 'required',
             'toggle' => 'required'
@@ -913,6 +915,7 @@ class PlanesController extends Controller
     public function guardarDevocionalTexto(Request $request)
     {
 
+
         $regla = array(
             'idblockdetalle' => 'required',
             'ididioma' => 'required',
@@ -956,23 +959,35 @@ class PlanesController extends Controller
 
                     $contenidoHtmlConJavascriptTitulo .= "</style>
                         <script type='text/javascript'>
-                            function aumentarTamaño() {
+
+                            function disminuirTamano() {
                                 var elementos = document.getElementsByTagName('*');
                                 for (var i = 0; i < elementos.length; i++) {
                                     var estilo = window.getComputedStyle(elementos[i], null).getPropertyValue('font-size');
                                     var fontSize = parseFloat(estilo);
-                                    elementos[i].style.fontSize = (fontSize + 2) + 'px';
+                                    var resta = fontSize - 5;
+                                    if(fontSize < 5){
+                                        resta = 5;
+                                    }
+
+                                    elementos[i].style.fontSize = (resta) + 'px';
                                 }
                             }
 
-                            function disminuirTamaño() {
+                            function aumentarTamano() {
                                 var elementos = document.getElementsByTagName('*');
                                 for (var i = 0; i < elementos.length; i++) {
                                     var estilo = window.getComputedStyle(elementos[i], null).getPropertyValue('font-size');
                                     var fontSize = parseFloat(estilo);
-                                    elementos[i].style.fontSize = (fontSize - 2) + 'px';
+                                    var suma = fontSize + 5;
+                                    if(suma > 40){
+                                        suma = 40;
+                                    }
+                                    elementos[i].style.fontSize = (suma) + 'px';
                                 }
                             }
+
+
                         </script>
                     </head>
                     <body>" . $request->titulo . "</body>
@@ -982,39 +997,51 @@ class PlanesController extends Controller
 
 
 
-                    // ****************** DESCRIPCION ************************
+                    // ****************** DEVOCIONAL ************************
 
 
 
-                    $contenidoHtmlConJavascript = "<html>
+                    $contenidoHtmlDevocional = "<html>
                     <head>
                     <meta charset='UTF-8'>
                         <meta name='viewport' content='width=device-width, initial-scale=1.0'>
                     <style>
                         ";
 
-                    $contenidoHtmlConJavascript .= $this->retornoFuentesCSS();
+                    $contenidoHtmlDevocional .= $this->retornoFuentesCSS();
 
 
-                    $contenidoHtmlConJavascript .= "</style>
+                    $contenidoHtmlDevocional .= "</style>
                         <script type='text/javascript'>
-                            function aumentarTamaño() {
+
+                            function disminuirTamano() {
                                 var elementos = document.getElementsByTagName('*');
                                 for (var i = 0; i < elementos.length; i++) {
                                     var estilo = window.getComputedStyle(elementos[i], null).getPropertyValue('font-size');
                                     var fontSize = parseFloat(estilo);
-                                    elementos[i].style.fontSize = (fontSize + 2) + 'px';
+                                    var resta = fontSize - 5;
+                                    if(fontSize < 5){
+                                        resta = 5;
+                                    }
+
+                                    elementos[i].style.fontSize = (resta) + 'px';
                                 }
                             }
 
-                            function disminuirTamaño() {
+                            function aumentarTamano() {
                                 var elementos = document.getElementsByTagName('*');
                                 for (var i = 0; i < elementos.length; i++) {
                                     var estilo = window.getComputedStyle(elementos[i], null).getPropertyValue('font-size');
                                     var fontSize = parseFloat(estilo);
-                                    elementos[i].style.fontSize = (fontSize - 2) + 'px';
+                                    var suma = fontSize + 5;
+                                    if(suma > 40){
+                                        suma = 40;
+                                    }
+                                    elementos[i].style.fontSize = (suma) + 'px';
                                 }
                             }
+
+
                         </script>
                     </head>
                     <body>" . $request->devocional . "</body>
@@ -1030,13 +1057,17 @@ class PlanesController extends Controller
                 <body>" . $request->devocional . "</body>
                     </html>";
 
+
+
                     $detalle = new BloqueCuestionarioTextos();
                     $detalle->id_bloque_detalle = $request->idblockdetalle;
                     $detalle->id_idioma_planes = $request->ididioma;
-                    $detalle->texto = $contenidoHtmlConJavascript;
-                    $detalle->texto_dia = $contenidoHtml;
-                    $detalle->titulo = $contenidoHtmlConJavascriptTitulo;
-                    $detalle->titulo_dia = $contenidoHtmlTitulo;
+                    $detalle->texto = $contenidoHtmlDevocional;    // TEXTO DEL DEVOCIONAL, QUE SE CARGA EN UN WEBVIEW
+                    $detalle->texto_dia = $contenidoHtml;  // EL MISMO TEXTO PERO ESTE SE CARGA EN TEXTVIEW
+                    $detalle->titulo = $contenidoHtmlConJavascriptTitulo;  // TITULO QUE AL TOCARLO ME MANDA A A BIBLIA
+                    $detalle->titulo_dia = $contenidoHtmlTitulo; // EL MISMO TEXTO DE TITULO PERO SE CARGARA EN TEXTIEW
+
+
 
                     $detalle->save();
                 }
@@ -1085,23 +1116,34 @@ class PlanesController extends Controller
 
             $contenidoHtmlConJavascriptTitulo .= "</style>
                         <script type='text/javascript'>
-                            function aumentarTamaño() {
+
+                           function disminuirTamano() {
                                 var elementos = document.getElementsByTagName('*');
                                 for (var i = 0; i < elementos.length; i++) {
                                     var estilo = window.getComputedStyle(elementos[i], null).getPropertyValue('font-size');
                                     var fontSize = parseFloat(estilo);
-                                    elementos[i].style.fontSize = (fontSize + 2) + 'px';
+                                    var resta = fontSize - 5;
+                                    if(fontSize < 5){
+                                        resta = 5;
+                                    }
+
+                                    elementos[i].style.fontSize = (resta) + 'px';
                                 }
                             }
 
-                            function disminuirTamaño() {
+                            function aumentarTamano() {
                                 var elementos = document.getElementsByTagName('*');
                                 for (var i = 0; i < elementos.length; i++) {
                                     var estilo = window.getComputedStyle(elementos[i], null).getPropertyValue('font-size');
                                     var fontSize = parseFloat(estilo);
-                                    elementos[i].style.fontSize = (fontSize - 2) + 'px';
+                                    var suma = fontSize + 5;
+                                    if(suma > 40){
+                                        suma = 40;
+                                    }
+                                    elementos[i].style.fontSize = (suma) + 'px';
                                 }
                             }
+
                         </script>
                     </head>
                     <body>" . $request->titulo . "</body>
@@ -1111,43 +1153,66 @@ class PlanesController extends Controller
 
 
 
-            // *************  DESCRIPCION *******************
+            // *************  DEVOCIONAL *******************
 
 
 
-            $contenidoHtmlConJavascript = "<html>
+            $contenidoHtmlDevocional= "<html>
                     <head>
                     <meta charset='UTF-8'>
                         <meta name='viewport' content='width=device-width, initial-scale=1.0'>
                     <style>
                         ";
 
-                $contenidoHtmlConJavascript .= $this->retornoFuentesCSS();
+            $contenidoHtmlDevocional .= $this->retornoFuentesCSS();
 
 
-                $contenidoHtmlConJavascript .= "</style>
+            $contenidoHtmlDevocional .= "  </style>
                         <script type='text/javascript'>
-                            function aumentarTamaño() {
+
+
+                            function disminuirTamano() {
                                 var elementos = document.getElementsByTagName('*');
                                 for (var i = 0; i < elementos.length; i++) {
                                     var estilo = window.getComputedStyle(elementos[i], null).getPropertyValue('font-size');
                                     var fontSize = parseFloat(estilo);
-                                    elementos[i].style.fontSize = (fontSize + 2) + 'px';
+                                    var resta = fontSize - 5;
+                                    if(fontSize < 5){
+                                        resta = 5;
+                                    }
+
+                                    elementos[i].style.fontSize = (resta) + 'px';
                                 }
                             }
 
-                            function disminuirTamaño() {
+                            function aumentarTamano() {
                                 var elementos = document.getElementsByTagName('*');
                                 for (var i = 0; i < elementos.length; i++) {
                                     var estilo = window.getComputedStyle(elementos[i], null).getPropertyValue('font-size');
                                     var fontSize = parseFloat(estilo);
-                                    elementos[i].style.fontSize = (fontSize - 2) + 'px';
+                                    var suma = fontSize + 5;
+                                    if(suma > 40){
+                                        suma = 40;
+                                    }
+                                    elementos[i].style.fontSize = (suma) + 'px';
                                 }
                             }
+
+
                         </script>
                     </head>
                     <body>" . $request->devocional . "</body>
                     </html>";
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1163,7 +1228,7 @@ class PlanesController extends Controller
 
             // actualizar
             BloqueCuestionarioTextos::where('id', $info->id)->update([
-                'texto' => $contenidoHtmlConJavascript,
+                'texto' => $contenidoHtmlDevocional,
                 'texto_dia' => $contenidoHtml,
                 'titulo' => $contenidoHtmlConJavascriptTitulo,
                 'titulo_dia' => $contenidoHtmlTitulo,

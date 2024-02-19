@@ -7,21 +7,18 @@ import { ClassicEditor } from '@ckeditor/ckeditor5-editor-classic';
 
 import { Alignment } from '@ckeditor/ckeditor5-alignment';
 import { Autoformat } from '@ckeditor/ckeditor5-autoformat';
-import { Bold, Code, Italic, Underline } from '@ckeditor/ckeditor5-basic-styles';
+import { Bold, Italic } from '@ckeditor/ckeditor5-basic-styles';
 import type { EditorConfig } from '@ckeditor/ckeditor5-core';
 import { Essentials } from '@ckeditor/ckeditor5-essentials';
-import { FontFamily, FontSize } from '@ckeditor/ckeditor5-font';
 import { Heading } from '@ckeditor/ckeditor5-heading';
-import { HorizontalLine } from '@ckeditor/ckeditor5-horizontal-line';
-import { HtmlComment } from '@ckeditor/ckeditor5-html-support';
-import { Indent } from '@ckeditor/ckeditor5-indent';
-import { List, ListProperties } from '@ckeditor/ckeditor5-list';
+import { List } from '@ckeditor/ckeditor5-list';
 import { Paragraph } from '@ckeditor/ckeditor5-paragraph';
 import {
 	SpecialCharacters,
 	SpecialCharactersArrows,
-	SpecialCharactersCurrency,
-	SpecialCharactersLatin
+	SpecialCharactersEssentials,
+	SpecialCharactersLatin,
+	SpecialCharactersText
 } from '@ckeditor/ckeditor5-special-characters';
 import { Undo } from '@ckeditor/ckeditor5-undo';
 
@@ -33,23 +30,16 @@ class Editor extends ClassicEditor {
 		Alignment,
 		Autoformat,
 		Bold,
-		Code,
 		Essentials,
-		FontFamily,
-		FontSize,
 		Heading,
-		HorizontalLine,
-		HtmlComment,
-		Indent,
 		Italic,
 		List,
-		ListProperties,
 		Paragraph,
 		SpecialCharacters,
 		SpecialCharactersArrows,
-		SpecialCharactersCurrency,
+		SpecialCharactersEssentials,
 		SpecialCharactersLatin,
-		Underline,
+		SpecialCharactersText,
 		Undo
 	];
 
@@ -57,21 +47,13 @@ class Editor extends ClassicEditor {
 		toolbar: {
 			items: [
 				'heading',
-				'|',
 				'bold',
 				'italic',
 				'bulletedList',
 				'numberedList',
 				'|',
-				'outdent',
-				'indent',
-				'|',
-				'undo',
-				'redo',
 				'alignment',
-				'fontFamily',
-				'specialCharacters',
-				'underline'
+				'specialCharacters'
 			]
 		},
 		language: 'es'

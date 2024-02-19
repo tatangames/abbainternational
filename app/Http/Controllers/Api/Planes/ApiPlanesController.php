@@ -417,6 +417,7 @@ class ApiPlanesController extends Controller
             $infoIglesia = Iglesias::where('id', $userToken->id_iglesia)->first();
             $infoDepartamento = Departamentos::where('id', $infoIglesia->id_departamento)->first();
             $zonaHoraria = ZonaHoraria::where('id', $infoDepartamento->id_zona_horaria)->first();
+            $fechaCarbon = Carbon::now($zonaHoraria->zona);
 
             // obtener todos los bloques ordenados por fecha
             $arrayBloques = PlanesBloques::where('id_planes', $request->idplan)
@@ -432,9 +433,25 @@ class ApiPlanesController extends Controller
             // en la aplicacion
             $hayDiaActual = 0;
 
+            // posicion para recyclerview, a donde debe moverse
+            $posicionRecycler = 0;
+            $primeraVuelta = false;
+            $pararConteo = true;
+
+
 
             foreach ($arrayBloques as $dato){
                 array_push($resultsBloque, $dato);
+
+                // POSICION PARA MOVER EL RECYCLERVIEW
+                if($pararConteo) {
+                    if($primeraVuelta){
+                        $posicionRecycler++;
+                    }
+                }
+                $primeraVuelta = true;
+
+
 
                 $contador++;
                 $dato->abreviatura = $this->retorno3LetrasFechasIdioma($idiomaTextos, $dato->fecha_inicio);
@@ -444,12 +461,16 @@ class ApiPlanesController extends Controller
                 $fecha1 = Carbon::parse($dato->fecha_inicio);
 
                 // fecha-horario actual segun usuario zona horaria
-                $fecha2 = Carbon::parse(now(), $zonaHoraria->zona);
+                $fecha2 = Carbon::parse($fechaCarbon);
 
 
                 if($fecha1->isSameDay($fecha2)){
                     $dato->mismodia = 1;
                     $hayDiaActual = 1;
+
+                    // nunca habra 2 dias iguales pero por seguridad
+                    $pararConteo = false;
+
                 }else{
                     $dato->mismodia = 0;
                 }
@@ -546,6 +567,7 @@ class ApiPlanesController extends Controller
                 'portada' => $infoPlan->imagenportada,
                 'haydiaactual' => $hayDiaActual,
                 'idultimobloque' => $idUltimoBloque,
+                'posrecycler' => $posicionRecycler, // posicion para mover recycler
                 'listado' => $arrayBloques,
                 ];
         }else{
@@ -1432,7 +1454,8 @@ class ApiPlanesController extends Controller
                 return ['success' => 1,
                     'descripcion' => $descripcionPregunta,
                     'hayrespuesta' => $hayrespuesta,
-                    'listado' => $arrayBloque
+                    'listado' => $arrayBloque,
+                    'genero' => $userToken->id_genero
                 ];
             }else{
 

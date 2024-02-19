@@ -1085,6 +1085,7 @@ class ApiComunidadController extends Controller
 
         if ($userToken = JWTAuth::user($tokenApi)) {
 
+            $hayinfo = 0;
             $idiomaTextos = $userToken->idiomaplan;
 
             $arrayPlanes = PlanesUsuarios::where('id_usuario', $userToken->id)->get();
@@ -1099,7 +1100,6 @@ class ApiComunidadController extends Controller
                 $dato->titulo = $datosRaw['titulo'];
 
                 $marcado = false;
-
 
                 if($infoOc = OcultarPlanes::where('id_usuario', $userToken->id)
                     ->where('id_planes', $dato->id_planes)->first()){
