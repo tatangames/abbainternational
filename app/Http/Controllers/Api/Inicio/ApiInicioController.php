@@ -99,6 +99,7 @@ class ApiInicioController extends Controller
             $devo_idBlockDeta = 0; // Para redireccionar a sus preguntas
             $devo_preguntas = 1; // defecto para cuestionario nomas
             $devo_lecturaDia = "";
+            $devo_plan = 0;
 
             $arrayPlanesSeleccionado = PlanesUsuarios::where('id_usuario', $userToken->id)
                 ->select('id_planes')
@@ -112,6 +113,9 @@ class ApiInicioController extends Controller
                     ->whereIn('p.id_planes', $arrayPlanesSeleccionado) // solo si usuario ya tiene seleccioando
                     ->whereDate('p.fecha_inicio', '=', $zonaHorariaUsuario)
                     ->first()){
+
+                    // id plan
+                    $devo_plan = $arrayL->id_planes;
 
                     $devo_haydevocional = 1;
                     $devo_idBlockDeta = $arrayL->idblockdeta;
@@ -323,7 +327,7 @@ class ApiInicioController extends Controller
                 'insigniashay' => $insignia_hayInsignias,
 
                 'devopreguntas' => $devo_preguntas,
-
+                'devoplan' => $devo_plan,
 
                 'arrayracha' => [$infoTotalRachas], // se mete en llaves
                 'arrayfinalvideo' => $arrayFinalVideo,
@@ -688,6 +692,7 @@ class ApiInicioController extends Controller
                 ->join('tipo_insignias AS tipo', 'nil.id_tipo_insignia', '=', 'tipo.id')
                 ->select('nil.nivel', 'nil.id AS idnivelinsignia')
                 ->where('nil.id_tipo_insignia', $infoInsignia->id)
+                ->where('indeta.id_usuarios', $userToken->id)
                 ->max('nil.nivel');
 
             $hito_infoNivelVoy = 1;
@@ -710,6 +715,7 @@ class ApiInicioController extends Controller
                 ->join('tipo_insignias AS tipo', 'nil.id_tipo_insignia', '=', 'tipo.id')
                 ->select('nil.id', 'indeta.fecha', 'nil.nivel')
                 ->where('nil.id_tipo_insignia', $infoInsignia->id)
+                ->where('indeta.id_usuarios', $userToken->id)
                 ->orderBy('indeta.fecha', 'DESC')
                 ->get();
 
@@ -782,26 +788,6 @@ class ApiInicioController extends Controller
 
 
 
-    // actualizar planes usuarios continuar, esta tabla solo tiene 1 registro usuario
-    private function retornoActualizarPlanUsuarioContinuar($iduser, $idplan)
-    {
-        if($idPlanUser = PlanesUsuariosContinuar::where('id_usuarios', $iduser)
-            ->first()){
-            // solo actualizar
-
-            PlanesUsuariosContinuar::where('id', $idPlanUser->id)
-                ->update([
-                    'id_planes' => $idplan,
-                ]);
-        }
-        else{
-            // crear
-            $dato = new PlanesUsuariosContinuar();
-            $dato->id_usuarios = $iduser;
-            $dato->id_planes = $idplan;
-            $dato->save();
-        }
-    }
 
 
 

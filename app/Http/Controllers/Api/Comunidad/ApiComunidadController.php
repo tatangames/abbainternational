@@ -535,9 +535,7 @@ class ApiComunidadController extends Controller
         if ($userToken = JWTAuth::user($tokenApi)) {
 
             $hayInfo = 0;
-            $conteoNoti = NotificacionUsuario::where('id_usuario', $userToken->id)
-                ->orderBy('fecha', 'DESC')
-                ->count();
+            $conteoNoti = NotificacionUsuario::where('id_usuario', $userToken->id)->count();
 
             if ($conteoNoti != null && $conteoNoti > 0) {
                 $hayInfo = 1;
@@ -547,7 +545,7 @@ class ApiComunidadController extends Controller
             $limit = $request->input('limit', 10);
 
             $arrayNotificacion = NotificacionUsuario::where('id_usuario', $userToken->id)
-                ->orderBy('fecha', 'DESC')
+                ->orderBy('id', 'DESC')
                 ->paginate($limit, ['*'], 'page', $page);
 
             foreach ($arrayNotificacion as $dato){
@@ -727,19 +725,28 @@ class ApiComunidadController extends Controller
 
                     foreach ($request->idsolicitud as $clave => $valor) {
 
+                        $idusuarioVal = $valor['idusuario'];
+
                         // Registrar
                         $detalle = new PlanesAmigosDetalle();
                         $detalle->id_planes_usuarios = $nuevoPlan->id;
                         $detalle->id_comunidad_solicitud = $clave;
-                        $detalle->id_usuario = $valor['idusuario'];
+                        $detalle->id_usuario = $idusuarioVal;
                         $detalle->save();
 
 
 
                         // NOTIFICACION A USUARIOS QUE FUE UNIDO A UN PLAN GRUPAL
+                        // GUARDARLE HISTORIAL
+                        $notiHistorial = new NotificacionUsuario();
+                        $notiHistorial->id_usuario = $idusuarioVal;
+                        $notiHistorial->id_tipo_notificacion = 13;
+                        $notiHistorial->fecha = $zonaHoraria;
+                        $notiHistorial->save();
 
 
-                        $arrayOneSignal = UsuarioNotificaciones::where('id_usuario', $valor['idusuario'])->get();
+
+                        $arrayOneSignal = UsuarioNotificaciones::where('id_usuario', $idusuarioVal)->get();
                         $pilaOneSignal = array();
                         $hayIdOne = false;
                         foreach ($arrayOneSignal as $item){
@@ -751,7 +758,7 @@ class ApiComunidadController extends Controller
 
                         if($hayIdOne){
 
-                            $infoUsuario = Usuarios::where('id', $valor['idusuario']->first());
+                            $infoUsuario = Usuarios::where('id', $idusuarioVal)->first();
 
                             // UN AMIGO TE ACABA DE ENVIAR UNA SOLICITUD
                             $datosRaw = $this->retornoTitulosNotificaciones(12, $infoUsuario->idioma_noti);

@@ -260,10 +260,6 @@ class ApiPlanesController extends Controller
 
         if ($userToken = JWTAuth::user($tokenApi)) {
 
-            $idPlanContinuar = 0;
-            $arrayContinuar = null;
-            $haycontinuar = 0;
-
             $arrayPlanUsuario = PlanesUsuarios::where('id_usuario', $userToken->id)
                 ->select('id_planes')
                 ->get();
@@ -316,30 +312,6 @@ class ApiPlanesController extends Controller
             }
 
 
-            // filtrar plan continuar, aunque haya, evitar el completados
-            if($infoContinuar = PlanesUsuariosContinuar::where('id_usuarios', $userToken->id)
-                ->whereIn('id_planes', $pilaIdPlanNoComplet)
-                ->first()){
-                $haycontinuar = 1;
-                $idPlanContinuar = $infoContinuar->id_planes;
-
-                // plan ultimo para continuar
-                $arrayContinuar = PlanesUsuariosContinuar::where('id_usuarios', $userToken->id)
-                    ->take(1) // por seguridad tomar solo 1
-                    ->get();
-
-                foreach ($arrayContinuar as $dato){
-                    $titulosRaw = $this->retornoTituloPlan($idiomaTextos, $dato->id_planes);
-
-                    $dato->titulo = $titulosRaw['titulo'];
-                    $dato->subtitulo = $titulosRaw['subtitulo'];
-
-                    $infoP = Planes::where('id', $dato->id_planes)->first();
-                    $dato->imagen = $infoP->imagen;
-                    $dato->imagenportada = $infoP->imagenportada;
-                    $dato->idplan = $infoP->id;
-                }
-            }
 
 
 
@@ -351,7 +323,6 @@ class ApiPlanesController extends Controller
 
             $arrayPlanesUser = PlanesUsuarios::where('id_usuario', $userToken->id)
                 ->whereIn('id_planes', $pilaIdPlanNoComplet)
-                ->whereNotIn('id_planes', [$idPlanContinuar])
                 ->paginate($limit, ['*'], 'page', $page);
 
             foreach ($arrayPlanesUser as $dato){
@@ -370,8 +341,6 @@ class ApiPlanesController extends Controller
             $sortedResult = $arrayPlanesUser->getCollection()->sortBy('id')->values();
             $arrayPlanesUser->setCollection($sortedResult);
 
-
-
             $hayinfo = 0;
             // EN LA APP: se verifica la primera vez con un boolean
             if ($arrayPlanesUser->count() > 0) {
@@ -380,9 +349,7 @@ class ApiPlanesController extends Controller
 
 
             return ['success' => 1,
-                'haycontinuar' => $haycontinuar,
                 'hayinfo' => $hayinfo,
-                'listacontinuar' => $arrayContinuar, // no usa barra progreso
                 'listado' => $arrayPlanesUser,
             ];
 
@@ -390,6 +357,9 @@ class ApiPlanesController extends Controller
             return ['success' => 99];
         }
     }
+
+
+    // INFORMACION DE BLOQUE FECHAS
 
     // devuelve informacion del plan a continuar, todos el bloque
     public function informacionBloqueMiPlan(Request $request){
@@ -491,7 +461,8 @@ class ApiPlanesController extends Controller
                 $textoPersonalizado = "";
                 // buscar si tiene texto personalizado, para no mostrar la fecha
                 if($dato->texto_personalizado == 1){
-                    $textoPersonalizado = $this->retornoTextoPersonalizadoPlan($idiomaTextos, $dato->id_planes);
+                    // se envia id planes bloques
+                    $textoPersonalizado = $this->retornoTextoPersonalizadoPlan($idiomaTextos, $dato->id);
                 }
 
                 $dato->textopersonalizado = $textoPersonalizado;
@@ -1084,7 +1055,7 @@ class ApiPlanesController extends Controller
 
 
 
-                // ******************* BLOQUE 3 *******************************
+                // ******************* BLOQUE 3 - PLANES COMPARTIDOS EN GRUPOS ***********************
                 if($planCompletado){
 
                     $arrayPlanesAmigos = DB::table('planes_usuarios AS p')
@@ -1265,25 +1236,6 @@ class ApiPlanesController extends Controller
 
 
 
-                //*** BLOQUE PLANES CONTINUAR  *******
-
-
-                if($idPlanUser = PlanesUsuariosContinuar::where('id_usuarios', $userToken->id)->first()){
-                    // solo actualizar
-
-                    PlanesUsuariosContinuar::where('id', $idPlanUser->id)
-                        ->update([
-                            'id_planes' => $infoPlanesBloques->id_planes,
-                        ]);
-                }
-                else{
-                    // crear
-                    $dato = new PlanesUsuariosContinuar();
-                    $dato->id_usuarios = $userToken->id;
-                    $dato->id_planes = $infoPlanesBloques->id_planes;
-                    $dato->save();
-                }
-
 
 
                 DB::commit();
@@ -1451,11 +1403,14 @@ class ApiPlanesController extends Controller
                     $hayrespuesta = 1;
                 }
 
+                $infoPlanBlockDetalle = PlanesBlockDetalle::where('id', $infoBloquePre->id_plan_block_detalle)->first();
+
                 return ['success' => 1,
                     'descripcion' => $descripcionPregunta,
                     'hayrespuesta' => $hayrespuesta,
                     'listado' => $arrayBloque,
-                    'genero' => $userToken->id_genero
+                    'genero' => $userToken->id_genero,
+                    'ignorarshare' => $infoPlanBlockDetalle->ignorar_pregunta
                 ];
             }else{
 
@@ -1592,8 +1547,6 @@ class ApiPlanesController extends Controller
                 $infoBlockDeta = PlanesBlockDetalle::where('id', $request->idblockdeta)->first();
                 $infoPlanesBloques = PlanesBloques::where('id', $infoBlockDeta->id_planes_bloques)->first();
 
-                // colocar plan continuar por defecto
-                $this->retornoActualizarPlanUsuarioContinuar($userToken->id, $infoPlanesBloques->id_planes);
 
 
                 DB::commit();
@@ -1910,28 +1863,6 @@ class ApiPlanesController extends Controller
     }
 
 
-
-
-    private function retornoActualizarPlanUsuarioContinuar($iduser, $idplan)
-    {
-        if($idPlanUser = PlanesUsuariosContinuar::where('id_usuarios', $iduser)->first()){
-            // solo actualizar
-
-            PlanesUsuariosContinuar::where('id', $idPlanUser->id)
-                ->update([
-                    'id_planes' => $idplan,
-                ]);
-        }
-        else{
-            // crear
-            $dato = new PlanesUsuariosContinuar();
-            $dato->id_usuarios = $iduser;
-            $dato->id_planes = $idplan;
-            $dato->save();
-        }
-    }
-
-
     // informacion de todos los planes completados
     public function listadoMisPlanesCompletados(Request $request)
     {
@@ -2059,9 +1990,9 @@ class ApiPlanesController extends Controller
 
 
 
-    private function retornoTextoPersonalizadoPlan($idiomaPlan, $idPlan)
+    private function retornoTextoPersonalizadoPlan($idiomaPlan, $idPlanesBloques)
     {
-        if($info = PlanesBloquesTextos::where('id_planes_bloques', $idPlan)
+        if($info = PlanesBloquesTextos::where('id_planes_bloques', $idPlanesBloques)
             ->where('id_idioma_planes', $idiomaPlan)
             ->first()){
 
@@ -2070,7 +2001,7 @@ class ApiPlanesController extends Controller
         }else{
             // si no encuentra sera por defecto español
 
-            if($info = PlanesBloquesTextos::where('id_planes_bloques', $idPlan)
+            if($info = PlanesBloquesTextos::where('id_planes_bloques', $idPlanesBloques)
                 ->where('id_idioma_planes', 1)
                 ->first()){
                 return $info->titulo;

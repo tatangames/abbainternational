@@ -265,7 +265,7 @@ class NotificacionTextoSeeder extends Seeder
             'id_tipo_notificacion' => '13',
             'id_idioma_planes' => '1',
             'titulo' => 'Plan Grupal',
-            'descripcion' => 'te acaba de unir a su Plan Grupal',
+            'descripcion' => 'Un Amigo te acaba de unir a su Plan Grupal',
         ]);
 
 
@@ -273,7 +273,7 @@ class NotificacionTextoSeeder extends Seeder
             'id_tipo_notificacion' => '13',
             'id_idioma_planes' => '2',
             'titulo' => 'Group Plan',
-            'descripcion' => 'just joined you to his Group Plan',
+            'descripcion' => 'A friend just joined you in her Group Plan',
         ]);
     }
 }
