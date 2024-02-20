@@ -191,7 +191,7 @@
                                         <tr>
                                             <td class="pad" style="padding-left:40px;padding-right:40px;width:100%;">
                                                 <div class="alignment" align="center" style="line-height:10px">
-                                                    <div style="max-width: 192px;"><img src="http://abbaapp.xyz/storage/archivospublicos/abba.jpg" style="display: block; height: auto; border: 0; width: 100%;" width="192" alt="I'm an image" title="I'm an image"></div>
+                                                    <div style="max-width: 192px;"><img src="http://micaminarcondios.com/storage/archivospublicos/abba.jpg" style="display: block; height: auto; border: 0; width: 100%;" width="192" alt="I'm an image" title="I'm an image"></div>
                                                 </div>
                                             </td>
                                         </tr>
@@ -339,8 +339,8 @@
                                                 <div class="alignment" align="center">
                                                     <table class="social-table" width="104px" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; display: inline-block;">
                                                         <tr>
-                                                            <td style="padding:0 10px 0 10px;"><a href="https://www.facebook.com/profile.php?id=100082336233558" target="_blank"><img src="http://abbaapp.xyz/storage/archivospublicos/logofacebook.png" width="32" height="32" alt="Facebook" title="Facebook" style="display: block; height: auto; border: 0;"></a></td>
-                                                            <td style="padding:0 10px 0 10px;"><a href="https://www.instagram.com/abbainternacional/" target="_blank"><img src="http://abbaapp.xyz/storage/archivospublicos/logoinstagram.png" width="32" height="32" alt="Instagram" title="Instagram" style="display: block; height: auto; border: 0;"></a></td>
+                                                            <td style="padding:0 10px 0 10px;"><a href="https://www.facebook.com/profile.php?id=100082336233558" target="_blank"><img src="http://micaminarcondios.com/storage/archivospublicos/logofacebook.png" width="32" height="32" alt="Facebook" title="Facebook" style="display: block; height: auto; border: 0;"></a></td>
+                                                            <td style="padding:0 10px 0 10px;"><a href="https://www.instagram.com/abbainternacional/" target="_blank"><img src="http://micaminarcondios.com/storage/archivospublicos/logoinstagram.png" width="32" height="32" alt="Instagram" title="Instagram" style="display: block; height: auto; border: 0;"></a></td>
                                                         </tr>
                                                     </table>
                                                 </div>
