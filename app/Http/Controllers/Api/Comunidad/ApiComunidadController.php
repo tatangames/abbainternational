@@ -827,9 +827,9 @@ class ApiComunidadController extends Controller
 
 
                 // Obtener todos los id que estan ocultos por el usuario
-                $noPlanes = OcultarPlanes::where('id_usuario', $userToken->id)
+                $noPlanes = OcultarPlanes::where('id_usuario', $infoUsuario->id)
                     ->select('id_planes')
-                    ->where('estado', 0) // no ocultos
+                    ->where('estado', 1) // los ocultos
                     ->get();
 
                 $arrayPlanes = PlanesUsuarios::where('id_usuario', $infoUsuario->id)
@@ -1132,6 +1132,8 @@ class ApiComunidadController extends Controller
     public function actualizarPlanesOcultos(Request $request)
     {
 
+        Log::info($request->all());
+
         $rules = array(
             'iduser' => 'required',
         );
@@ -1153,15 +1155,19 @@ class ApiComunidadController extends Controller
 
                 if ($request->has('idplan')) {
 
+                    OcultarPlanes::where('id_usuario', $userToken->id)
+                        ->update(['estado' => 0]);
+
                     foreach ($request->idplan as $clave => $valor) {
 
+                        $idestado = $valor['estado'];
 
                         // si existe solo actualizar
                         if($fila = OcultarPlanes::where('id_usuario', $userToken->id)
                             ->where('id_planes', $clave)->first()){
 
                             OcultarPlanes::where('id', $fila->id)
-                                ->update(['estado' => $valor['estado']]);
+                                ->update(['estado' => $idestado]);
 
                         }else{
 
@@ -1175,11 +1181,9 @@ class ApiComunidadController extends Controller
                     }
                 }else{
                     // viene vacio, todos pasaran a false
-
                     OcultarPlanes::where('id_usuario', $userToken->id)
                         ->update(['estado' => 0]);
                 }
-
 
 
                 DB::commit();
