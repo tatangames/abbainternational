@@ -10,4 +10,8 @@ class BloquePreguntas extends Model
     use HasFactory;
     protected $table = 'bloque_preguntas';
     public $timestamps = false;
+
+    protected $fillable = [
+        'posicion'
+    ];
 }

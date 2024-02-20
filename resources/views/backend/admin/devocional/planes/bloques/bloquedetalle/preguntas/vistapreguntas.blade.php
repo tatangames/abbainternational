@@ -85,6 +85,12 @@
 
     <script>
 
+        function recargar(){
+            var idplanbloquedetalle = {{ $idplanbloquedetalle }};
+            var ruta = "{{ URL::to('/admin/preguntas/tabla') }}/" + idplanbloquedetalle;
+            $('#tablaDatatable').load(ruta);
+        }
+
 
         function vistaNuevasPreguntas(){
             let idplanbloquedetalle = {{ $idplanbloquedetalle }};
