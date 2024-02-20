@@ -28,11 +28,11 @@
                                         <button type="button" class="btn btn-success btn-xs" onclick="informacionUsuario({{ $dato->idusuario }})">
                                             <i class="fas fa-eye" title="Información"></i>&nbsp; Información
                                         </button>
-                                        <button type="button" class="btn btn-primary btn-xs" onclick="informacionRacha()">
+                                        <button type="button" style="margin: 5px" class="btn btn-primary btn-xs" onclick="informacionRacha()">
                                             <i class="fas fa-eye" title="Racha"></i>&nbsp; Racha
                                         </button>
 
-                                        <button type="button" class="btn btn-primary btn-xs" onclick="informacionRacha()">
+                                        <button type="button" style="margin: 5px" class="btn btn-primary btn-xs" onclick="informacionRacha()">
                                             <i class="fas fa-eye" title="Devocionales"></i>&nbsp; Devocionales
                                         </button>
 

@@ -164,7 +164,7 @@
                                                     <tr>
                                                         <td style="padding-right: 0px;padding-left: 0px;" align="center">
 
-                                                            <img align="center" border="0" src="http://abbaapp.xyz/storage/archivospublicos/abba.jpg" alt="Image" title="Image" style="outline: none;text-decoration: none;-ms-interpolation-mode: bicubic;clear: both;display: inline-block !important;border: none;height: auto;float: none;width: 29%;max-width: 168.2px;" width="168.2"/>
+                                                            <img align="center" border="0" src="http://micaminarcondios.com/storage/archivospublicos/abba.jpg" alt="Image" title="Image" style="outline: none;text-decoration: none;-ms-interpolation-mode: bicubic;clear: both;display: inline-block !important;border: none;height: auto;float: none;width: 29%;max-width: 168.2px;" width="168.2"/>
 
                                                         </td>
                                                     </tr>
@@ -205,7 +205,7 @@
                                                     <tr>
                                                         <td style="padding-right: 0px;padding-left: 0px;" align="center">
 
-                                                            <img align="center" border="0" src="http://abbaapp.xyz/storage/archivospublicos/candado.png" alt="Image" title="Image" style="outline: none;text-decoration: none;-ms-interpolation-mode: bicubic;clear: both;display: inline-block !important;border: none;height: auto;float: none;width: 10%;max-width: 58px;" width="58"/>
+                                                            <img align="center" border="0" src="http://micaminarcondios.com/storage/archivospublicos/candado.png" alt="Image" title="Image" style="outline: none;text-decoration: none;-ms-interpolation-mode: bicubic;clear: both;display: inline-block !important;border: none;height: auto;float: none;width: 10%;max-width: 58px;" width="58"/>
 
                                                         </td>
                                                     </tr>
