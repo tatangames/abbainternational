@@ -21,14 +21,14 @@
             <div class="col-sm-6">
                 <button type="button" onclick="modalAgregar()" class="btn btn-primary btn-sm">
                     <i class="fas fa-plus-square"></i>
-                    Nuevo número
+                    Nuevo Bloque
                 </button>
             </div>
 
             <div class="col-sm-6">
                 <ol class="breadcrumb float-sm-right">
                     <li class="breadcrumb-item">Capitulos</li>
-                    <li class="breadcrumb-item active">Listado</li>
+                    <li class="breadcrumb-item active">Listado Bloque</li>
                 </ol>
             </div>
 
@@ -39,7 +39,7 @@
         <div class="container-fluid">
             <div class="card card-success">
                 <div class="card-header">
-                    <h3 class="card-title">Listado de Capitulos</h3>
+                    <h3 class="card-title">Listado de Capitulos Bloque</h3>
                 </div>
                 <div class="card-body">
                     <div class="row">
@@ -54,12 +54,11 @@
     </section>
 
 
-
     <div class="modal fade" id="modalAgregar">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title">Nuevo número</h4>
+                    <h4 class="modal-title">Nuevo Bloque</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -71,8 +70,8 @@
                                 <div class="col-md-12">
 
                                     <div class="form-group">
-                                        <label>Número</label>
-                                        <input type="text" class="form-control" id="numero-nuevo" autocomplete="off">
+                                        <label>Título</label>
+                                        <input type="text" maxlength="50" class="form-control" id="titulo-nuevo" autocomplete="off">
                                     </div>
 
                                 </div>
@@ -93,7 +92,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title">Editar número</h4>
+                    <h4 class="modal-title">Editar Título</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -110,8 +109,8 @@
                                     </div>
 
                                     <div class="form-group">
-                                        <label>Número</label>
-                                        <input type="text" class="form-control" id="numero-editar" autocomplete="off">
+                                        <label>Título</label>
+                                        <input type="text" maxlength="50" class="form-control" id="titulo-editar" autocomplete="off">
                                     </div>
 
                                 </div>
@@ -132,8 +131,8 @@
 @extends('backend.menus.footerjs')
 @section('archivos-js')
 
-    <script src="{{ asset('js/jquery.dataTables.js') }}" type="text/javascript"></script>
-    <script src="{{ asset('js/dataTables.bootstrap4.js') }}" type="text/javascript"></script>
+    <script src="{{ asset('js/jquery-ui-drag.js') }}" type="text/javascript"></script>
+    <script src="{{ asset('js/datatables-drag.min.js') }}" type="text/javascript"></script>
 
     <script src="{{ asset('js/toastr.min.js') }}" type="text/javascript"></script>
     <script src="{{ asset('js/axios.min.js') }}" type="text/javascript"></script>
@@ -142,7 +141,6 @@
 
     <script type="text/javascript">
         $(document).ready(function(){
-
 
             let idcapitulo = {{ $idcapitulo }};
             var ruta = "{{ URL::to('/admin/bibliacapitulo/bloque/tabla') }}/" + idcapitulo;
@@ -170,38 +168,19 @@
 
         // envia datos de nuevo pais al servidor
         function nuevo(){
-            var numero = document.getElementById('numero-nuevo').value;
+            var titulo = document.getElementById('titulo-nuevo').value;
 
-            if(numero === ''){
-                toastr.error('Número es requerido');
+            if(titulo === ''){
+                toastr.error('Título es requerido');
                 return;
             }
-
-            var reglaNumeroEntero = /^[0-9]\d*$/;
-
-
-            if(!numero.match(reglaNumeroEntero)) {
-                toastr.error('Número Entero y no Negativo');
-                return;
-            }
-
-            if(numero <= 0){
-                toastr.error('Número no debe ser negativo o cero');
-                return;
-            }
-
-            if(numero > 9000000){
-                toastr.error('Número no debe ser mayor 9 millones');
-                return;
-            }
-
 
             let idcapitulo = {{ $idcapitulo }};
 
             openLoading();
             let formData = new FormData();
             formData.append('idcapitulo', idcapitulo);
-            formData.append('numero', numero);
+            formData.append('titulo', titulo);
 
             axios.post('/admin/bibliacapitulo/bloque/registrar', formData, {
             })
@@ -235,7 +214,7 @@
                     if(response.data.success === 1){
                         $('#modalEditar').modal('show');
                         $('#id-editar').val(response.data.info.id);
-                        $('#numero-editar').val(response.data.info.numero);
+                        $('#titulo-editar').val(response.data.titulo);
 
                     }else{
                         toastr.error('Información no encontrada');
@@ -251,28 +230,10 @@
         // editar datos de un pais
         function editar(){
             var id = document.getElementById('id-editar').value;
-            var numero = document.getElementById('numero-editar').value;
+            var titulo = document.getElementById('titulo-editar').value;
 
-            if(numero === ''){
-                toastr.error('Número es requerido');
-                return;
-            }
-
-            var reglaNumeroEntero = /^[0-9]\d*$/;
-
-
-            if(!numero.match(reglaNumeroEntero)) {
-                toastr.error('Número Entero y no Negativo');
-                return;
-            }
-
-            if(numero <= 0){
-                toastr.error('Número no debe ser negativo o cero');
-                return;
-            }
-
-            if(numero > 9000000){
-                toastr.error('Número no debe ser mayor 9 millones');
+            if(titulo === ''){
+                toastr.error('Título es requerido');
                 return;
             }
 
@@ -280,7 +241,7 @@
             openLoading();
             let formData = new FormData();
             formData.append('idbloque', id);
-            formData.append('numero', numero);
+            formData.append('titulo', titulo);
 
             axios.post('/admin/bibliacapitulo/bloque/actualizar', formData, {
             })

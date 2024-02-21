@@ -15,7 +15,12 @@ return new class extends Migration
             $table->id();
             $table->bigInteger('id_biblia_capitulo')->unsigned();
 
-            $table->integer('numero');
+            // ESTE SERA LA POSICION
+            $table->integer('posicion');
+
+            // EL NOMBRE DE ESTE BLOQUE SE TOMARA DE OTRA TABLA
+
+
             $table->boolean('visible');
 
             $table->foreign('id_biblia_capitulo')->references('id')->on('biblia_capitulos');

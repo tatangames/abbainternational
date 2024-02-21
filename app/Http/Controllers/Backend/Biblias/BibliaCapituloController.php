@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Backend\Biblias;
 
 use App\Http\Controllers\Controller;
+use App\Models\BibliaCapituloBlockTexto;
 use App\Models\BibliaCapituloBloque;
 use App\Models\BibliaCapitulos;
 use App\Models\BibliaCapitulosTextos;
@@ -112,8 +113,6 @@ class BibliaCapituloController extends Controller
 
     public function actualizarPosicionBibliaCapitulos(Request $request){
 
-        Log::info($request->all());
-
         $tasks = BibliaCapitulos::all();
 
         foreach ($tasks as $task) {
@@ -210,10 +209,26 @@ class BibliaCapituloController extends Controller
     public function tablaCapitulosBloque($idcapitulo)
     {
         $listado = BibliaCapituloBloque::where('id_biblia_capitulo', $idcapitulo)
-            ->orderBy('numero', 'ASC')
+            ->orderBy('posicion', 'ASC')
             ->get();
 
+        foreach ($listado as $dato){
+
+            $titulo = $this->retornoTituloCapituloBoque($dato->id);
+            $dato->titulo = $titulo;
+        }
+
         return view('backend.admin.biblias.capitulos.bloque.tablacapitulobloque', compact('listado'));
+    }
+
+    // tabla: biblia_capitulo_block_texto
+    private function retornoTituloCapituloBoque($idcapiblock){
+
+        $datos = BibliaCapituloBlockTexto::where('id_biblia_capitulo_block', $idcapiblock)
+            ->where('id_idioma_planes', 1)
+            ->first();
+
+        return $datos->titulo;
     }
 
 
@@ -221,8 +236,7 @@ class BibliaCapituloController extends Controller
     {
         $rules = array(
             'idcapitulo' => 'required',
-            'numero' => 'required',
-
+            'titulo' => 'required'
         );
 
         $validator = Validator::make($request->all(), $rules);
@@ -235,11 +249,28 @@ class BibliaCapituloController extends Controller
 
         try {
 
+
+            if($info = BibliaCapituloBloque::where('id_biblia_capitulo', $request->idcapitulo)
+                ->orderBy('posicion', 'DESC')
+                ->first()){
+                $nuevaPosicion = $info->posicion + 1;
+            }else{
+                $nuevaPosicion = 1;
+            }
+
+
             $nuevo = new BibliaCapituloBloque();
             $nuevo->id_biblia_capitulo = $request->idcapitulo;
             $nuevo->visible = 0;
-            $nuevo->numero = $request->numero;
+            $nuevo->posicion = $nuevaPosicion;
             $nuevo->save();
+
+            // guardar el idioma por defecto
+            $detalle = new BibliaCapituloBlockTexto();
+            $detalle->id_biblia_capitulo_block = $nuevo->id;
+            $detalle->id_idioma_planes = 1;
+            $detalle->titulo = $request->titulo;
+            $detalle->save();
 
             DB::commit();
             return ['success' => 1];
@@ -265,7 +296,9 @@ class BibliaCapituloController extends Controller
 
         if($lista = BibliaCapituloBloque::where('id', $request->id)->first()){
 
-            return ['success' => 1, 'info' => $lista];
+            $titulo = $this->retornoTituloCapituloBoque($lista->id);
+
+            return ['success' => 1, 'info' => $lista, 'titulo' => $titulo];
         }else{
             return ['success' => 2];
         }
@@ -276,16 +309,17 @@ class BibliaCapituloController extends Controller
     {
         $rules = array(
             'idbloque' => 'required',
-            'numero' => 'required',
+            'titulo' => 'required',
         );
 
         $validator = Validator::make($request->all(), $rules);
 
         if ($validator->fails()) { return ['success' => 0]; }
 
-        BibliaCapituloBloque::where('id', $request->idbloque)
+        BibliaCapituloBlockTexto::where('id_biblia_capitulo_block', $request->idbloque)
+            ->where('id_idioma_planes', 1)
             ->update([
-                'numero' => $request->numero,
+                'titulo' => $request->titulo,
             ]);
 
         return ['success' => 1];
@@ -313,7 +347,21 @@ class BibliaCapituloController extends Controller
     }
 
 
+    public function actualizarPosicionBibliaCapitulosBloque(Request $request){
 
+        $tasks = BibliaCapituloBloque::all();
+
+        foreach ($tasks as $task) {
+            $id = $task->id;
+
+            foreach ($request->order as $order) {
+                if ($order['id'] == $id) {
+                    $task->update(['posicion' => $order['posicion']]);
+                }
+            }
+        }
+        return ['success' => 1];
+    }
 
 
 

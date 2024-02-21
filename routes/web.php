@@ -305,6 +305,8 @@ Route::post('/admin/bibliacapitulo/bloque/registrar', [BibliaCapituloController:
 Route::post('/admin/bibliacapitulo/bloque/informacion', [BibliaCapituloController::class,'informacionCapituloBloque']);
 Route::post('/admin/bibliacapitulo/bloque/actualizar', [BibliaCapituloController::class,'actualizarCapituloBloque']);
 Route::post('/admin/bibliacapitulo/bloque/activacion', [BibliaCapituloController::class,'estadoCapituloBloque']);
+Route::post('/admin/bibliacapitulo/bloque/posicion', [BibliaCapituloController::class,'actualizarPosicionBibliaCapitulosBloque']);
+
 
 // --- BIBLIA CAPITULO - VERSICULO ---
 Route::get('/admin/bibliacapitulo/versiculo/vista/{idbloqe}', [BibliaCapituloController::class,'vistaCapitulosBloqueVersiculo']);

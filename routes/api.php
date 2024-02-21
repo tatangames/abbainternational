@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\Registro\ApiLoginController;
 use App\Http\Controllers\Api\Planes\ApiPlanesController;
 use App\Http\Controllers\Api\Inicio\ApiInicioController;
 use App\Http\Controllers\Api\Comunidad\ApiComunidadController;
+use App\Http\Controllers\Api\Biblia\ApiBibliaController;
 
 
 // inicio de sesion
@@ -201,6 +202,23 @@ Route::middleware('verificarToken')->group(function () {
 
     // actualizar planes para ver y ocultar
     Route::post('app/comunidad/actualizarplanes/ocultos', [ApiComunidadController::class,'actualizarPlanesOcultos']);
+
+
+
+
+    // --- BIBLIAS ----
+    Route::post('app/listado/biblias', [ApiBibliaController::class,'listadoBiblias']);
+
+    // listado de capitulos, su titulo y todos los bloques
+    Route::post('app/listado/biblias', [ApiBibliaController::class,'listadoBiblias']);
+
+    // listado de capitulos para usar el Acordeon en Apps
+    Route::post('app/listado/biblia/capitulos', [ApiBibliaController::class,'listadoBibliasCapitulos']);
+
+
+
+
+
 
 });
 
