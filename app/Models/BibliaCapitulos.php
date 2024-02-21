@@ -10,4 +10,8 @@ class BibliaCapitulos extends Model
     use HasFactory;
     protected $table = 'biblia_capitulos';
     public $timestamps = false;
+
+    protected $fillable = [
+        'posicion'
+    ];
 }

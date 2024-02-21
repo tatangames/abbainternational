@@ -5,9 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class BibliaTituloTextos extends Model
+class BibliaVersiculo extends Model
 {
     use HasFactory;
-    protected $table = 'biblia_titulo_textos';
+    protected $table = 'biblia_versiculo';
     public $timestamps = false;
+
+    protected $fillable = [
+        'posicion'
+    ];
 }

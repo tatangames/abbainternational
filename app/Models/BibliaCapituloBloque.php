@@ -5,9 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class BibliaVersiculosTextos extends Model
+class BibliaCapituloBloque extends Model
 {
     use HasFactory;
-    protected $table = 'biblia_versiculos_textos';
+    protected $table = 'biblia_capitulo_bloque';
     public $timestamps = false;
 }
