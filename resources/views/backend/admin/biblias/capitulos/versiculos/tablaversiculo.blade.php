@@ -8,7 +8,7 @@
                             <thead>
                             <tr>
                                 <th style="width: 8%">Visible</th>
-                                <th style="width: 8%">Número</th>
+                                <th style="width: 8%">Versículo</th>
                                 <th style="width: 4%">Opciones</th>
                             </tr>
                             </thead>
@@ -25,14 +25,13 @@
                                         @endif
                                     </td>
 
-                                    <td style="width: 8%">{{ $dato->numero }}</td>
+                                    <td style="width: 8%">{{ $dato->titulo }}</td>
 
                                     <td style="width: 4%">
 
                                         <button type="button" class="btn btn-info btn-xs" onclick="informacionEditar({{ $dato->id }})">
                                             <i class="fas fa-edit" title="Editar"></i>&nbsp; Editar
                                         </button>
-
 
                                         @if($dato->visible == 1)
                                             <button style="margin: 8px" type="button" class="btn btn-danger btn-xs" onclick="preguntaDeshabilitar({{ $dato->id }})">

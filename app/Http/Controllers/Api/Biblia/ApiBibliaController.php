@@ -9,6 +9,8 @@ use App\Models\BibliaCapitulos;
 use App\Models\BibliaCapitulosTextos;
 use App\Models\Biblias;
 use App\Models\BibliasTextos;
+use App\Models\Versiculo;
+use App\Models\VersiculoTextos;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -151,10 +153,58 @@ class ApiBibliaController extends Controller
 
 
 
+    public function listadoCapitulosVersiculos(Request $request){
+
+        $rules = array(
+            'idiomaplan' => 'required',
+            'iduser' => 'required',
+            'idcapibloque' => 'required'
+        );
+
+
+        $validator = Validator::make($request->all(), $rules);
+        if ( $validator->fails()){
+            return ['success' => 0, 'msj' => "validación incorrecta"];
+        }
+
+        $tokenApi = $request->header('Authorization');
+
+        // por el momento no se utilizara
+        $idiomaTextos = $request->idiomaplan;
+
+        if ($userToken = JWTAuth::user($tokenApi)) {
+
+            // listado de versiculos
+            $arrayVersiculos = Versiculo::where('id_capitulo_block', $request->idcapibloque)
+                ->where('visible', 1)
+                ->orderBy('posicion', 'ASC')
+                ->get();
+
+            foreach ($arrayVersiculos as $dato){
+
+                $titulo = $this->retornoTituloVersiculo($dato->id);
+                $dato->titulo = $titulo;
+            }
+
+            return ['success' => 1,
+                'listado' => $arrayVersiculos,
+            ];
+        }else{
+            return ['success' => 99];
+        }
+    }
 
 
 
+    // TITULO DE VERSICULO
+    private function retornoTituloVersiculo($idversiculo){
 
+        $datos = VersiculoTextos::where('id_versiculo', $idversiculo)
+            ->where('id_idioma_planes', 1)
+            ->first();
+
+        return $datos->titulo;
+    }
 
 
 

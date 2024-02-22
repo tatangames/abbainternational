@@ -21,14 +21,14 @@
             <div class="col-sm-6">
                 <button type="button" onclick="modalAgregar()" class="btn btn-primary btn-sm">
                     <i class="fas fa-plus-square"></i>
-                    Nuevo Bloque
+                    Nuevo Capitulo
                 </button>
             </div>
 
             <div class="col-sm-6">
                 <ol class="breadcrumb float-sm-right">
                     <li class="breadcrumb-item">Capitulos</li>
-                    <li class="breadcrumb-item active">Listado Bloque</li>
+                    <li class="breadcrumb-item active">Listado de Capitulos</li>
                 </ol>
             </div>
 
@@ -39,7 +39,7 @@
         <div class="container-fluid">
             <div class="card card-success">
                 <div class="card-header">
-                    <h3 class="card-title">Listado de Capitulos Bloque</h3>
+                    <h3 class="card-title">Listado de Capitulos</h3>
                 </div>
                 <div class="card-body">
                     <div class="row">
@@ -58,7 +58,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title">Nuevo Bloque</h4>
+                    <h4 class="modal-title">Nuevo Capitulo</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -92,7 +92,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title">Editar Título</h4>
+                    <h4 class="modal-title">Editar Capitulo</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>

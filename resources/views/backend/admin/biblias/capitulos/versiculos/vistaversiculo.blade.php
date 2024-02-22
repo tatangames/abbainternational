@@ -21,13 +21,13 @@
             <div class="col-sm-6">
                 <button type="button" onclick="modalAgregar()" class="btn btn-primary btn-sm">
                     <i class="fas fa-plus-square"></i>
-                    Nuevo número
+                    Nuevo versículo
                 </button>
             </div>
 
             <div class="col-sm-6">
                 <ol class="breadcrumb float-sm-right">
-                    <li class="breadcrumb-item">Versículos</li>
+                    <li class="breadcrumb-item">Versículo</li>
                     <li class="breadcrumb-item active">Listado</li>
                 </ol>
             </div>
@@ -59,7 +59,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title">Nuevo número</h4>
+                    <h4 class="modal-title">Nuevo Versículo</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -71,8 +71,8 @@
                                 <div class="col-md-12">
 
                                     <div class="form-group">
-                                        <label>Número</label>
-                                        <input type="text" class="form-control" id="numero-nuevo" autocomplete="off">
+                                        <label>Título</label>
+                                        <input type="text" maxlength="50" class="form-control" id="titulo-nuevo" autocomplete="off">
                                     </div>
 
                                 </div>
@@ -93,7 +93,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title">Editar número</h4>
+                    <h4 class="modal-title">Editar</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -110,8 +110,8 @@
                                     </div>
 
                                     <div class="form-group">
-                                        <label>Número</label>
-                                        <input type="text" class="form-control" id="numero-editar" autocomplete="off">
+                                        <label>Versículo</label>
+                                        <input type="text" maxlength="50" class="form-control" id="titulo-editar" autocomplete="off">
                                     </div>
 
                                 </div>
@@ -169,28 +169,10 @@
 
         // envia datos de nuevo pais al servidor
         function nuevo(){
-            var numero = document.getElementById('numero-nuevo').value;
+            var titulo = document.getElementById('titulo-nuevo').value;
 
-            if(numero === ''){
-                toastr.error('Número es requerido');
-                return;
-            }
-
-            var reglaNumeroEntero = /^[0-9]\d*$/;
-
-
-            if(!numero.match(reglaNumeroEntero)) {
-                toastr.error('Número Entero y no Negativo');
-                return;
-            }
-
-            if(numero <= 0){
-                toastr.error('Número no debe ser negativo o cero');
-                return;
-            }
-
-            if(numero > 9000000){
-                toastr.error('Número no debe ser mayor 9 millones');
+            if(titulo === ''){
+                toastr.error('Título es requerido');
                 return;
             }
 
@@ -199,7 +181,7 @@
             openLoading();
             let formData = new FormData();
             formData.append('idbloque', idbloque);
-            formData.append('numero', numero);
+            formData.append('titulo', titulo);
 
             axios.post('/admin/bibliacapitulo/versiculo/registrar', formData, {
             })
@@ -233,8 +215,7 @@
                     if(response.data.success === 1){
                         $('#modalEditar').modal('show');
                         $('#id-editar').val(response.data.info.id);
-                        $('#numero-editar').val(response.data.info.numero);
-
+                        $('#titulo-editar').val(response.data.titulo);
                     }else{
                         toastr.error('Información no encontrada');
                     }
@@ -249,34 +230,17 @@
         // editar datos de un pais
         function editar(){
             var id = document.getElementById('id-editar').value;
-            var numero = document.getElementById('numero-editar').value;
+            var titulo = document.getElementById('titulo-editar').value;
 
-            if(numero === ''){
-                toastr.error('Número es requerido');
-                return;
-            }
-
-            var reglaNumeroEntero = /^[0-9]\d*$/;
-
-            if(!numero.match(reglaNumeroEntero)) {
-                toastr.error('Número Entero y no Negativo');
-                return;
-            }
-
-            if(numero <= 0){
-                toastr.error('Número no debe ser negativo o cero');
-                return;
-            }
-
-            if(numero > 9000000){
-                toastr.error('Número no debe ser mayor 9 millones');
+            if(titulo === ''){
+                toastr.error('Título es requerido');
                 return;
             }
 
             openLoading();
             let formData = new FormData();
-            formData.append('idbloque', id);
-            formData.append('numero', numero);
+            formData.append('idversiculo', id);
+            formData.append('titulo', titulo);
 
             axios.post('/admin/bibliacapitulo/versiculo/actualizar', formData, {
             })

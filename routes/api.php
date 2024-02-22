@@ -215,7 +215,8 @@ Route::middleware('verificarToken')->group(function () {
     // listado de capitulos para usar el Acordeon en Apps
     Route::post('app/listado/biblia/capitulos', [ApiBibliaController::class,'listadoBibliasCapitulos']);
 
-
+    // listado de versiculos cargara bloques.
+    Route::post('app/listado/biblia/versiculos', [ApiBibliaController::class,'listadoCapitulosVersiculos']);
 
 
 

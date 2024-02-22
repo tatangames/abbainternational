@@ -35,7 +35,7 @@
                                     </button>
 
                                     <button type="button" style="margin: 8px" class="btn btn-info btn-xs" onclick="vistaCapitulos({{ $dato->id }})">
-                                        <i class="fas fa-eye" title="Capitulos"></i>&nbsp; Capitulos
+                                        <i class="fas fa-eye" title="Libros"></i>&nbsp; Libros
                                     </button>
 
 

@@ -10,6 +10,8 @@ use App\Models\BibliaCapitulosTextos;
 use App\Models\BibliasTextos;
 use App\Models\BibliaVersiculo;
 use App\Models\BibliaVersiculoBloque;
+use App\Models\Versiculo;
+use App\Models\VersiculoTextos;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -249,7 +251,6 @@ class BibliaCapituloController extends Controller
 
         try {
 
-
             if($info = BibliaCapituloBloque::where('id_biblia_capitulo', $request->idcapitulo)
                 ->orderBy('posicion', 'DESC')
                 ->first()){
@@ -374,11 +375,25 @@ class BibliaCapituloController extends Controller
 
     public function tablaCapitulosBloqueVersiculo($idbloque)
     {
-        $listado = BibliaVersiculoBloque::where('id_biblia_capitulo_bloque', $idbloque)
-            ->orderBy('numero', 'ASC')
+        $listado = Versiculo::where('id_capitulo_block', $idbloque)
+            ->orderBy('posicion', 'ASC')
             ->get();
 
+        foreach ($listado as $dato){
+
+            $titulo = $this->retornoTituloVersiculo($dato->id);
+            $dato->titulo = $titulo;
+        }
+
         return view('backend.admin.biblias.capitulos.versiculos.tablaversiculo', compact('listado'));
+    }
+
+    private function retornoTituloVersiculo($idversiculo){
+        $datos = VersiculoTextos::where('id_versiculo', $idversiculo)
+            ->where('id_idioma_planes', 1)
+            ->first();
+
+        return $datos->titulo;
     }
 
 
@@ -386,8 +401,7 @@ class BibliaCapituloController extends Controller
     {
         $rules = array(
             'idbloque' => 'required',
-            'numero' => 'required',
-
+            'titulo' => 'required',
         );
 
         $validator = Validator::make($request->all(), $rules);
@@ -400,11 +414,27 @@ class BibliaCapituloController extends Controller
 
         try {
 
-            $nuevo = new BibliaVersiculoBloque();
-            $nuevo->id_biblia_capitulo_bloque = $request->idbloque;
+            if($info = Versiculo::where('id_capitulo_block', $request->idbloque)
+                ->orderBy('posicion', 'DESC')
+                ->first()){
+                $nuevaPosicion = $info->posicion + 1;
+            }else{
+                $nuevaPosicion = 1;
+            }
+
+
+            $nuevo = new Versiculo();
+            $nuevo->id_capitulo_block = $request->idbloque;
+            $nuevo->posicion = $nuevaPosicion;
             $nuevo->visible = 0;
-            $nuevo->numero = $request->numero;
             $nuevo->save();
+
+            // guardar el idioma
+            $detalle = new VersiculoTextos();
+            $detalle->id_versiculo = $nuevo->id;
+            $detalle->id_idioma_planes = 1;
+            $detalle->titulo = $request->titulo;
+            $detalle->save();
 
             DB::commit();
             return ['success' => 1];
@@ -427,10 +457,11 @@ class BibliaCapituloController extends Controller
             return ['success' => 0];
         }
 
+        if($lista = Versiculo::where('id', $request->id)->first()){
 
-        if($lista = BibliaVersiculoBloque::where('id', $request->id)->first()){
+            $titulo = $this->retornoTituloVersiculo($lista->id);
 
-            return ['success' => 1, 'info' => $lista];
+            return ['success' => 1, 'info' => $lista, 'titulo' => $titulo];
         }else{
             return ['success' => 2];
         }
@@ -440,17 +471,18 @@ class BibliaCapituloController extends Controller
     public function actualizarCapituloBloqueVersiculo(Request $request)
     {
         $rules = array(
-            'idbloque' => 'required',
-            'numero' => 'required',
+            'idversiculo' => 'required',
+            'titulo' => 'required',
         );
 
         $validator = Validator::make($request->all(), $rules);
 
         if ($validator->fails()) { return ['success' => 0]; }
 
-        BibliaVersiculoBloque::where('id', $request->idbloque)
+        VersiculoTextos::where('id_versiculo', $request->idversiculo)
+            ->where('id_idioma_planes', 1)
             ->update([
-                'numero' => $request->numero,
+                'titulo' => $request->titulo,
             ]);
 
         return ['success' => 1];
@@ -469,7 +501,7 @@ class BibliaCapituloController extends Controller
         if ($validar->fails()){ return ['success' => 0];}
 
 
-        BibliaVersiculoBloque::where('id', $request->idbloque)->update([
+        Versiculo::where('id', $request->idbloque)->update([
             'visible' => $request->estado,
         ]);
 

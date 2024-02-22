@@ -5,10 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class BibliaVersiculoTextos extends Model
+class VersiculoTextos extends Model
 {
-    use HasFactory;
-    protected $table = 'biblia_versiculo_textos';
-    public $timestamps = false;
 
+    use HasFactory;
+    protected $table = 'versiculo_textos';
+    public $timestamps = false;
 }

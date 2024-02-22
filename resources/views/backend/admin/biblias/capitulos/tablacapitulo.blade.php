@@ -35,7 +35,7 @@
                                     </button>
 
                                     <button style="margin: 8px" type="button" class="btn btn-success btn-xs" onclick="infoBloque({{ $dato->id }})">
-                                        <i class="fas fa-eye" title="Bloque Capitulos"></i>&nbsp; Bloque Capitulos
+                                        <i class="fas fa-eye" title="Capitulos"></i>&nbsp; Capitulos
                                     </button>
 
                                     @if($dato->visible == 1)
