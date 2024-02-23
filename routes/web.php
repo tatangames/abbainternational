@@ -315,6 +315,12 @@ Route::post('/admin/bibliacapitulo/versiculo/registrar', [BibliaCapituloControll
 Route::post('/admin/bibliacapitulo/versiculo/informacion', [BibliaCapituloController::class,'informacionCapituloBloqueVersiculo']);
 Route::post('/admin/bibliacapitulo/versiculo/actualizar', [BibliaCapituloController::class,'actualizarCapituloBloqueVersiculo']);
 Route::post('/admin/bibliacapitulo/versiculo/activacion', [BibliaCapituloController::class,'estadoCapituloBloqueVersiculo']);
+Route::post('/admin/bibliacapitulo/versiculo/posicion', [BibliaCapituloController::class,'actualizarPosicionVersiculos']);
+
+// --- BUSQUEDA TEXTO VERSICULO ---
+Route::post('/admin/buscar/texto/versiculo', [BibliaCapituloController::class,'BusquedaTextoVersiculo']);
+Route::post('/admin/guardar/texto/versiculo', [BibliaCapituloController::class,'guardarTextoVersiculo']);
+
 
 
 

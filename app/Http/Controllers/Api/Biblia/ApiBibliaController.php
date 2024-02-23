@@ -10,6 +10,7 @@ use App\Models\BibliaCapitulosTextos;
 use App\Models\Biblias;
 use App\Models\BibliasTextos;
 use App\Models\Versiculo;
+use App\Models\VersiculoRefran;
 use App\Models\VersiculoTextos;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -205,6 +206,62 @@ class ApiBibliaController extends Controller
 
         return $datos->titulo;
     }
+
+
+
+    public function listadoTextosVersiculos(Request $request)
+    {
+        $rules = array(
+            'idiomaplan' => 'required',
+            'iduser' => 'required',
+            'idversiculo' => 'required'
+        );
+
+
+        $validator = Validator::make($request->all(), $rules);
+        if ( $validator->fails()){
+            return ['success' => 0, 'msj' => "validación incorrecta"];
+        }
+
+        $tokenApi = $request->header('Authorization');
+
+        // por el momento no se utilizara
+        $idiomaTextos = $request->idiomaplan;
+
+        if ($userToken = JWTAuth::user($tokenApi)) {
+
+            $infoVersiculo = Versiculo::where('id', $request->idversiculo)->first();
+            $infoCapiBlock = BibliaCapituloBloque::where('id', $infoVersiculo->id_capitulo_block)->first();
+            $infoCapitulo = BibliaCapitulos::where('id', $infoCapiBlock->id_biblia_capitulo)->first();
+
+            // nombre libro - defecto espanol
+            $infoLibroTexto = BibliaCapitulosTextos::where('id_biblia_capitulo', $infoCapitulo->id)->first();
+            $nombreLibro = $infoLibroTexto->titulo;
+
+            // numero capitulo - defecto espanol
+            $infoCapituloTexto = BibliaCapituloBlockTexto::where('id_biblia_capitulo_block', $infoCapiBlock->id)->first();
+            $numeroCapitulo = $infoCapituloTexto->titulo;
+
+            // texto final concatenado
+
+            $listado = Versiculo::where('id_capitulo_block', $infoCapiBlock)
+                ->orderBy('posicion', 'ASC')
+                ->get();
+
+            foreach ($listado as $dato){
+
+                $infoVer = VersiculoRefran::where('id_versiculo', $dato->id)->first();
+                $dato->titulo = $infoVer->titulo;
+            }
+
+
+            return ['success' => 1];
+        }else{
+            return ['success' => 99];
+        }
+    }
+
+
 
 
 

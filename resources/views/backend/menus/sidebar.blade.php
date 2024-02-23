@@ -235,7 +235,7 @@
                 <li class="nav-item">
 
                     <a href="#" class="nav-link nav-">
-                        <i class="fa fa-info"></i>
+                        <i class="fa fa-bible"></i>
                         <p>
                             Biblias
                             <i class="fas fa-angle-left right"></i>

@@ -129,19 +129,72 @@
 </div>
 
 
+
+<div class="modal fade" id="modalEditarTexto" >
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Texto</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="formulario-editar">
+                    <div class="card-body">
+                        <div class="col-md-12">
+
+                            <div class="form-group">
+                                <label>Versículo</label>
+                                <input type="hidden" id="idfila-texto">
+                                <textarea name="content" id="texto-editor" rows="12" cols="50"></textarea>
+                            </div>
+
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-success" id="miboton" onclick="guardarTexto()">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
 @extends('backend.menus.footerjs')
 @section('archivos-js')
 
-    <script src="{{ asset('js/jquery.dataTables.js') }}" type="text/javascript"></script>
-    <script src="{{ asset('js/dataTables.bootstrap4.js') }}" type="text/javascript"></script>
+    <script src="{{ asset('js/jquery-ui-drag.js') }}" type="text/javascript"></script>
+    <script src="{{ asset('js/datatables-drag.min.js') }}" type="text/javascript"></script>
 
     <script src="{{ asset('js/toastr.min.js') }}" type="text/javascript"></script>
     <script src="{{ asset('js/axios.min.js') }}" type="text/javascript"></script>
     <script src="{{ asset('js/sweetalert2.all.min.js') }}"></script>
     <script src="{{ asset('js/alertaPersonalizada.js') }}"></script>
+    <script src="{{ asset('plugins/ckeditor5v1/build/ckeditor.js') }}"></script>
+
+
 
     <script type="text/javascript">
         $(document).ready(function(){
+
+            window.varGlobalTexto;
+
+            ClassicEditor
+                .create(document.querySelector('#texto-editor'), {
+                    language: 'es',
+                })
+                .then(editor => {
+                    varGlobalTexto = editor;
+                })
+                .catch(error => {
+
+                });
 
             let idbloque = {{ $idbloque }};
             var ruta = "{{ URL::to('/admin/bibliacapitulo/versiculo/tabla') }}/" + idbloque;
@@ -328,6 +381,85 @@
                     closeLoading();
                 });
         }
+
+
+        // buscar texto si existe
+        function vistaTextos(idversiculo){
+
+            let formData = new FormData();
+            formData.append('idversiculo', idversiculo);
+            openLoading();
+
+            axios.post('/admin/buscar/texto/versiculo', formData, {
+            })
+                .then((response) => {
+                    closeLoading();
+
+                    if(response.data.success === 1){
+
+                        let haydatos = response.data.hayguardado;
+                        let texto = response.data.texto;
+
+                        $('#idfila-texto').val(idversiculo);
+
+                        varGlobalTexto.setData(texto);
+
+                        if(haydatos == 1){
+                          document.getElementById("miboton").textContent = "Actualizar";
+                        }else{
+                          document.getElementById("miboton").textContent = "Guardar";
+                        }
+
+                        $('#modalEditarTexto').css('overflow-y', 'auto');
+                        $('#modalEditarTexto').modal({backdrop: 'static', keyboard: false})
+                    }
+                    else{
+                        toastr.error('Error al actualizar');
+                    }
+                })
+                .catch((error) => {
+                    toastr.error('Error al actualizar');
+                    closeLoading();
+                });
+        }
+
+
+        function guardarTexto(){
+
+            var idversiculo = document.getElementById('idfila-texto').value;
+
+            const contenido = varGlobalTexto.getData();
+
+            if (contenido.trim() === '') {
+                toastr.error("Texto es requerido");
+                return;
+            }
+
+            let formData = new FormData();
+            formData.append('idversiculo', idversiculo);
+            formData.append('contenido', contenido);
+            openLoading();
+
+            axios.post('/admin/guardar/texto/versiculo', formData, {
+            })
+                .then((response) => {
+                    closeLoading();
+
+                    if(response.data.success === 1){
+                        toastr.success('Actualizado');
+
+                        $('#modalEditarTexto').modal('hide');
+                    }
+                    else{
+                        toastr.error('Error al actualizar');
+                    }
+                })
+                .catch((error) => {
+                    toastr.error('Error al actualizar');
+                    closeLoading();
+                });
+        }
+
 
 
 

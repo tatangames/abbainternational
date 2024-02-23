@@ -11,6 +11,7 @@ use App\Models\BibliasTextos;
 use App\Models\BibliaVersiculo;
 use App\Models\BibliaVersiculoBloque;
 use App\Models\Versiculo;
+use App\Models\VersiculoRefran;
 use App\Models\VersiculoTextos;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -506,6 +507,92 @@ class BibliaCapituloController extends Controller
         ]);
 
 
+        return ['success' => 1];
+    }
+
+
+
+    public function BusquedaTextoVersiculo(Request $request)
+    {
+        $regla = array(
+            'idversiculo' => 'required',
+        );
+
+        $validar = Validator::make($request->all(), $regla);
+
+        if ($validar->fails()){ return ['success' => 0];}
+
+        $texto = "";
+        $hayguardado = 0;
+
+        if($info = VersiculoRefran::where('id_versiculo', $request->idversiculo)->first()){
+            $hayguardado = 1;
+            $texto = $info->titulo;
+        }
+
+        return ['success' => 1,
+            'hayguardado' => $hayguardado,
+            'texto' => $texto];
+    }
+
+
+    public function guardarTextoVersiculo(Request $request)
+    {
+        $regla = array(
+            'idversiculo' => 'required',
+            'contenido' => 'required',
+        );
+
+        $validar = Validator::make($request->all(), $regla);
+
+        if ($validar->fails()){ return ['success' => 0];}
+
+
+        DB::beginTransaction();
+
+        try {
+
+            // No verificar idioma, ahorita es actualizar o crear por defecto
+            if(VersiculoRefran::where('id_versiculo', $request->idversiculo)->first()){
+
+                VersiculoRefran::where('id_versiculo', $request->idversiculo)
+                    ->update([
+                        'titulo' => $request->contenido,
+                    ]);
+
+            }else{
+                $nuevo = new VersiculoRefran();
+                $nuevo->id_versiculo = $request->idversiculo;
+                $nuevo->id_idioma_planes = 1;
+                $nuevo->titulo = $request->contenido;
+                $nuevo->save();
+            }
+
+
+            DB::commit();
+            return ['success' => 1];
+        }catch(\Throwable $e){
+            Log::info('error: ' . $e);
+            DB::rollback();
+            return ['success' => 99];
+        }
+    }
+
+
+
+    public function actualizarPosicionVersiculos(Request $request){
+
+        $tasks = Versiculo::all();
+
+        foreach ($tasks as $task) {
+            $id = $task->id;
+
+            foreach ($request->order as $order) {
+                if ($order['id'] == $id) {
+                    $task->update(['posicion' => $order['posicion']]);
+                }
+            }
+        }
         return ['success' => 1];
     }
 
