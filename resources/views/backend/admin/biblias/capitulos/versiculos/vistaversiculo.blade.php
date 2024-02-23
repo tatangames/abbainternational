@@ -176,7 +176,7 @@
     <script src="{{ asset('js/axios.min.js') }}" type="text/javascript"></script>
     <script src="{{ asset('js/sweetalert2.all.min.js') }}"></script>
     <script src="{{ asset('js/alertaPersonalizada.js') }}"></script>
-    <script src="{{ asset('plugins/ckeditor5v1/build/ckeditor.js') }}"></script>
+    <script src="{{ asset('plugins/ckeditor5v2/build/ckeditor.js') }}"></script>
 
 
 

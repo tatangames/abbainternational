@@ -242,20 +242,88 @@ class ApiBibliaController extends Controller
             $infoCapituloTexto = BibliaCapituloBlockTexto::where('id_biblia_capitulo_block', $infoCapiBlock->id)->first();
             $numeroCapitulo = $infoCapituloTexto->titulo;
 
-            // texto final concatenado
 
-            $listado = Versiculo::where('id_capitulo_block', $infoCapiBlock)
+            $listado = Versiculo::where('id_capitulo_block', $infoCapiBlock->id)
                 ->orderBy('posicion', 'ASC')
                 ->get();
 
-            foreach ($listado as $dato){
 
-                $infoVer = VersiculoRefran::where('id_versiculo', $dato->id)->first();
-                $dato->titulo = $infoVer->titulo;
-            }
+            $contenidoHtml = "<html>
+                    <head>
+                    <meta charset='UTF-8'>
+                        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+                    <style>
+                        ";
+
+            $contenidoHtml .= $this->retornoFuentesCSS();
 
 
-            return ['success' => 1];
+
+
+            $contenidoHtml .= "
+
+                        </style>
+                        <script type='text/javascript'>
+
+                            function disminuirTamano() {
+                                 var elementos = document.querySelectorAll('*'); // Obtener todos los elementos
+                                    elementos.forEach(function(elemento) {
+                                        // Verificar si el elemento es una etiqueta de texto
+                                        if (elemento.nodeType === Node.TEXT_NODE && elemento.parentNode.nodeName !== 'SCRIPT') {
+                                            var estilo = window.getComputedStyle(elemento.parentNode, null); // Obtener el estilo calculado del elemento padre
+                                            var tamanoActual = parseInt(estilo.getPropertyValue('font-size')); // Obtener el tamaño de la fuente actual del elemento padre
+                                            var nuevoTamano = tamanoActual + 2; // Aumentar el tamaño en 2px
+                                            elemento.parentNode.style.fontSize = nuevoTamano + 'px'; // Aplicar el nuevo tamaño de fuente al elemento padre
+                                        }
+                                    });
+                            }
+
+                            function aumentarTamano() {
+                                   var elementos = document.querySelectorAll('*'); // Obtener todos los elementos
+                                    elementos.forEach(function(elemento) {
+                                        // Verificar si el elemento es una etiqueta de texto
+                                            var estilo = window.getComputedStyle(elemento.parentNode, null); // Obtener el estilo calculado del elemento padre
+                                            var tamanoActual = parseInt(estilo.getPropertyValue('font-size')); // Obtener el tamaño de la fuente actual del elemento padre
+                                            var nuevoTamano = tamanoActual - 2; // Aumentar el tamaño en 2px
+                                            elemento.parentNode.style.fontSize = nuevoTamano + 'px'; // Aplicar el nuevo tamaño de fuente al elemento padre
+
+                                    });
+                            }
+
+
+                            function scrollTo(element){
+                                document.getElementById(element).scrollIntoView();
+                            }
+
+
+                        </script>
+                    </head>
+                    <body>"
+
+
+                        . "<p style='text-align: center; font-size: 22px; margin-bottom: 5px;'>" . $nombreLibro . "</p>"
+                        . "<p style='text-align: center; font-size: 35px; font-weight: bold; margin-top: 5px;'>" . $numeroCapitulo . "</p>" ;
+
+                  foreach ($listado as $dato) {
+
+                      $infoVer = VersiculoRefran::where('id_versiculo', $dato->id)->first();
+                      $dato->titulo = $infoVer->titulo;
+
+                      $contenidoHtml .= "<div id='verso$dato->id'>$dato->titulo </div>";
+                  }
+
+            $contenidoHtml .= "</body>
+                    </html>";
+
+
+
+
+
+
+            return ['success' => 1,
+                'contenido' => $contenidoHtml,
+
+                ];
         }else{
             return ['success' => 99];
         }
@@ -263,6 +331,60 @@ class ApiBibliaController extends Controller
 
 
 
+
+    private function retornoFuentesCSS(){
+
+        $fuentes = "
+
+                @font-face {
+                    font-family: 'Fuente1';
+                    src: url('file:///android_res/font/notosans_light.ttf') format('truetype'); /* Ruta de la tercera fuente */
+                 }
+
+                @font-face {
+                    font-family: 'Fuente2';
+                    src: url('file:///android_res/font/notosans_condensed_medium.ttf') format('truetype'); /* Ruta de la tercera fuente */
+                }
+
+                @font-face {
+                    font-family: 'Fuente3';
+                    src: url('file:///android_res/font/times_new_normal_regular.ttf') format('truetype'); /* Ruta de la tercera fuente */
+                }
+
+                @font-face {
+                    font-family: 'Fuente4';
+                    src: url('file:///android_res/font/recolecta_medium.ttf') format('truetype'); /* Ruta de la cuarta fuente */
+                }
+
+                @font-face {
+                    font-family: 'Fuente5';
+                    src: url('file:///android_res/font/recolecta_regular.ttf') format('truetype'); /* Ruta de la quinta fuente */
+                }
+
+                /* Utilizar las fuentes según sea necesario */
+                .texto-fuente1 {
+                    font-family: 'Fuente1', sans-serif;
+                }
+
+                .texto-fuente2 {
+                    font-family: 'Fuente2', sans-serif;
+                }
+
+                .texto-fuente3 {
+                    font-family: 'Fuente3', sans-serif;
+                }
+
+                .texto-fuente4 {
+                    font-family: 'Fuente4', sans-serif;
+                }
+
+                .texto-fuente5 {
+                    font-family: 'Fuente5', sans-serif;
+                }
+        ";
+
+        return $fuentes;
+    }
 
 
 }
