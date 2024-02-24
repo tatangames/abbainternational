@@ -941,134 +941,11 @@ class PlanesController extends Controller
                 }else{
 
 
-                    // *************** TITULO ****************************
-
-
-
-
-
-                    $contenidoHtmlConJavascriptTitulo = "<html>
-                    <head>
-                    <meta charset='UTF-8'>
-                        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-                    <style>
-                        ";
-
-                    $contenidoHtmlConJavascriptTitulo .= $this->retornoFuentesCSS();
-
-
-                    $contenidoHtmlConJavascriptTitulo .= "</style>
-                        <script type='text/javascript'>
-
-                            function disminuirTamano() {
-                                var elementos = document.getElementsByTagName('*');
-                                for (var i = 0; i < elementos.length; i++) {
-                                    var estilo = window.getComputedStyle(elementos[i], null).getPropertyValue('font-size');
-                                    var fontSize = parseFloat(estilo);
-                                    var resta = fontSize - 5;
-                                    if(fontSize < 5){
-                                        resta = 5;
-                                    }
-
-                                    elementos[i].style.fontSize = (resta) + 'px';
-                                }
-                            }
-
-                            function aumentarTamano() {
-                                var elementos = document.getElementsByTagName('*');
-                                for (var i = 0; i < elementos.length; i++) {
-                                    var estilo = window.getComputedStyle(elementos[i], null).getPropertyValue('font-size');
-                                    var fontSize = parseFloat(estilo);
-                                    var suma = fontSize + 5;
-                                    if(suma > 40){
-                                        suma = 40;
-                                    }
-                                    elementos[i].style.fontSize = (suma) + 'px';
-                                }
-                            }
-
-
-                        </script>
-                    </head>
-                    <body>" . $request->titulo . "</body>
-                    </html>";
-
-
-
-
-
-                    // ****************** DEVOCIONAL ************************
-
-
-
-                    $contenidoHtmlDevocional = "<html>
-                    <head>
-                    <meta charset='UTF-8'>
-                        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-                    <style>
-                        ";
-
-                    $contenidoHtmlDevocional .= $this->retornoFuentesCSS();
-
-
-                    $contenidoHtmlDevocional .= "</style>
-                        <script type='text/javascript'>
-
-                            function disminuirTamano() {
-                                var elementos = document.getElementsByTagName('*');
-                                for (var i = 0; i < elementos.length; i++) {
-                                    var estilo = window.getComputedStyle(elementos[i], null).getPropertyValue('font-size');
-                                    var fontSize = parseFloat(estilo);
-                                    var resta = fontSize - 5;
-                                    if(fontSize < 5){
-                                        resta = 5;
-                                    }
-
-                                    elementos[i].style.fontSize = (resta) + 'px';
-                                }
-                            }
-
-                            function aumentarTamano() {
-                                var elementos = document.getElementsByTagName('*');
-                                for (var i = 0; i < elementos.length; i++) {
-                                    var estilo = window.getComputedStyle(elementos[i], null).getPropertyValue('font-size');
-                                    var fontSize = parseFloat(estilo);
-                                    var suma = fontSize + 5;
-                                    if(suma > 40){
-                                        suma = 40;
-                                    }
-                                    elementos[i].style.fontSize = (suma) + 'px';
-                                }
-                            }
-
-
-                        </script>
-                    </head>
-                    <body>" . $request->devocional . "</body>
-                    </html>";
-
-
-
-                    $contenidoHtmlTitulo = "<html>
-                <body>" . $request->titulo . "</body>
-                    </html>";
-
-                    $contenidoHtml = "<html>
-                <body>" . $request->devocional . "</body>
-                    </html>";
-
-
-
                     $detalle = new BloqueCuestionarioTextos();
                     $detalle->id_bloque_detalle = $request->idblockdetalle;
                     $detalle->id_idioma_planes = $request->ididioma;
-                    $detalle->texto = $contenidoHtmlDevocional;    // TEXTO DEL DEVOCIONAL, QUE SE CARGA EN UN WEBVIEW
-                    $detalle->texto_dia = $contenidoHtml;  // EL MISMO TEXTO PERO ESTE SE CARGA EN TEXTVIEW
-                    $detalle->titulo = $contenidoHtmlConJavascriptTitulo;  // TITULO QUE AL TOCARLO ME MANDA A A BIBLIA
-                    $detalle->titulo_dia = $contenidoHtmlTitulo; // EL MISMO TEXTO DE TITULO PERO SE CARGARA EN TEXTIEW
-
-
-
+                    $detalle->titulo = $request->titulo;
+                    $detalle->titulo_dia = $request->devocional;
                     $detalle->save();
                 }
 
@@ -1101,137 +978,12 @@ class PlanesController extends Controller
 
         if ($info = BloqueCuestionarioTextos::where('id', $request->idcuestionario)->first()){
 
-
-            // *************  TITULO *******************
-
-            $contenidoHtmlConJavascriptTitulo = "<html>
-                    <head>
-                    <meta charset='UTF-8'>
-                        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-                    <style>
-                        ";
-
-            $contenidoHtmlConJavascriptTitulo .= $this->retornoFuentesCSS();
-
-
-            $contenidoHtmlConJavascriptTitulo .= "</style>
-                        <script type='text/javascript'>
-
-                           function disminuirTamano() {
-                                var elementos = document.getElementsByTagName('*');
-                                for (var i = 0; i < elementos.length; i++) {
-                                    var estilo = window.getComputedStyle(elementos[i], null).getPropertyValue('font-size');
-                                    var fontSize = parseFloat(estilo);
-                                    var resta = fontSize - 5;
-                                    if(fontSize < 5){
-                                        resta = 5;
-                                    }
-
-                                    elementos[i].style.fontSize = (resta) + 'px';
-                                }
-                            }
-
-                            function aumentarTamano() {
-                                var elementos = document.getElementsByTagName('*');
-                                for (var i = 0; i < elementos.length; i++) {
-                                    var estilo = window.getComputedStyle(elementos[i], null).getPropertyValue('font-size');
-                                    var fontSize = parseFloat(estilo);
-                                    var suma = fontSize + 5;
-                                    if(suma > 40){
-                                        suma = 40;
-                                    }
-                                    elementos[i].style.fontSize = (suma) + 'px';
-                                }
-                            }
-
-                        </script>
-                    </head>
-                    <body>" . $request->titulo . "</body>
-                    </html>";
-
-
-
-
-
-            // *************  DEVOCIONAL *******************
-
-
-
-            $contenidoHtmlDevocional= "<html>
-                    <head>
-                    <meta charset='UTF-8'>
-                        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-                    <style>
-                        ";
-
-            $contenidoHtmlDevocional .= $this->retornoFuentesCSS();
-
-
-            $contenidoHtmlDevocional .= "  </style>
-                        <script type='text/javascript'>
-
-
-                            function disminuirTamano() {
-                                var elementos = document.getElementsByTagName('*');
-                                for (var i = 0; i < elementos.length; i++) {
-                                    var estilo = window.getComputedStyle(elementos[i], null).getPropertyValue('font-size');
-                                    var fontSize = parseFloat(estilo);
-                                    var resta = fontSize - 5;
-                                    if(fontSize < 5){
-                                        resta = 5;
-                                    }
-
-                                    elementos[i].style.fontSize = (resta) + 'px';
-                                }
-                            }
-
-                            function aumentarTamano() {
-                                var elementos = document.getElementsByTagName('*');
-                                for (var i = 0; i < elementos.length; i++) {
-                                    var estilo = window.getComputedStyle(elementos[i], null).getPropertyValue('font-size');
-                                    var fontSize = parseFloat(estilo);
-                                    var suma = fontSize + 5;
-                                    if(suma > 40){
-                                        suma = 40;
-                                    }
-                                    elementos[i].style.fontSize = (suma) + 'px';
-                                }
-                            }
-
-
-                        </script>
-                    </head>
-                    <body>" . $request->devocional . "</body>
-                    </html>";
-
-
-
-
-
-
-
-
-
-
-
-
-
-            $contenidoHtmlTitulo = "<html>
-                <body>" . $request->titulo . "</body>
-                    </html>";
-
-
-            $contenidoHtml = "<html>
-                <body>" . $request->devocional . "</body>
-                    </html>";
-
+            // EN EL RESPONSE API SE ARMA LA CONSULTA DE RESPUESTA HTML
 
             // actualizar
             BloqueCuestionarioTextos::where('id', $info->id)->update([
-                'texto' => $contenidoHtmlDevocional,
-                'texto_dia' => $contenidoHtml,
-                'titulo' => $contenidoHtmlConJavascriptTitulo,
-                'titulo_dia' => $contenidoHtmlTitulo,
+                'titulo' => $request->titulo, // TITULO
+                'titulo_dia' => $request->devocional, // TODOS EL DEVOCIONAL
             ]);
         }
 
@@ -1242,6 +994,7 @@ class PlanesController extends Controller
     private function retornoFuentesCSS(){
 
         $fuentes = "
+
                 @font-face {
                     font-family: 'Fuente1';
                     src: url('file:///android_res/font/notosans_light.ttf') format('truetype'); /* Ruta de la tercera fuente */
@@ -1257,6 +1010,16 @@ class PlanesController extends Controller
                     src: url('file:///android_res/font/times_new_normal_regular.ttf') format('truetype'); /* Ruta de la tercera fuente */
                 }
 
+                @font-face {
+                    font-family: 'Fuente4';
+                    src: url('file:///android_res/font/recolecta_medium.ttf') format('truetype'); /* Ruta de la cuarta fuente */
+                }
+
+                @font-face {
+                    font-family: 'Fuente5';
+                    src: url('file:///android_res/font/recolecta_regular.ttf') format('truetype'); /* Ruta de la quinta fuente */
+                }
+
                 /* Utilizar las fuentes según sea necesario */
                 .texto-fuente1 {
                     font-family: 'Fuente1', sans-serif;
@@ -1269,6 +1032,15 @@ class PlanesController extends Controller
                 .texto-fuente3 {
                     font-family: 'Fuente3', sans-serif;
                 }
+
+                .texto-fuente4 {
+                    font-family: 'Fuente4', sans-serif;
+                }
+
+                .texto-fuente5 {
+                    font-family: 'Fuente5', sans-serif;
+                }
+
         ";
 
         return $fuentes;

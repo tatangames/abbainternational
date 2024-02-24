@@ -17,6 +17,7 @@ use App\Http\Controllers\Backend\Recursos\DevoInicioController;
 use App\Http\Controllers\Backend\Recursos\InsigniasController;
 use App\Http\Controllers\Backend\Biblias\BibliasController;
 use App\Http\Controllers\Backend\Biblias\BibliaCapituloController;
+use App\Http\Controllers\Backend\Devocional\DevoBibliaController;
 
 
 Route::get('/', [LoginController::class,'index'])->name('login');
@@ -322,6 +323,10 @@ Route::post('/admin/buscar/texto/versiculo', [BibliaCapituloController::class,'B
 Route::post('/admin/guardar/texto/versiculo', [BibliaCapituloController::class,'guardarTextoVersiculo']);
 
 
+// --- DEVOCIONAL BIBLIAS ---
+
+Route::get('/admin/devobiblia/vista/{idbloqedetalle}', [DevoBibliaController::class,'vistaDevoBiblia']);
+Route::get('/admin/devobiblia/tabla/{idbloqedetalle}', [DevoBibliaController::class,'tablaDevoBiblia']);
 
 
 

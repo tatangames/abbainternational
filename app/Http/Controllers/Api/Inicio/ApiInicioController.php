@@ -866,7 +866,8 @@ class ApiInicioController extends Controller
             ->where('id_idioma_planes', $idiomaTexto)
             ->first()){
 
-            return ['texto' => $infoTituloTexto->texto, 'textodia' => $infoTituloTexto->texto_dia];
+            return ['texto' => $infoTituloTexto->texto,
+                'textodia' => $infoTituloTexto->texto_dia];
 
         }else{
             // si no encuentra sera por defecto español

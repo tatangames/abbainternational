@@ -42,6 +42,10 @@
                                         <i class="fas fa-edit" title="Preguntas"></i>&nbsp; Preguntas
                                     </button>
 
+                                    <button style="margin: 8px" type="button" class="btn btn-success btn-xs" onclick="vistaBiblias({{ $dato->id }})">
+                                        <i class="fas fa-edit" title="Biblia"></i>&nbsp; Biblia
+                                    </button>
+
                                     @if($dato->visible == 1)
                                         <button style="margin: 8px" type="button" class="btn btn-danger btn-xs" onclick="preguntaDeshabilitar({{ $dato->id }})">
                                             <i class="fas fa-edit" title="Deshabilitar"></i>&nbsp; Deshabilitar

@@ -265,54 +265,37 @@ class ApiBibliaController extends Controller
                         </style>
                         <script type='text/javascript'>
 
-                            function disminuirTamano() {
-                                 var elementos = document.querySelectorAll('*'); // Obtener todos los elementos
-                                    elementos.forEach(function(elemento) {
-                                        // Verificar si el elemento es una etiqueta de texto
-                                        if (elemento.nodeType === Node.TEXT_NODE && elemento.parentNode.nodeName !== 'SCRIPT') {
-                                            var estilo = window.getComputedStyle(elemento.parentNode, null); // Obtener el estilo calculado del elemento padre
-                                            var tamanoActual = parseInt(estilo.getPropertyValue('font-size')); // Obtener el tamaño de la fuente actual del elemento padre
-                                            var nuevoTamano = tamanoActual + 2; // Aumentar el tamaño en 2px
-                                            elemento.parentNode.style.fontSize = nuevoTamano + 'px'; // Aplicar el nuevo tamaño de fuente al elemento padre
-                                        }
-                                    });
-                            }
-
-                            function aumentarTamano() {
-                                   var elementos = document.querySelectorAll('*'); // Obtener todos los elementos
-                                    elementos.forEach(function(elemento) {
-                                        // Verificar si el elemento es una etiqueta de texto
-                                            var estilo = window.getComputedStyle(elemento.parentNode, null); // Obtener el estilo calculado del elemento padre
-                                            var tamanoActual = parseInt(estilo.getPropertyValue('font-size')); // Obtener el tamaño de la fuente actual del elemento padre
-                                            var nuevoTamano = tamanoActual - 2; // Aumentar el tamaño en 2px
-                                            elemento.parentNode.style.fontSize = nuevoTamano + 'px'; // Aplicar el nuevo tamaño de fuente al elemento padre
-
-                                    });
-                            }
-
-
                             function scrollTo(element){
                                 document.getElementById(element).scrollIntoView();
                             }
-
 
                         </script>
                     </head>
                     <body>"
 
 
+
                         . "<p style='text-align: center; font-size: 22px; margin-bottom: 5px;'>" . $nombreLibro . "</p>"
-                        . "<p style='text-align: center; font-size: 35px; font-weight: bold; margin-top: 5px;'>" . $numeroCapitulo . "</p>" ;
+                        . "<p style='text-align: center; font-size: 48px; font-weight: bold; margin-top: 5px;'><strong>" . $numeroCapitulo . "</strong></p>" ;
+
+                 $contenidoHtml .= "<div class='contenedor'>";
+
+
+
 
                   foreach ($listado as $dato) {
 
-                      $infoVer = VersiculoRefran::where('id_versiculo', $dato->id)->first();
-                      $dato->titulo = $infoVer->titulo;
+                      $titulo = "";
+                      if($infoVer = VersiculoRefran::where('id_versiculo', $dato->id)->first()){
+                          $titulo = $infoVer->titulo;
+                      }
 
-                      $contenidoHtml .= "<div id='verso$dato->id'>$dato->titulo </div>";
+                      $textoSinP = preg_replace('/<p[^>]*>|<\/p>/', '', $titulo);
+
+                      $contenidoHtml .= "<span id='verso$dato->id'>$textoSinP </span>";
                   }
 
-            $contenidoHtml .= "</body>
+            $contenidoHtml .= "</div></body>
                     </html>";
 
 
@@ -381,6 +364,7 @@ class ApiBibliaController extends Controller
                 .texto-fuente5 {
                     font-family: 'Fuente5', sans-serif;
                 }
+
         ";
 
         return $fuentes;

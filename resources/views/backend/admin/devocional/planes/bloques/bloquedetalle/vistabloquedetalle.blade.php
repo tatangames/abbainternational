@@ -195,6 +195,9 @@
         }
 
 
+        function vistaBiblias(idbloqedetalle){
+            window.location.href="{{ url('/admin/devobiblia/vista') }}/" + idbloqedetalle;
+        }
 
     </script>
 

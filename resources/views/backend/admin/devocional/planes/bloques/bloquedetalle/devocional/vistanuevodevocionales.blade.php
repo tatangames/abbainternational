@@ -115,7 +115,7 @@
                             <td>
                                 <!-- data-ididioma se utiliza para comparar si falta agregar idioma nuevo -->
                                 <input name="arrayIdioma[]" disabled data-idblockcuestionario="{{ $item->id }}" data-ididioma="{{ $item->id_idioma_planes }}" value="{{ $item->idioma }}" class="form-control" type="text">
-                                <textarea name="arrayDescripcion[]" disabled style="display: none" class="form-control">{{ $item->texto }}</textarea>
+                                <textarea name="arrayDescripcion[]" disabled style="display: none" class="form-control">{{ $item->titulo_dia }}</textarea>
                                 <textarea name="arrayTitulo[]" disabled style="display: none" class="form-control">{{ $item->titulo }}</textarea>
                             </td>
 

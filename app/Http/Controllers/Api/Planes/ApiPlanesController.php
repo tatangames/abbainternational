@@ -1286,11 +1286,10 @@ class ApiPlanesController extends Controller
                 ->first()){
 
                 $datosArray = $this->retornoTituloCuestionarioIdioma($request->idblockdeta, $idiomaTextos);
-                $titulo = $datosArray['titulo'];
-                $texto = $datosArray['texto'];
+                $devocional = $datosArray['devocional'];
+
                 return ['success' => 1,
-                       'titulo' => $titulo,
-                       'texto' => $texto
+                       'devocional' => $devocional
                 ];
             }else{
 
@@ -1311,11 +1310,56 @@ class ApiPlanesController extends Controller
         if($infoTituloTexto = BloqueCuestionarioTextos::where('id_bloque_detalle', $idBlockDeta)
             ->where('id_idioma_planes', $idiomaTexto)
             ->first()){
-            return ['texto' => $infoTituloTexto->texto,
-                    'texto_dia' => $infoTituloTexto->texto_dia,
-                    'titulo' => $infoTituloTexto->titulo,
-                    'titulo_dia' => $infoTituloTexto->titulo_dia
+
+            // DEVOLVER CON FORMATO
+
+
+            // ****************************************************************************************
+
+
+
+            $contenidoTitulo = "<html>
+                    <head>
+                    <meta charset='UTF-8'>
+                        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+                    <style>
+                        ";
+
+            $contenidoTitulo .= $this->retornoFuentesCSS();
+
+
+            $contenidoTitulo .= "
+
+                        </style>
+                        <script type='text/javascript'>
+
+
+                           function notifyClick() {
+                                Android.notifyClickToJava(); // Esta función será llamada cuando el párrafo sea tocado
+                           }
+
+
+                        </script>
+                    </head>
+                    <body>";
+
+            // Titulo
+
+            $contenidoTitulo .= "<div id='miParrafo' onclick='notifyClick()'>";
+            $contenidoTitulo .= $infoTituloTexto->titulo;
+            $contenidoTitulo .= "</div>";
+
+            // Devocional
+
+            $contenidoTitulo .= $infoTituloTexto->titulo_dia;
+
+            $contenidoTitulo .= "</body>
+                    </html>";
+
+
+            return ['devocional' => $contenidoTitulo
             ];
+
 
         }else{
             // si no encuentra sera por defecto español
@@ -1323,15 +1367,128 @@ class ApiPlanesController extends Controller
                 ->where('id_idioma_planes', 1)
                 ->first();
 
-            return ['texto' => $infoTituloTexto->texto,
-                'texto_dia' => $infoTituloTexto->texto_dia,
-                'titulo' => $infoTituloTexto->titulo,
-                'titulo_dia' => $infoTituloTexto->titulo_dia
-            ];
 
+
+            // ****************************************************************************************
+
+
+            $contenidoTitulo = "<html>
+                    <head>
+                    <meta charset='UTF-8'>
+                        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+                    <style>
+                        ";
+
+            $contenidoTitulo .= $this->retornoFuentesCSS();
+
+
+            $contenidoTitulo .= "
+
+                        </style>
+                        <script type='text/javascript'>
+
+
+                           function notifyClick() {
+                                Android.notifyClickToJava(); // Esta función será llamada cuando el párrafo sea tocado
+                           }
+
+
+                        </script>
+                    </head>
+                    <body>";
+
+            // Titulo
+
+            $contenidoTitulo .= "<div id='miParrafo' onclick='notifyClick()'>";
+            $contenidoTitulo .= $infoTituloTexto->titulo;
+            $contenidoTitulo .= "</div>";
+
+            // Devocional
+
+            $contenidoTitulo .= $infoTituloTexto->titulo_dia;
+
+            $contenidoTitulo .= "</body>
+                    </html>";
+
+
+            return ['devocional' => $contenidoTitulo
+            ];
 
         }
     }
+
+
+
+
+
+
+
+
+
+    private function retornoFuentesCSS(){
+
+        $fuentes = "
+
+                @font-face {
+                    font-family: 'Fuente1';
+                    src: url('file:///android_res/font/notosans_light.ttf') format('truetype'); /* Ruta de la tercera fuente */
+                 }
+
+                @font-face {
+                    font-family: 'Fuente2';
+                    src: url('file:///android_res/font/notosans_condensed_medium.ttf') format('truetype'); /* Ruta de la tercera fuente */
+                }
+
+                @font-face {
+                    font-family: 'Fuente3';
+                    src: url('file:///android_res/font/times_new_normal_regular.ttf') format('truetype'); /* Ruta de la tercera fuente */
+                }
+
+                @font-face {
+                    font-family: 'Fuente4';
+                    src: url('file:///android_res/font/recolecta_medium.ttf') format('truetype'); /* Ruta de la cuarta fuente */
+                }
+
+                @font-face {
+                    font-family: 'Fuente5';
+                    src: url('file:///android_res/font/recolecta_regular.ttf') format('truetype'); /* Ruta de la quinta fuente */
+                }
+
+                /* Utilizar las fuentes según sea necesario */
+                .texto-fuente1 {
+                    font-family: 'Fuente1', sans-serif;
+                }
+
+                .texto-fuente2 {
+                    font-family: 'Fuente2', sans-serif;
+                }
+
+                .texto-fuente3 {
+                    font-family: 'Fuente3', sans-serif;
+                }
+
+                .texto-fuente4 {
+                    font-family: 'Fuente4', sans-serif;
+                }
+
+                .texto-fuente5 {
+                    font-family: 'Fuente5', sans-serif;
+                }
+
+        ";
+
+        return $fuentes;
+    }
+
+
+
+
+
+
+
+
+
+
 
 
 
