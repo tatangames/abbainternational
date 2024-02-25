@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\Planes\ApiPlanesController;
 use App\Http\Controllers\Api\Inicio\ApiInicioController;
 use App\Http\Controllers\Api\Comunidad\ApiComunidadController;
 use App\Http\Controllers\Api\Biblia\ApiBibliaController;
+use App\Http\Controllers\Api\Biblia\ApiDevocionalBibliaController;
 
 
 // inicio de sesion
@@ -221,6 +222,15 @@ Route::middleware('verificarToken')->group(function () {
 
     // todos los textos del versiculo
     Route::post('app/listado/versiculos/textos', [ApiBibliaController::class,'listadoTextosVersiculos']);
+
+
+
+    // --- LECTURA BIBLIA EN DEVOCIONALES ---
+    Route::post('app/listado/biblia/devocionales', [ApiDevocionalBibliaController::class,'listadoCapituloVersiculo']);
+
+
+
+
 
 
 });

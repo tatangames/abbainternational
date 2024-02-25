@@ -145,7 +145,7 @@
                         <div class="col-md-12">
 
                             <div class="form-group">
-                                <label>Versículo</label>
+                                <label>Versículo <strong style="color: red">(Si necesita dar Espacios se debe pulsar SHIFT + ENTER) si solo presionar ENTER no dara el Espacio al mostrarse en App)</strong></label>
                                 <input type="hidden" id="idfila-texto">
                                 <textarea name="content" id="texto-editor" rows="12" cols="50"></textarea>
                             </div>

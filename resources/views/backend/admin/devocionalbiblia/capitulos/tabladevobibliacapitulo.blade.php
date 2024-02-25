@@ -7,8 +7,9 @@
                         <table id="tabla" class="table table-bordered table-striped">
                             <thead>
                             <tr>
-                                <th style="width: 6%">Biblia</th>
-                                <th style="width: 6%">Defecto</th>
+                                <th style="width: 6%">Posición</th>
+                                <th style="width: 6%">Libro</th>
+                                <th style="width: 6%">Capitulo</th>
                                 <th style="width: 4%">Opciones</th>
                             </tr>
                             </thead>
@@ -16,27 +17,15 @@
 
                             @foreach($listado as $dato)
                                 <tr>
-                                    <td style="width: 6%">{{ $dato->titulo }}</td>
-
-                                    <td style="width: 6%">
-                                        @if($dato->defecto == 1)
-                                            <span class="badge bg-success">Si</span>
-                                        @else
-                                            <span class="badge bg-danger">No</span>
-                                        @endif
-                                    </td>
+                                    <td style="width: 6%">{{ $dato->posicion }}</td>
+                                    <td style="width: 6%">{{ $dato->titulolibro }}</td>
+                                    <td style="width: 6%">{{ $dato->titulocapitulo }}</td>
 
                                     <td style="width: 4%">
 
-                                        <button style="margin: 2px" type="button" class="btn btn-success btn-xs" onclick="vistaCapitulo({{ $dato->id }})">
-                                            <i class="fas fa-book" title="Libro - Capitulo"></i>&nbsp; Libro - Capitulo
+                                        <button style="margin: 2px" type="button" class="btn btn-danger btn-xs" onclick="borrarElemento({{ $dato->id }})">
+                                            <i class="fas fa-trash" title="Borrar"></i>&nbsp; Borrar
                                         </button>
-
-                                        @if($dato->defecto == 0)
-                                            <button style="margin: 8px" type="button" class="btn btn-info btn-xs" onclick="defectoDevo({{ $dato->id }})">
-                                                <i class="fas fa-edit" title="Defecto"></i>&nbsp; Defecto
-                                            </button>
-                                        @endif
 
                                     </td>
                                 </tr>

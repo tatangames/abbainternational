@@ -74,13 +74,21 @@
 
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label class="control-label">Biblia</label>
-                                        <select class="form-control" id="select-biblia">
-                                            @foreach($arrayBiblias as $item)
+                                        <label class="control-label">Libro</label>
+                                        <select class="form-control" id="select-devobiblia" onchange="buscarCapitulos(this)">
+                                            <option value="0">Seleccionar opción</option>
+                                            @foreach($arrayLibros as $item)
                                                 <option value="{{$item->id}}">{{$item->titulo}}</option>
                                             @endforeach
                                         </select>
                                     </div>
+
+                                    <div class="form-group">
+                                        <label class="control-label">Capitulos</label>
+                                        <select class="form-control" id="select-capitulos">
+                                        </select>
+                                    </div>
+
                                 </div>
 
                             </div>
@@ -90,46 +98,12 @@
             </div>
             <div class="modal-footer justify-content-between">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
-                <button type="button" class="btn btn-success" onclick="nuevo()">Guardar</button>
+                <button type="button" class="btn btn-success" onclick="registrar()">Guardar</button>
             </div>
         </div>
     </div>
 </div>
 
-
-<!-- modal editar-->
-<div class="modal fade" id="modalEditar" >
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">Editar</h4>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form id="formulario-editar">
-                    <div class="card-body">
-                        <div class="col-md-12">
-
-                            <div class="form-group">
-                                <label>Título</label>
-                                <input type="hidden" id="id-editar">
-                                <input type="text" maxlength="50" autocomplete="off" class="form-control" id="titulo-editar">
-                            </div>
-
-
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer justify-content-between">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
-                <button type="button" class="btn btn-success" onclick="editar()">Actualizar</button>
-            </div>
-        </div>
-    </div>
-</div>
 
 
 
@@ -149,8 +123,9 @@
 
     <script type="text/javascript">
         $(document).ready(function(){
-            let idbloqedetalle = {{ $idbloqedetalle }};
-            var ruta = "{{ URL::to('/admin/devobiblia/tabla') }}/" + idbloqedetalle;
+
+            let iddevobiblia = {{ $iddevobiblia }};
+            var ruta = "{{ URL::to('/admin/devobiblia/capitulos/tabla') }}/" + iddevobiblia;
             $('#tablaDatatable').load(ruta);
         });
     </script>
@@ -158,8 +133,8 @@
     <script>
 
         function recargar(){
-            let idbloqedetalle = {{ $idbloqedetalle }};
-            var ruta = "{{ URL::to('/admin/devobiblia/tabla') }}/" + idbloqedetalle;
+            let iddevobiblia = {{ $iddevobiblia }};
+            var ruta = "{{ URL::to('/admin/devobiblia/capitulos/tabla') }}/" + iddevobiblia;
             $('#tablaDatatable').load(ruta);
         }
 
@@ -169,33 +144,76 @@
             $('#modalAgregar').modal('show');
         }
 
-        // registrar biblia
-        function nuevo(){
 
-            var biblia = document.getElementById('select-biblia').value;
+        function buscarCapitulos(e){
 
-            if(biblia === '') {
-                toastr.error('Biblia es requerido');
+            let idlibro = $(e).val();
+
+            if(idlibro == 0){
+                toastr.info("Seleccionar opción")
                 return;
             }
 
-            let idbloqedetalle = {{ $idbloqedetalle }};
-
             openLoading();
 
-            var formData = new FormData();
-            formData.append('idbiblia', biblia);
-            formData.append('idbloqedetalle', idbloqedetalle);
+            let formData = new FormData();
+            formData.append('idlibro', idlibro);
 
-            axios.post('/admin/devobiblia/registrar', formData, {
+            axios.post('/admin/devobiblia/buscador/capitulos', formData, {
+
             })
                 .then((response) => {
                     closeLoading();
 
-                    if (response.data.success === 1) {
+                    if(response.data.success === 1){
+
+                        document.getElementById("select-capitulos").options.length = 0;
+
+                        $('#select-capitulos').append('<option value="0" selected>Seleccionar Capitulo</option>');
+
+                        $.each(response.data.listado, function( key, val ){
+                            $('#select-capitulos').append('<option value="' +val.id +'">'+ val.titulo +'</option>');
+                        });
+                    }
+                    else{
+                        toastr.error('Información no encontrada');
+                    }
+                })
+                .catch((error) => {
+                    closeLoading();
+                    toastr.error('Información no encontrada');
+                });
+        }
+
+
+        function registrar(){
+
+            var idcapitulo = document.getElementById('select-capitulos').value;
+
+            if(idcapitulo === '') {
+                toastr.error('Capitulo es requerido');
+                return;
+            }
+
+            let iddevobiblia = {{ $iddevobiblia }};
+
+            openLoading();
+
+
+            let formData = new FormData();
+            formData.append('iddevobiblia', iddevobiblia);
+            formData.append('idcapitulo', idcapitulo);
+
+            axios.post('/admin/devobiblia/registrar/capitulos', formData, {
+
+            })
+                .then((response) => {
+                    closeLoading();
+
+                    if(response.data.success === 1){
                         Swal.fire({
                             title: "No Registrado",
-                            text: "La Biblia ya se encuentra registrada",
+                            text: "Capitulo ya esta registrado",
                             icon: 'info',
                             showCancelButton: false,
                             allowOutsideClick: false,
@@ -208,52 +226,49 @@
                         })
                     }
 
-                    else if (response.data.success === 2) {
-                        $('#modalAgregar').modal('hide');
-                        toastr.success('Registrado correctamente');
+                    else if(response.data.success === 2){
+                        toastr.success('Registrado');
                         recargar();
                     }
-                    else {
-                        toastr.error('Error al guardar');
+                    else{
+                        toastr.error('Información no encontrada');
                     }
                 })
                 .catch((error) => {
                     closeLoading();
-                    toastr.error('Error al guardar');
+                    toastr.error('Información no encontrada');
                 });
         }
 
 
-        function defectoDevo(id){
 
-            openLoading();
+        function borrarElemento(id){
 
-            var formData = new FormData();
+            let formData = new FormData();
             formData.append('id', id);
 
-            axios.post('/admin/devobiblia/defecto', formData, {
+            axios.post('/admin/devobiblia/borrar/fila', formData, {
+
             })
                 .then((response) => {
                     closeLoading();
 
-                    if (response.data.success === 1) {
-                        toastr.success('Actualizado');
+                    if(response.data.success === 1){
+                        toastr.success('Borrado');
                         recargar();
                     }
-                    else {
-                        toastr.error('Error al guardar');
+                    else{
+                        toastr.error('Información no encontrada');
                     }
+
                 })
                 .catch((error) => {
                     closeLoading();
-                    toastr.error('Error al guardar');
+                    toastr.error('Información no encontrada');
                 });
+
         }
 
-
-        function vistaCapitulo(idblockdetalle){
-            window.location.href="{{ url('/admin/devobiblia/capitulos/vista') }}/" + idblockdetalle;
-        }
 
 
 

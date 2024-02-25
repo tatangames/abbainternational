@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\Planes;
 
+use App\FuentesCssLetra;
 use App\Http\Controllers\Controller;
 use App\Jobs\EnviarNotificacion;
 use App\Models\BloqueCuestionarioTextos;
@@ -10,6 +11,8 @@ use App\Models\BloquePreguntasTextos;
 use App\Models\BloquePreguntasUsuarios;
 use App\Models\ComunidadSolicitud;
 use App\Models\Departamentos;
+use App\Models\DevocionalBiblia;
+use App\Models\DevocionalCapitulo;
 use App\Models\Iglesias;
 use App\Models\ImagenPreguntas;
 use App\Models\InsigniasUsuarios;
@@ -396,8 +399,8 @@ class ApiPlanesController extends Controller
                 ->get();
 
             $contador = 0;
-             $resultsBloque = array();
-             $index = 0;
+            $resultsBloque = array();
+            $index = 0;
 
             // con esto se conoce si hay un dia con informacion para Hoy, sino se tomara el ultimo
             // en la aplicacion
@@ -1281,6 +1284,23 @@ class ApiPlanesController extends Controller
 
             $idiomaTextos = $request->idiomaplan;
 
+            $redireccionar = 0;
+            $iddevobiblia = 0;
+
+            // buscar el
+            if($info = DevocionalBiblia::where('id_bloque_detalle', $request->idblockdeta)
+                ->where('defecto', 1)->first()){
+
+                // Esto se utilizara si redireccionar es igual a 1
+                $iddevobiblia = $info->id;
+
+                // hoy ver si tiene algo dentro, aunque sea 1 capitulo
+                if(DevocionalCapitulo::where('id_devocional_biblia', $info->id)->first()){
+                    $redireccionar = 1;
+                }
+
+            }
+
             // comprueba que al menos haya un cuestionario disponible de cualquier idioma
             if(BloqueCuestionarioTextos::where('id_bloque_detalle', $request->idblockdeta)
                 ->first()){
@@ -1289,6 +1309,8 @@ class ApiPlanesController extends Controller
                 $devocional = $datosArray['devocional'];
 
                 return ['success' => 1,
+                        'redireccionar' => $redireccionar,
+                        'iddevobiblia' => $iddevobiblia,
                        'devocional' => $devocional
                 ];
             }else{
@@ -1325,8 +1347,8 @@ class ApiPlanesController extends Controller
                     <style>
                         ";
 
-            $contenidoTitulo .= $this->retornoFuentesCSS();
-
+            $datosFuentes = new FuentesCssLetra();
+            $contenidoTitulo .= $datosFuentes->retornaFuentesCss();
 
             $contenidoTitulo .= "
 
@@ -1379,8 +1401,8 @@ class ApiPlanesController extends Controller
                     <style>
                         ";
 
-            $contenidoTitulo .= $this->retornoFuentesCSS();
-
+            $datosFuentes = new FuentesCssLetra();
+            $contenidoTitulo .= $datosFuentes->retornaFuentesCss();
 
             $contenidoTitulo .= "
 
@@ -1416,81 +1438,6 @@ class ApiPlanesController extends Controller
 
         }
     }
-
-
-
-
-
-
-
-
-
-    private function retornoFuentesCSS(){
-
-        $fuentes = "
-
-                @font-face {
-                    font-family: 'Fuente1';
-                    src: url('file:///android_res/font/notosans_light.ttf') format('truetype'); /* Ruta de la tercera fuente */
-                 }
-
-                @font-face {
-                    font-family: 'Fuente2';
-                    src: url('file:///android_res/font/notosans_condensed_medium.ttf') format('truetype'); /* Ruta de la tercera fuente */
-                }
-
-                @font-face {
-                    font-family: 'Fuente3';
-                    src: url('file:///android_res/font/times_new_normal_regular.ttf') format('truetype'); /* Ruta de la tercera fuente */
-                }
-
-                @font-face {
-                    font-family: 'Fuente4';
-                    src: url('file:///android_res/font/recolecta_medium.ttf') format('truetype'); /* Ruta de la cuarta fuente */
-                }
-
-                @font-face {
-                    font-family: 'Fuente5';
-                    src: url('file:///android_res/font/recolecta_regular.ttf') format('truetype'); /* Ruta de la quinta fuente */
-                }
-
-                /* Utilizar las fuentes según sea necesario */
-                .texto-fuente1 {
-                    font-family: 'Fuente1', sans-serif;
-                }
-
-                .texto-fuente2 {
-                    font-family: 'Fuente2', sans-serif;
-                }
-
-                .texto-fuente3 {
-                    font-family: 'Fuente3', sans-serif;
-                }
-
-                .texto-fuente4 {
-                    font-family: 'Fuente4', sans-serif;
-                }
-
-                .texto-fuente5 {
-                    font-family: 'Fuente5', sans-serif;
-                }
-
-        ";
-
-        return $fuentes;
-    }
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
