@@ -201,7 +201,7 @@ class ApiInicioController extends Controller
                     ->join('insignias_usuarios AS i', 'i.id_tipo_insignia', '=', 't.id')
                     ->where('i.id_usuario', $userToken->id)
                     ->select('t.visible', 'i.id_usuario', 'i.id_tipo_insignia', 'i.fecha')
-                    ->take(5)
+                    //->take(5) MOSTRAR TODAS
                     ->get();
 
 
@@ -304,11 +304,15 @@ class ApiInicioController extends Controller
 
             $infoTotalRachas = $this->retornoInformacionRacha($userToken);
 
+            $urlapple = "https://apps.apple.com/us/app/dji-store-try-virtual-flight/id899147555";
+
+
             // guardar modificaciones
             DB::commit();
 
             return ['success' => 1,
 
+                'urlapple' => $urlapple,
                 'videomayor5' => $video_mayor5,
                 'imagenesmayor5' => $imagenes_mayor5,
                 'insigniasmayor5' => $insignias_mayor5,
@@ -329,12 +333,14 @@ class ApiInicioController extends Controller
                 'devopreguntas' => $devo_preguntas,
                 'devoplan' => $devo_plan,
 
+                'devocuestionario' => $devo_lecturaDia,
+
                 'arrayracha' => [$infoTotalRachas], // se mete en llaves
                 'arrayfinalvideo' => $arrayFinalVideo,
                 'arrayfinalimagenes' => $arrayFinalImagenes,
                 'arrayfinalinsignias' => $arrayFinalInsignias,
 
-                'devocuestionario' => $devo_lecturaDia
+
 
                 ];
 
@@ -866,8 +872,8 @@ class ApiInicioController extends Controller
             ->where('id_idioma_planes', $idiomaTexto)
             ->first()){
 
-            return ['texto' => $infoTituloTexto->texto,
-                'textodia' => $infoTituloTexto->texto_dia];
+            return ['texto' => $infoTituloTexto->titulo,
+                'textodia' => $infoTituloTexto->titulo_dia];
 
         }else{
             // si no encuentra sera por defecto español
@@ -876,7 +882,8 @@ class ApiInicioController extends Controller
                 ->where('id_idioma_planes', 1)
                 ->first();
 
-            return ['texto' => $infoTituloTexto->texto, 'textodia' => $infoTituloTexto->texto_dia];
+            return ['texto' => $infoTituloTexto->titulo,
+                'textodia' => $infoTituloTexto->titulo_dia];
         }
     }
 
@@ -951,6 +958,8 @@ class ApiInicioController extends Controller
                 $hayinfo = 1;
             }
 
+            $unavez = true;
+
             foreach ($listado as $dato){
 
                 $datosRaw = $this->retornoTituloInsigniasAppIdioma($dato->id, $idiomaTexto);
@@ -959,6 +968,8 @@ class ApiInicioController extends Controller
 
                 $dato->titulo = $titulo;
                 $dato->descripcion = $descripcion;
+
+                $unavez = false;
             }
 
             $arrayFinalInsignias = $listado->sortBy('titulo')->values();

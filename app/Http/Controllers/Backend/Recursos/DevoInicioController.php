@@ -184,7 +184,7 @@ class DevoInicioController extends Controller
             ->first()){
 
             return ['success' => 1,
-                    'texto' => $info->texto];
+                    'texto' => $info->titulo_dia];
         }
 
         return ['success' => 2];

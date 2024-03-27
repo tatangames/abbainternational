@@ -16,9 +16,29 @@ class FuentesCssLetra
                  }
 
                 @font-face {
+                    font-family: 'Fuente1ios';
+                    src: url('Notosans-Light.ttf') format('truetype');
+                }
+
+
+
+
+
+
+                @font-face {
                     font-family: 'Fuente2';
                     src: url('file:///android_res/font/notosans_condensed_medium.ttf') format('truetype'); /* Ruta de la tercera fuente */
                 }
+
+
+                @font-face {
+                    font-family: 'Fuente2ios';
+                    src: url('Notosans-Medium.ttf') format('truetype');
+                }
+
+
+
+
 
                 @font-face {
                     font-family: 'Fuente3';
@@ -26,19 +46,44 @@ class FuentesCssLetra
                 }
 
                 @font-face {
+                    font-family: 'Fuente3ios';
+                    src: url('Times-Regular.ttf') format('truetype');
+                }
+
+
+
+
+                @font-face {
                     font-family: 'Fuente4';
                     src: url('file:///android_res/font/recolecta_medium.ttf') format('truetype'); /* Ruta de la cuarta fuente */
                 }
+
+                @font-face {
+                    font-family: 'Fuente4ios';
+                    src: url('Recolecta-Medium.ttf') format('truetype');
+                }
+
+
+
+
 
                 @font-face {
                     font-family: 'Fuente5';
                     src: url('file:///android_res/font/recolecta_regular.ttf') format('truetype'); /* Ruta de la quinta fuente */
                 }
 
-                /* Utilizar las fuentes según sea necesario */
+
+                 @font-face {
+                    font-family: 'Fuente5ios';
+                    src: url('Recolecta-Regular.ttf') format('truetype');
+                }
+
+
                 .texto-fuente1 {
                     font-family: 'Fuente1', sans-serif;
                 }
+
+
 
                 .texto-fuente2 {
                     font-family: 'Fuente2', sans-serif;

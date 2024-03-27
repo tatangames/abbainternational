@@ -267,11 +267,22 @@ class ApiComunidadController extends Controller
             foreach ($arrayPendientes as $dato){
                 $hayinfo = 1;
 
-                $infoUsuario = Usuarios::where('id', $dato->id_usuario_recibe)->first();
+                if($userToken->id == $dato->id_usuario_recibe){
+                    // no quiero de este
+                    $infoUsuario = Usuarios::where('id', $dato->id_usuario_envia)->first();
 
-                $dato->correo = $infoUsuario->correo;
-                $fecha = date("d-m-Y", strtotime($dato->fecha));
-                $dato->fecha = $fecha;
+                    $dato->correo = $infoUsuario->correo;
+                    $fecha = date("d-m-Y", strtotime($dato->fecha));
+                    $dato->fecha = $fecha;
+                }else{
+                    $infoUsuario = Usuarios::where('id', $dato->id_usuario_recibe)->first();
+
+                    $dato->correo = $infoUsuario->correo;
+                    $fecha = date("d-m-Y", strtotime($dato->fecha));
+                    $dato->fecha = $fecha;
+                }
+
+
             }
 
             return ['success' => 1,
@@ -385,8 +396,7 @@ class ApiComunidadController extends Controller
         if ($userToken = JWTAuth::user($tokenApi)) {
 
             // borrar solicitud de amistad, exista o no
-            if($info = ComunidadSolicitud::where('id', $request->idsolicitud)
-                ->where('id_usuario_envia', $userToken->id)->first()){
+            if($info = ComunidadSolicitud::where('id', $request->idsolicitud)->first()){
 
                 ComunidadSolicitud::where('id', $info->id)->delete();
             }
@@ -665,6 +675,13 @@ class ApiComunidadController extends Controller
                     }
 
                     ComunidadSolicitud::where('id', $info->id)->update(['estado' => 1]);
+                }else{
+
+                    // SOLICITUD YA NO EXISTE
+
+                    return ['success' => 2];
+
+
                 }
 
                 DB::commit();
@@ -786,6 +803,138 @@ class ApiComunidadController extends Controller
             return ['success' => 99];
         }
     }
+
+
+
+
+
+
+    public function iniciarPlanConAmigosIphone(Request $request){
+
+        Log::info($request->all());
+
+
+        $rules = array(
+            'iduser' => 'required',
+            'idplan' => 'required',
+            'idiomaplan' => 'required',
+        );
+
+        $validator = Validator::make($request->all(), $rules);
+        if ( $validator->fails()){
+            return ['success' => 0,
+                'msj' => "validación incorrecta"
+            ];
+        }
+
+        $tokenApi = $request->header('Authorization');
+
+        if ($userToken = JWTAuth::user($tokenApi)) {
+
+            DB::beginTransaction();
+
+            try {
+
+                // TAMBIEN VERIFICAR QUE PLAN NO ESTE INICIADO YA
+                if(PlanesUsuarios::where('id_usuario', $userToken->id)
+                    ->where('id_planes', $request->idplan)->first()){
+
+                    return ['success' => 1, 'msg' => 'plan ya estaba registrado'];
+                }
+
+                $zonaHoraria = $this->retornoZonaHorariaUsuario($userToken->id_iglesia);
+
+                // registrar plan a usuario
+                $nuevoPlan = new PlanesUsuarios();
+                $nuevoPlan->id_usuario = $userToken->id;
+                $nuevoPlan->id_planes = $request->idplan;
+                $nuevoPlan->fecha = $zonaHoraria;
+                $nuevoPlan->save();
+
+
+
+
+
+
+                if ($request->has('datos')) {
+
+                    foreach ($request->datos as $dato) {
+
+                        $clave = $dato['id']; // ID SOLICITUD
+                        $idusuarioVal = $dato['estado']; // IDUSUARIO
+
+                            // Registrar
+                            $detalle = new PlanesAmigosDetalle();
+                            $detalle->id_planes_usuarios = $nuevoPlan->id;
+                            $detalle->id_comunidad_solicitud = $clave;
+                            $detalle->id_usuario = $idusuarioVal;
+                            $detalle->save();
+
+
+
+                            // NOTIFICACION A USUARIOS QUE FUE UNIDO A UN PLAN GRUPAL
+                            // GUARDARLE HISTORIAL
+                            $notiHistorial = new NotificacionUsuario();
+                            $notiHistorial->id_usuario = $idusuarioVal;
+                            $notiHistorial->id_tipo_notificacion = 13;
+                            $notiHistorial->fecha = $zonaHoraria;
+                            $notiHistorial->save();
+
+
+
+                            $arrayOneSignal = UsuarioNotificaciones::where('id_usuario', $idusuarioVal)->get();
+                            $pilaOneSignal = array();
+                            $hayIdOne = false;
+                            foreach ($arrayOneSignal as $item){
+                                if($item->onesignal != null){
+                                    $hayIdOne = true;
+                                    array_push($pilaOneSignal, $item->onesignal);
+                                }
+                            }
+
+                            if($hayIdOne){
+
+                                $infoUsuario = Usuarios::where('id', $idusuarioVal)->first();
+
+                                // UN AMIGO TE ACABA DE ENVIAR UNA SOLICITUD
+                                $datosRaw = $this->retornoTitulosNotificaciones(12, $infoUsuario->idioma_noti);
+                                $tiNo = $datosRaw['titulo'];
+                                $desNo = $datosRaw['descripcion'];
+
+                                // como es primera vez, se necesita enviar notificacion
+                                dispatch(new EnviarNotificacion($pilaOneSignal, $tiNo, $desNo));
+                            }
+
+
+
+                    }
+                }
+
+
+
+                DB::commit();
+                return ['success' => 2];
+
+            }catch(\Throwable $e){
+                Log::info("error: " . $e);
+                DB::rollback();
+                return ['success' => 99];
+            }
+
+        }else{
+            return ['success' => 99];
+        }
+    }
+
+
+
+
+
+
+
+
+
+
 
 
     public function informacionPlanesAmigo(Request $request){
@@ -1132,8 +1281,6 @@ class ApiComunidadController extends Controller
     public function actualizarPlanesOcultos(Request $request)
     {
 
-        Log::info($request->all());
-
         $rules = array(
             'iduser' => 'required',
         );
@@ -1153,10 +1300,10 @@ class ApiComunidadController extends Controller
 
             try {
 
-                if ($request->has('idplan')) {
+                OcultarPlanes::where('id_usuario', $userToken->id)
+                    ->update(['estado' => 0]);
 
-                    OcultarPlanes::where('id_usuario', $userToken->id)
-                        ->update(['estado' => 0]);
+                if ($request->has('idplan')) {
 
                     foreach ($request->idplan as $clave => $valor) {
 
@@ -1179,10 +1326,6 @@ class ApiComunidadController extends Controller
                             $nuevo->save();
                         }
                     }
-                }else{
-                    // viene vacio, todos pasaran a false
-                    OcultarPlanes::where('id_usuario', $userToken->id)
-                        ->update(['estado' => 0]);
                 }
 
 
@@ -1198,7 +1341,72 @@ class ApiComunidadController extends Controller
         }else{
             return ['success' => 99];
         }
+    }
 
+
+    public function actualizarPlanesOcultosIphone(Request $request)
+    {
+        $rules = array(
+            'iduser' => 'required',
+        );
+
+        $validator = Validator::make($request->all(), $rules);
+        if ( $validator->fails()){
+            return ['success' => 0,
+                'msj' => "validación incorrecta"
+            ];
+        }
+
+        $tokenApi = $request->header('Authorization');
+
+        if ($userToken = JWTAuth::user($tokenApi)) {
+
+            DB::beginTransaction();
+
+            try {
+
+                OcultarPlanes::where('id_usuario', $userToken->id)
+                    ->update(['estado' => 0]);
+
+                if ($request->has('datos')) {
+
+                    foreach ($request->datos as $dato) {
+
+                        $clave = $dato['id'];
+                        $idestado = $dato['estado'];
+
+                        // si existe solo actualizar
+                        if($fila = OcultarPlanes::where('id_usuario', $userToken->id)
+                            ->where('id_planes', $clave)->first()){
+
+                            OcultarPlanes::where('id', $fila->id)
+                                ->update(['estado' => $idestado]);
+
+                        }else{
+
+                            // crear
+                            $nuevo = new OcultarPlanes();
+                            $nuevo->id_usuario = $userToken->id;
+                            $nuevo->id_planes = $clave;
+                            $nuevo->estado = $idestado;
+                            $nuevo->save();
+                        }
+                    }
+                }
+
+
+                DB::commit();
+                return ['success' => 1];
+
+            }catch(\Throwable $e){
+                Log::info("error: " . $e);
+                DB::rollback();
+                return ['success' => 99];
+            }
+
+        }else{
+            return ['success' => 99];
+        }
     }
 
 

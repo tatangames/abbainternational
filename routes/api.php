@@ -82,6 +82,9 @@ Route::middleware('verificarToken')->group(function () {
     // actualizar preguntas
     Route::post('app/plan/misplanes/preguntas/usuario/actualizar', [ApiPlanesController::class,'actualizarPreguntasUsuarioPlan']);
 
+    // IPHONE
+    Route::post('app/plan/misplanes/preguntas/usuario/actualizariphone', [ApiPlanesController::class,'actualizarPreguntasUsuarioPlanIphone']);
+
 
 
     // informacion de todos los planes completados -> Paginate
@@ -185,6 +188,12 @@ Route::middleware('verificarToken')->group(function () {
     // iniciar plan con amigos
     Route::post('app/comunidadplan/iniciar/plan/amigos', [ApiComunidadController::class,'iniciarPlanConAmigos']);
 
+    // iniciar plan con amigos IPHONE
+    Route::post('app/comunidadplan/iniciar/plan/amigosiphone', [ApiComunidadController::class,'iniciarPlanConAmigosIphone']);
+
+
+
+
 
 
     // listado de planes que tiene ese amigo de comunidad
@@ -204,12 +213,12 @@ Route::middleware('verificarToken')->group(function () {
     // actualizar planes para ver y ocultar
     Route::post('app/comunidad/actualizarplanes/ocultos', [ApiComunidadController::class,'actualizarPlanesOcultos']);
 
+    // actualizar planes para ver y ocultar IPHONE
+    Route::post('app/comunidad/actualizarplanes/ocultosiphone', [ApiComunidadController::class,'actualizarPlanesOcultosIphone']);
 
 
 
     // --- BIBLIAS ----
-    Route::post('app/listado/biblias', [ApiBibliaController::class,'listadoBiblias']);
-
     // listado de capitulos, su titulo y todos los bloques
     Route::post('app/listado/biblias', [ApiBibliaController::class,'listadoBiblias']);
 
@@ -237,5 +246,8 @@ Route::middleware('verificarToken')->group(function () {
 
 
 
-
+Route::post('app/listado/biblias/invitado', [ApiBibliaController::class,'listadoBibliasInvitado']);
+Route::post('app/listado/biblia/capitulos/invitado', [ApiBibliaController::class,'listadoBibliasCapitulosInvitado']);
+Route::post('app/listado/biblia/versiculos/invitado', [ApiBibliaController::class,'listadoCapitulosVersiculosInvitado']);
+Route::post('app/listado/versiculos/textos/invitado', [ApiBibliaController::class,'listadoTextosVersiculosInvitado']);
 

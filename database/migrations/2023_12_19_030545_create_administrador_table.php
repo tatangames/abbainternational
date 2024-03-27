@@ -17,7 +17,6 @@ return new class extends Migration
             $table->string('email', 100)->unique();
             $table->string('password', 255);
 
-            $table->string('correo', 100)->nullable();
             $table->string('token_correo', 100)->nullable();
             $table->dateTime('token_fecha')->nullable();
         });

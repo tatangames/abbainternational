@@ -1648,8 +1648,99 @@ class ApiPlanesController extends Controller
                 }
 
                 // setear plan continuar
-                $infoBlockDeta = PlanesBlockDetalle::where('id', $request->idblockdeta)->first();
-                $infoPlanesBloques = PlanesBloques::where('id', $infoBlockDeta->id_planes_bloques)->first();
+                //$infoBlockDeta = PlanesBlockDetalle::where('id', $request->idblockdeta)->first();
+                //$infoPlanesBloques = PlanesBloques::where('id', $infoBlockDeta->id_planes_bloques)->first();
+
+                DB::commit();
+                return ['success' => 1];
+
+            }catch(\Throwable $e){
+                Log::info("error: " . $e);
+                DB::rollback();
+                return ['success' => 99];
+            }
+
+        }else{
+            return ['success' => 99];
+        }
+    }
+
+
+   // VERSION IPHONE
+    public function actualizarPreguntasUsuarioPlanIphone(Request $request)
+    {
+
+        Log::info($request->all());
+
+        $rules = array(
+            'iduser' => 'required',
+            'idblockdeta' => 'required',
+            'idiomaplan' => 'required',
+        );
+
+        $validator = Validator::make($request->all(), $rules);
+        if ( $validator->fails()){
+            return ['success' => 0,
+                'msj' => "validación incorrecta"
+            ];
+        }
+
+
+        $tokenApi = $request->header('Authorization');
+
+        if ($userToken = JWTAuth::user($tokenApi)) {
+
+            $zonaHorariaCarbon = $this->retornoZonaHorariaDepaCarbonNow($userToken->id_iglesia);
+
+            DB::beginTransaction();
+
+            try {
+
+
+                if(RachaDevocional::where('id_usuario', $userToken->id)
+                  ->where('id_plan_block_deta', $request->idblockdeta)->first()){
+                  // no guardar
+                  }else{
+                      // GUARDAR UNA RACHA DEVOCIONAL
+                      $nuevaRacha = new RachaDevocional();
+                      $nuevaRacha->id_usuario = $userToken->id;
+                      $nuevaRacha->id_plan_block_deta = $request->idblockdeta;
+                      $nuevaRacha->fecha = $zonaHorariaCarbon;
+                      $nuevaRacha->save();
+                  }
+
+
+
+              if ($request->has('datos')) {
+
+                  foreach ($request->datos as $dato) {
+
+                      $clave = $dato['id']; // ID PREGUNTA
+                      $valor = $dato['estado']; // TEXTO DEL EDT
+
+
+                      if($infoFila = BloquePreguntasUsuarios::where('id_bloque_preguntas', $clave)
+                          ->where('id_usuarios', $userToken->id)->first()){
+
+                          // actualizar la preguntas
+                          BloquePreguntasUsuarios::where('id', $infoFila->id)
+                              ->update([
+                                  'texto' => $valor,
+                                  'fecha_actualizo' => $zonaHorariaCarbon
+                              ]);
+
+                      }else{
+                          $pregunta = new BloquePreguntasUsuarios();
+                          $pregunta->id_bloque_preguntas = $clave;
+                          $pregunta->id_usuarios = $userToken->id;
+                          $pregunta->texto = $valor;
+                          $pregunta->fecha = $zonaHorariaCarbon;
+                          $pregunta->fecha_actualizo = null;
+                          $pregunta->save();
+                      }
+
+                  }
+              }
 
 
 
@@ -1666,6 +1757,7 @@ class ApiPlanesController extends Controller
             return ['success' => 99];
         }
     }
+
 
 
     public function informacionPreguntasParaCompartir(Request $request)

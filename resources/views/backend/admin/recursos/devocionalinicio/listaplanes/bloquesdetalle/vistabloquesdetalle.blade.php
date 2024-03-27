@@ -132,14 +132,20 @@
             let formData = new FormData();
 
             formData.append('idplanesblockdetalle', idplanesblockdetalle);
+
             axios.post('/admin/devoinicio/informacion/devocional', formData, {
             })
                 .then((response) => {
                     closeLoading();
 
+
                     if(response.data.success === 1){
 
-                        varGlobalEditorNuevo.setData(response.data.texto);
+                        if(response.data.texto == null){
+                            varGlobalEditorNuevo.setData("");
+                        }else{
+                            varGlobalEditorNuevo.setData(response.data.texto);
+                        }
 
                         $('#modalDevocional').modal('show');
                     }
