@@ -337,8 +337,16 @@ class PreguntasController extends Controller
             array_push($pilaIdBloque, $dato->id);
         }
 
-        $listado = BloquePreguntasUsuarios::whereIn('id_bloque_preguntas', $pilaIdBloque)
-            ->where('id_usuarios', $idusuario)->get();
+
+
+        $listado =  DB::table('bloque_preguntas_usuarios AS bpu')
+            ->join('bloque_preguntas AS b', 'bpu.id_bloque_preguntas', '=', 'b.id')
+            ->select('bpu.id_bloque_preguntas', 'bpu.id_usuarios', 'bpu.texto', 'bpu.fecha', 'b.posicion')
+            ->whereIn('bpu.id_bloque_preguntas', $pilaIdBloque)
+            ->where('bpu.id_usuarios', $idusuario)
+            ->orderBy('b.posicion', 'ASC')
+            ->get();
+
 
         foreach ($listado as $dato){
 
@@ -349,11 +357,7 @@ class PreguntasController extends Controller
 
             $dato->titulopre = $infoPre->texto;
 
-
-
-
             $dato->fechaRegistro = date("d-m-Y", strtotime($dato->fecha));
-
         }
 
 
