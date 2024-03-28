@@ -110,6 +110,10 @@
             window.location.href="{{ url('/admin/preguntas/vista') }}/" + idplanbloquedetalle;
         }
 
+        // Para ver las respuestas de los usuarios a las preguntas
+        function vistaMeditacion(idplanbloquedetalle){
+            window.location.href="{{ url('/admin/preguntas/meditacion/vista') }}/" + idplanbloquedetalle;
+        }
 
 
         function preguntaActivar(idplanbloquedetalle){

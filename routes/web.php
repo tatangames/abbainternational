@@ -203,6 +203,19 @@ Route::get('/admin/preguntas/nuevoregitros/{idplanbloquedetalle}', [PreguntasCon
 Route::post('/admin/preguntas/registrar/nuevo', [PreguntasController::class,'registrarNuevaPregunta']);
 Route::post('/admin/preguntas/actualizar/posicion', [PreguntasController::class,'actualizarPosicionPreguntas']);
 
+
+// Meditacion
+Route::get('/admin/preguntas/meditacion/vista/{idplanbloquedetalle}', [PreguntasController::class,'indexPreguntasMeditacion']);
+Route::get('/admin/preguntas/meditacion/tabla/{idplanbloquedetalle}', [PreguntasController::class,'tablaPreguntasMeditacion']);
+
+// Meditacion - Usuario
+Route::get('/admin/preguntas/meditacion/usuario/{idplanbloquedetalle}/{idusuario}', [PreguntasController::class,'indexPreguntasMeditacionUsuario']);
+Route::get('/admin/preguntas/meditacion/usuario/tabla/{idplanbloquedetalle}/{idusuario}', [PreguntasController::class,'tablaPreguntasMeditacionUsuario']);
+
+
+
+
+
 // Editar
 Route::get('/admin/preguntas/vista/editar/{idbloquepreguntas}', [PreguntasController::class,'indexEditarBloquePregunta']);
 Route::post('/admin/preguntas/editar', [PreguntasController::class,'editarBloquePreguntas']);

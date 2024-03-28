@@ -42,6 +42,10 @@
                                         <i class="fas fa-edit" title="Preguntas"></i>&nbsp; Preguntas
                                     </button>
 
+                                    <button style="margin: 8px" type="button" class="btn btn-success btn-xs" onclick="vistaMeditacion({{ $dato->id }})">
+                                        <i class="fas fa-edit" title="Meditacion"></i>&nbsp; Meditación
+                                    </button>
+
                                     <button style="margin: 8px" type="button" class="btn btn-success btn-xs" onclick="vistaBiblias({{ $dato->id }})">
                                         <i class="fas fa-edit" title="Biblia"></i>&nbsp; Biblia
                                     </button>

@@ -5,8 +5,16 @@ namespace App\Http\Controllers\Backend\Planes;
 use App\Http\Controllers\Controller;
 use App\Models\BloquePreguntas;
 use App\Models\BloquePreguntasTextos;
+use App\Models\BloquePreguntasUsuarios;
+use App\Models\Departamentos;
 use App\Models\IdiomaPlanes;
+use App\Models\Iglesias;
 use App\Models\ImagenPreguntas;
+use App\Models\Pais;
+use App\Models\PlanesBlockDetalle;
+use App\Models\PlanesBlockDetaTextos;
+use App\Models\PlanesBlockDetaUsuario;
+use App\Models\Usuarios;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -242,6 +250,124 @@ class PreguntasController extends Controller
             return ['success' => 99];
         }
     }
+
+
+
+
+
+    // ********************************** MEDITACION ***********************************
+
+    public function indexPreguntasMeditacion($idplanbloquedetalle){
+
+        $infoPlanBlockDetaTexto = PlanesBlockDetaTextos::where('id_planes_block_detalle', $idplanbloquedetalle)
+            ->where('id_idioma_planes', 1)
+            ->first();
+
+        $nombreItem = $infoPlanBlockDetaTexto->titulo;
+
+
+        return view('backend.admin.meditacion.vistapaismedi', compact('idplanbloquedetalle', 'nombreItem'));
+    }
+
+
+    // regresa tabla listado de paises
+    public function tablaPreguntasMeditacion($idplanbloquedetalle){
+
+        $pilaIdBloque = array();
+
+        $listadoBlo = BloquePreguntas::where('id_plan_block_detalle', $idplanbloquedetalle)->get();
+
+        foreach ($listadoBlo as $dato){
+            array_push($pilaIdBloque, $dato->id);
+        }
+
+        $pilaIdUsuario = array();
+
+        $listadoP = BloquePreguntasUsuarios::whereIn('id_bloque_preguntas', $pilaIdBloque)->get();
+
+        // necesito meter array lista de id usuarios
+        foreach ($listadoP as $dato){
+            array_push($pilaIdUsuario, $dato->id_usuarios);
+        }
+
+        $listado = Usuarios::whereIn('id', $pilaIdUsuario)->get();
+
+        foreach ($listado as $dato){
+
+            $infoIglesia = Iglesias::where('id', $dato->id_iglesia)->first();
+            $dato->iglesia = $infoIglesia->nombre;
+
+            $infoDepa = Departamentos::where('id', $infoIglesia->id_departamento)->first();
+            $dato->nomdepa = $infoDepa->nombre;
+
+            $infoPais = Pais::where('id', $infoDepa->id_pais)->first();
+            $dato->nompais = $infoPais->nombre;
+
+            if($dato->id_genero == 1){
+                $dato->genero = "Masculino";
+            }else{
+                $dato->genero = "Femenino";
+            }
+
+            $dato->unido = $dato->nombre . " " . $dato->apellido;
+        }
+
+        return view('backend.admin.meditacion.tablapaismedi', compact('listado'));
+    }
+
+
+
+
+    public function indexPreguntasMeditacionUsuario($idplanbloquedetalle, $idusuario)
+    {
+
+        return view('backend.admin.meditacion.usuario.vistamediusuario', compact('idplanbloquedetalle', 'idusuario'));
+    }
+
+
+
+    public function tablaPreguntasMeditacionUsuario($idplanbloquedetalle, $idusuario)
+    {
+
+        $pilaIdBloque = array();
+
+        $listadoBlo = BloquePreguntas::where('id_plan_block_detalle', $idplanbloquedetalle)->get();
+
+        foreach ($listadoBlo as $dato){
+            array_push($pilaIdBloque, $dato->id);
+        }
+
+        $listado = BloquePreguntasUsuarios::whereIn('id_bloque_preguntas', $pilaIdBloque)
+            ->where('id_usuarios', $idusuario)->get();
+
+        foreach ($listado as $dato){
+
+            // buscar texto de pregunta
+            $infoPre = BloquePreguntasTextos::where('id_bloque_preguntas', $dato->id_bloque_preguntas)
+                ->where('id_idioma_planes', 1)
+                ->first();
+
+            $dato->titulopre = $infoPre->texto;
+
+
+
+
+            $dato->fechaRegistro = date("d-m-Y", strtotime($dato->fecha));
+
+        }
+
+
+        return view('backend.admin.meditacion.usuario.tablamediusuario', compact( 'listado'));
+    }
+
+
+
+
+
+
+
+
+
 
 
 
