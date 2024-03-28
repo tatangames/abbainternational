@@ -348,6 +348,7 @@ class PreguntasController extends Controller
             ->get();
 
 
+
         foreach ($listado as $dato){
 
             // buscar texto de pregunta
@@ -359,7 +360,6 @@ class PreguntasController extends Controller
 
             $dato->fechaRegistro = date("d-m-Y", strtotime($dato->fecha));
         }
-
 
         return view('backend.admin.meditacion.usuario.tablamediusuario', compact( 'listado'));
     }
