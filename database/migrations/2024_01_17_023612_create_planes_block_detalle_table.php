@@ -9,6 +9,8 @@ return new class extends Migration
     /**
      * esto seran los items de cada cajita,
      * donde estan los circulos para marcar con check
+     *
+     * // SE AGREGO UN REDIRECCIONAMIENTO A URL SI ESTA ACTIVADO EL CHECK
      */
     public function up(): void
     {
@@ -21,6 +23,11 @@ return new class extends Migration
 
             // TRUE: IGNORA EL PRIMER CUADRO PARA COMPARTIR PREGUNTA
             $table->boolean('ignorar_pregunta');
+
+            // redireccionamiento web
+            $table->boolean('redireccionar_web');
+            $table->string('url_link', 1000)->nullable();
+
 
             $table->foreign('id_planes_bloques')->references('id')->on('planes_bloques');
         });
