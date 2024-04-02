@@ -61,12 +61,47 @@
                             </div>
 
 
+                            <hr>
 
 
 
 
 
 
+                            <!-- REDIRECCIONAR LINK -->
+
+
+                            <section style="margin-top: 25px">
+                                <div class="form-group">
+                                    <label>Redireccionar a Link Web</label>
+                                    <br>
+                                    <label class="switch" style="margin-top:10px">
+                                        <input type="checkbox" id="toggle-link">
+                                        <div class="slider round">
+                                            <span class="on">Si</span>
+                                            <span class="off">No</span>
+                                        </div>
+                                    </label>
+                                </div>
+                            </section>
+
+
+                            <div class="form-group">
+                                <label>URL LINK</label>
+                                <input type="text" maxlength="1000" autocomplete="off" class="form-control" id="urllink" value="{{ $infoBloque->url_link }}" placeholder="URL">
+                            </div>
+
+
+
+
+
+
+
+
+
+
+
+                            <hr>
 
                             <div class="col-md-3">
                                 <div class="form-group">
@@ -277,6 +312,18 @@
                 $("#toggle").prop("checked", true);
             }else{
                 $("#toggle").prop("checked", false);
+            }
+
+
+            // redireccionar pagina web
+
+            let redireWeb = {{ $infoBloque->redireccionar_web }};
+
+
+            if(redireWeb == 1){
+                $("#toggle-link").prop("checked", true);
+            }else{
+                $("#toggle-link").prop("checked", false);
             }
 
             document.getElementById("divcontenedor").style.display = "block";
@@ -517,10 +564,18 @@
             let t = document.getElementById('toggle').checked;
             let togglePersonalizado = t ? 1 : 0;
 
+            // redireccionamiento web
+            let tw = document.getElementById('toggle-link').checked;
+            let toggleWeb = tw ? 1 : 0;
+
+            var urllink = document.getElementById('urllink').value;
+
 
             formData.append('contenedorArray', JSON.stringify(contenedorArray));
             formData.append('idplanbloquedetalle', idplanbloquedetalle);
             formData.append('toggle', togglePersonalizado);
+            formData.append('toggleweb', toggleWeb);
+            formData.append('urllink', urllink);
 
             openLoading();
 

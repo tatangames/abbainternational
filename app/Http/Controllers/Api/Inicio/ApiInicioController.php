@@ -122,7 +122,8 @@ class ApiInicioController extends Controller
 
                     $devoDatos = $this->retornoTituloCuestionarioIdioma($arrayL->idblockdeta, $idiomaTextos);
 
-                    $devo_lecturaDia = $devoDatos['textodia'];
+                    $devo_lecturaDia = $devoDatos['texto'] . $devoDatos['textodia'];
+
 
                     // saver si tiene preguntas, y ver que esten activas al menos 1
                     $arrayBloqueP = BloquePreguntas::where('id_plan_block_detalle', $arrayL->idblockdeta)->get();

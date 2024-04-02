@@ -1287,6 +1287,11 @@ class ApiPlanesController extends Controller
             $redireccionar = 0;
             $iddevobiblia = 0;
 
+            $infoPlBlockDeta = PlanesBlockDetalle::where('id', $request->idblockdeta)->first();
+
+
+
+
             // buscar el
             if($info = DevocionalBiblia::where('id_bloque_detalle', $request->idblockdeta)
                 ->where('defecto', 1)->first()){
@@ -1311,7 +1316,10 @@ class ApiPlanesController extends Controller
                 return ['success' => 1,
                         'redireccionar' => $redireccionar,
                         'iddevobiblia' => $iddevobiblia,
-                       'devocional' => $devocional
+                        'devocional' => $devocional,
+
+                        'redirecweb' => $infoPlBlockDeta->redireccionar_web,
+                        'urllink' => $infoPlBlockDeta->url_link
                 ];
             }else{
 

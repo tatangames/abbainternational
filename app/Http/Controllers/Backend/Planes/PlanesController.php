@@ -691,6 +691,8 @@ class PlanesController extends Controller
             $bloque->posicion = $nuevaPosicion;
             $bloque->visible = 0;
             $bloque->ignorar_pregunta = 1;
+            $bloque->redireccionar_web = 0;
+            $bloque->url_link = null;
             $bloque->save();
 
 
@@ -799,6 +801,7 @@ class PlanesController extends Controller
         }
 
 
+
         return view('backend.admin.devocional.planes.bloques.bloquedetalle.editar.vistaeditarplanbloquedetalle', compact('infoBloque', 'arrayIdiomas', 'idplanbloquedetalle', 'arrayPlanBlockDetaTextos'));
     }
 
@@ -806,14 +809,14 @@ class PlanesController extends Controller
     public function actualizarPlanesBloquesDetaTextos(Request $request)
     {
 
-
-
         $regla = array(
             'idplanbloquedetalle' => 'required',
-            'toggle' => 'required'
+            'toggle' => 'required',
+            'toggleweb' => 'required'
         );
 
         // array: infoIdBloqueDetaTexto, infoIdIdioma, infoTitulo, infoDescripcion
+        // urllink
 
         $validar = Validator::make($request->all(), $regla);
 
@@ -826,6 +829,8 @@ class PlanesController extends Controller
             // actualizar toggle
             PlanesBlockDetalle::where('id', $request->idplanbloquedetalle)->update([
                 'ignorar_pregunta' => $request->toggle,
+                'redireccionar_web' => $request->toggleweb,
+                'url_link' => $request->urllink
             ]);
 
 
