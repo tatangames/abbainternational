@@ -74,7 +74,7 @@ class UsuariosController extends Controller
         $arrayUsuarios = DB::table('usuarios AS u')
             ->join('iglesia AS igle', 'u.id_iglesia', '=', 'igle.id')
             ->select('igle.id_departamento', 'igle.nombre', 'u.nombre', 'u.apellido',
-            'u.correo', 'igle.nombre AS nombreiglesia', 'u.id AS idusuario')
+            'u.correo', 'igle.nombre AS nombreiglesia', 'u.id AS idusuario', 'u.imagen')
             ->whereIn('igle.id_departamento', $arrayDepaID)
             ->get();
 

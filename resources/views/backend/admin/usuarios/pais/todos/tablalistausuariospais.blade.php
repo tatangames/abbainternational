@@ -12,6 +12,7 @@
                                 <th style="width: 8%">Correo</th>
                                 <th style="width: 8%">Nombre</th>
                                 <th style="width: 8%">Apellido</th>
+                                <th style="width: 8%">Imagen</th>
                                 <th style="width: 4%">Opciones</th>
                             </tr>
                             </thead>
@@ -24,6 +25,13 @@
                                     <td style="width: 8%">{{ $dato->correo }}</td>
                                     <td style="width: 8%">{{ $dato->nombre }}</td>
                                     <td style="width: 8%">{{ $dato->apellido }}</td>
+
+                                    <td style="width: 8%">
+                                        @if($dato->imagen != null)
+                                            <center><img alt="Imagenes" src="{{ url('storage/archivos/'.$dato->imagen) }}" width="100px" height="100px" /></center>
+                                        @endif
+                                    </td>
+
                                     <td style="width: 4%">
                                         <button type="button" class="btn btn-success btn-xs" onclick="informacionUsuario({{ $dato->idusuario }})">
                                             <i class="fas fa-eye" title="Información"></i>&nbsp; Información
