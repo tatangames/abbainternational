@@ -13,6 +13,7 @@
                                 <th style="width: 8%">Nombre</th>
                                 <th style="width: 8%">Género</th>
                                 <th style="width: 8%">Correo</th>
+                                <th style="width: 8%">Imagen</th>
                                 <th style="width: 4%">Opciones</th>
                             </tr>
                             </thead>
@@ -26,6 +27,11 @@
                                     <td style="width: 8%">{{ $dato->unido }}</td>
                                     <td style="width: 8%">{{ $dato->genero }}</td>
                                     <td style="width: 8%">{{ $dato->correo }}</td>
+                                    <td style="width: 8%">
+                                        @if($dato->imagen != null)
+                                            <center><img alt="Imagenes" src="{{ url('storage/archivos/'.$dato->imagen) }}" width="100px" height="100px" /></center>
+                                        @endif
+                                    </td>
 
                                     <td style="width: 4%">
                                         <button type="button" class="btn btn-primary btn-xs" onclick="informacion({{ $dato->id }})">

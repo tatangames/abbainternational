@@ -100,7 +100,7 @@ class ApiPerfilController extends Controller
             'fechanac' => 'required',
             'correo' => 'required'
         );
-        Log::info("entra 0");
+
         $validator = Validator::make($request->all(), $rules);
         if ( $validator->fails()){
             return ['success' => 0];
