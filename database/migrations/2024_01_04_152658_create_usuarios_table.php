@@ -35,6 +35,10 @@ return new class extends Migration
             // esto se setea al iniciar Fragment inicio siempre
             $table->integer('idioma_noti');
 
+            // foto del usuario
+            $table->string('imagen', 100)->nullable();
+
+
             $table->foreign('id_iglesia')->references('id')->on('iglesia');
             $table->foreign('id_genero')->references('id')->on('generos');
         });

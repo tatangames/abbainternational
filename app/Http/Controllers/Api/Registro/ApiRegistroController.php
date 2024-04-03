@@ -66,6 +66,7 @@ class ApiRegistroController extends Controller
             $nuevoUsuario->fecha_registro = $fecha;
             $nuevoUsuario->notificacion_general = 1;
             $nuevoUsuario->idioma_noti = 1; // defecto espanol
+            $nuevoUsuario->imagen = null;
             $nuevoUsuario->save();
 
             $token = JWTAuth::fromUser($nuevoUsuario);
