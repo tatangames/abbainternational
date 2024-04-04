@@ -305,7 +305,7 @@ class ApiInicioController extends Controller
 
             $infoTotalRachas = $this->retornoInformacionRacha($userToken);
 
-            $urlapple = "https://apps.apple.com/us/app/dji-store-try-virtual-flight/id899147555";
+            $urlapple = "https://apps.apple.com/sv/app/mi-caminar-con-dios/id6480132659";
 
 
             // guardar modificaciones

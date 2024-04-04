@@ -132,6 +132,8 @@ class ApiPerfilController extends Controller
 
                 if ($upload) {
 
+                    $imagenOld = $userToken->imagen;
+
                     Usuarios::where('id', $userToken->id)
                         ->update([
                             'nombre' => $request->nombre,
@@ -140,6 +142,12 @@ class ApiPerfilController extends Controller
                             'correo' => $request->correo,
                             'imagen' => $nombreFoto
                         ]);
+
+                    if($imagenOld != null){
+                        if(Storage::disk('archivos')->exists($imagenOld)){
+                            Storage::disk('archivos')->delete($imagenOld);
+                        }
+                    }
 
                     return ['success' => 2];
 
