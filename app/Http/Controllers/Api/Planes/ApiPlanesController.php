@@ -2229,6 +2229,291 @@ class ApiPlanesController extends Controller
 
 
 
+    // FIX 30/04/2024
+    public function listadoMisPlanesNoPaginacion(Request $request)
+    {
+        $rules = array(
+            'idiomaplan' => 'required',
+            'iduser' => 'required',
+        );
+
+        $validator = Validator::make($request->all(), $rules);
+        if ( $validator->fails()){
+            return ['success' => 0, 'msj' => "validación incorrecta"];
+        }
+
+        $tokenApi = $request->header('Authorization');
+
+        $idiomaTextos = $request->idiomaplan;
+
+        if ($userToken = JWTAuth::user($tokenApi)) {
+
+            $arrayPlanUsuario = PlanesUsuarios::where('id_usuario', $userToken->id)
+                ->select('id_planes')
+                ->get();
+
+            foreach ($arrayPlanUsuario as $dato){
+
+                $arrayPlanBloque = PlanesBloques::where('id_planes', $dato->id_planes)->get();
+                $planCompletado = 1;
+
+                if($arrayPlanBloque != null && $arrayPlanBloque->isNotEmpty()){
+                    foreach ($arrayPlanBloque as $rec){ // cada bloque
+
+                        // buscar el detalle de ese bloque
+                        $arrayListado = PlanesBlockDetalle::where('id_planes_bloques', $rec->id)
+                            ->where('visible', 1)
+                            ->get();
+
+                        foreach ($arrayListado as $datoLista){
+
+                            if($detauser = PlanesBlockDetaUsuario::where('id_usuario', $userToken->id)
+                                ->where('id_planes_block_deta', $datoLista->id)
+                                ->first()){
+                                // si encontro, verificar si esta completo
+                                if($detauser->completado == 0){
+                                    $planCompletado = 0;
+                                    break;
+                                }
+                            }else{
+                                // no encontrado, asi que retornar
+                                $planCompletado = 0;
+                                break;
+                            }
+                        }
+                    }
+                }else{
+                    $planCompletado = 0;
+                }
+
+                $dato->plancompletado = $planCompletado;
+            }
+
+
+            // obtener los planes que no esten completados
+            $pilaIdPlanNoComplet = array();
+
+            foreach ($arrayPlanUsuario as $item){
+                if($item->plancompletado == 0){
+                    array_push($pilaIdPlanNoComplet, $item->id_planes);
+                }
+            }
+
+
+
+
+
+
+            $arrayPlanesUser = PlanesUsuarios::where('id_usuario', $userToken->id)
+                ->whereIn('id_planes', $pilaIdPlanNoComplet)
+                ->get();
+
+            foreach ($arrayPlanesUser as $dato){
+                $titulosRaw = $this->retornoTituloPlan($idiomaTextos, $dato->id_planes);
+
+                $dato->titulo = $titulosRaw['titulo'];
+                $dato->subtitulo = $titulosRaw['subtitulo'];
+
+                $infoP = Planes::where('id', $dato->id_planes)->first();
+                $dato->imagen = $infoP->imagen;
+                $dato->imagenportada = $infoP->imagenportada;
+                $dato->idplan = $infoP->id;
+            }
+
+            $hayinfo = 0;
+
+            // EN LA APP: se verifica la primera vez con un boolean
+            if ($arrayPlanesUser->count() > 0) {
+                $hayinfo = 1;
+            }
+
+
+            return ['success' => 1,
+                'hayinfo' => $hayinfo,
+                'listado' => $arrayPlanesUser,
+            ];
+
+        }else{
+            return ['success' => 99];
+        }
+    }
+
+
+
+    public function buscarPlanesNoAgregadosNoPaginacion(Request $request){
+
+        $rules = array(
+            'idiomaplan' => 'required',
+            'iduser' => 'required',
+        );
+
+        $validator = Validator::make($request->all(), $rules);
+        if ( $validator->fails()){
+            return ['success' => 0, 'msj' => "validación incorrecta"];
+        }
+
+        $tokenApi = $request->header('Authorization');
+
+        // idioma, segun el usuario
+        $idiomaTextos = $request->idiomaplan;
+
+        if ($userToken = JWTAuth::user($tokenApi)) {
+
+
+            // todos los planes de mi usuario
+            $arrayIdYaSeleccionados = PlanesUsuarios::where('id_usuario', $userToken->id)
+                ->select('id_planes')
+                ->get();
+
+            // conocer si habra planes disponibles
+            $hayInfo = 0;
+
+            // obtener todos los planes NO elegido por el usuario y sean visible
+            $arrayPlanes = Planes::whereNotIn('id', $arrayIdYaSeleccionados)
+                ->where('visible', 1)
+                ->get();
+
+            if ($arrayPlanes->isNotEmpty()) {
+                $hayInfo = 1;
+            }
+
+
+            $page = $request->input('page', 1);
+            $limit = $request->input('limit', 10);
+
+
+            $arrayPlanes = Planes::whereNotIn('id', $arrayIdYaSeleccionados)
+                ->where('visible', 1)
+                ->get();
+
+            foreach ($arrayPlanes as $dato){
+                $arrayRaw = $this->retornoTituloPlan($idiomaTextos, $dato->id);
+                $dato->titulo = $arrayRaw['titulo'];
+                $dato->subtitulo = $arrayRaw['subtitulo'];
+            }
+
+
+            return [
+                'success' => 1,
+                'hayinfo' => $hayInfo,
+                'listado2' => $arrayPlanes
+            ];
+        }else{
+            return ['success' => 99];
+        }
+    }
+
+
+
+    public function listadoMisPlanesCompletadosNoPaginacion(Request $request)
+    {
+        $rules = array(
+            'idiomaplan' => 'required',
+            'iduser' => 'required',
+        );
+
+        $validator = Validator::make($request->all(), $rules);
+        if ( $validator->fails()){
+            return ['success' => 0, 'msj' => "validación incorrecta"];
+        }
+
+        $tokenApi = $request->header('Authorization');
+
+        $idiomaTextos = $request->idiomaplan;
+
+        if ($userToken = JWTAuth::user($tokenApi)) {
+
+            $arrayPlanUsuario = PlanesUsuarios::where('id_usuario', $userToken->id)
+                ->select('id_planes')
+                ->get();
+
+            foreach ($arrayPlanUsuario as $dato){
+
+                // NO SE FILTRARA POR VISIBLES
+                $arrayPlanBloque = PlanesBloques::where('id_planes', $dato->id_planes)->get();
+
+                $planCompletado = 1;
+
+                if($arrayPlanBloque != null && $arrayPlanBloque->isNotEmpty()){
+                    foreach ($arrayPlanBloque as $rec){ // cada bloque
+
+                        // buscar el detalle de ese bloque
+                        $arrayListado = PlanesBlockDetalle::where('id_planes_bloques', $rec->id)
+                            ->where('visible', 1)
+                            ->get();
+
+                        foreach ($arrayListado as $datoLista){
+
+                            if($detauser = PlanesBlockDetaUsuario::where('id_usuario', $userToken->id)
+                                ->where('id_planes_block_deta', $datoLista->id)
+                                ->first()){
+                                // si encontro, verificar si esta completo
+                                if($detauser->completado == 0){
+                                    $planCompletado = 0;
+                                    break;
+                                }
+                            }else{
+                                // no encontrado, asi que retornar
+                                $planCompletado = 0;
+                                break;
+                            }
+                        }
+                    }
+                }else{
+                    $planCompletado = 0;
+                }
+
+                $dato->plancompletado = $planCompletado;
+            }
+
+
+            // obtener los planes completados
+            $pilaIdPlanComplet = array();
+
+            foreach ($arrayPlanUsuario as $item){
+                if($item->plancompletado == 1){
+                    array_push($pilaIdPlanComplet, $item->id_planes);
+                }
+            }
+
+
+            $arrayPlanesUser = PlanesUsuarios::where('id_usuario', $userToken->id)
+                ->whereIn('id_planes', $pilaIdPlanComplet)
+                ->get();
+
+            $hayinfo = 0;
+
+            foreach ($arrayPlanesUser as $dato){
+                $hayinfo = 1;
+                $titulosRaw = $this->retornoTituloPlan($idiomaTextos, $dato->id_planes);
+
+                $dato->titulo = $titulosRaw['titulo'];
+                $dato->subtitulo = $titulosRaw['subtitulo'];
+
+                $infoP = Planes::where('id', $dato->id_planes)->first();
+                $dato->imagen = $infoP->imagen;
+                $dato->imagenportada = $infoP->imagenportada;
+                $dato->idplan = $infoP->id;
+            }
+
+
+
+            return ['success' => 1,
+                'hayinfo' => $hayinfo,
+                'listado3' => $arrayPlanesUser,
+            ];
+
+        }else{
+            return ['success' => 99];
+        }
+    }
+
+
+
+
+
+
+
 
 
 }

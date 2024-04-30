@@ -242,6 +242,18 @@ Route::middleware('verificarToken')->group(function () {
 
 
 
+    // FIX 30/04/2024
+    // mis planes sin paginacion
+    Route::post('app/plan/listado/misplanes/nopagination', [ApiPlanesController::class,'listadoMisPlanesNoPaginacion']);
+    Route::post('app/buscar/planes/nuevos/nopagination', [ApiPlanesController::class,'buscarPlanesNoAgregadosNoPaginacion']);
+    Route::post('app/plan/misplanes/completados/nopagination', [ApiPlanesController::class,'listadoMisPlanesCompletadosNoPaginacion']);
+
+
+
+
+
+
+
 });
 
 
