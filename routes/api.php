@@ -23,6 +23,12 @@ Route::post('app/solicitar/listado/iglesias', [ApiRegistroController::class,'lis
 // registro de usuario
 Route::post('app/registro/usuario', [ApiRegistroController::class,'registroUsuario']);
 
+// Fix 01/05/2024
+// registro de usuario
+Route::post('app/registro/usuario/v2', [ApiRegistroController::class,'registroUsuarioV2']);
+
+
+
 // solicitar codigo segun correo
 Route::post('app/solicitar/codigo/contrasena', [ApiCorreoController::class,'enviarCorreoRecuperacion']);
 
