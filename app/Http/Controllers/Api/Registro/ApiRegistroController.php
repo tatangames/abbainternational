@@ -111,6 +111,7 @@ class ApiRegistroController extends Controller
 
     public function registroUsuarioV2(Request $request)
     {
+
         $rules = array(
             'nombre' => 'required',
             'apellido' => 'required',
@@ -162,10 +163,13 @@ class ApiRegistroController extends Controller
             if($request->iglesia == 503){
 
                 $detalle = new UsuarioRegionOtros();
+                $detalle->id_usuario = $nuevoUsuario->id;
                 $detalle->pais = $request->paisotros;
                 $detalle->ciudad = $request->ciudadotros;
                 $detalle->save();
             }
+
+
 
             $token = JWTAuth::fromUser($nuevoUsuario);
 

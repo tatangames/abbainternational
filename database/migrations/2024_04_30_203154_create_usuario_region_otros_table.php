@@ -15,7 +15,6 @@ return new class extends Migration
         Schema::create('usuario_region_otros', function (Blueprint $table) {
             $table->id();
 
-            $table->string('nombre', 300);
             $table->bigInteger('id_usuario')->unsigned();
 
             $table->string('pais', 300);
