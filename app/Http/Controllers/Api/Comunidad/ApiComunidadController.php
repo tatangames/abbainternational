@@ -1249,9 +1249,6 @@ class ApiComunidadController extends Controller
             $idiomaTextos = $request->idiomaplan;
 
 
-
-
-
             $arrayPlanes = DB::table('planes AS p')
                 ->join('planes_usuarios AS pu', 'pu.id_planes', '=', 'p.id')
                 ->select('p.visible', 'pu.id_usuario', 'pu.id_planes', 'pu.fecha', 'p.visible')
