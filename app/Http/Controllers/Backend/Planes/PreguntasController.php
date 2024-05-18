@@ -131,6 +131,225 @@ class PreguntasController extends Controller
     }
 
 
+    // REGISTRAR PREGUNTAS POR DEFECTO
+    // 18/05/2024
+
+    public function registrarNuevaPreguntaDefecto(Request $request)
+    {
+        $regla = array(
+            'idplanbloquedetalle' => 'required'
+        );
+
+
+        // array: infoIdIdioma, infoDescripcion
+
+        $validar = Validator::make($request->all(), $regla);
+
+        if ($validar->fails()){ return ['success' => 0];}
+
+
+        DB::beginTransaction();
+
+        try {
+
+            // Evitar que se agreguen 2 veces las preguntas por defecto
+            if(BloquePreguntas::where('id_plan_block_detalle', $request->idplanbloquedetalle)->first()){
+                return ['success' => 1];
+            }
+
+
+            $pregunta1 = "Registra el versículo que Dios está usando para hablarte hoy";
+            $pregunta2 = "1. Padre, ¿Qué me enseña esta escritura acerca de tí?";
+            $pregunta3 = "2. Padre, ¿Qué me enseña esta escritura acerca de la vida cristiana?";
+            $pregunta4 = "3. Padre, ¿Qué debo hacer con tu palabra revelada hoy?";
+            $pregunta5 = "4. Padre, ¿cómo debo orar?";
+
+
+            // ********** PREGUNTA 1 **************
+
+
+
+            $nuevo1 = new BloquePreguntas();
+            $nuevo1->id_plan_block_detalle = $request->idplanbloquedetalle;
+            $nuevo1->id_imagen_pregunta = 1;
+            $nuevo1->visible = 1;
+            $nuevo1->posicion = 1;
+            $nuevo1->requerido = 1;
+            $nuevo1->save();
+
+
+            $contenido1= "<html>
+                    <head>
+                    <meta charset='UTF-8'>
+                        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+                    </head>
+                    <body>" . $pregunta1 . "</body>
+                    </html>";
+
+
+            $detalleE1 = new BloquePreguntasTextos();
+            $detalleE1->id_bloque_preguntas = $nuevo1->id;
+            $detalleE1->id_idioma_planes = 1;
+            $detalleE1->texto = $contenido1;
+            $detalleE1->save();
+
+            $detalleI1 = new BloquePreguntasTextos();
+            $detalleI1->id_bloque_preguntas = $nuevo1->id;
+            $detalleI1->id_idioma_planes = 2;
+            $detalleI1->texto = $contenido1;
+            $detalleI1->save();
+
+
+
+            // ********** PREGUNTA 2 **************
+
+            $nuevo2 = new BloquePreguntas();
+            $nuevo2->id_plan_block_detalle = $request->idplanbloquedetalle;
+            $nuevo2->id_imagen_pregunta = 2;
+            $nuevo2->visible = 1;
+            $nuevo2->posicion = 2;
+            $nuevo2->requerido = 1;
+            $nuevo2->save();
+
+
+            $contenido2= "<html>
+                    <head>
+                    <meta charset='UTF-8'>
+                        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+                    </head>
+                    <body>" . $pregunta2 . "</body>
+                    </html>";
+
+
+            $detalleE2 = new BloquePreguntasTextos();
+            $detalleE2->id_bloque_preguntas = $nuevo2->id;
+            $detalleE2->id_idioma_planes = 1;
+            $detalleE2->texto = $contenido2;
+            $detalleE2->save();
+
+            $detalleI2 = new BloquePreguntasTextos();
+            $detalleI2->id_bloque_preguntas = $nuevo2->id;
+            $detalleI2->id_idioma_planes = 2;
+            $detalleI2->texto = $contenido2;
+            $detalleI2->save();
+
+
+
+
+            // ********** PREGUNTA 3 **************
+
+            $nuevo3 = new BloquePreguntas();
+            $nuevo3->id_plan_block_detalle = $request->idplanbloquedetalle;
+            $nuevo3->id_imagen_pregunta = 3;
+            $nuevo3->visible = 1;
+            $nuevo3->posicion = 3;
+            $nuevo3->requerido = 1;
+            $nuevo3->save();
+
+
+            $contenido3= "<html>
+                    <head>
+                    <meta charset='UTF-8'>
+                        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+                    </head>
+                    <body>" . $pregunta3 . "</body>
+                    </html>";
+
+
+            $detalleE3 = new BloquePreguntasTextos();
+            $detalleE3->id_bloque_preguntas = $nuevo3->id;
+            $detalleE3->id_idioma_planes = 1;
+            $detalleE3->texto = $contenido3;
+            $detalleE3->save();
+
+            $detalleI3 = new BloquePreguntasTextos();
+            $detalleI3->id_bloque_preguntas = $nuevo3->id;
+            $detalleI3->id_idioma_planes = 2;
+            $detalleI3->texto = $contenido3;
+            $detalleI3->save();
+
+
+
+            // ********** PREGUNTA 4 **************
+
+            $nuevo4 = new BloquePreguntas();
+            $nuevo4->id_plan_block_detalle = $request->idplanbloquedetalle;
+            $nuevo4->id_imagen_pregunta = 4;
+            $nuevo4->visible = 1;
+            $nuevo4->posicion = 4;
+            $nuevo4->requerido = 1;
+            $nuevo4->save();
+
+
+            $contenido4= "<html>
+                    <head>
+                    <meta charset='UTF-8'>
+                        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+                    </head>
+                    <body>" . $pregunta4 . "</body>
+                    </html>";
+
+
+            $detalleE4 = new BloquePreguntasTextos();
+            $detalleE4->id_bloque_preguntas = $nuevo4->id;
+            $detalleE4->id_idioma_planes = 1;
+            $detalleE4->texto = $contenido4;
+            $detalleE4->save();
+
+            $detalleI4 = new BloquePreguntasTextos();
+            $detalleI4->id_bloque_preguntas = $nuevo4->id;
+            $detalleI4->id_idioma_planes = 2;
+            $detalleI4->texto = $contenido4;
+            $detalleI4->save();
+
+
+
+
+            // ********** PREGUNTA 5 **************
+
+            $nuevo5 = new BloquePreguntas();
+            $nuevo5->id_plan_block_detalle = $request->idplanbloquedetalle;
+            $nuevo5->id_imagen_pregunta = 5;
+            $nuevo5->visible = 1;
+            $nuevo5->posicion = 5;
+            $nuevo5->requerido = 1;
+            $nuevo5->save();
+
+
+            $contenido5= "<html>
+                    <head>
+                    <meta charset='UTF-8'>
+                        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+                    </head>
+                    <body>" . $pregunta5 . "</body>
+                    </html>";
+
+
+            $detalleE5 = new BloquePreguntasTextos();
+            $detalleE5->id_bloque_preguntas = $nuevo5->id;
+            $detalleE5->id_idioma_planes = 1;
+            $detalleE5->texto = $contenido5;
+            $detalleE5->save();
+
+            $detalleI5 = new BloquePreguntasTextos();
+            $detalleI5->id_bloque_preguntas = $nuevo5->id;
+            $detalleI5->id_idioma_planes = 2;
+            $detalleI5->texto = $contenido5;
+            $detalleI5->save();
+
+
+            // completado y actualizado
+            DB::commit();
+            return ['success' => 2];
+        }catch(\Throwable $e){
+            Log::info('error: ' . $e);
+            DB::rollback();
+            return ['success' => 99];
+        }
+    }
+
+
+
     public function actualizarPosicionPreguntas(Request $request)
     {
         $tasks = BloquePreguntas::all();

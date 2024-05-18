@@ -35,6 +35,17 @@
 <div id="divcontenedor" style="display: none">
 
 
+
+    <section class="content-header">
+        <div class="row mb-12">
+            <div class="col-sm-12">
+                <button type="button" class="btn btn-info btn-sm" onclick="crearPreguntasPorDefecto()">Crear Preguntas por Defecto</button>
+            </div>
+        </div>
+    </section>
+
+
+
     <section class="content-header">
         <div class="row mb-12">
             <div class="col-sm-12">
@@ -389,6 +400,66 @@
                 var element = table.rows[r].cells[0].children[0];
                 document.getElementById(element.id).innerHTML = ""+conteo;
             }
+        }
+
+
+        function crearPreguntasPorDefecto(){
+
+            let idplanbloquedetalle = {{ $idplanbloquedetalle }};
+
+
+            let formData = new FormData();
+            formData.append('idplanbloquedetalle', idplanbloquedetalle);
+
+            openLoading();
+
+            axios.post('/admin/preguntas/registrar/nuevodefecto', formData, {
+            })
+                .then((response) => {
+                    closeLoading();
+
+                    if(response.data.success === 1){
+                        Swal.fire({
+                            title: "No creado",
+                            text: "Ya hay al menos 1 Pregunta registrada",
+                            icon: 'info',
+                            showCancelButton: false,
+                            allowOutsideClick: false,
+                            confirmButtonColor: '#28a745',
+                            confirmButtonText: 'Aceptar'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                               limpiarParaNuevoDato()
+                            }
+                        })
+                    }
+                    else if(response.data.success === 2){
+                        Swal.fire({
+                            title: "Preguntas Por Defecto Creada",
+
+                            icon: 'success',
+                            showCancelButton: false,
+                            allowOutsideClick: false,
+                            confirmButtonColor: '#28a745',
+                            confirmButtonText: 'Aceptar'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                volverAtras();
+                            }
+                        })
+                    }
+                    else {
+                        toastr.error('Error al registrar');
+                    }
+                })
+                .catch((error) => {
+                    toastr.error('Error al registrar');
+                    closeLoading();
+                });
+        }
+
+        function volverAtras(){
+            history.go(-1);
         }
 
 

@@ -214,6 +214,10 @@ Route::get('/admin/preguntas/nuevoregitros/{idplanbloquedetalle}', [PreguntasCon
 Route::post('/admin/preguntas/registrar/nuevo', [PreguntasController::class,'registrarNuevaPregunta']);
 Route::post('/admin/preguntas/actualizar/posicion', [PreguntasController::class,'actualizarPosicionPreguntas']);
 
+// Preguntas por defecto en registro (18/05/2024)
+Route::post('/admin/preguntas/registrar/nuevodefecto', [PreguntasController::class,'registrarNuevaPreguntaDefecto']);
+
+
 
 // Meditacion
 Route::get('/admin/preguntas/meditacion/vista/{idplanbloquedetalle}', [PreguntasController::class,'indexPreguntasMeditacion']);
