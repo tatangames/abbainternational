@@ -92,7 +92,7 @@ Route::middleware('verificarToken')->group(function () {
     Route::post('app/plan/misplanes/preguntas/usuario/actualizariphone', [ApiPlanesController::class,'actualizarPreguntasUsuarioPlanIphone']);
 
 
-
+    // SOLO LO USA IPHONE 18/05/2024
     // informacion de todos los planes completados -> Paginate
     Route::post('app/plan/misplanes/completados', [ApiPlanesController::class,'listadoMisPlanesCompletados']);
 

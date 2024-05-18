@@ -411,10 +411,15 @@ class ApiPlanesController extends Controller
             $primeraVuelta = false;
             $pararConteo = true;
 
-
+            $unaVezBool = 1;
 
             foreach ($arrayBloques as $dato){
                 array_push($resultsBloque, $dato);
+
+                $dato->mismodia = 3;
+
+
+
 
                 // POSICION PARA MOVER EL RECYCLERVIEW
                 if($pararConteo) {
@@ -429,6 +434,7 @@ class ApiPlanesController extends Controller
                 $contador++;
                 $dato->abreviatura = $this->retorno3LetrasFechasIdioma($idiomaTextos, $dato->fecha_inicio);
                 $dato->contador = $contador;
+                $dato->contador2 = $contador;
 
                 // fecha inicio del bloque
                 $fecha1 = Carbon::parse($dato->fecha_inicio);
@@ -438,14 +444,20 @@ class ApiPlanesController extends Controller
 
 
                 if($fecha1->isSameDay($fecha2)){
-                    $dato->mismodia = 1;
+
+                    // YA NO SE USARA
+                    // 18/05/2024
+                    //$dato->mismodia = 1;
+
                     $hayDiaActual = 1;
 
                     // nunca habra 2 dias iguales pero por seguridad
                     $pararConteo = false;
 
                 }else{
-                    $dato->mismodia = 0;
+
+
+                   // $dato->mismodia = 0;
                 }
 
                 // ESTA PARTE ERA QUE APARECIERA EL BLOQUE SEGUN FECHA DEL USUARIO
@@ -2088,9 +2100,18 @@ class ApiPlanesController extends Controller
 
         if ($userToken = JWTAuth::user($tokenApi)) {
 
-            $arrayPlanUsuario = PlanesUsuarios::where('id_usuario', $userToken->id)
-                ->select('id_planes')
+
+
+            $arrayPlanUsuario = DB::table('planes AS p')
+                ->join('planes_usuarios AS pu', 'pu.id_planes', '=', 'p.id')
+                ->select('p.visiblepanel', 'pu.id_usuario', 'pu.id_planes', 'pu.fecha', 'p.visible')
+                ->where('p.visiblepanel', 1)
+                ->where('p.visible', 1)
                 ->get();
+
+            /*$arrayPlanUsuario = PlanesUsuarios::where('id_usuario', $userToken->id)
+                ->select('id_planes')
+                ->get();*/
 
 
 
@@ -2423,9 +2444,17 @@ class ApiPlanesController extends Controller
 
         if ($userToken = JWTAuth::user($tokenApi)) {
 
-            $arrayPlanUsuario = PlanesUsuarios::where('id_usuario', $userToken->id)
-                ->select('id_planes')
+
+
+            $arrayPlanUsuario = DB::table('planes AS p')
+                ->join('planes_usuarios AS pu', 'pu.id_planes', '=', 'p.id')
+                ->select('p.visiblepanel', 'pu.id_usuario', 'pu.id_planes', 'pu.fecha', 'p.visible')
+                ->where('p.visible', 1)
+                ->where('pu.id_usuario', $userToken->id)
                 ->get();
+
+
+
 
             foreach ($arrayPlanUsuario as $dato){
 

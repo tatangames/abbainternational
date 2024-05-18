@@ -428,7 +428,7 @@ class ApiComunidadController extends Controller
         if ($userToken = JWTAuth::user($tokenApi)) {
 
 
-            $idiomaTextos = $userToken->idiomaplan;
+            $idiomaTextos = $request->idiomaplan;
 
 
             if($infoComu = ComunidadSolicitud::where('id', $request->idsolicitud)->first()){
@@ -460,9 +460,12 @@ class ApiComunidadController extends Controller
                     $hayInsignias = 1;
                 }
 
+
+
                 foreach ($insignia_arrayInsignias as $dato){
 
                     $infoTitulos = $this->retornoTituloInsigniasAppIdioma($dato->id_tipo_insignia, $idiomaTextos);
+
                     $dato->titulo = $infoTitulos['titulo'];
                     $dato->descripcion = $infoTitulos['descripcion'];
 
@@ -945,6 +948,7 @@ class ApiComunidadController extends Controller
             'iduser' => 'required'
         );
 
+
         $validator = Validator::make($request->all(), $rules);
         if ( $validator->fails()){
             return ['success' => 0,
@@ -956,7 +960,7 @@ class ApiComunidadController extends Controller
 
         if ($userToken = JWTAuth::user($tokenApi)) {
 
-            $idiomaTextos = $userToken->idiomaplan;
+            $idiomaTextos = $request->idiomaplan;
 
 
             if($infoComu = ComunidadSolicitud::where('id', $request->idsolicitud)->first()){
@@ -1061,7 +1065,7 @@ class ApiComunidadController extends Controller
 
         if ($userToken = JWTAuth::user($tokenApi)) {
 
-            $idiomaTextos = $userToken->idiomaplan;
+            $idiomaTextos = $request->idiomaplan;
 
             // OBTENER TODOS LOS ITEMS
 
@@ -1242,9 +1246,21 @@ class ApiComunidadController extends Controller
         if ($userToken = JWTAuth::user($tokenApi)) {
 
             $hayinfo = 0;
-            $idiomaTextos = $userToken->idiomaplan;
+            $idiomaTextos = $request->idiomaplan;
 
-            $arrayPlanes = PlanesUsuarios::where('id_usuario', $userToken->id)->get();
+
+
+
+
+            $arrayPlanes = DB::table('planes AS p')
+                ->join('planes_usuarios AS pu', 'pu.id_planes', '=', 'p.id')
+                ->select('p.visible', 'pu.id_usuario', 'pu.id_planes', 'pu.fecha', 'p.visible')
+                ->where('p.visible', 1)
+                ->where('pu.id_usuario', $userToken->id)
+                ->get();
+
+
+
 
             foreach ($arrayPlanes as $dato){
                 $hayinfo = 1;

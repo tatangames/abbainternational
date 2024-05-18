@@ -22,6 +22,12 @@ return new class extends Migration
             $table->boolean('visible');
             $table->date('fecha');
 
+            $table->boolean('visible');
+
+            //18/05/2024
+            $table->boolean('visiblepanel');
+
+
             $table->integer('posicion');
         });
     }

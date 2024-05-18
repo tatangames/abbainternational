@@ -58,6 +58,11 @@
                                     </button>
                                     @endif
 
+                                    <button style="margin: 8px" type="button" class="btn btn-danger btn-xs" onclick="modalBorrar({{ $dato->id }})">
+                                        <i class="fas fa-trash" title="Ocultar"></i>&nbsp; Ocultar
+                                    </button>
+
+
                                 </td>
 
                             </tr>

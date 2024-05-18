@@ -34,7 +34,11 @@ class PlanesController extends Controller
     // regresa tabla listado de paises
     public function tablaPlanes(){
 
-        $listado = Planes::orderBy('posicion', 'ASC')->get();
+        $listado = Planes::where('visiblepanel', 1)
+            ->orderBy('posicion', 'ASC')
+            ->get();
+
+
         foreach ($listado as $dato){
 
             // siempre habra ididoma espanol
@@ -388,6 +392,51 @@ class PlanesController extends Controller
             return ['success' => 1];
         }
     }
+
+
+
+    public function ocultarTotalDevocional(Request $request)
+    {
+        $rules = array(
+            'id' => 'required',
+        );
+
+        $validator = Validator::make($request->all(), $rules);
+
+        if ($validator->fails()) {
+            return ['success' => 0];
+        }
+
+        if($infoPlan = Planes::where('id', $request->id)->first()){
+
+            DB::beginTransaction();
+
+            try {
+
+               // SOLO SE OCULTARA
+
+                Planes::where('id', $request->id)->update([
+                    'visiblepanel' => 0,
+                    'visible' => 0
+                ]);
+
+
+                DB::commit();
+                return ['success' => 1];
+
+            }catch(\Throwable $e){
+                Log::info("error: " . $e);
+                DB::rollback();
+                return ['success' => 99];
+            }
+        }
+        else{
+            // decir que fue eliminado
+            return ['success' => 1];
+        }
+    }
+
+
 
 
     public function indexPlanBloque($idplan)

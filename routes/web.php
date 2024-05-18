@@ -167,12 +167,23 @@ Route::post('/admin/planes/datos/actualizar', [PlanesController::class,'actualiz
 Route::post('/admin/planes/imagen/actualizar', [PlanesController::class,'actualizarImagenPlanes']);
 Route::post('/admin/planes/imagenportada/actualizar', [PlanesController::class,'actualizarImagenPortadaPlanes']);
 
+
+// Eliminacion total de un devocional
+Route::post('/admin/planes/ocultartotal', [PlanesController::class,'ocultarTotalDevocional']);
+
+
+
+
 // -> Vista Bloque de plan
 Route::get('/admin/planesbloques/vista/index/{idplan}', [PlanesController::class,'indexPlanBloque']);
 Route::get('/admin/planesbloques/tabla/index/{idplan}', [PlanesController::class,'tablaPlanBloque']);
 Route::get('/admin/planesbloques/agregar/nuevo/index/{idplan}', [PlanesController::class,'indexNuevoPlanBloque']);
 Route::post('/admin/planesbloques/agregar/nuevo', [PlanesController::class,'registrarPlanesBloques']);
 Route::post('/admin/planesbloques/activacion', [PlanesController::class,'activacionPlanBloque']);
+
+
+
+
 
 // Editar Bloque
 Route::get('/admin/planesbloques/vista/editar/index/{idplanbloque}', [PlanesController::class,'indexEditarPlanBloque']);

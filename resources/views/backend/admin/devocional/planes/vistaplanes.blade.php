@@ -272,6 +272,52 @@
         }
 
 
+        function modalBorrar(id){
+
+            Swal.fire({
+                title: 'Ocultar Devocional',
+                text: "Esto ocultara todo registro",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#28a745',
+                cancelButtonColor: '#d33',
+                cancelButtonText: 'Cancelar',
+                confirmButtonText: 'Si'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    borrarRegistro(id)
+                }
+            })
+        }
+
+
+        function borrarRegistro(id){
+
+            let formData = new FormData();
+            formData.append('id', id);
+            openLoading();
+
+            axios.post('/admin/planes/ocultartotal', formData, {
+            })
+                .then((response) => {
+                    closeLoading();
+
+                    if(response.data.success === 1){
+
+                        toastr.success('Ocultar');
+                        recargar();
+                    }
+                    else{
+                        toastr.error('Error al ocultar');
+                    }
+                })
+                .catch((error) => {
+                    toastr.error('Error al ocultar');
+                    closeLoading();
+                });
+        }
+
+
     </script>
 
 
