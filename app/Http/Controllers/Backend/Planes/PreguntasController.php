@@ -165,6 +165,13 @@ class PreguntasController extends Controller
             $pregunta5 = "4. Padre, ¿cómo debo orar?";
 
 
+            $pregunta1Ingles = "What God is using to speak to you today";
+            $pregunta2Ingles = "1. Father, what does this scripture teach me about you?";
+            $pregunta3Ingles = "2. Father, what does this scripture teach me about the Christian life?";
+            $pregunta4Ingles = "3. Father, what should I do with your revealed word today?";
+            $pregunta5Ingles = "4. Father, how should I pray?";
+
+
             // ********** PREGUNTA 1 **************
 
 
@@ -186,6 +193,14 @@ class PreguntasController extends Controller
                     <body>" . $pregunta1 . "</body>
                     </html>";
 
+            $contenido1Ingles= "<html>
+                    <head>
+                    <meta charset='UTF-8'>
+                        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+                    </head>
+                    <body>" . $pregunta1Ingles . "</body>
+                    </html>";
+
 
             $detalleE1 = new BloquePreguntasTextos();
             $detalleE1->id_bloque_preguntas = $nuevo1->id;
@@ -196,7 +211,7 @@ class PreguntasController extends Controller
             $detalleI1 = new BloquePreguntasTextos();
             $detalleI1->id_bloque_preguntas = $nuevo1->id;
             $detalleI1->id_idioma_planes = 2;
-            $detalleI1->texto = $contenido1;
+            $detalleI1->texto = $contenido1Ingles;
             $detalleI1->save();
 
 
@@ -220,6 +235,14 @@ class PreguntasController extends Controller
                     <body>" . $pregunta2 . "</body>
                     </html>";
 
+            $contenido2Ingles= "<html>
+                    <head>
+                    <meta charset='UTF-8'>
+                        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+                    </head>
+                    <body>" . $pregunta2Ingles . "</body>
+                    </html>";
+
 
             $detalleE2 = new BloquePreguntasTextos();
             $detalleE2->id_bloque_preguntas = $nuevo2->id;
@@ -230,7 +253,7 @@ class PreguntasController extends Controller
             $detalleI2 = new BloquePreguntasTextos();
             $detalleI2->id_bloque_preguntas = $nuevo2->id;
             $detalleI2->id_idioma_planes = 2;
-            $detalleI2->texto = $contenido2;
+            $detalleI2->texto = $contenido2Ingles;
             $detalleI2->save();
 
 
@@ -256,6 +279,16 @@ class PreguntasController extends Controller
                     </html>";
 
 
+            $contenido3Ingles= "<html>
+                    <head>
+                    <meta charset='UTF-8'>
+                        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+                    </head>
+                    <body>" . $pregunta3Ingles . "</body>
+                    </html>";
+
+
+
             $detalleE3 = new BloquePreguntasTextos();
             $detalleE3->id_bloque_preguntas = $nuevo3->id;
             $detalleE3->id_idioma_planes = 1;
@@ -265,7 +298,7 @@ class PreguntasController extends Controller
             $detalleI3 = new BloquePreguntasTextos();
             $detalleI3->id_bloque_preguntas = $nuevo3->id;
             $detalleI3->id_idioma_planes = 2;
-            $detalleI3->texto = $contenido3;
+            $detalleI3->texto = $contenido3Ingles;
             $detalleI3->save();
 
 
@@ -289,6 +322,14 @@ class PreguntasController extends Controller
                     <body>" . $pregunta4 . "</body>
                     </html>";
 
+            $contenido4Ingles= "<html>
+                    <head>
+                    <meta charset='UTF-8'>
+                        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+                    </head>
+                    <body>" . $pregunta4Ingles . "</body>
+                    </html>";
+
 
             $detalleE4 = new BloquePreguntasTextos();
             $detalleE4->id_bloque_preguntas = $nuevo4->id;
@@ -299,7 +340,7 @@ class PreguntasController extends Controller
             $detalleI4 = new BloquePreguntasTextos();
             $detalleI4->id_bloque_preguntas = $nuevo4->id;
             $detalleI4->id_idioma_planes = 2;
-            $detalleI4->texto = $contenido4;
+            $detalleI4->texto = $contenido4Ingles;
             $detalleI4->save();
 
 
@@ -324,6 +365,14 @@ class PreguntasController extends Controller
                     <body>" . $pregunta5 . "</body>
                     </html>";
 
+            $contenido5Ingles= "<html>
+                    <head>
+                    <meta charset='UTF-8'>
+                        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+                    </head>
+                    <body>" . $pregunta5Ingles . "</body>
+                    </html>";
+
 
             $detalleE5 = new BloquePreguntasTextos();
             $detalleE5->id_bloque_preguntas = $nuevo5->id;
@@ -334,7 +383,7 @@ class PreguntasController extends Controller
             $detalleI5 = new BloquePreguntasTextos();
             $detalleI5->id_bloque_preguntas = $nuevo5->id;
             $detalleI5->id_idioma_planes = 2;
-            $detalleI5->texto = $contenido5;
+            $detalleI5->texto = $contenido5Ingles;
             $detalleI5->save();
 
 
