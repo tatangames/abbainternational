@@ -375,6 +375,9 @@ class ApiInicioController extends Controller
         // EL USUARIO CUANDO SE REGISTRA SE CREA EL RACHA ALTA
 
 
+        // SERA SUMATORIA DE TODAS LAS VECES QUE ABRI LA APP.
+        // PERO SOLO SUMARA SI LOS DIAS SEGUIDOS LLEGA A SUPERAR LA RACHA MAS ALTA
+
         $infoRachaAlta = RachaAlta::where('id_usuarios', $userToken->id)->first();
 
 
