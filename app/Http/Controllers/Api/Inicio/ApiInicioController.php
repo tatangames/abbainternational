@@ -378,7 +378,7 @@ class ApiInicioController extends Controller
         $infoRachaAlta = RachaAlta::where('id_usuarios', $userToken->id)->first();
 
 
-        $arrayRachaUserDevocional = RachaDevocional::where('id_usuario', $userToken->id)
+        $arrayRachaUserDevocional = RachaDias::where('id_usuario', $userToken->id)
             ->where('fecha', '<=', $fechaFormatHorariaCarbon)
             ->orderBy('fecha', 'DESC')
             ->get();
@@ -399,6 +399,7 @@ class ApiInicioController extends Controller
                 $devocionalConsecutivos++;
                 continue;
             }
+
 
             // Verificar si la fecha en el bucle es un día antes de la fecha actual
             if ($fechaObjeto->equalTo($fechaActual->copy()->subDay())) {
