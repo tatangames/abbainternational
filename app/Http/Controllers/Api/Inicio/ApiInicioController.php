@@ -381,44 +381,61 @@ class ApiInicioController extends Controller
         $infoRachaAlta = RachaAlta::where('id_usuarios', $userToken->id)->first();
 
 
-        $arrayRachaUserDevocional = RachaDias::where('id_usuario', $userToken->id)
+        /*$arrayRachaUserDevocional = RachaDias::where('id_usuario', $userToken->id)
             ->where('fecha', '<=', $fechaFormatHorariaCarbon)
             ->orderBy('fecha', 'DESC')
-            ->get();
+            ->get();*/
 
         $fechaActualH = $this->retornoZonaHorariaUsuarioFormatFecha($userToken->id_iglesia);
         $fechaActual = Carbon::parse($fechaActualH);
 
+        // DEVOCIONALES REALIZADOS CONCECUTIVOS
         $devocionalConsecutivos = 0;
 
 
-        // ESTAMOS CONTANDO LOS DIAS SEGUIDOS UNICAMENTE
-        foreach ($arrayRachaUserDevocional as $dato) {
 
-            $fechaObjeto = Carbon::parse($dato->fecha);
+        $arrayFechaDevoPorSeguido = PlanesBlockDetaUsuario::where('id_usuario', $userToken->id)
+            ->where('fecha', '<=', $fechaFormatHorariaCarbon)
+            ->select('fecha')
+            ->orderBy('fecha', 'DESC')
+            ->groupBy('fecha')
+            ->get();
 
-            // si es fecha actual, se sumara 1
-            if ($fechaObjeto->equalTo($fechaActual)) {
+        // Convertir cada fecha a una instancia de Carbon
+        $fechas = $arrayFechaDevoPorSeguido->map(function ($item) {
+            return Carbon::parse($item->fecha);
+        });
+
+        // Inicializar el contador
+        $devocionalConsecutivos = 0;
+        $puedeContar = true;
+
+        // Verificar si hay fechas en el array
+        if (!$fechas->isEmpty()) {
+            // Comparar la primera fecha con la fecha actual
+            if ($fechas->first()->isSameDay($fechaActualH)) {
                 $devocionalConsecutivos++;
-                continue;
+            } else {
+                // Si la primera fecha no es igual a hoy, no tiene sentido continuar
+                $puedeContar = false;
             }
 
-
-            // Verificar si la fecha en el bucle es un día antes de la fecha actual
-            if ($fechaObjeto->equalTo($fechaActual->copy()->subDay())) {
-                // Incrementar el contador de devocional consecutivos
-                $devocionalConsecutivos++;
-                // Actualizar la fecha actual para la próxima iteración
-                $fechaActual = $fechaObjeto;
-            } else {
-                // si estra aqui, la cadena de fechas se rompe
-                break;
+            if($puedeContar){
+                // Iterar a través de las fechas y comparar cada una con el día anterior
+                for ($i = 1; $i < $fechas->count(); $i++) {
+                    if ($fechas[$i]->isSameDay($fechas[$i - 1]->copy()->subDay())) {
+                        $devocionalConsecutivos++;
+                    } else {
+                        break;
+                    }
+                }
             }
         }
 
+
         $miRachaAlta = $infoRachaAlta->contador;
 
-        // actualizar rachaAlta si requiere
+        // ACTUALIZAR LA RACHA MAS ALTA
         if($devocionalConsecutivos > $infoRachaAlta->contador){
             $miRachaAlta = $devocionalConsecutivos;
 
@@ -432,7 +449,6 @@ class ApiInicioController extends Controller
 
         // VER QUE DIAS HIZO EL DEVOCIONAL
 
-
         $diaDomingo = 0;
         $diaLunes = 0;
         $diaMartes = 0;
@@ -443,13 +459,14 @@ class ApiInicioController extends Controller
 
 
         // obtener los dias de estas fechas seguidas
-        $arrayFechaDias = RachaDevocional::where('id_usuario', $userToken->id)
+        /*$arrayFechaDias = RachaDevocional::where('id_usuario', $userToken->id)
             ->where('fecha', '<=', $fechaFormatHorariaCarbon)
             ->orderBy('fecha', 'DESC')
             ->take(7) // por seguridad nomas
-            ->get();
+            ->get();*/
+        $arrayFechaDevo = PlanesBlockDetaUsuario::where('id_usuario', $userToken->id)->get();
 
-        foreach ($arrayFechaDias as $dato){
+        foreach ($arrayFechaDevo as $dato){
 
             if(Carbon::parse($dato->fecha)->isMonday()){
                 $diaLunes = 1;
@@ -480,9 +497,9 @@ class ApiInicioController extends Controller
             }
         }
 
-        return ['diasesteanio' => $diasAppEsteAnio,
-            'diasconcecutivos' => $devocionalConsecutivos,
-            'nivelrachaalta' => $miRachaAlta,
+        return ['diasesteanio' => $diasAppEsteAnio, // YAP
+            'diasconcecutivos' => $devocionalConsecutivos, // POR DEVOCIONAl POR DIA SEGUIDO
+            'nivelrachaalta' => $miRachaAlta, // RACHA MAS ALTAA
             'domingo' => $diaDomingo,
             'lunes' => $diaLunes,
             'martes' => $diaMartes,

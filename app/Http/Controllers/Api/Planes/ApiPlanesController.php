@@ -691,6 +691,7 @@ class ApiPlanesController extends Controller
                     $detalle->id_usuario = $userToken->id;
                     $detalle->id_planes_block_deta = $request->idblockdeta;
                     $detalle->completado = 1;
+                    $detalle->fecha = $fechaCarbon;
                     $detalle->save();
 
                     $primeraVezItem = true;

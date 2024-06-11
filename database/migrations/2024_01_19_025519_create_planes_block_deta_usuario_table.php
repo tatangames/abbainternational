@@ -10,7 +10,7 @@ return new class extends Migration
      * CADA VEZ QUE HACE CHECK EL USUARIO, SE VERIFICA SI YA ESTA CREADA UNA FILA CON ESE BLOQUE
      * SINO SE CREA
      *
-     *  no visto en el panel de control
+     *
      */
     public function up(): void
     {
@@ -19,6 +19,13 @@ return new class extends Migration
             $table->bigInteger('id_usuario')->unsigned();
             $table->bigInteger('id_planes_block_deta')->unsigned();
             $table->boolean('completado');
+
+
+            // 10/06/2024
+            // SE AGREGO FECHA QUE ES COMPLETADO, SE SETEA UNICAMENTE AL CREARSE LA FILA
+            $table->date('fecha');
+
+
 
             $table->foreign('id_usuario')->references('id')->on('usuarios');
             $table->foreign('id_planes_block_deta')->references('id')->on('planes_block_detalle');
