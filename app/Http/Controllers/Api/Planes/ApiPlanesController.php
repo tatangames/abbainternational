@@ -84,7 +84,9 @@ class ApiPlanesController extends Controller
             // obtener todos los planes NO elegido por el usuario y sean visible
             $arrayPlanes = Planes::whereNotIn('id', $arrayIdYaSeleccionados)
                 ->where('visible', 1)
+                ->where('visiblepanel', 1)
                 ->get();
+
 
             if ($arrayPlanes->isNotEmpty()) {
                 $hayInfo = 1;
@@ -264,19 +266,13 @@ class ApiPlanesController extends Controller
         if ($userToken = JWTAuth::user($tokenApi)) {
 
 
-            $arrayPlanUsuario = PlanesUsuarios::where('id_usuario', $userToken->id)
-                ->select('id_planes')
-                ->get();
-
-
-
-            /*$arrayPlanUsuario = DB::table('planes_usuarios AS pu')
-                ->join('planes AS p', 'pu.id_planes', '=', 'p.id')
-                ->select('pu.id_planes', 'p.visiblepanel')
+            $arrayPlanUsuario = DB::table('planes AS p')
+                ->join('planes_usuarios AS pu', 'pu.id_planes', '=', 'p.id')
+                ->select('p.visiblepanel', 'p.visible', 'pu.id_usuario', 'pu.id_planes')
                 ->where('pu.id_usuario', $userToken->id)
                 ->where('p.visiblepanel', 1)
-                ->get();*/
-
+                ->where('p.visible', 1)
+                ->get();
 
 
             foreach ($arrayPlanUsuario as $dato){
@@ -2113,20 +2109,13 @@ class ApiPlanesController extends Controller
 
         if ($userToken = JWTAuth::user($tokenApi)) {
 
-
-
             $arrayPlanUsuario = DB::table('planes AS p')
                 ->join('planes_usuarios AS pu', 'pu.id_planes', '=', 'p.id')
                 ->select('p.visiblepanel', 'pu.id_usuario', 'pu.id_planes', 'pu.fecha', 'p.visible')
-                ->where('p.visiblepanel', 1)
                 ->where('p.visible', 1)
+                ->where('p.visiblepanel', 1)
+                ->where('pu.id_usuario', $userToken->id)
                 ->get();
-
-            /*$arrayPlanUsuario = PlanesUsuarios::where('id_usuario', $userToken->id)
-                ->select('id_planes')
-                ->get();*/
-
-
 
 
             foreach ($arrayPlanUsuario as $dato){
@@ -2407,14 +2396,6 @@ class ApiPlanesController extends Controller
             $arrayIdYaSeleccionados = PlanesUsuarios::where('id_usuario', $userToken->id)
                 ->select('id_planes')
                 ->get();
-
-            /*$arrayIdYaSeleccionados = DB::table('planes AS p')
-                ->join('planes_usuarios AS pu', 'pu.id_planes', '=', 'p.id')
-                ->select('p.visiblepanel', 'p.visible', 'pu.id_usuario', 'pu.id_planes')
-                ->where('pu.id_usuario', $userToken->id)
-                ->where('p.visiblepanel', 1)
-                ->where('p.visible', 1)
-                ->get();*/
 
 
             // conocer si habra planes disponibles
