@@ -237,7 +237,7 @@ Route::middleware('verificarToken')->group(function () {
 
 
     // todos los textos del versiculo
-    Route::post('app/listado/versiculos/textos', [ApiBibliaController::class,'listadoTextosVersiculos']);
+    Route::post('app/listado/bibliacapitulo/textos', [ApiBibliaController::class,'listadoTextosCapituloBiblia']);
 
 
 

@@ -312,12 +312,12 @@ class ApiBibliaController extends Controller
 
 
 
-    public function listadoTextosVersiculos(Request $request)
+    public function listadoTextosCapituloBiblia(Request $request)
     {
         $rules = array(
             'idiomaplan' => 'required',
             'iduser' => 'required',
-            'idversiculo' => 'required'
+            'idcapitulo' => 'required'
         );
 
 
@@ -328,28 +328,14 @@ class ApiBibliaController extends Controller
 
         $tokenApi = $request->header('Authorization');
 
-        // por el momento no se utilizara
+        // POR EL MOMENTO NO SE UTILIZA, ES DEFECTO IDIOMA ESPANOL
         $idiomaTextos = $request->idiomaplan;
 
         if ($userToken = JWTAuth::user($tokenApi)) {
 
-            $infoVersiculo = Versiculo::where('id', $request->idversiculo)->first();
-            $infoCapiBlock = BibliaCapituloBloque::where('id', $infoVersiculo->id_capitulo_block)->first();
-            $infoCapitulo = BibliaCapitulos::where('id', $infoCapiBlock->id_biblia_capitulo)->first();
-
-            // nombre libro - defecto espanol
-            $infoLibroTexto = BibliaCapitulosTextos::where('id_biblia_capitulo', $infoCapitulo->id)->first();
-            $nombreLibro = $infoLibroTexto->titulo;
-
-            // numero capitulo - defecto espanol
-            $infoCapituloTexto = BibliaCapituloBlockTexto::where('id_biblia_capitulo_block', $infoCapiBlock->id)->first();
-            $numeroCapitulo = $infoCapituloTexto->titulo;
-
-
-            $listado = Versiculo::where('id_capitulo_block', $infoCapiBlock->id)
-                ->orderBy('posicion', 'ASC')
-                ->get();
-
+            $infoCapiBlockTexto = BibliaCapituloBlockTexto::where('id_biblia_capitulo_block', $request->idcapitulo)
+                ->where('id_idioma_planes', 1) // defecto espanol
+                ->first();
 
             $contenidoHtml = "<html>
                     <head>
@@ -368,35 +354,19 @@ class ApiBibliaController extends Controller
                         </style>
                         <script type='text/javascript'>
 
-                            function scrollTo(element){
+                            /*function scrollTo(element){
                                 document.getElementById(element).scrollIntoView();
-                            }
+                            }*/
 
                         </script>
                     </head>
-                    <body>"
+                    <body>";
 
 
 
-                        . "<p style='text-align: center; font-size: 22px; margin-bottom: 5px;'>" . $nombreLibro . "</p>"
-                        . "<p style='text-align: center; font-size: 48px; font-weight: bold; margin-top: 5px;'><strong>" . $numeroCapitulo . "</strong></p>" ;
-
-                 $contenidoHtml .= "<div class='contenedor'>";
+                $contenidoHtml .= "$infoCapiBlockTexto->textocapitulo";
 
 
-
-
-                  foreach ($listado as $dato) {
-
-                      $titulo = "";
-                      if($infoVer = VersiculoRefran::where('id_versiculo', $dato->id)->first()){
-                          $titulo = $infoVer->titulo;
-                      }
-
-                      $textoSinP = preg_replace('/<p[^>]*>|<\/p>/', '', $titulo);
-
-                      $contenidoHtml .= "<span id='verso$dato->id'>$textoSinP </span>";
-                  }
 
             $contenidoHtml .= "</div></body>
                     </html>";
@@ -407,9 +377,8 @@ class ApiBibliaController extends Controller
 
 
             return ['success' => 1,
-                'contenido' => $contenidoHtml,
+                'contenido' => $contenidoHtml];
 
-                ];
         }else{
             return ['success' => 99];
         }
