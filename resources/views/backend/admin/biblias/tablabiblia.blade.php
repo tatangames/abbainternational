@@ -34,7 +34,7 @@
                                         <i class="fas fa-edit" title="Editar"></i>&nbsp; Editar
                                     </button>
 
-                                    <button type="button" style="margin: 8px" class="btn btn-info btn-xs" onclick="vistaCapitulos({{ $dato->id }})">
+                                    <button type="button" style="margin: 8px" class="btn btn-info btn-xs" onclick="vistaLibros({{ $dato->id }})">
                                         <i class="fas fa-eye" title="Libros"></i>&nbsp; Libros
                                     </button>
 

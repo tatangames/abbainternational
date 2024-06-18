@@ -83,7 +83,7 @@
 
             openLoading();
 
-            axios.post('/admin/bibliacapitulo/posicion',  {
+            axios.post('/admin/biblialibro/posicion',  {
                 'order': order
             })
                 .then((response) => {

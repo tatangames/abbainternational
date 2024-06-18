@@ -140,7 +140,7 @@
         $(document).ready(function(){
 
             var idbiblia = {{ $idbiblia }};
-            var ruta = "{{ URL::to('/admin/bibliacapitulo/tabla') }}/" + idbiblia;
+            var ruta = "{{ URL::to('/admin/biblialibro/tabla') }}/" + idbiblia;
             $('#tablaDatatable').load(ruta);
         });
     </script>
@@ -149,7 +149,7 @@
 
         function recargar(){
             var idbiblia = {{ $idbiblia }};
-            var ruta = "{{ URL::to('/admin/bibliacapitulo/tabla') }}/" + idbiblia;
+            var ruta = "{{ URL::to('/admin/biblialibro/tabla') }}/" + idbiblia;
             $('#tablaDatatable').load(ruta);
         }
 
@@ -176,7 +176,7 @@
             formData.append('titulo', titulo);
             formData.append('idbiblia', idbiblia);
 
-            axios.post('/admin/bibliacapitulo/registrar', formData, {
+            axios.post('/admin/biblialibro/registrar', formData, {
             })
                 .then((response) => {
                     closeLoading();
@@ -203,7 +203,7 @@
             openLoading();
             document.getElementById("formulario-editar").reset();
 
-            axios.post('/admin/bibliacapitulo/informacion',{
+            axios.post('/admin/biblialibro/informacion',{
                 'id': id
             })
                 .then((response) => {
@@ -239,7 +239,7 @@
             formData.append('titulo', titulo);
             formData.append('idcapitulo', id);
 
-            axios.post('/admin/bibliacapitulo/actualizar', formData, {
+            axios.post('/admin/biblialibro/actualizar', formData, {
             })
                 .then((response) => {
                     closeLoading();
@@ -305,7 +305,7 @@
             formData.append('estado', estado);
             openLoading();
 
-            axios.post('/admin/bibliacapitulo/activacion', formData, {
+            axios.post('/admin/biblialibro/activacion', formData, {
             })
                 .then((response) => {
                     closeLoading();

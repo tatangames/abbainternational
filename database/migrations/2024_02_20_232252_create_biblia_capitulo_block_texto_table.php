@@ -20,6 +20,12 @@ return new class extends Migration
             // mayormente seran numeros
             $table->string('titulo', 50);
 
+
+            // 18/06/2024
+            // SE AGREGO QUE YA NO SERAN VERSICULOS, SINO QUE CADA CAPITULO TENDRA SU BLOQUE TEXTO
+            $table->text('textocapitulo')->nullable();
+
+
             $table->foreign('id_biblia_capitulo_block')->references('id')->on('biblia_capitulo_bloque');
             $table->foreign('id_idioma_planes')->references('id')->on('idioma_planes');
         });

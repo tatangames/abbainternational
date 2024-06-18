@@ -1,4 +1,3 @@
-
 <!-- Main content -->
 <section class="content">
     <div class="row">
@@ -8,10 +7,10 @@
                     <table id="table" class="table table-bordered">
                         <thead>
                         <tr>
-                            <th style="width: 4%">Posición</th>
-                            <th style="width: 5%"># Versículo</th>
-                            <th style="width: 8%">Visible</th>
-                            <th style="width: 8%">Opciones</th>
+                            <th>Posición</th>
+                            <th>Visible</th>
+                            <th>Título</th>
+                            <th>Opciones</th>
                         </tr>
                         </thead>
                         <tbody id="tablecontents">
@@ -19,10 +18,6 @@
                             <tr class="row1" data-id="{{ $dato->id }}">
 
                                 <td>{{ $dato->posicion }}</td>
-
-
-
-                                <td style="width: 8%">{{ $dato->titulo }}</td>
 
                                 <td>
                                     @if($dato->visible == 1)
@@ -32,17 +27,14 @@
                                     @endif
                                 </td>
 
-
-
-
+                                <td>{{ $dato->titulo }}</td>
                                 <td>
-
                                     <button type="button" class="btn btn-info btn-xs" onclick="informacionEditar({{ $dato->id }})">
                                         <i class="fas fa-edit" title="Editar"></i>&nbsp; Editar
                                     </button>
 
-                                    <button type="button" class="btn btn-info btn-xs" onclick="vistaTextos({{ $dato->id }})">
-                                        <i class="fas fa-edit" title="Texto"></i>&nbsp; Texto
+                                    <button type="button" style="margin: 8px" class="btn btn-info btn-xs" onclick="informacionTexto({{ $dato->id }})">
+                                        <i class="fas fa-list" title="Texto"></i>&nbsp; Texto
                                     </button>
 
                                     @if($dato->visible == 1)
@@ -54,7 +46,6 @@
                                             <i class="fas fa-edit" title="Activar"></i>&nbsp; Activar
                                         </button>
                                     @endif
-
                                 </td>
 
                             </tr>
@@ -91,7 +82,7 @@
 
             openLoading();
 
-            axios.post('/admin/bibliacapitulo/versiculo/posicion',  {
+            axios.post('/admin/bibliacapitulo/bloque/posicion',  {
                 'order': order
             })
                 .then((response) => {
@@ -107,3 +98,4 @@
     });
 
 </script>
+

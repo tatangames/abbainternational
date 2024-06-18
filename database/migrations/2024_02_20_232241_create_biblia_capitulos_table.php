@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * CAPITULO PARA LA BIBLIA
+     * LIBROS PARA LA BIBLIA
      */
     public function up(): void
     {

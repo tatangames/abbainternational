@@ -21,14 +21,14 @@
             <div class="col-sm-6">
                 <button type="button" onclick="modalAgregar()" class="btn btn-primary btn-sm">
                     <i class="fas fa-plus-square"></i>
-                    Nuevo versículo
+                    Nuevo Capitulo
                 </button>
             </div>
 
             <div class="col-sm-6">
                 <ol class="breadcrumb float-sm-right">
-                    <li class="breadcrumb-item">Versículo</li>
-                    <li class="breadcrumb-item active">Listado</li>
+                    <li class="breadcrumb-item">Capitulos</li>
+                    <li class="breadcrumb-item active">Listado de Capitulos</li>
                 </ol>
             </div>
 
@@ -39,7 +39,7 @@
         <div class="container-fluid">
             <div class="card card-success">
                 <div class="card-header">
-                    <h3 class="card-title">Listado de Versículos.</h3>
+                    <h3 class="card-title">Listado de Capitulos</h3>
                 </div>
                 <div class="card-body">
                     <div class="row">
@@ -54,12 +54,11 @@
     </section>
 
 
-
     <div class="modal fade" id="modalAgregar">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title">Nuevo Versículo</h4>
+                    <h4 class="modal-title">Nuevo Capitulo</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -93,7 +92,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title">Editar</h4>
+                    <h4 class="modal-title">Editar Capitulo</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -110,7 +109,7 @@
                                     </div>
 
                                     <div class="form-group">
-                                        <label>Versículo</label>
+                                        <label>Título</label>
                                         <input type="text" maxlength="50" class="form-control" id="titulo-editar" autocomplete="off">
                                     </div>
 
@@ -126,44 +125,48 @@
             </div>
         </div>
     </div>
-</div>
 
 
 
-<div class="modal fade" id="modalEditarTexto" >
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">Texto</h4>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form id="formulario-editar">
-                    <div class="card-body">
-                        <div class="col-md-12">
+    <div class="modal fade" id="modalEditarTexto" >
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Texto</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="formulario-editartexto">
+                        <div class="card-body">
+                            <div class="col-md-12">
 
-                            <div class="form-group">
-                                <label>Versículo <strong style="color: red">(Si necesita dar Espacios se debe pulsar SHIFT + ENTER) si solo presionar ENTER no dara el Espacio al mostrarse en App)</strong></label>
-                                <input type="hidden" id="idfila-texto">
-                                <textarea name="content" id="texto-editor" rows="12" cols="50"></textarea>
+                                <div class="form-group">
+                                    <label><strong style="color: red">(Si necesita dar Espacios se debe pulsar SHIFT + ENTER) si solo presionar ENTER no dara el Espacio al mostrarse en App)</strong></label>
+                                    <input type="hidden" id="idfila-texto">
+                                    <textarea name="content" id="texto-editor" rows="12" cols="50"></textarea>
+                                </div>
+
                             </div>
-
                         </div>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer justify-content-between">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
-                <button type="button" class="btn btn-success" id="miboton" onclick="guardarTexto()">Guardar</button>
+                    </form>
+                </div>
+                <div class="modal-footer justify-content-between">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-success" id="miboton" onclick="guardarTexto()">Guardar</button>
+                </div>
             </div>
         </div>
     </div>
+
+
+
+
+
+
+
 </div>
-
-
-
 
 
 @extends('backend.menus.footerjs')
@@ -179,9 +182,13 @@
     <script src="{{ asset('plugins/ckeditor5v2/build/ckeditor.js') }}"></script>
 
 
-
     <script type="text/javascript">
         $(document).ready(function(){
+
+            let idcapitulo = {{ $idcapitulo }};
+            var ruta = "{{ URL::to('/admin/bibliacapitulo/bloque/tabla') }}/" + idcapitulo;
+            $('#tablaDatatable').load(ruta);
+
 
             window.varGlobalTexto;
 
@@ -196,9 +203,6 @@
 
                 });
 
-            let idbloque = {{ $idbloque }};
-            var ruta = "{{ URL::to('/admin/bibliacapitulo/versiculo/tabla') }}/" + idbloque;
-            $('#tablaDatatable').load(ruta);
 
             document.getElementById("divcontenedor").style.display = "block";
 
@@ -209,8 +213,8 @@
 
         // recarga tabla
         function recargar(){
-            let idbloque = {{ $idbloque }};
-            var ruta = "{{ URL::to('/admin/bibliacapitulo/versiculo/tabla') }}/" + idbloque;
+            let idcapitulo = {{ $idcapitulo }};
+            var ruta = "{{ URL::to('/admin/bibliacapitulo/bloque/tabla') }}/" + idcapitulo;
             $('#tablaDatatable').load(ruta);
         }
 
@@ -229,14 +233,14 @@
                 return;
             }
 
-            let idbloque = {{ $idbloque }};
+            let idcapitulo = {{ $idcapitulo }};
 
             openLoading();
             let formData = new FormData();
-            formData.append('idbloque', idbloque);
+            formData.append('idcapitulo', idcapitulo);
             formData.append('titulo', titulo);
 
-            axios.post('/admin/bibliacapitulo/versiculo/registrar', formData, {
+            axios.post('/admin/bibliacapitulo/bloque/registrar', formData, {
             })
                 .then((response) => {
                     closeLoading();
@@ -260,7 +264,7 @@
             openLoading();
             document.getElementById("formulario-editar").reset();
 
-            axios.post('/admin/bibliacapitulo/versiculo/informacion',{
+            axios.post('/admin/bibliacapitulo/bloque/informacion',{
                 'id': id
             })
                 .then((response) => {
@@ -269,6 +273,7 @@
                         $('#modalEditar').modal('show');
                         $('#id-editar').val(response.data.info.id);
                         $('#titulo-editar').val(response.data.titulo);
+
                     }else{
                         toastr.error('Información no encontrada');
                     }
@@ -290,12 +295,13 @@
                 return;
             }
 
+
             openLoading();
             let formData = new FormData();
-            formData.append('idversiculo', id);
+            formData.append('idbloque', id);
             formData.append('titulo', titulo);
 
-            axios.post('/admin/bibliacapitulo/versiculo/actualizar', formData, {
+            axios.post('/admin/bibliacapitulo/bloque/actualizar', formData, {
             })
                 .then((response) => {
                     closeLoading();
@@ -363,7 +369,7 @@
             formData.append('estado', estado);
             openLoading();
 
-            axios.post('/admin/bibliacapitulo/versiculo/activacion', formData, {
+            axios.post('/admin/bibliacapitulo/bloque/activacion', formData, {
             })
                 .then((response) => {
                     closeLoading();
@@ -383,42 +389,43 @@
         }
 
 
-        // buscar texto si existe
-        function vistaTextos(idversiculo){
+        function informacionTexto(id){
 
+            // YO ESTOY ENVIADO ID DE biblia_capitulo_bloque
             let formData = new FormData();
-            formData.append('idversiculo', idversiculo);
+            formData.append('id', id);
             openLoading();
 
-            axios.post('/admin/buscar/texto/versiculo', formData, {
+            axios.post('/admin/bibliacapitulo/informacion/texto', formData, {
             })
                 .then((response) => {
                     closeLoading();
 
                     if(response.data.success === 1){
 
-                        let haydatos = response.data.hayguardado;
-                        let texto = response.data.texto;
+                        // ESTA TABLA DEBO OBTENER EL ID PARA ACTUALIZAR EL TEXTO PARA EL IDIOMA ACTUAL ESPANOL
+                        //biblia_capitulo_block_texto
 
-                        $('#idfila-texto').val(idversiculo);
+                        let identi = response.data.info.id;
+                        let texto = response.data.info.textocapitulo;
 
-                        varGlobalTexto.setData(texto);
+                        $('#idfila-texto').val(identi);
 
-                        if(haydatos == 1){
-                          document.getElementById("miboton").textContent = "Actualizar";
+                        if(texto == null){
+                            varGlobalTexto.setData("");
                         }else{
-                          document.getElementById("miboton").textContent = "Guardar";
+                            varGlobalTexto.setData(texto);
                         }
 
                         $('#modalEditarTexto').css('overflow-y', 'auto');
                         $('#modalEditarTexto').modal({backdrop: 'static', keyboard: false})
                     }
                     else{
-                        toastr.error('Error al actualizar');
+                        toastr.error('Error al buscar');
                     }
                 })
                 .catch((error) => {
-                    toastr.error('Error al actualizar');
+                    toastr.error('Error al buscar');
                     closeLoading();
                 });
         }
@@ -426,7 +433,7 @@
 
         function guardarTexto(){
 
-            var idversiculo = document.getElementById('idfila-texto').value;
+            var idfila = document.getElementById('idfila-texto').value;
 
             const contenido = varGlobalTexto.getData();
 
@@ -436,19 +443,19 @@
             }
 
             let formData = new FormData();
-            formData.append('idversiculo', idversiculo);
-            formData.append('contenido', contenido);
+            formData.append('idfila', idfila);
+            formData.append('texto', contenido);
             openLoading();
 
-            axios.post('/admin/guardar/texto/versiculo', formData, {
+            axios.post('/admin/bibliacapitulo/texto/actualizar', formData, {
             })
                 .then((response) => {
                     closeLoading();
 
                     if(response.data.success === 1){
                         toastr.success('Actualizado');
-
                         $('#modalEditarTexto').modal('hide');
+                        recargar();
                     }
                     else{
                         toastr.error('Error al actualizar');
@@ -459,8 +466,6 @@
                     closeLoading();
                 });
         }
-
-
 
 
     </script>

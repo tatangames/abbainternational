@@ -317,14 +317,14 @@ Route::post('/admin/biblia/activacion', [BibliasController::class,'estadoBiblia'
 Route::post('/admin/biblias/actualizar/posicion', [BibliasController::class,'actualizarPosicionBiblias']);
 
 
-// --- BIBLIAS CAPITULOS ---
-Route::get('/admin/bibliacapitulo/vista/{idbiblia}', [BibliaCapituloController::class,'vistaCapitulos']);
-Route::get('/admin/bibliacapitulo/tabla/{idbiblia}', [BibliaCapituloController::class,'tablaCapitulos']);
-Route::post('/admin/bibliacapitulo/registrar', [BibliaCapituloController::class,'registrarCapitulo']);
-Route::post('/admin/bibliacapitulo/posicion', [BibliaCapituloController::class,'actualizarPosicionBibliaCapitulos']);
-Route::post('/admin/bibliacapitulo/informacion', [BibliaCapituloController::class,'informacionCapitulo']);
-Route::post('/admin/bibliacapitulo/actualizar', [BibliaCapituloController::class,'actualizarCapitulo']);
-Route::post('/admin/bibliacapitulo/activacion', [BibliaCapituloController::class,'estadoCapitulo']);
+// --- BIBLIAS LIBROS ---
+Route::get('/admin/biblialibro/vista/{idbiblia}', [BibliaCapituloController::class,'vistaLibro']);
+Route::get('/admin/biblialibro/tabla/{idbiblia}', [BibliaCapituloController::class,'tablaLibro']);
+Route::post('/admin/biblialibro/registrar', [BibliaCapituloController::class,'registrarLibro']);
+Route::post('/admin/biblialibro/posicion', [BibliaCapituloController::class,'actualizarPosicionBibliaLibros']);
+Route::post('/admin/biblialibro/informacion', [BibliaCapituloController::class,'informacionLibro']);
+Route::post('/admin/biblialibro/actualizar', [BibliaCapituloController::class,'actualizarLibro']);
+Route::post('/admin/biblialibro/activacion', [BibliaCapituloController::class,'estadoLibro']);
 
 
 // --- BIBLIA CAPITULOS - BLOQUES ---
@@ -337,18 +337,27 @@ Route::post('/admin/bibliacapitulo/bloque/activacion', [BibliaCapituloController
 Route::post('/admin/bibliacapitulo/bloque/posicion', [BibliaCapituloController::class,'actualizarPosicionBibliaCapitulosBloque']);
 
 
+// --- BUSQUEDA TEXTO CAPITULO ---
+Route::post('/admin/bibliacapitulo/informacion/texto', [BibliaCapituloController::class,'busquedaTextoCapitulo']);
+Route::post('/admin/bibliacapitulo/texto/actualizar', [BibliaCapituloController::class,'guardarTextoVersiculo']);
+
+
+
 // --- BIBLIA CAPITULO - VERSICULO ---
-Route::get('/admin/bibliacapitulo/versiculo/vista/{idbloqe}', [BibliaCapituloController::class,'vistaCapitulosBloqueVersiculo']);
+/*Route::get('/admin/bibliacapitulo/versiculo/vista/{idbloqe}', [BibliaCapituloController::class,'vistaCapitulosBloqueVersiculo']);
 Route::get('/admin/bibliacapitulo/versiculo/tabla/{idbloque}', [BibliaCapituloController::class,'tablaCapitulosBloqueVersiculo']);
 Route::post('/admin/bibliacapitulo/versiculo/registrar', [BibliaCapituloController::class,'registrarCapituloBloqueVersiculo']);
 Route::post('/admin/bibliacapitulo/versiculo/informacion', [BibliaCapituloController::class,'informacionCapituloBloqueVersiculo']);
 Route::post('/admin/bibliacapitulo/versiculo/actualizar', [BibliaCapituloController::class,'actualizarCapituloBloqueVersiculo']);
 Route::post('/admin/bibliacapitulo/versiculo/activacion', [BibliaCapituloController::class,'estadoCapituloBloqueVersiculo']);
-Route::post('/admin/bibliacapitulo/versiculo/posicion', [BibliaCapituloController::class,'actualizarPosicionVersiculos']);
+Route::post('/admin/bibliacapitulo/versiculo/posicion', [BibliaCapituloController::class,'actualizarPosicionVersiculos']);*/
 
-// --- BUSQUEDA TEXTO VERSICULO ---
-Route::post('/admin/buscar/texto/versiculo', [BibliaCapituloController::class,'BusquedaTextoVersiculo']);
-Route::post('/admin/guardar/texto/versiculo', [BibliaCapituloController::class,'guardarTextoVersiculo']);
+
+
+
+
+
+
 
 
 // --- DEVOCIONAL BIBLIAS ---

@@ -25,14 +25,14 @@ class BibliaCapituloController extends Controller
     }
 
 
-    public function vistaCapitulos($idbiblia){
+    public function vistaLibro($idbiblia){
 
         $nombre = $this->retornoTituloBiblia($idbiblia);
 
-        return view('backend.admin.biblias.capitulos.vistacapitulo', compact('idbiblia', 'nombre'));
+        return view('backend.admin.biblias.libros.vistalibro', compact('idbiblia', 'nombre'));
     }
 
-    public function tablaCapitulos($idbiblia){
+    public function tablaLibro($idbiblia){
 
         $listado = BibliaCapitulos::where('id_biblias', $idbiblia)
             ->orderBy('posicion', 'ASC')
@@ -44,7 +44,7 @@ class BibliaCapituloController extends Controller
             $dato->titulo = $titulo;
         }
 
-        return view('backend.admin.biblias.capitulos.tablacapitulo', compact('listado'));
+        return view('backend.admin.biblias.libros.tablalibro', compact('listado'));
     }
 
     private function retornoTituloCapituloBiblia($idcapitulo){
@@ -66,7 +66,7 @@ class BibliaCapituloController extends Controller
     }
 
 
-    public function registrarCapitulo(Request $request){
+    public function registrarLibro(Request $request){
 
         $rules = array(
             'titulo' => 'required',
@@ -114,7 +114,7 @@ class BibliaCapituloController extends Controller
     }
 
 
-    public function actualizarPosicionBibliaCapitulos(Request $request){
+    public function actualizarPosicionBibliaLibros(Request $request){
 
         $tasks = BibliaCapitulos::all();
 
@@ -131,7 +131,7 @@ class BibliaCapituloController extends Controller
     }
 
 
-    public function informacionCapitulo(Request $request)
+    public function informacionLibro(Request $request)
     {
         $rules = array(
             'id' => 'required',
@@ -154,7 +154,7 @@ class BibliaCapituloController extends Controller
     }
 
 
-    public function actualizarCapitulo(Request $request)
+    public function actualizarLibro(Request $request)
     {
         $rules = array(
             'idcapitulo' => 'required',
@@ -177,7 +177,7 @@ class BibliaCapituloController extends Controller
 
 
 
-    public function estadoCapitulo(Request $request)
+    public function estadoLibro(Request $request)
     {
         $regla = array(
             'idcapitulo' => 'required',
@@ -206,7 +206,7 @@ class BibliaCapituloController extends Controller
     public function vistaCapitulosBloque($idcapitulo)
     {
 
-        return view('backend.admin.biblias.capitulos.bloque.vistacapitulobloque', compact('idcapitulo'));
+        return view('backend.admin.biblias.capitulos.vistacapitulobiblia', compact('idcapitulo'));
     }
 
     public function tablaCapitulosBloque($idcapitulo)
@@ -221,7 +221,7 @@ class BibliaCapituloController extends Controller
             $dato->titulo = $titulo;
         }
 
-        return view('backend.admin.biblias.capitulos.bloque.tablacapitulobloque', compact('listado'));
+        return view('backend.admin.biblias.capitulos.tablacapitulobiblia', compact('listado'));
     }
 
     // tabla: biblia_capitulo_block_texto
@@ -512,36 +512,38 @@ class BibliaCapituloController extends Controller
 
 
 
-    public function BusquedaTextoVersiculo(Request $request)
+    public function busquedaTextoCapitulo(Request $request)
     {
         $regla = array(
-            'idversiculo' => 'required',
+            'id' => 'required', // id capitulo
         );
 
         $validar = Validator::make($request->all(), $regla);
 
         if ($validar->fails()){ return ['success' => 0];}
 
-        $texto = "";
-        $hayguardado = 0;
 
-        if($info = VersiculoRefran::where('id_versiculo', $request->idversiculo)->first()){
-            $hayguardado = 1;
-            $texto = $info->titulo;
+        if($idbloque = BibliaCapituloBloque::where('id', $request->id)->first()){
+
+            // OBTENER TEXTO DEL CAPITULO
+            $info = BibliaCapituloBlockTexto::where('id_biblia_capitulo_block', $idbloque->id)
+                    ->where('id_idioma_planes', 1)
+                    ->first();
+
+            return ['success' => 1, 'info' => $info];
+        }else{
+            return ['success' => 99];
         }
-
-        return ['success' => 1,
-            'hayguardado' => $hayguardado,
-            'texto' => $texto];
     }
 
 
     public function guardarTextoVersiculo(Request $request)
     {
         $regla = array(
-            'idversiculo' => 'required',
-            'contenido' => 'required',
+            'idfila' => 'required',
         );
+
+        // texto
 
         $validar = Validator::make($request->all(), $regla);
 
@@ -552,22 +554,10 @@ class BibliaCapituloController extends Controller
 
         try {
 
-            // No verificar idioma, ahorita es actualizar o crear por defecto
-            if(VersiculoRefran::where('id_versiculo', $request->idversiculo)->first()){
-
-                VersiculoRefran::where('id_versiculo', $request->idversiculo)
-                    ->update([
-                        'titulo' => $request->contenido,
-                    ]);
-
-            }else{
-                $nuevo = new VersiculoRefran();
-                $nuevo->id_versiculo = $request->idversiculo;
-                $nuevo->id_idioma_planes = 1;
-                $nuevo->titulo = $request->contenido;
-                $nuevo->save();
-            }
-
+            BibliaCapituloBlockTexto::where('id', $request->idfila)
+                ->update([
+                    'textocapitulo' => $request->texto,
+                ]);
 
             DB::commit();
             return ['success' => 1];

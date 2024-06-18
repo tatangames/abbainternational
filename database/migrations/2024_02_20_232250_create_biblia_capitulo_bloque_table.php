@@ -18,8 +18,6 @@ return new class extends Migration
             // ESTE SERA LA POSICION
             $table->integer('posicion');
 
-            // EL NOMBRE DE ESTE BLOQUE SE TOMARA DE OTRA TABLA
-
 
             $table->boolean('visible');
 

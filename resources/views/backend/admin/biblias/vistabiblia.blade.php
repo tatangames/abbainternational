@@ -318,8 +318,8 @@
         }
 
 
-        function vistaCapitulos(idbiblia){
-            window.location.href="{{ url('/admin/bibliacapitulo/vista') }}/" + idbiblia;
+        function vistaLibros(idbiblia){
+            window.location.href="{{ url('/admin/biblialibro/vista') }}/" + idbiblia;
         }
 
 
