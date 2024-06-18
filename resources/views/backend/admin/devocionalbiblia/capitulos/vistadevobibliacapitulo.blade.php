@@ -213,7 +213,7 @@
                     if(response.data.success === 1){
                         Swal.fire({
                             title: "No Registrado",
-                            text: "Capitulo ya esta registrado",
+                            text: "Solo se puede 1 registro",
                             icon: 'info',
                             showCancelButton: false,
                             allowOutsideClick: false,
@@ -228,6 +228,8 @@
 
                     else if(response.data.success === 2){
                         toastr.success('Registrado');
+                        $('#modalAgregar').modal('hide');
+
                         recargar();
                     }
                     else{

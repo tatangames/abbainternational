@@ -1314,8 +1314,7 @@ class ApiPlanesController extends Controller
 
 
             // buscar el
-            if($info = DevocionalBiblia::where('id_bloque_detalle', $request->idblockdeta)
-                ->where('defecto', 1)->first()){
+            if($info = DevocionalBiblia::where('id_bloque_detalle', $request->idblockdeta)->first()){
 
                 // Esto se utilizara si redireccionar es igual a 1
                 $iddevobiblia = $info->id;

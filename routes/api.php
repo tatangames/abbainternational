@@ -232,8 +232,6 @@ Route::middleware('verificarToken')->group(function () {
     // listado de capitulos para usar el Acordeon en Apps
     Route::post('app/listado/biblia/capitulos', [ApiBibliaController::class,'listadoBibliasCapitulos']);
 
-    // listado de versiculos cargara bloques.
-    Route::post('app/listado/biblia/versiculos', [ApiBibliaController::class,'listadoCapitulosVersiculos']);
 
 
     // todos los textos del versiculo
@@ -262,11 +260,4 @@ Route::middleware('verificarToken')->group(function () {
 
 
 });
-
-
-
-Route::post('app/listado/biblias/invitado', [ApiBibliaController::class,'listadoBibliasInvitado']);
-Route::post('app/listado/biblia/capitulos/invitado', [ApiBibliaController::class,'listadoBibliasCapitulosInvitado']);
-Route::post('app/listado/biblia/versiculos/invitado', [ApiBibliaController::class,'listadoCapitulosVersiculosInvitado']);
-Route::post('app/listado/versiculos/textos/invitado', [ApiBibliaController::class,'listadoTextosVersiculosInvitado']);
 

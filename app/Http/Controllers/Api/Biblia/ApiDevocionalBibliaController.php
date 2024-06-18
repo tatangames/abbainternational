@@ -34,23 +34,12 @@ class ApiDevocionalBibliaController extends Controller
         }
 
         // ya viene el ID cual sera el POR DEFECTO
-        if($infoFila = DevocionalBiblia::where('id', $request->iddevobiblia)->first()){
-
-            $listado = DevocionalCapitulo::where('id_devocional_biblia', $request->iddevobiblia)->get();
+        if($infoFila = DevocionalCapitulo::where('id_devocional_biblia', $request->iddevobiblia)->first()){
 
 
-            // saber si hay mas opciones de biblias
-            $arrayMas = DevocionalBiblia::where('id_bloque_detalle', $infoFila->id_bloque_detalle)
-                ->where('id', '!=', $infoFila->id)->get();
-
-            $haymasversiones = 0;
-
-            foreach ($arrayMas as $dato){
-                if(DevocionalCapitulo::where('id_devocional_biblia', $dato->id)->first()){
-                    $haymasversiones = 1;
-                    break;
-                }
-            }
+            $infoCapituloBlockTexto = BibliaCapituloBlockTexto::where('id_biblia_capitulo_block', $infoFila->id_capitulo_bloque)
+                ->where('id_idioma_planes', 1) // defecto espanol
+                ->first();
 
 
 
@@ -77,42 +66,7 @@ class ApiDevocionalBibliaController extends Controller
 
 
 
-            foreach ($listado as $dato){
-
-                $infoBloque = BibliaCapituloBloque::where('id', $dato->id_capitulo_bloque)->first();
-                $dato->posicioncapi = $infoBloque->posicion;
-
-                // nombre del libro
-                $tituloLibro = $this->retornoTituloLibro($infoBloque->id_biblia_capitulo);
-                $dato->titulolibro = $tituloLibro;
-
-                // nombre del capitulo
-                $tituloCapitulo = $this->retornoTituloCapitulo($dato->id_capitulo_bloque);
-                $dato->titulocapitulo = $tituloCapitulo;
-
-
-                $arrayVersiculo = Versiculo::where('id_capitulo_block', $dato->id_capitulo_bloque)
-                    ->where('visible', 1)
-                    ->orderBy('posicion', 'ASC')
-                    ->get();
-
-
-                $contenidoHtml .= "<p style='text-align: center; font-size: 22px; margin-bottom: 5px;'>" . $tituloLibro . "</p>"
-                . "<p style='text-align: center; font-size: 48px; font-weight: bold; margin-top: 5px;'><strong>" . $tituloCapitulo . "</strong></p>" ;
-
-
-                foreach ($arrayVersiculo as $fila){
-
-                    $tituloVersiculo = $this->retornoTituloVersiculoTexto($fila->id);
-
-                    $textoSinP = preg_replace('/<p[^>]*>|<\/p>/', '', $tituloVersiculo);
-
-                    $contenidoHtml .= $textoSinP;
-                }
-
-
-                $contenidoHtml .= "<br><br>";
-            }
+                $contenidoHtml .= "$infoCapituloBlockTexto->textocapitulo";
 
 
             $contenidoHtml .= "</body>
@@ -120,34 +74,8 @@ class ApiDevocionalBibliaController extends Controller
 
 
 
-            // BUSCAR LAS VERSIONES QUE REALMENTE TIENEN DATOS
-
-            $pilaIdVersiones= array();
-
-
-
-            // obtener todas la versiones disponibles
-            $arrayVerificar = DevocionalBiblia::where('id_bloque_detalle', $infoFila->id_bloque_detalle)->get();
-
-            foreach ($arrayVerificar as $dato){
-
-                // puede haber varios id repetidos, pero se arregla al hacer la consulta final
-                if(DevocionalCapitulo::where('id_devocional_biblia', $dato->id)->first()){
-                    array_push($pilaIdVersiones, $dato->id);
-                }
-            }
-
-            $arrayVersiones = DevocionalBiblia::whereIn('id', $pilaIdVersiones)->get();
-
-            foreach ($arrayVersiones as $dato){
-                $titulo = $this->retornoTituloBiblia($dato->id_biblia);
-                $dato->titulo = $titulo;
-            }
-
             return ['success' => 1,
-                'haymasversiones' => $haymasversiones,
                 'contenido' => $contenidoHtml,
-                'versiones' => $arrayVersiones
                 ];
 
         }else{

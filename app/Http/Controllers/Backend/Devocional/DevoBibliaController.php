@@ -83,23 +83,14 @@ class DevoBibliaController extends Controller
 
         try {
 
-            if(DevocionalBiblia::where('id_bloque_detalle', $request->idbloqedetalle)
-                ->where('id_biblia', $request->idbiblia)->first()){
-                // esta repetido
-                return ['success' => 1];
-            }
-
-            $defecto = 0;
+            // SOLO ES PERMITIDO 1 BIBLIA
             if(DevocionalBiblia::where('id_bloque_detalle', $request->idbloqedetalle)->first()){
-                // hay ya
-            }else{
-                $defecto = 1;
+                return ['success' => 1];
             }
 
             $nuevo = new DevocionalBiblia();
             $nuevo->id_bloque_detalle = $request->idbloqedetalle;
             $nuevo->id_biblia = $request->idbiblia;
-            $nuevo->defecto = $defecto;
             $nuevo->save();
 
             DB::commit();
@@ -112,10 +103,11 @@ class DevoBibliaController extends Controller
     }
 
 
-    public function actualizarDefecto(Request $request)
+
+    public function borrarRegistroDevoBiblia(Request $request)
     {
         $rules = array(
-            'id' => 'required', // devocional_biblia
+            'id' => 'required',
         );
 
         $validator = Validator::make($request->all(), $rules);
@@ -128,17 +120,9 @@ class DevoBibliaController extends Controller
 
         try {
 
-            $infoDevoBiblia = DevocionalBiblia::where('id', $request->id)->first();
-
-            DevocionalBiblia::where('id_bloque_detalle', $infoDevoBiblia->id_bloque_detalle)
-                ->update([
-                    'defecto' => 0,
-                ]);
-
-            DevocionalBiblia::where('id', $infoDevoBiblia->id)
-                ->update([
-                    'defecto' => 1,
-                ]);
+            // Borrar datos de la segunda tabla
+            DevocionalCapitulo::where('id_devocional_biblia', $request->id)->delete();
+            DevocionalBiblia::where('id', $request->id)->delete();
 
 
             DB::commit();
@@ -149,6 +133,8 @@ class DevoBibliaController extends Controller
             return ['success' => 99];
         }
     }
+
+
 
 
 
@@ -286,10 +272,8 @@ class DevoBibliaController extends Controller
         }
 
 
-        // evitar meter capitulo duplicado
-        if(DevocionalCapitulo::where('id_devocional_biblia', $request->iddevobiblia)
-            ->where('id_capitulo_bloque', $request->idcapitulo)->first()){
-
+        // SOLO SE PUEDE 1 REGISTRO
+        if(DevocionalCapitulo::where('id_devocional_biblia', $request->iddevobiblia)->first()){
             return ['success' => 1];
         }
 

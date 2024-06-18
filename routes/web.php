@@ -365,7 +365,7 @@ Route::post('/admin/bibliacapitulo/versiculo/posicion', [BibliaCapituloControlle
 Route::get('/admin/devobiblia/vista/{idbloqedetalle}', [DevoBibliaController::class,'vistaDevoBiblia']);
 Route::get('/admin/devobiblia/tabla/{idbloqedetalle}', [DevoBibliaController::class,'tablaDevoBiblia']);
 Route::post('/admin/devobiblia/registrar', [DevoBibliaController::class,'registrarBibliaDevo']);
-Route::post('/admin/devobiblia/defecto', [DevoBibliaController::class,'actualizarDefecto']);
+Route::post('/admin/devobiblia/borrarregistro', [DevoBibliaController::class,'borrarRegistroDevoBiblia']);
 
 // vista para registrar libro capitulo
 Route::get('/admin/devobiblia/capitulos/vista/{iddevobiblia}', [DevoBibliaController::class,'vistaDevoBibliaCapitulos']);

@@ -74,7 +74,7 @@
 
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label class="control-label">Biblia</label>
+                                        <label class="control-label">Biblia (Solo se puede registrar 1)</label>
                                         <select class="form-control" id="select-biblia">
                                             @foreach($arrayBiblias as $item)
                                                 <option value="{{$item->id}}">{{$item->titulo}}</option>
@@ -95,43 +95,6 @@
         </div>
     </div>
 </div>
-
-
-<!-- modal editar-->
-<div class="modal fade" id="modalEditar" >
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">Editar</h4>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form id="formulario-editar">
-                    <div class="card-body">
-                        <div class="col-md-12">
-
-                            <div class="form-group">
-                                <label>Título</label>
-                                <input type="hidden" id="id-editar">
-                                <input type="text" maxlength="50" autocomplete="off" class="form-control" id="titulo-editar">
-                            </div>
-
-
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer justify-content-between">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
-                <button type="button" class="btn btn-success" onclick="editar()">Actualizar</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-
 
 
 
@@ -195,7 +158,7 @@
                     if (response.data.success === 1) {
                         Swal.fire({
                             title: "No Registrado",
-                            text: "La Biblia ya se encuentra registrada",
+                            text: "Solo se puede 1 registro",
                             icon: 'info',
                             showCancelButton: false,
                             allowOutsideClick: false,
@@ -224,20 +187,40 @@
         }
 
 
-        function defectoDevo(id){
+
+        function modalBorrar(id){
+
+            Swal.fire({
+                title: '¿Borrar?',
+                text: '',
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonColor: '#28a745',
+                cancelButtonColor: '#d33',
+                allowOutsideClick: false,
+                confirmButtonText: 'Si',
+                cancelButtonText: 'No'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    borrarRegistro(id);
+                }
+            })
+        }
+
+        function borrarRegistro(id){
 
             openLoading();
 
             var formData = new FormData();
             formData.append('id', id);
 
-            axios.post('/admin/devobiblia/defecto', formData, {
+            axios.post('/admin/devobiblia/borrarregistro', formData, {
             })
                 .then((response) => {
                     closeLoading();
 
                     if (response.data.success === 1) {
-                        toastr.success('Actualizado');
+                        toastr.success('Borrado');
                         recargar();
                     }
                     else {
@@ -249,6 +232,8 @@
                     toastr.error('Error al guardar');
                 });
         }
+
+
 
 
         function vistaCapitulo(idblockdetalle){

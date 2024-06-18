@@ -18,7 +18,6 @@ return new class extends Migration
             $table->bigInteger('id_bloque_detalle')->unsigned();
             $table->bigInteger('id_biblia')->unsigned();
 
-            $table->boolean('defecto');
 
 
             $table->foreign('id_bloque_detalle')->references('id')->on('planes_block_detalle');
