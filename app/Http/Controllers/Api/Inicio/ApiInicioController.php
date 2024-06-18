@@ -458,12 +458,6 @@ class ApiInicioController extends Controller
         $diaSabado = 0;
 
 
-        // obtener los dias de estas fechas seguidas
-        /*$arrayFechaDias = RachaDevocional::where('id_usuario', $userToken->id)
-            ->where('fecha', '<=', $fechaFormatHorariaCarbon)
-            ->orderBy('fecha', 'DESC')
-            ->take(7) // por seguridad nomas
-            ->get();*/
         $arrayFechaDevo = PlanesBlockDetaUsuario::where('id_usuario', $userToken->id)->get();
 
         foreach ($arrayFechaDevo as $dato){

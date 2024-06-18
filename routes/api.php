@@ -72,6 +72,7 @@ Route::middleware('verificarToken')->group(function () {
 
     // devuelve mis planes que he seleccionado, habra algunos que pasaran a 'completados' pero
     // se verificaran dinamicamente -> Paginate
+    // SOLO UTILIZADO EN IPHONE POR PAGINATE 18/06/2024
     Route::post('app/plan/listado/misplanes', [ApiPlanesController::class,'listadoMisPlanes']);
 
     // devuelve informacion del plan BLOQUE FECHAS
@@ -248,7 +249,7 @@ Route::middleware('verificarToken')->group(function () {
 
 
 
-    // FIX 30/04/2024
+    // FIX 30/04/2024  SOLO PARA ANDROID
     // mis planes sin paginacion
     Route::post('app/plan/listado/misplanes/nopagination', [ApiPlanesController::class,'listadoMisPlanesNoPaginacion']);
     Route::post('app/buscar/planes/nuevos/nopagination', [ApiPlanesController::class,'buscarPlanesNoAgregadosNoPaginacion']);

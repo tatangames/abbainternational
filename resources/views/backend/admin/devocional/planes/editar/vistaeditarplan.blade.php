@@ -42,6 +42,12 @@
                     <div>
                         <div class="col-md-12">
 
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label class="control-label">ID Devocional: {{ $idplan }}</label>
+                                </div>
+                            </div>
+
                             <section>
                                 <div class="row">
 

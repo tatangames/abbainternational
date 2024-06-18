@@ -227,7 +227,8 @@ class PlanesController extends Controller
             $dato->idioma = $infoIdioma->nombre;
         }
 
-        return view('backend.admin.devocional.planes.editar.vistaeditarplan', compact('infoPlan', 'arrayIdiomas', 'arrayPlanTextos', 'idplan'));
+        return view('backend.admin.devocional.planes.editar.vistaeditarplan', compact('infoPlan',
+            'arrayIdiomas', 'arrayPlanTextos', 'idplan'));
     }
 
 
