@@ -17,7 +17,7 @@ return new class extends Migration
 
             // COMO SE PUEDEN BORRAR PLANES, ESTO NO SERA FORANEA
             // 19/06/2024
-            $table->integer('id_planes');
+            $table->bigInteger('id_planes');
 
 
 

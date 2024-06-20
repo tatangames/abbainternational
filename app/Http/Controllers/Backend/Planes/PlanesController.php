@@ -7,6 +7,8 @@ use App\Models\BloqueCuestionarioTextos;
 use App\Models\BloquePreguntas;
 use App\Models\BloquePreguntasTextos;
 use App\Models\BloquePreguntasUsuarios;
+use App\Models\DevocionalBiblia;
+use App\Models\DevocionalCapitulo;
 use App\Models\IdiomaPlanes;
 use App\Models\LecturaDia;
 use App\Models\Planes;
@@ -429,6 +431,23 @@ class PlanesController extends Controller
                 // borrar lectura dia
                 LecturaDia::whereIn('id_planes_block_detalle', $pilaIdBlockDetalle)->delete();
 
+
+
+
+
+                $pilaIdDevoBiblia = array();
+                $arrayDevoBiblia = DevocionalBiblia::whereIn('id_bloque_detalle', $pilaIdBlockDetalle)->get();
+
+                foreach ($arrayDevoBiblia as $dato){
+                    array_push($pilaIdDevoBiblia, $dato->id);
+                }
+
+                DevocionalCapitulo::whereIn('id_devocional_biblia', $pilaIdDevoBiblia)->delete();
+                DevocionalBiblia::whereIn('id_bloque_detalle', $pilaIdBlockDetalle)->delete();
+
+
+
+
                 // borrar ya plan block detalle
                 PlanesBlockDetalle::whereIn('id', $pilaIdBlockDetalle)->delete();
 
@@ -457,9 +476,28 @@ class PlanesController extends Controller
                 // borrar planes usuarios
                 PlanesUsuarios::where('id_planes', $idplan)->delete();
 
+
+                $infoPlanes = Planes::where('id', $idplan)->first();
+                $imagenPortada = $infoPlanes->imagenportada;
+                $imagenNormal = $infoPlanes->imagen;
+
+
+
                 // BORRADO FINAL
                 Planes::where('id', $idplan)->delete();
 
+
+                if($imagenPortada != null){
+                    if(Storage::disk('archivos')->exists($imagenPortada)){
+                        Storage::disk('archivos')->delete($imagenPortada);
+                    }
+                }
+
+                if($imagenNormal != null){
+                    if(Storage::disk('archivos')->exists($imagenNormal)){
+                        Storage::disk('archivos')->delete($imagenNormal);
+                    }
+                }
 
 
                 DB::commit();
@@ -635,12 +673,27 @@ class PlanesController extends Controller
                 // borrar lectura dia
                 LecturaDia::whereIn('id_planes_block_detalle', $pilaIdBlockDetalle)->delete();
 
+
+
+                $pilaIdDevoBiblia = array();
+                $arrayDevoBiblia = DevocionalBiblia::whereIn('id_bloque_detalle', $pilaIdBlockDetalle)->get();
+
+                foreach ($arrayDevoBiblia as $dato){
+                    array_push($pilaIdDevoBiblia, $dato->id);
+                }
+
+                DevocionalCapitulo::whereIn('id_devocional_biblia', $pilaIdDevoBiblia)->delete();
+                DevocionalBiblia::whereIn('id_bloque_detalle', $pilaIdBlockDetalle)->delete();
+
+
+
+
                 // borrar ya plan block detalle
                 PlanesBlockDetalle::whereIn('id', $pilaIdBlockDetalle)->delete();
-
-
                 // borrar plan bloque textos
                 PlanesBloquesTextos::where('id_planes_bloques', $idplanBloque)->delete();
+
+
 
                 // borrar ya plan bloque
                 PlanesBloques::where('id', $idplanBloque)->delete();
@@ -919,6 +972,19 @@ class PlanesController extends Controller
                 LecturaDia::where('id_planes_block_detalle', $id)->delete();
 
 
+
+                // Eliminar tablas devocional_biblia y devocional_capitulo que son los redireccionamiento
+
+
+                $pilaIdDevoBiblia = array();
+                $arrayDevoBiblia = DevocionalBiblia::where('id_bloque_detalle', $id)->get();
+
+                foreach ($arrayDevoBiblia as $dato){
+                    array_push($pilaIdDevoBiblia, $dato->id);
+                }
+
+                DevocionalCapitulo::whereIn('id_devocional_biblia', $pilaIdDevoBiblia)->delete();
+                DevocionalBiblia::where('id_bloque_detalle', $id)->delete();
 
 
                 PlanesBlockDetalle::where('id', $id)->delete();

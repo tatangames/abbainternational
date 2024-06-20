@@ -308,11 +308,11 @@
                         recargar();
                     }
                     else{
-                        toastr.error('Error al ocultar');
+                        toastr.error('Error al borrar');
                     }
                 })
                 .catch((error) => {
-                    toastr.error('Error al ocultar');
+                    toastr.error('Error al borrar');
                     closeLoading();
                 });
         }
