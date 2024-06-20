@@ -202,7 +202,6 @@ class ApiInicioController extends Controller
                     ->join('insignias_usuarios AS i', 'i.id_tipo_insignia', '=', 't.id')
                     ->where('i.id_usuario', $userToken->id)
                     ->select('t.visible', 'i.id_usuario', 'i.id_tipo_insignia', 'i.fecha')
-                    //->take(5) MOSTRAR TODAS
                     ->get();
 
 
@@ -222,11 +221,20 @@ class ApiInicioController extends Controller
 
 
                 // Conocer que nivel voy (ejemplo devuelve 5)
+                /*$datoHitoNivel = DB::table('insignias_usuarios_detalle AS indeta')
+                    ->join('niveles_insignias AS nil', 'indeta.id_niveles_insignias', '=', 'nil.id')
+                    ->join('tipo_insignias AS tipo', 'nil.id_tipo_insignia', '=', 'tipo.id')
+                    ->select('nil.nivel', 'nil.id AS idnivelinsignia')
+                    ->where('nil.id_tipo_insignia', $dato->id_tipo_insignia)
+                    ->max('nil.nivel');*/
+
+
                 $datoHitoNivel = DB::table('insignias_usuarios_detalle AS indeta')
                     ->join('niveles_insignias AS nil', 'indeta.id_niveles_insignias', '=', 'nil.id')
                     ->join('tipo_insignias AS tipo', 'nil.id_tipo_insignia', '=', 'tipo.id')
                     ->select('nil.nivel', 'nil.id AS idnivelinsignia')
                     ->where('nil.id_tipo_insignia', $dato->id_tipo_insignia)
+                    ->where('indeta.id_usuarios', $userToken->id_usuario)
                     ->max('nil.nivel');
 
                 $hito_infoNivelVoy = 1;
@@ -241,8 +249,6 @@ class ApiInicioController extends Controller
 
                 // ------ INFORMACION DEL HITO DE CADA INSIGNIA ------
 
-                $hito_cuantoFaltan = 0; // Cuantos puntos me faltan para la siguiente nivel de esta insignia
-                $hito_haySiguienteNivel = 0; // Saber si hay un nivel mas por superar
 
 
                 // Obtener los niveles ya ganados para evitarlos
@@ -264,18 +270,10 @@ class ApiInicioController extends Controller
                     ->whereNotIn('id', $pilaIdYaGanados)
                     ->where('nivel', '>', $hito_infoNivelVoy)
                     ->first()){
-
-                    $hito_haySiguienteNivel = 1; // Si hay siguiente nivel
-                    $hito_cuantoFaltan = $infoNivelSiguiente->nivel - $hito_infoNivelVoy;
                 }
 
                 $infoInsigniaP = TipoInsignias::where('id', $dato->id_tipo_insignia)->first();
                 $dato->imageninsignia = $infoInsigniaP->imagen;
-
-                $dato->hitohaynextlevel = $hito_haySiguienteNivel;
-                $dato->hitocuantofalta = $hito_cuantoFaltan;
-
-
             }
 
 

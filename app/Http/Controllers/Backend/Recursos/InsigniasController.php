@@ -190,7 +190,6 @@ class InsigniasController extends Controller
     {
         $regla = array(
             'idtipoinsignia' => 'required',
-            'toggle' => 'required'
         );
 
         // array: infoIdInsigniaTexto, infoIdIdioma, infoTitulo, infoSubtitulo
@@ -202,11 +201,6 @@ class InsigniasController extends Controller
         DB::beginTransaction();
 
         try {
-
-            TipoInsignias::where('id', $request->idtipoinsignia)->update([
-                'visible' => $request->toggle,
-            ]);
-
 
             $datosContenedor = json_decode($request->contenedorArray, true);
 

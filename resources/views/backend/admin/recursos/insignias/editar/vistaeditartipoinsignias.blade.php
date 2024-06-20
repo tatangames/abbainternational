@@ -58,18 +58,6 @@
                                 </div>
 
 
-                                <div class="form-group" style="margin-top: 25px">
-                                    <label>Visible</label>
-                                    <br>
-                                    <label class="switch" style="margin-top:10px">
-                                        <input type="checkbox" id="toggle">
-                                        <div class="slider round">
-                                            <span class="on">Activo</span>
-                                            <span class="off">Inactivo</span>
-                                        </div>
-                                    </label>
-                                </div>
-
 
 
                             </section>
@@ -269,11 +257,7 @@
     <script type="text/javascript">
         $(document).ready(function() {
 
-            let visi = {{ $visible }};
 
-            if(visi === 1){
-                $("#toggle").prop("checked", true);
-            }
 
             document.getElementById("divcontenedor").style.display = "block";
         });
@@ -506,10 +490,6 @@
                 return;
             }
 
-            let t = document.getElementById('toggle').checked;
-            let toggleVisible = t ? 1 : 0;
-
-
 
             let idtipoinsignia = {{ $idtipoinsignia }};
 
@@ -535,7 +515,6 @@
 
             formData.append('contenedorArray', JSON.stringify(contenedorArray));
             formData.append('idtipoinsignia', idtipoinsignia);
-            formData.append('toggle', toggleVisible);
 
             openLoading();
 
