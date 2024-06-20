@@ -18,14 +18,15 @@ return new class extends Migration
             $table->id();
             $table->bigInteger('id_usuario')->unsigned();
             $table->bigInteger('id_planes_block_deta')->unsigned();
-            $table->boolean('completado');
 
 
             // 10/06/2024
             // SE AGREGO FECHA QUE ES COMPLETADO, SE SETEA UNICAMENTE AL CREARSE LA FILA
             $table->date('fecha');
 
-
+            // 19/06/2024
+            // SIEMPRE SE DEJARA, CON ESTO VOY A SABER SI FINALIZO EL PLAN
+            $table->boolean('completado');
 
             $table->foreign('id_usuario')->references('id')->on('usuarios');
             $table->foreign('id_planes_block_deta')->references('id')->on('planes_block_detalle');

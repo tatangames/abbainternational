@@ -106,11 +106,11 @@
         }
 
 
-        function preguntaActivar(idplanbloques){
+        function modalBorrar(idplanbloques){
 
             Swal.fire({
-                title: '¿Activar?',
-                text: "",
+                title: '¿Borrar?',
+                text: "Borrar registro",
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonColor: '#28a745',
@@ -119,39 +119,19 @@
                 confirmButtonText: 'Si'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    configurarPlan(1, idplanbloques);
+                    apiBorrar(idplanbloques);
                 }
             })
         }
 
 
-        function preguntaDeshabilitar(idplanbloques){
-
-            Swal.fire({
-                title: '¿Deshabilitar?',
-                text: "",
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#28a745',
-                cancelButtonColor: '#d33',
-                cancelButtonText: 'Cancelar',
-                confirmButtonText: 'Si'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    configurarPlan(0, idplanbloques);
-                }
-            })
-        }
-
-
-        function configurarPlan(estado, idplanbloques){
+        function apiBorrar(idplanbloques){
 
             let formData = new FormData();
             formData.append('idplanbloques', idplanbloques);
-            formData.append('estado', estado);
             openLoading();
 
-            axios.post('/admin/planesbloques/activacion', formData, {
+            axios.post('/admin/planesbloques/borrarregistro', formData, {
             })
                 .then((response) => {
                     closeLoading();

@@ -81,11 +81,8 @@ class ApiPlanesController extends Controller
             // conocer si habra planes disponibles
             $hayInfo = 0;
 
-            // obtener todos los planes NO elegido por el usuario y sean visible
-            $arrayPlanes = Planes::whereNotIn('id', $arrayIdYaSeleccionados)
-                ->where('visible', 1)
-                ->where('visiblepanel', 1)
-                ->get();
+            // obtener todos los planes NO elegido por el usuario
+            $arrayPlanes = Planes::whereNotIn('id', $arrayIdYaSeleccionados)->get();
 
 
             if ($arrayPlanes->isNotEmpty()) {
@@ -98,7 +95,6 @@ class ApiPlanesController extends Controller
 
 
             $arrayPlanes = Planes::whereNotIn('id', $arrayIdYaSeleccionados)
-                ->where('visible', 1)
                 ->paginate($limit, ['*'], 'page', $page);
 
             foreach ($arrayPlanes as $dato){
@@ -268,24 +264,20 @@ class ApiPlanesController extends Controller
 
             $arrayPlanUsuario = DB::table('planes AS p')
                 ->join('planes_usuarios AS pu', 'pu.id_planes', '=', 'p.id')
-                ->select('p.visiblepanel', 'p.visible', 'pu.id_usuario', 'pu.id_planes')
+                ->select('pu.id_usuario', 'pu.id_planes')
                 ->where('pu.id_usuario', $userToken->id)
-                ->where('p.visiblepanel', 1)
-                ->where('p.visible', 1)
                 ->get();
 
 
             foreach ($arrayPlanUsuario as $dato){
 
                 $arrayPlanBloque = PlanesBloques::where('id_planes', $dato->id_planes)->get();
-                $planCompletado = 1;
 
                 if($arrayPlanBloque != null && $arrayPlanBloque->isNotEmpty()){
                     foreach ($arrayPlanBloque as $rec){ // cada bloque
 
                         // buscar el detalle de ese bloque
                         $arrayListado = PlanesBlockDetalle::where('id_planes_bloques', $rec->id)
-                            ->where('visible', 1)
                             ->get();
 
                         foreach ($arrayListado as $datoLista){
@@ -305,11 +297,7 @@ class ApiPlanesController extends Controller
                             }
                         }
                     }
-                }else{
-                    $planCompletado = 0;
                 }
-
-                $dato->plancompletado = $planCompletado;
             }
 
 
@@ -321,8 +309,6 @@ class ApiPlanesController extends Controller
                     array_push($pilaIdPlanNoComplet, $item->id_planes);
                 }
             }
-
-
 
 
 
@@ -392,176 +378,60 @@ class ApiPlanesController extends Controller
 
         if ($userToken = JWTAuth::user($tokenApi)) {
 
-            $infoPlan = Planes::where('id', $request->idplan)->first();
 
-            // obtener zona horaria
-            $infoIglesia = Iglesias::where('id', $userToken->id_iglesia)->first();
-            $infoDepartamento = Departamentos::where('id', $infoIglesia->id_departamento)->first();
-            $zonaHoraria = ZonaHoraria::where('id', $infoDepartamento->id_zona_horaria)->first();
-            $fechaCarbon = Carbon::now($zonaHoraria->zona);
+            $infoPlan = Planes::where('id', $request->idplan)->first();
 
             // obtener todos los bloques ordenados por fecha
             $arrayBloques = PlanesBloques::where('id_planes', $request->idplan)
-                ->where('visible', 1)
                 ->orderBy('fecha_inicio', 'ASC')
                 ->get();
 
-            $contador = 0;
+
             $resultsBloque = array();
             $index = 0;
 
-            // con esto se conoce si hay un dia con informacion para Hoy, sino se tomara el ultimo
-            // en la aplicacion
-            $hayDiaActual = 0;
-
-            // posicion para recyclerview, a donde debe moverse
-            $posicionRecycler = 0;
-            $primeraVuelta = false;
-            $pararConteo = true;
-
-            $unaVezBool = 1;
 
             foreach ($arrayBloques as $dato){
                 array_push($resultsBloque, $dato);
 
-                $dato->mismodia = 3;
-
-
-
-
-                // POSICION PARA MOVER EL RECYCLERVIEW
-                if($pararConteo) {
-                    if($primeraVuelta){
-                        $posicionRecycler++;
-                    }
-                }
-                $primeraVuelta = true;
-
-
-
-                $contador++;
-                $dato->abreviatura = $this->retorno3LetrasFechasIdioma($idiomaTextos, $dato->fecha_inicio);
-                $dato->contador = $contador;
-                $dato->contador2 = $contador;
-
-                // fecha inicio del bloque
-                $fecha1 = Carbon::parse($dato->fecha_inicio);
-
-                // fecha-horario actual segun usuario zona horaria
-                $fecha2 = Carbon::parse($fechaCarbon);
-
-
-                if($fecha1->isSameDay($fecha2)){
-
-                    // YA NO SE USARA
-                    // 18/05/2024
-                    //$dato->mismodia = 1;
-
-                    $hayDiaActual = 1;
-
-                    // nunca habra 2 dias iguales pero por seguridad
-                    $pararConteo = false;
-
-                }else{
-
-
-                   // $dato->mismodia = 0;
-                }
-
-                // ESTA PARTE ERA QUE APARECIERA EL BLOQUE SEGUN FECHA DEL USUARIO
-                /*if($dato->esperar_fecha == 1){
-
-                    //gte: mayor o igual
-                    if($fecha2->gte($fecha1)){
-                        // SET
-                        $dato->esperar_fecha = 0;
-                    }
-                }*/
-
 
                 // TEXTO PERSONALIZADO EN EL BLOQUE
 
-                $textoPersonalizado = "";
-                // buscar si tiene texto personalizado, para no mostrar la fecha
-                if($dato->texto_personalizado == 1){
-                    // se envia id planes bloques
-                    $textoPersonalizado = $this->retornoTextoPersonalizadoPlan($idiomaTextos, $dato->id);
-                }
 
+                $textoPersonalizado = $this->retornoTextoPersonalizadoPlan($idiomaTextos, $dato->id);
                 $dato->textopersonalizado = $textoPersonalizado;
 
                 // agregar detalle bloques
                 $arrayDetaBloque = PlanesBlockDetalle::where('id_planes_bloques', $dato->id)
-                    ->where('visible', 1)
                     ->orderBy('posicion', 'ASC')
                     ->get();
+
+
 
                 foreach ($arrayDetaBloque as $datoArr){
 
                     $datoArr->titulo = $this->retornoTituloBloquesTextos($idiomaTextos, $datoArr->id);
 
+                    // SE GUARDO PREGUNTAS
+                    $estaCompletado = 0;
+
+
                     // saber si esta check para mi usuario
-                    if($infoDeta = PlanesBlockDetaUsuario::where('id_usuario', $userToken->id)
+                    if(PlanesBlockDetaUsuario::where('id_usuario', $userToken->id)
                     ->where('id_planes_block_deta', $datoArr->id)
                     ->first()){
-                        if($infoDeta->completado == 1){
-                            $datoArr->completado = 1;
-                        }else{
-                            $datoArr->completado = 0;
-                        }
-                    }else{
-                        $datoArr->completado = 0;
+                        $estaCompletado = 1;
                     }
 
-                    // verificar si tiene preguntas, o alguna activa para mostrarlas
-                    $hayPreguntas = 0;
-                    $arrayPreguntas = BloquePreguntas::where('id_plan_block_detalle', $datoArr->id)
-                        ->where('visible', 1)
-                        ->count();
-
-                    if ($arrayPreguntas > 0) {
-                        $hayPreguntas = 1;
-                    }
-                    $datoArr->tiene_preguntas = $hayPreguntas;
+                    $datoArr->completado = $estaCompletado;
                 }
 
                 $resultsBloque[$index]->detalle = $arrayDetaBloque;
                 $index++;
             }
 
-
-            // Para comparar en la aplicacion que sino hay info para este dia, este id sera el bloque que se
-            // le cambiara el estilo
-            $idUltimoBloque = 0;
-
-            if ($arrayBloques->isNotEmpty() && $hayDiaActual == 0) {
-
-                $encontroBloque = true;
-
-                // encontrar cual es el siguiente bloque que deberia cargarse
-                foreach ($arrayBloques as $bloque){
-                    $fecha1 = Carbon::parse($bloque->fecha_inicio);
-                    $fecha2 = Carbon::parse(now(), $zonaHoraria->zona);
-
-                    if($fecha1->gte($fecha2)){
-                        $idUltimoBloque = $bloque->id;
-                        $encontroBloque = false;
-                        break;
-                    }
-                }
-
-                if($encontroBloque){
-                    $ultimoElemento = $arrayBloques->last();
-                    $idUltimoBloque = $ultimoElemento->id;
-                }
-            }
-
-
             return ['success' => 1,
                 'portada' => $infoPlan->imagenportada,
-                'haydiaactual' => $hayDiaActual,
-                'idultimobloque' => $idUltimoBloque,
-                'posrecycler' => $posicionRecycler, // posicion para mover recycler
                 'listado' => $arrayBloques,
                 ];
         }else{
@@ -617,7 +487,6 @@ class ApiPlanesController extends Controller
     // actualizar el check de cada plan
     public function actualizarCheckBloqueMiPlan(Request $request)
     {
-
         $rules = array(
             'iduser' => 'required',
             'idblockdeta' => 'required',
@@ -639,27 +508,38 @@ class ApiPlanesController extends Controller
 
             try {
 
+
+                // ESTO ES TESTEO LOCAL, EN PRODUCCION DEBE ESTAR EN TRUE
                 $permitirNotificacion = true;
                 $idiomaTexto = $request->idiomaplan;
                 $fechaCarbon = $this->retornoZonaHorariaDepaCarbonNow($userToken->id_iglesia);
 
 
+                // EVITAR UN PLAN BORRADO
+                if(!Planes::where('id', $request->idplan)->first()){
+                    return ['success' => 1, 'msg' => "el plan no existe"];
+                }
+
+
                 // ****************** BLOQUE 1 *********************
 
+                $arrayConteoPreguntas = BloquePreguntas::where('id_plan_block_detalle', $request->idblockdeta)->count();
 
-                // comprobar si hay preguntas, por lo menos 1 visible y requerida
-                $arrayPreguntas = BloquePreguntas::where('id_plan_block_detalle', $request->idblockdeta)
-                    ->where('visible', 1)
-                    ->where('requerido', 1)
-                    ->get();
+                // NO EXISTEN PREGUNTAS REGISTRADAS POR ADMINISTRADOR
+                if($arrayConteoPreguntas <= 0){
+                    return ['success' => 1, 'msg' => "no hay ninguna pregunta"];
+                }
 
-                $hayVerificar = false;
+
+                // TODAS LAS PREGUNTAS REGISTRADAS POR ADMINISTRADOR
+                $arrayPreguntas = BloquePreguntas::where('id_plan_block_detalle', $request->idblockdeta)->get();
+
+
+
                 $hayRespondidas = false;
 
-                // verificar que haya al menos preguntas ya guardadas
+                // CON SOLO UNA PREGUNTA RESPONDIDA POR EL USUARIO ES SUFICIENTE
                 foreach ($arrayPreguntas as $dato){
-                    $hayVerificar = true;
-
                     if(BloquePreguntasUsuarios::where('id_bloque_preguntas', $dato->id)
                         ->where('id_usuarios', $userToken->id)->first()){
                           $hayRespondidas = true;
@@ -667,51 +547,57 @@ class ApiPlanesController extends Controller
                     }
                 }
 
-                if($hayVerificar){
-                    if(!$hayRespondidas){
-                        return ['success' => 1, 'msg' => "falta responder preguntas"];
-                    }
+                // SI ES FALSO, TAMBIEN NO DEJARA
+                if(!$hayRespondidas){
+                    return ['success' => 1, 'msg' => "falta responder preguntas"];
                 }
+
+
 
 
 
                 //*******************************
 
 
-                $planCompletado = 1;
+
+                // SOLO SUMAR PUNTO SI ES PRIMERA VEZ GUARDANDO ITEM
                 $primeraVezItem = false;
 
                 // si existe, solo actualizar
-                if($idinfo = PlanesBlockDetaUsuario::where('id_usuario', $userToken->id)
+                if(PlanesBlockDetaUsuario::where('id_usuario', $userToken->id)
                     ->where('id_planes_block_deta', $request->idblockdeta)
                     ->first()){
 
-                    PlanesBlockDetaUsuario::where('id', $idinfo->id)
-                        ->update([
-                            'completado' => $request->valor,
-                        ]);
+                    // SI ENTRA AQUI, DIGAMOS QUE EL CHECK VINO DE NUEVO,
+                    // SOLO DECIRLE AL USUARIO ACTUALIZADO, Y AL CARGAR DE NUEVO LA PANTALLA
+                    // YA NO SALDRA EL CHECK
+                    return ['success' => 2, 'msg' => 'actualizado'];
 
                 }else{
 
-                    // se debera crear
-
+                    // PRIMERA VEZ QUE LLEGA EL CHECK
+                    // ESTO HARA QUE NO VUELVA APARECE EL CHECK DE NUEVO
                     $detalle = new PlanesBlockDetaUsuario();
                     $detalle->id_usuario = $userToken->id;
                     $detalle->id_planes_block_deta = $request->idblockdeta;
-                    $detalle->completado = 1;
                     $detalle->fecha = $fechaCarbon;
+                    $detalle->completado = 1;
                     $detalle->save();
 
                     $primeraVezItem = true;
                 }
 
+
+
+                ///*********************** PARTE DE LAS INSIGNIAS **********************************
+
+
                 // INSIGNIAS
-
-
+                // Rachas / Días lectura y devocional
                 $idTipoInsignia = 4; // RACHA DEVOCIONAL
 
 
-
+                // OBTENER LOS IDENTIFICADORES DE ONE SIGNAL
                 $arrayOneSignal = UsuarioNotificaciones::where('id_usuario', $userToken->id)->get();
                 $pilaOneSignal = array();
                 $hayIdOne = false;
@@ -723,10 +609,9 @@ class ApiPlanesController extends Controller
                 }
 
 
-                // COMPARTIR DEVOCIONAL
+                // Rachas / Días lectura y devocional
                 if(InsigniasUsuarios::where('id_tipo_insignia', $idTipoInsignia)
                     ->where('id_usuario', $userToken->id)->first()){
-                    //ya esta registrado, se debera sumar un punto
 
                     // AQUI SE SUMA CONTADOR Y SE VERIFICA SI GANARA EL HITO
 
@@ -785,7 +670,8 @@ class ApiPlanesController extends Controller
                         if($enviarNoti){
 
                             if($hayIdOne){
-                                // SUBI DE NIVEL INSIGNIA RACHA DEVOCIONAL
+
+                                // 8: Subiste de Nivel tu insignia Racha Lectura
                                 $datosRaw = $this->retornoTitulosNotificaciones(8, $idiomaTexto);
                                 $tiNo = $datosRaw['titulo'];
                                 $desNo = $datosRaw['descripcion'];
@@ -795,8 +681,6 @@ class ApiPlanesController extends Controller
                                 if($permitirNotificacion) {
                                     dispatch(new EnviarNotificacion($pilaOneSignal, $tiNo, $desNo));
                                 }
-
-
                             }
                         }
 
@@ -805,21 +689,16 @@ class ApiPlanesController extends Controller
 
                         if($conteo <= $maxNiveles){
 
-                            // solo actualizar conteo
-
+                            // SOLO ACTUALIZAR CONTEO, PORQUE AUN NO ALCANZA EL MAX NIVEL
                             InsigniasUsuariosConteo::where('id_tipo_insignia', $idTipoInsignia)
                                 ->where('id_usuarios', $userToken->id)
                                 ->update(['conteo' => $conteo]);
 
                         }
-
                     }
-
-
                 }else{
 
-                    // PRIMERA VEZ GANANDO INSIGNIA RACHA
-                    // AQUI ENTRARA 1 SOLA VEZ POR USUARIO
+                    // POR PRIMERA VEZ GANANDO LA INSIGNIA RACHA DEVOCIONAL , conteo 1
 
                     $nuevaInsignia = new InsigniasUsuarios();
                     $nuevaInsignia->id_tipo_insignia = $idTipoInsignia;
@@ -847,7 +726,6 @@ class ApiPlanesController extends Controller
                     $nuevoHito->save();
 
 
-
                     // PRIMERA VEZ - INSIGNIA COMPARTIR DEVOCIONAL
                     $notiHistorial = new NotificacionUsuario();
                     $notiHistorial->id_usuario = $userToken->id;
@@ -856,9 +734,8 @@ class ApiPlanesController extends Controller
                     $notiHistorial->save();
 
 
-
                     if($hayIdOne){
-                        // GANE INSIGNIA RACHA DEVOCIONAL
+                        // 7: Ganaste Insignia Racha Lectura
                         $datosRaw = $this->retornoTitulosNotificaciones(7, $idiomaTexto);
                         $tiNo = $datosRaw['titulo'];
                         $desNo = $datosRaw['descripcion'];
@@ -867,9 +744,17 @@ class ApiPlanesController extends Controller
                         if($permitirNotificacion) {
                             dispatch(new EnviarNotificacion($pilaOneSignal, $tiNo, $desNo));
                         }
-
                     }
                 }
+
+
+
+
+
+                $planCompletado = 1;
+
+
+
 
 
                 // VERIFICA SI TODAS LAS CASILLAS DE TODOS LOS BLOQUES ESTAN COMPLETOS
@@ -878,9 +763,7 @@ class ApiPlanesController extends Controller
                 foreach ($arrayPlanBloque as $dato){
 
                     // buscar el detalle de cada bloque
-                    $arrayListado = PlanesBlockDetalle::where('id_planes_bloques', $dato->id)
-                        ->where('visible', 1)
-                        ->get();
+                    $arrayListado = PlanesBlockDetalle::where('id_planes_bloques', $dato->id)->get();
 
                     foreach ($arrayListado as $datoLista){
 
@@ -903,6 +786,18 @@ class ApiPlanesController extends Controller
 
                 $infoBlockDeta = PlanesBlockDetalle::where('id', $request->idblockdeta)->first();
                 $infoPlanesBloques = PlanesBloques::where('id', $infoBlockDeta->id_planes_bloques)->first();
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1259,9 +1154,6 @@ class ApiPlanesController extends Controller
 
 
 
-
-
-
                 DB::commit();
                 return ['success' => 2,
                     'plancompletado' => $planCompletado
@@ -1493,15 +1385,12 @@ class ApiPlanesController extends Controller
             $idiomaTextos = $request->idiomaplan;
 
             // comprueba que al menos haya una pregunta disponible
-            if($infoBloquePre = BloquePreguntas::where('id_plan_block_detalle', $request->idblockdeta)
-                ->where('visible', 1)
-                ->first()){
+            if($infoBloquePre = BloquePreguntas::where('id_plan_block_detalle', $request->idblockdeta)->first()){
 
                 $descripcionPregunta = $this->retornoTituloPrincipalPreguntaTextoIdioma($request->idblockdeta, $idiomaTextos);
 
 
                 $arrayBloque = BloquePreguntas::where('id_plan_block_detalle', $request->idblockdeta)
-                    ->where('visible', 1)
                     ->orderBy('posicion')
                     ->get();
 
@@ -1605,9 +1494,7 @@ class ApiPlanesController extends Controller
     }
 
 
-
-    // guardar las preguntas del usuario segun plan, guardara las que vienen y en actualizar
-    // se verifica si existe o no para update o crearla
+    // GUARDADR LAS PREGUNTAS O ACTUALIZA - VERSION ANDROID
     public function actualizarPreguntasUsuarioPlan(Request $request)
     {
         $rules = array(
@@ -1634,20 +1521,21 @@ class ApiPlanesController extends Controller
 
             try {
 
-
                 // COMO GUARDO PREGUNTAS, GUARDAR RACHA DEVOCIONAL
+                // SE GUARDA LOS ITEMS
+                // TAN SOLO QUE HAYA 1 PREGUNTA GUARDADA SE VERIFICARA LAS INSIGNIAS
                 if(RachaDevocional::where('id_usuario', $userToken->id)
                     ->where('id_plan_block_deta', $request->idblockdeta)->first()){
                     // no guardar
                 }else{
+
                     // GUARDAR UNA RACHA DEVOCIONAL
                     $nuevaRacha = new RachaDevocional();
                     $nuevaRacha->id_usuario = $userToken->id;
-                    $nuevaRacha->id_plan_block_deta = $request->idblockdeta;
+                    $nuevaRacha->id_plan_block_deta = $request->idblockdeta; // son los items
                     $nuevaRacha->fecha = $zonaHorariaCarbon;
                     $nuevaRacha->save();
                 }
-
 
                 if ($request->has('idpregunta')) {
 
@@ -1675,9 +1563,6 @@ class ApiPlanesController extends Controller
                     }
                 }
 
-                // setear plan continuar
-                //$infoBlockDeta = PlanesBlockDetalle::where('id', $request->idblockdeta)->first();
-                //$infoPlanesBloques = PlanesBloques::where('id', $infoBlockDeta->id_planes_bloques)->first();
 
                 DB::commit();
                 return ['success' => 1];
@@ -1692,6 +1577,9 @@ class ApiPlanesController extends Controller
             return ['success' => 99];
         }
     }
+
+
+
 
 
    // VERSION IPHONE
@@ -1724,7 +1612,7 @@ class ApiPlanesController extends Controller
 
             try {
 
-
+                // SON LOS ITEMS
                 if(RachaDevocional::where('id_usuario', $userToken->id)
                   ->where('id_plan_block_deta', $request->idblockdeta)->first()){
                   // no guardar
@@ -1732,11 +1620,10 @@ class ApiPlanesController extends Controller
                       // GUARDAR UNA RACHA DEVOCIONAL
                       $nuevaRacha = new RachaDevocional();
                       $nuevaRacha->id_usuario = $userToken->id;
-                      $nuevaRacha->id_plan_block_deta = $request->idblockdeta;
+                      $nuevaRacha->id_plan_block_deta = $request->idblockdeta; // ITEMS
                       $nuevaRacha->fecha = $zonaHorariaCarbon;
                       $nuevaRacha->save();
                   }
-
 
 
               if ($request->has('datos')) {
@@ -1766,19 +1653,17 @@ class ApiPlanesController extends Controller
                           $pregunta->fecha_actualizo = null;
                           $pregunta->save();
                       }
-
                   }
               }
 
 
-
-                DB::commit();
-                return ['success' => 1];
+              DB::commit();
+              return ['success' => 1];
 
             }catch(\Throwable $e){
-                Log::info("error: " . $e);
-                DB::rollback();
-                return ['success' => 99];
+              Log::info("error: " . $e);
+              DB::rollback();
+              return ['success' => 99];
             }
 
         }else{
@@ -1814,18 +1699,13 @@ class ApiPlanesController extends Controller
             try {
 
                 // comprueba que al menos haya una pregunta disponible
-                if(BloquePreguntas::where('id_plan_block_detalle', $request->idblockdeta)
-                    ->where('visible', 1)
-                    ->first()){
+                if(BloquePreguntas::where('id_plan_block_detalle', $request->idblockdeta)->first()){
 
 
                     // VERIFICAR QUE HAYA CONTESTADO YA PREGUNTAS
 
                     // comprobar si hay preguntas, por lo menos 1 visible y requerida
-                    $arrayPreguntasVe = BloquePreguntas::where('id_plan_block_detalle', $request->idblockdeta)
-                        ->where('visible', 1)
-                        ->where('requerido', 1)
-                        ->get();
+                    $arrayPreguntasVe = BloquePreguntas::where('id_plan_block_detalle', $request->idblockdeta)->get();
 
                     $hayVerificar = false;
                     $hayRespondidas = false;
@@ -1850,7 +1730,6 @@ class ApiPlanesController extends Controller
 
 
                     $arrayBloque = BloquePreguntas::where('id_plan_block_detalle', $request->idblockdeta)
-                        ->where('visible', 1)
                         ->orderBy('posicion')
                         ->get();
 
@@ -2062,7 +1941,7 @@ class ApiPlanesController extends Controller
 
 
 
-    // RETORNO TITULO Y DESCRIPCION PARA NOTIFICACIONES
+    // RETORNO TITULO Y DESCRIPCION PARA NOTIFICACIONES ENVIADAS EN PUSH
     private function retornoTitulosNotificaciones($idTipoNotificacion, $idiomaTexto){
 
         if($infoTexto = NotificacionTextos::where('id_tipo_notificacion', $idTipoNotificacion)
@@ -2110,9 +1989,7 @@ class ApiPlanesController extends Controller
 
             $arrayPlanUsuario = DB::table('planes AS p')
                 ->join('planes_usuarios AS pu', 'pu.id_planes', '=', 'p.id')
-                ->select('p.visiblepanel', 'pu.id_usuario', 'pu.id_planes', 'pu.fecha', 'p.visible')
-                ->where('p.visible', 1)
-                ->where('p.visiblepanel', 1)
+                ->select( 'pu.id_usuario', 'pu.id_planes', 'pu.fecha')
                 ->where('pu.id_usuario', $userToken->id)
                 ->get();
 
@@ -2131,7 +2008,6 @@ class ApiPlanesController extends Controller
 
                         // buscar el detalle de ese bloque
                         $arrayListado = PlanesBlockDetalle::where('id_planes_bloques', $rec->id)
-                            ->where('visible', 1)
                             ->get();
 
                         foreach ($arrayListado as $datoLista){
@@ -2270,74 +2146,14 @@ class ApiPlanesController extends Controller
 
         if ($userToken = JWTAuth::user($tokenApi)) {
 
-            // UNICAMENTE PLANES VISIBLES
-            /*$arrayPlanUsuario = PlanesUsuarios::where('id_usuario', $userToken->id)
-                ->select('id_planes')
-                ->get();*/
 
-            $arrayPlanUsuario = DB::table('planes AS p')
+            $arrayPlanesUser = DB::table('planes AS p')
                 ->join('planes_usuarios AS pu', 'pu.id_planes', '=', 'p.id')
-                ->select('p.visiblepanel', 'p.visible', 'pu.id_usuario', 'pu.id_planes')
+                ->select('pu.id_usuario', 'pu.id_planes')
                 ->where('pu.id_usuario', $userToken->id)
-                ->where('p.visiblepanel', 1)
-                ->where('p.visible', 1)
+                ->orderBy('pu.id_planes', 'ASC')
                 ->get();
 
-            foreach ($arrayPlanUsuario as $dato){
-
-                $arrayPlanBloque = PlanesBloques::where('id_planes', $dato->id_planes)->get();
-                $planCompletado = 1;
-
-                if($arrayPlanBloque != null && $arrayPlanBloque->isNotEmpty()){
-                    foreach ($arrayPlanBloque as $rec){ // cada bloque
-
-                        // buscar el detalle de ese bloque
-                        $arrayListado = PlanesBlockDetalle::where('id_planes_bloques', $rec->id)
-                            ->where('visible', 1)
-                            ->get();
-
-                        foreach ($arrayListado as $datoLista){
-
-                            if($detauser = PlanesBlockDetaUsuario::where('id_usuario', $userToken->id)
-                                ->where('id_planes_block_deta', $datoLista->id)
-                                ->first()){
-                                // si encontro, verificar si esta completo
-                                if($detauser->completado == 0){
-                                    $planCompletado = 0;
-                                    break;
-                                }
-                            }else{
-                                // no encontrado, asi que retornar
-                                $planCompletado = 0;
-                                break;
-                            }
-                        }
-                    }
-                }else{
-                    $planCompletado = 0;
-                }
-
-                $dato->plancompletado = $planCompletado;
-            }
-
-
-            // obtener los planes que no esten completados
-            $pilaIdPlanNoComplet = array();
-
-            foreach ($arrayPlanUsuario as $item){
-                if($item->plancompletado == 0){
-                    array_push($pilaIdPlanNoComplet, $item->id_planes);
-                }
-            }
-
-
-
-
-
-
-            $arrayPlanesUser = PlanesUsuarios::where('id_usuario', $userToken->id)
-                ->whereIn('id_planes', $pilaIdPlanNoComplet)
-                ->get();
 
             foreach ($arrayPlanesUser as $dato){
                 $titulosRaw = $this->retornoTituloPlan($idiomaTextos, $dato->id_planes);
@@ -2357,7 +2173,6 @@ class ApiPlanesController extends Controller
             if ($arrayPlanesUser->count() > 0) {
                 $hayinfo = 1;
             }
-
 
             return ['success' => 1,
                 'hayinfo' => $hayinfo,
@@ -2401,26 +2216,20 @@ class ApiPlanesController extends Controller
             $hayInfo = 0;
 
             // obtener todos los planes NO elegido por el usuario y sean visible
-            $arrayPlanes = Planes::whereNotIn('id', $arrayIdYaSeleccionados)
-                ->where('visible', 1)
-                ->where('visiblepanel', 1)
-                ->get();
+            $arrayPlanes = Planes::whereNotIn('id', $arrayIdYaSeleccionados)->get();
 
             if ($arrayPlanes->isNotEmpty()) {
                 $hayInfo = 1;
             }
 
 
-            $arrayPlanes = Planes::whereNotIn('id', $arrayIdYaSeleccionados)
-                ->where('visible', 1)
-                ->get();
+            $arrayPlanes = Planes::whereNotIn('id', $arrayIdYaSeleccionados)->get();
 
             foreach ($arrayPlanes as $dato){
                 $arrayRaw = $this->retornoTituloPlan($idiomaTextos, $dato->id);
                 $dato->titulo = $arrayRaw['titulo'];
                 $dato->subtitulo = $arrayRaw['subtitulo'];
             }
-
 
             return [
                 'success' => 1,
@@ -2431,119 +2240,6 @@ class ApiPlanesController extends Controller
             return ['success' => 99];
         }
     }
-
-
-
-    public function listadoMisPlanesCompletadosNoPaginacion(Request $request)
-    {
-        $rules = array(
-            'idiomaplan' => 'required',
-            'iduser' => 'required',
-        );
-
-        $validator = Validator::make($request->all(), $rules);
-        if ( $validator->fails()){
-            return ['success' => 0, 'msj' => "validación incorrecta"];
-        }
-
-        $tokenApi = $request->header('Authorization');
-
-        $idiomaTextos = $request->idiomaplan;
-
-        if ($userToken = JWTAuth::user($tokenApi)) {
-
-
-            $arrayPlanUsuario = DB::table('planes AS p')
-                ->join('planes_usuarios AS pu', 'pu.id_planes', '=', 'p.id')
-                ->select('p.visiblepanel', 'pu.id_usuario', 'pu.id_planes', 'pu.fecha', 'p.visible')
-                ->where('p.visible', 1)
-                ->where('p.visiblepanel', 1)
-                ->where('pu.id_usuario', $userToken->id)
-                ->get();
-
-
-            foreach ($arrayPlanUsuario as $dato){
-
-                // NO SE FILTRARA POR VISIBLES
-                $arrayPlanBloque = PlanesBloques::where('id_planes', $dato->id_planes)->get();
-
-                $planCompletado = 1;
-
-                if($arrayPlanBloque != null && $arrayPlanBloque->isNotEmpty()){
-                    foreach ($arrayPlanBloque as $rec){ // cada bloque
-
-                        // buscar el detalle de ese bloque
-                        $arrayListado = PlanesBlockDetalle::where('id_planes_bloques', $rec->id)
-                            ->where('visible', 1)
-                            ->get();
-
-                        foreach ($arrayListado as $datoLista){
-
-                            if($detauser = PlanesBlockDetaUsuario::where('id_usuario', $userToken->id)
-                                ->where('id_planes_block_deta', $datoLista->id)
-                                ->first()){
-                                // si encontro, verificar si esta completo
-                                if($detauser->completado == 0){
-                                    $planCompletado = 0;
-                                    break;
-                                }
-                            }else{
-                                // no encontrado, asi que retornar
-                                $planCompletado = 0;
-                                break;
-                            }
-                        }
-                    }
-                }else{
-                    $planCompletado = 0;
-                }
-
-                $dato->plancompletado = $planCompletado;
-            }
-
-
-            // obtener los planes completados
-            $pilaIdPlanComplet = array();
-
-            foreach ($arrayPlanUsuario as $item){
-                if($item->plancompletado == 1){
-                    array_push($pilaIdPlanComplet, $item->id_planes);
-                }
-            }
-
-
-            $arrayPlanesUser = PlanesUsuarios::where('id_usuario', $userToken->id)
-                ->whereIn('id_planes', $pilaIdPlanComplet)
-                ->get();
-
-            $hayinfo = 0;
-
-            foreach ($arrayPlanesUser as $dato){
-                $hayinfo = 1;
-                $titulosRaw = $this->retornoTituloPlan($idiomaTextos, $dato->id_planes);
-
-                $dato->titulo = $titulosRaw['titulo'];
-                $dato->subtitulo = $titulosRaw['subtitulo'];
-
-                $infoP = Planes::where('id', $dato->id_planes)->first();
-                $dato->imagen = $infoP->imagen;
-                $dato->imagenportada = $infoP->imagenportada;
-                $dato->idplan = $infoP->id;
-            }
-
-
-
-            return ['success' => 1,
-                'hayinfo' => $hayinfo,
-                'listado3' => $arrayPlanesUser,
-            ];
-
-        }else{
-            return ['success' => 99];
-        }
-    }
-
-
 
 
 

@@ -22,7 +22,7 @@ class ControlRolController extends Controller
             $ruta = 'admin.roles.index';
         }
         else if($user->hasRole('editor')){
-            $ruta = 'admin.dashboard.index';
+            $ruta = 'admin.planes.index';
         }
         else{
             $ruta = 'no.permisos.index';

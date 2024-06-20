@@ -275,8 +275,8 @@
         function modalBorrar(id){
 
             Swal.fire({
-                title: 'Ocultar Devocional',
-                text: "Esto ocultara todo registro",
+                title: 'Borrar Devocional',
+                text: "Esto borrara todo registro",
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonColor: '#28a745',
@@ -297,14 +297,14 @@
             formData.append('id', id);
             openLoading();
 
-            axios.post('/admin/planes/ocultartotal', formData, {
+            axios.post('/admin/planes/borradototal', formData, {
             })
                 .then((response) => {
                     closeLoading();
 
                     if(response.data.success === 1){
 
-                        toastr.success('Ocultar');
+                        toastr.success('Borrado');
                         recargar();
                     }
                     else{

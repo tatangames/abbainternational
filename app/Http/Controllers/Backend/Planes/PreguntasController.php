@@ -66,7 +66,6 @@ class PreguntasController extends Controller
 
         $regla = array(
             'idplanbloquedetalle' => 'required',
-            'toggle' => 'required',
             'idimagen' => 'required',
         );
 
@@ -96,9 +95,7 @@ class PreguntasController extends Controller
             $nuevo = new BloquePreguntas();
             $nuevo->id_plan_block_detalle = $request->idplanbloquedetalle;
             $nuevo->id_imagen_pregunta = $request->idimagen;
-            $nuevo->visible = 1; // por defecto dejar en visible
             $nuevo->posicion = $nuevaPosicion;
-            $nuevo->requerido = $request->toggle;
             $nuevo->save();
 
             // sus idiomas
@@ -179,9 +176,7 @@ class PreguntasController extends Controller
             $nuevo1 = new BloquePreguntas();
             $nuevo1->id_plan_block_detalle = $request->idplanbloquedetalle;
             $nuevo1->id_imagen_pregunta = 1;
-            $nuevo1->visible = 1;
             $nuevo1->posicion = 1;
-            $nuevo1->requerido = 1;
             $nuevo1->save();
 
 
@@ -221,9 +216,7 @@ class PreguntasController extends Controller
             $nuevo2 = new BloquePreguntas();
             $nuevo2->id_plan_block_detalle = $request->idplanbloquedetalle;
             $nuevo2->id_imagen_pregunta = 2;
-            $nuevo2->visible = 1;
             $nuevo2->posicion = 2;
-            $nuevo2->requerido = 1;
             $nuevo2->save();
 
 
@@ -264,9 +257,7 @@ class PreguntasController extends Controller
             $nuevo3 = new BloquePreguntas();
             $nuevo3->id_plan_block_detalle = $request->idplanbloquedetalle;
             $nuevo3->id_imagen_pregunta = 3;
-            $nuevo3->visible = 1;
             $nuevo3->posicion = 3;
-            $nuevo3->requerido = 1;
             $nuevo3->save();
 
 
@@ -308,9 +299,7 @@ class PreguntasController extends Controller
             $nuevo4 = new BloquePreguntas();
             $nuevo4->id_plan_block_detalle = $request->idplanbloquedetalle;
             $nuevo4->id_imagen_pregunta = 4;
-            $nuevo4->visible = 1;
             $nuevo4->posicion = 4;
-            $nuevo4->requerido = 1;
             $nuevo4->save();
 
 
@@ -351,9 +340,7 @@ class PreguntasController extends Controller
             $nuevo5 = new BloquePreguntas();
             $nuevo5->id_plan_block_detalle = $request->idplanbloquedetalle;
             $nuevo5->id_imagen_pregunta = 5;
-            $nuevo5->visible = 1;
             $nuevo5->posicion = 5;
-            $nuevo5->requerido = 1;
             $nuevo5->save();
 
 
@@ -415,6 +402,40 @@ class PreguntasController extends Controller
         return ['success' => 1];
     }
 
+    public function borrarPreguntaCompleta(Request $request)
+    {
+        $regla = array(
+            'id' => 'required',
+        );
+
+        $validar = Validator::make($request->all(), $regla);
+
+        if ($validar->fails()){ return ['success' => 0];}
+
+
+        // BORRAR DE 3 TABLAS
+
+
+        DB::beginTransaction();
+
+        try {
+
+            BloquePreguntasUsuarios::where('id_bloque_preguntas', $request->id)->delete();
+            BloquePreguntasTextos::where('id_bloque_preguntas', $request->id)->delete();
+            BloquePreguntas::where('id', $request->id)->delete();
+
+            DB::commit();
+            return ['success' => 1];
+        }catch(\Throwable $e){
+        Log::info('error: ' . $e);
+        DB::rollback();
+        return ['success' => 99];
+        }
+
+    }
+
+
+
 
     public function indexEditarBloquePregunta($idbloquepregunta)
     {
@@ -449,8 +470,6 @@ class PreguntasController extends Controller
         $regla = array(
             'idbloquepreguntas' => 'required',
             'idimagen' => 'required',
-            'toggle' => 'required',
-            'togglevisible' => 'required'
         );
 
 
@@ -471,15 +490,10 @@ class PreguntasController extends Controller
             // actualizar
             BloquePreguntas::where('id', $request->idbloquepreguntas)->update([
                 'id_imagen_pregunta' => $request->idimagen,
-                'requerido' => $request->toggle,
-                'visible' => $request->togglevisible
             ]);
-
 
             // sus idiomas
             foreach ($datosContenedor as $filaArray) {
-
-
 
                 $contenidoHtmlConJavascript = "<html>
                     <head>

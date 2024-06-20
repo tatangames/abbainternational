@@ -7,8 +7,8 @@
                         <table id="tabla" class="table table-bordered table-striped">
                             <thead>
                             <tr>
-                                <th style="width: 8%">Nombre</th>
                                 <th style="width: 8%">Fecha Creado</th>
+                                <th style="width: 8%">Nombre</th>
                                 <th style="width: 4%">Opciones</th>
                             </tr>
                             </thead>
@@ -16,8 +16,9 @@
 
                             @foreach($listado as $dato)
                                 <tr>
-                                    <td style="width: 8%">{{ $dato->titulo }}</td>
                                     <td style="width: 8%">{{ $dato->fecha }}</td>
+                                    <td style="width: 8%">{{ $dato->titulo }}</td>
+
                                     <td style="width: 4%">
                                         <button type="button" class="btn btn-info btn-xs" onclick="informacionPlanesBloques({{ $dato->id }})">
                                             <i class="fas fa-eye" title="Fechas"></i>&nbsp; Fechas
@@ -39,6 +40,9 @@
 <script>
     $(function () {
         $("#tabla").DataTable({
+            columnDefs: [
+                { type: 'date-euro', targets: 0 } // Suponiendo que la columna de fecha es la primera (índice 0)
+            ],
             "paging": true,
             "lengthChange": true,
             "searching": true,

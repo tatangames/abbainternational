@@ -18,15 +18,6 @@ return new class extends Migration
 
             // Fecha del bloque
             $table->date('fecha_inicio');
-
-            // esto oculta al usuario
-            $table->boolean('visible');
-
-            // desea cambiar en vez de mostrar la fecha en el bloque, un texto
-            // personalizado, el texto se obtiene de bloques textos
-            $table->boolean('texto_personalizado');
-
-
             $table->foreign('id_planes')->references('id')->on('planes');
         });
     }

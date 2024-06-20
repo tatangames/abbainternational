@@ -781,7 +781,7 @@ class ApiComunidadController extends Controller
                             $infoUsuario = Usuarios::where('id', $idusuarioVal)->first();
 
                             // UN AMIGO TE ACABA DE ENVIAR UNA SOLICITUD
-                            $datosRaw = $this->retornoTitulosNotificaciones(12, $infoUsuario->idioma_noti);
+                            $datosRaw = $this->retornoTitulosNotificaciones(13, $infoUsuario->idioma_noti);
                             $tiNo = $datosRaw['titulo'];
                             $desNo = $datosRaw['descripcion'];
 
@@ -974,20 +974,10 @@ class ApiComunidadController extends Controller
                 }
 
 
-
-
                 // ************** BLOQUE PLANES ******************
 
 
-                // Obtener todos los id que estan ocultos por el usuario
-                $noPlanes = OcultarPlanes::where('id_usuario', $infoUsuario->id)
-                    ->select('id_planes')
-                    ->where('estado', 1) // los ocultos
-                    ->get();
-
-                $arrayPlanes = PlanesUsuarios::where('id_usuario', $infoUsuario->id)
-                    ->whereNotIn('id_planes', $noPlanes)
-                    ->get();
+                $arrayPlanes = PlanesUsuarios::where('id_usuario', $infoUsuario->id)->get();
 
                 $hayinfo = 0;
 
@@ -1002,7 +992,6 @@ class ApiComunidadController extends Controller
                 }
 
                 $arrayPlanesOrdenado = $arrayPlanes->sortBy('titulo')->values();
-
 
                 return ['success' => 1,
                     'usuariobuscado' => $infoUsuario->id, // con este usuario buscar items y preguntas
@@ -1221,18 +1210,16 @@ class ApiComunidadController extends Controller
 
             return $infoTituloTexto->texto;
         }
-
     }
 
 
-    // DEVUELTE TEXTO CON IDIOMA DE LO ESCRITOP
 
-    public function infoPlanesUsuarios(Request $request)
+    public function listadoPlanesYoAgregueComunidad(Request $request)
     {
         $rules = array(
             'idiomaplan' => 'required',
-            'iduser' => 'required'
         );
+
 
         $validator = Validator::make($request->all(), $rules);
         if ( $validator->fails()){
@@ -1243,47 +1230,155 @@ class ApiComunidadController extends Controller
 
         $tokenApi = $request->header('Authorization');
 
+        $idiomaTextos = $request->idiomaplan;
+
         if ($userToken = JWTAuth::user($tokenApi)) {
 
-            $hayinfo = 0;
-            $idiomaTextos = $request->idiomaplan;
+            // listado de planes
 
 
-            $arrayPlanes = DB::table('planes AS p')
-                ->join('planes_usuarios AS pu', 'pu.id_planes', '=', 'p.id')
-                ->select('p.visible', 'pu.id_usuario', 'pu.id_planes', 'pu.fecha', 'p.visible')
-                ->where('p.visible', 1)
+            $listado = DB::table('planes_usuarios AS pu')
+                ->join('planes_amigos_detalle AS pad', 'pad.id_planes_usuarios', '=', 'pu.id')
+                ->select('pu.id_usuario', 'pu.id_planes', 'pu.id')
                 ->where('pu.id_usuario', $userToken->id)
+                ->groupBy('pu.id')
+                ->get();
+
+            $hayInfo = 0;
+            foreach ($listado as $dato){
+                $hayInfo = 1;
+
+                $titulosRaw = $this->retornoTituloPlan($idiomaTextos, $dato->id_planes);
+
+                $dato->titulo = $titulosRaw['titulo'];
+
+                $infoP = Planes::where('id', $dato->id_planes)->first();
+                $dato->imagen = $infoP->imagen;
+            }
+
+            return ['success' => 1,
+                    'hayinfo' => $hayInfo,
+                    'listadoplan' => $listado];
+        }else{
+            return ['success' => 99];
+        }
+    }
+
+
+    public function listadoPlanesYoAgregueComunidaInformacion(Request $request)
+    {
+        $rules = array(
+            'idiomaplan' => 'required',
+            'idplan' => 'required'
+        );
+
+
+        $validator = Validator::make($request->all(), $rules);
+        if ( $validator->fails()){
+            return ['success' => 0,
+                'msj' => "validación incorrecta"
+            ];
+        }
+
+        $tokenApi = $request->header('Authorization');
+
+        $idiomaTextos = $request->idiomaplan;
+
+        if ($userToken = JWTAuth::user($tokenApi)) {
+
+           // MOSTRAR LOS AMIGOS QUE YO AGREGUE A ESTE PLAN
+
+
+
+            $listado = DB::table('planes_usuarios AS pu')
+                ->join('planes_amigos_detalle AS pad', 'pad.id_planes_usuarios', '=', 'pu.id')
+                ->select('pu.id_usuario', 'pu.id_planes', 'pu.id_usuario', 'pad.id_usuario AS idusuarioamigo')
+                ->where('pu.id_usuario', $userToken->id)
+                ->where('pu.id_planes', $request->idplan)
+                ->get();
+
+            $arrayPlanItems = DB::table('planes_bloques AS pb')
+                ->join('planes_block_detalle AS pbd', 'pbd.id_planes_bloques', '=', 'pb.id')
+                ->select('pb.id_planes', 'pbd.id')
+                ->where('pb.id_planes', $request->idplan)
                 ->get();
 
 
+            $countItemTotales = DB::table('planes_bloques AS pb')
+                ->join('planes_block_detalle AS pbd', 'pbd.id_planes_bloques', '=', 'pb.id')
+                ->select('pb.id_planes', 'pbd.id')
+                ->where('pb.id_planes', $request->idplan)
+                ->count();
 
+                        // contar las preguntas de ese plan
+            foreach ($listado as $dato){
 
-            foreach ($arrayPlanes as $dato){
-                $hayinfo = 1;
+                $infoUsuario = Usuarios::where('id', $dato->idusuarioamigo)->first();
+                $dato->nombre = $infoUsuario->nombre . " " . $infoUsuario->apellido;
+                $dato->correo = $infoUsuario->correo;
 
-                $infoPlan = Planes::where('id', $dato->id_planes)->first();
-                $dato->imagen = $infoPlan->imagen;
+                // saver total de preguntas que tiene ese plan
+                $conteo = 0;
 
-                $datosRaw = $this->retornoTituloPlan($idiomaTextos, $dato->id_planes);
-                $dato->titulo = $datosRaw['titulo'];
-
-                $marcado = false;
-
-                if($infoOc = OcultarPlanes::where('id_usuario', $userToken->id)
-                    ->where('id_planes', $dato->id_planes)->first()){
-                    if($infoOc->estado == 1){
-                        $marcado = true;
+                foreach ($arrayPlanItems as $jj){
+                    if(PlanesBlockDetaUsuario::where('id_usuario', $dato->idusuarioamigo)
+                        ->where('id_planes_block_deta', $jj->id)->first()){
+                        $conteo++;
                     }
                 }
-                $dato->estado = $marcado;
+                $dato->conteo = $conteo;
             }
 
-            $arrayPlanesOrdenado = $arrayPlanes->sortBy('titulo')->values();
+            return ['success' => 1, 'itemtotal' => $countItemTotales, 'listadoplan' => $listado];
+        }else{
+            return ['success' => 99];
+        }
+    }
 
-            return ['success' => 1,
-                'hayinfo' => $hayinfo,
-                'listado' => $arrayPlanesOrdenado];
+
+
+    public function listadoAmigosMeHanAgregadoPlan(Request $request)
+    {
+        $rules = array(
+            'idiomaplan' => 'required',
+        );
+
+
+        $validator = Validator::make($request->all(), $rules);
+        if ( $validator->fails()){
+            return ['success' => 0,
+                'msj' => "validación incorrecta"
+            ];
+        }
+
+        $tokenApi = $request->header('Authorization');
+
+        $idiomaTextos = $request->idiomaplan;
+
+        if ($userToken = JWTAuth::user($tokenApi)) {
+
+            // LISTADO DE AMIGOS QUE HAN AGREGADO A UN PLAN
+
+            $arrayPlanesAmigos = PlanesAmigosDetalle::where('id_usuario', $userToken->id)->get();
+
+            $pilaIdUsuario = array();
+
+            foreach ($arrayPlanesAmigos as $dato){
+
+                $infoPlanUsuario = PlanesUsuarios::where('id', $dato->id_planes_usuarios)->first();
+                array_push($pilaIdUsuario, $infoPlanUsuario->id_usuario);
+            }
+
+            $listado = Usuarios::whereIn('id', $pilaIdUsuario)
+                ->select('id', 'nombre', 'apellido', 'correo')
+                ->get();
+
+            foreach ($listado as $dato){
+                $dato->nombrecompleto = $dato->nombre . " " . $dato->apellido;
+            }
+
+
+            return ['success' => 1, 'listadoplan' => $listado];
         }
         else{
             return ['success' => 99];
@@ -1291,12 +1386,15 @@ class ApiComunidadController extends Controller
     }
 
 
-    public function actualizarPlanesOcultos(Request $request)
+    public function listadoAmigosMeHanAgregadoPlanListado(Request $request)
     {
+        // id de la tabla usuario, esta persona me agrego a uno o x listado de planes comunidad
 
         $rules = array(
-            'iduser' => 'required',
+            'idiomaplan' => 'required',
+            'id' => 'required',
         );
+
 
         $validator = Validator::make($request->all(), $rules);
         if ( $validator->fails()){
@@ -1307,120 +1405,35 @@ class ApiComunidadController extends Controller
 
         $tokenApi = $request->header('Authorization');
 
+        $idiomaTextos = $request->idiomaplan;
+
         if ($userToken = JWTAuth::user($tokenApi)) {
 
-            DB::beginTransaction();
+            // el x usuario quiero ver a que planes me agrego
 
-            try {
+            $listado = DB::table('planes_amigos_detalle AS pad')
+                ->join('planes_usuarios AS pu', 'pad.id_planes_usuarios', '=', 'pu.id')
+                ->select('pu.id_planes')
+                ->where('pad.id_usuario', $userToken->id)
+                ->where('pu.id_usuario', $request->id)
+                ->get();
 
-                OcultarPlanes::where('id_usuario', $userToken->id)
-                    ->update(['estado' => 0]);
+            foreach ($listado as $dato){
 
-                if ($request->has('idplan')) {
+                $infoPlan = Planes::where('id', $dato->id_planes)->first();
 
-                    foreach ($request->idplan as $clave => $valor) {
-
-                        $idestado = $valor['estado'];
-
-                        // si existe solo actualizar
-                        if($fila = OcultarPlanes::where('id_usuario', $userToken->id)
-                            ->where('id_planes', $clave)->first()){
-
-                            OcultarPlanes::where('id', $fila->id)
-                                ->update(['estado' => $idestado]);
-
-                        }else{
-
-                            // crear
-                            $nuevo = new OcultarPlanes();
-                            $nuevo->id_usuario = $userToken->id;
-                            $nuevo->id_planes = $clave;
-                            $nuevo->estado = $valor['estado'];
-                            $nuevo->save();
-                        }
-                    }
-                }
-
-
-                DB::commit();
-                return ['success' => 1];
-
-            }catch(\Throwable $e){
-                Log::info("error: " . $e);
-                DB::rollback();
-                return ['success' => 99];
+                $datosRaw = $this->retornoTituloPlan($idiomaTextos, $infoPlan->id);
+                $dato->titulo = $datosRaw['titulo'];
             }
 
-        }else{
+
+            return ['success' => 1, 'listadoplan' => $listado];
+        }
+        else{
             return ['success' => 99];
         }
     }
 
-
-    public function actualizarPlanesOcultosIphone(Request $request)
-    {
-        $rules = array(
-            'iduser' => 'required',
-        );
-
-        $validator = Validator::make($request->all(), $rules);
-        if ( $validator->fails()){
-            return ['success' => 0,
-                'msj' => "validación incorrecta"
-            ];
-        }
-
-        $tokenApi = $request->header('Authorization');
-
-        if ($userToken = JWTAuth::user($tokenApi)) {
-
-            DB::beginTransaction();
-
-            try {
-
-                OcultarPlanes::where('id_usuario', $userToken->id)
-                    ->update(['estado' => 0]);
-
-                if ($request->has('datos')) {
-
-                    foreach ($request->datos as $dato) {
-
-                        $clave = $dato['id'];
-                        $idestado = $dato['estado'];
-
-                        // si existe solo actualizar
-                        if($fila = OcultarPlanes::where('id_usuario', $userToken->id)
-                            ->where('id_planes', $clave)->first()){
-
-                            OcultarPlanes::where('id', $fila->id)
-                                ->update(['estado' => $idestado]);
-
-                        }else{
-
-                            // crear
-                            $nuevo = new OcultarPlanes();
-                            $nuevo->id_usuario = $userToken->id;
-                            $nuevo->id_planes = $clave;
-                            $nuevo->estado = $idestado;
-                            $nuevo->save();
-                        }
-                    }
-                }
-
-
-                DB::commit();
-                return ['success' => 1];
-
-            }catch(\Throwable $e){
-                Log::info("error: " . $e);
-                DB::rollback();
-                return ['success' => 99];
-            }
-
-        }else{
-            return ['success' => 99];
-        }
-    }
 
 
 

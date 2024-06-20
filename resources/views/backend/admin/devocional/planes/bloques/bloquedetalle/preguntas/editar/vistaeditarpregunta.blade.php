@@ -56,29 +56,6 @@
                                 </select>
                             </div>
 
-                            <div class="form-group" style="margin-left: 5px">
-                                <label>Pregunta es Requerida</label><br>
-                                <label class="switch" style="margin-top:10px">
-                                    <input type="checkbox" id="toggle-requerida">
-                                    <div class="slider round">
-                                        <span class="on">Sí</span>
-                                        <span class="off">No</span>
-                                    </div>
-                                </label>
-                            </div>
-
-
-                            <div class="form-group" style="margin-left: 5px">
-                                <label>Visible</label><br>
-                                <label class="switch" style="margin-top:10px">
-                                    <input type="checkbox" id="toggle-visible">
-                                    <div class="slider round">
-                                        <span class="on">Sí</span>
-                                        <span class="off">No</span>
-                                    </div>
-                                </label>
-                            </div>
-
 
                             <div class="form-group col-md-3" style="margin-top: 35px">
                                 <label class="control-label">Idioma</label>
@@ -89,14 +66,8 @@
                                 </select>
                             </div>
 
-
-
                             <button type="button" class="btn btn-info btn-sm" onclick="verificarIdiomaTabla()">Agregar Idioma</button>
-
-
                         </section>
-
-
 
                     </div>
                 </div>
@@ -209,12 +180,10 @@
                         <div class="card-body">
                             <div class="col-md-12">
 
-
                                 <div class="form-group">
                                     <label>Descripción </label>
                                     <div id="editor-editar"></div>
                                 </div>
-
 
                             </div>
                         </div>
@@ -274,17 +243,6 @@
 
                 });
 
-
-            let valor = {{ $infoPregunta->requerido }};
-            let valorVisible = {{ $infoPregunta->visible }};
-
-            if(valor == 1){
-                $("#toggle-requerida").prop("checked", true);
-            }
-
-            if(valorVisible == 1){
-                $("#toggle-visible").prop("checked", true);
-            }
 
             document.getElementById("divcontenedor").style.display = "block";
         });
@@ -451,11 +409,6 @@
 
             // id imagen y toggle
             var selectImagen = document.getElementById("select-imagen").value;
-            let t = document.getElementById('toggle-requerida').checked;
-            let toggle = t ? 1 : 0;
-
-            let tv = document.getElementById('toggle-visible').checked;
-            let toggleVisible = tv ? 1 : 0;
 
 
             let formData = new FormData();
@@ -477,8 +430,6 @@
             formData.append('contenedorArray', JSON.stringify(contenedorArray));
             formData.append('idbloquepreguntas', idbloquepreguntas);
             formData.append('idimagen', selectImagen);
-            formData.append('toggle', toggle);
-            formData.append('togglevisible', toggleVisible);
 
             openLoading();
 

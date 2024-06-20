@@ -58,23 +58,6 @@
                             </section>
 
 
-                            <section style="margin-top: 25px">
-                                <div class="form-group">
-                                    <label>Texto Personalizado</label>
-                                    <i class="far fa-question-circle" onclick="queEsEsto()"></i>
-                                    <br>
-                                    <label class="switch" style="margin-top:10px">
-                                        <input type="checkbox" id="toggle-personalizado">
-                                        <div class="slider round">
-                                            <span class="on">Activo</span>
-                                            <span class="off">Inactivo</span>
-                                        </div>
-                                    </label>
-                                </div>
-                            </section>
-
-                            <hr><br>
-
                         </div>
                     </div>
                 </div>
@@ -91,7 +74,7 @@
 
                         <div class="col-md-3">
                             <div class="form-group">
-                                <label class="control-label">Idioma para Texto Personalizado:</label>
+                                <label class="control-label">Idioma para Texto:</label>
                                 <select class="form-control" id="select-idioma">
                                     @foreach($arrayIdiomas as $item)
                                         <option value="{{$item->id}}">{{$item->nombre}}</option>
@@ -129,7 +112,6 @@
                     </tr>
                     </thead>
                     <tbody>
-
 
                     @foreach($arrayPlanBloqueTextos as $item)
                         <tr>
@@ -254,12 +236,6 @@
     <script type="text/javascript">
         $(document).ready(function() {
 
-            let toggleInput = {{ $infoBloque->texto_personalizado }};
-            if(toggleInput == 1){
-                $("#toggle-personalizado").prop("checked", true);
-            }else{
-                $("#toggle-personalizado").prop("checked", false);
-            }
 
             document.getElementById("divcontenedor").style.display = "block";
         });
@@ -268,22 +244,6 @@
     <script>
 
         var referenciaArrayTitulo;
-
-        function queEsEsto(){
-            Swal.fire({
-                title: "Texto Personalizado",
-                text: "El texto (número y fecha) de cada cuadro que aparece en el Devocional se sustituirá, si se activa se debera agregar el texto personalizado",
-                icon: 'question',
-                showCancelButton: false,
-                allowOutsideClick: false,
-                confirmButtonColor: '#28a745',
-                confirmButtonText: 'Aceptar'
-            }).then((result) => {
-                if (result.isConfirmed) {
-
-                }
-            })
-        }
 
 
         // obtener los datos de la fila y llevarlos al modal
@@ -470,9 +430,6 @@
                 return;
             }
 
-            let t = document.getElementById('toggle-personalizado').checked;
-            let togglePersonalizado = t ? 1 : 0;
-
 
             // Verificar que haya ingresado todos los idiomas
             let conteoIdioma = selectIdioma.length;
@@ -481,14 +438,10 @@
             var nRegistro = $('#matriz > tbody >tr').length;
 
 
-            // Verificar si toggle esta activo para actualizar idiomas
-            if(togglePersonalizado === 1){
-                if (nRegistro !== conteoIdioma){
-                    toastr.error('Idiomas son requeridos');
-                    return;
-                }
+            if (nRegistro !== conteoIdioma){
+                toastr.error('Idiomas son requeridos');
+                return;
             }
-
 
             // obtener ID idioma, titulo, subtitulo, descripcion
 
@@ -513,7 +466,6 @@
 
             formData.append('contenedorArray', JSON.stringify(contenedorArray));
             formData.append('fecha', fecha);
-            formData.append('toggle', togglePersonalizado);
             formData.append('idplanbloque', idplanbloque);
 
             openLoading();

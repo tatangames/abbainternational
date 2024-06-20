@@ -9,8 +9,6 @@
                         <thead>
                         <tr>
                             <th>Posición</th>
-                            <th>Visible</th>
-                            <th>Requerido</th>
                             <th>Opciones</th>
                         </tr>
                         </thead>
@@ -21,24 +19,12 @@
                                 <td>{{ $dato->posicion }}</td>
 
                                 <td>
-                                    @if($dato->visible == 1)
-                                        <span class="badge bg-success">Activo</span>
-                                    @else
-                                        <span class="badge bg-danger">Inactivo</span>
-                                    @endif
-                                </td>
-
-                                <td>
-                                    @if($dato->requerido == 1)
-                                        <span class="badge bg-success">Activo</span>
-                                    @else
-                                        <span class="badge bg-danger">Inactivo</span>
-                                    @endif
-                                </td>
-
-                                <td>
                                     <button type="button" class="btn btn-info btn-xs" onclick="informacionEditar({{ $dato->id }})">
                                         <i class="fas fa-edit" title="Editar"></i>&nbsp; Editar
+                                    </button>
+
+                                    <button type="button" style="margin-left: 5px" class="btn btn-danger btn-xs" onclick="modalBorrar({{ $dato->id }})">
+                                        <i class="fas fa-trash" title="Borrar"></i>&nbsp; Borrar
                                     </button>
                                 </td>
 

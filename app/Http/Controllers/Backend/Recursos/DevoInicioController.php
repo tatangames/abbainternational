@@ -82,9 +82,7 @@ class DevoInicioController extends Controller
 
     public function tablaDevoInicioPlanes(){
 
-        $listado = Planes::orderBy('posicion', 'ASC')
-            ->where('visible', 1)
-            ->get();
+        $listado = Planes::orderBy('posicion', 'ASC')->get();
 
         foreach ($listado as $dato){
 
@@ -111,9 +109,7 @@ class DevoInicioController extends Controller
 
     public function tablaPlanesBloques($idplan){
 
-        $listado = PlanesBloques::where('id_planes', $idplan)
-            ->where('visible', 1)
-            ->get();
+        $listado = PlanesBloques::where('id_planes', $idplan)->get();
 
         foreach ($listado as $dato){
             $fechaFormat = date("d-m-Y", strtotime($dato->fecha_inicio));
@@ -127,15 +123,12 @@ class DevoInicioController extends Controller
 
     public function indexPlanesBloquesDetalle($idplanbloque){
 
-
         return view('backend.admin.recursos.devocionalinicio.listaplanes.bloquesdetalle.vistabloquesdetalle', compact('idplanbloque'));
     }
 
     public function tablaPlanesBloquesDetalle($idplanbloque){
 
-        $listado = PlanesBlockDetalle::where('id_planes_bloques', $idplanbloque)
-            ->where('visible', 1)
-            ->get();
+        $listado = PlanesBlockDetalle::where('id_planes_bloques', $idplanbloque)->get();
 
         foreach ($listado as $dato){
             $titulo = $this->retornoTituloBloquesTextos($dato->id);

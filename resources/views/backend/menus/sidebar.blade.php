@@ -51,16 +51,6 @@
 
                 <!-- DASHBOARD -->
 
-                @can('sidebar.dashboard')
-                <li class="nav-item">
-                    <a href="{{ route('admin.dashboard.index') }}" target="frameprincipal" class="nav-link">
-                        <i class="far fa-address-book nav-icon"></i>
-                        <p>Estadísticas</p>
-                    </a>
-                </li>
-                @endcan
-
-
 
                 <!-- REGIONES -->
                 @can('sidebar.regiones')
@@ -200,7 +190,7 @@
                         <li class="nav-item">
                             <a href="{{ route('admin.planes.index') }}" target="frameprincipal" class="nav-link">
                                 <i class="far fa-circle nav-icon"></i>
-                                <p>Nuevo Devocional</p>
+                                <p>Lista Devocional</p>
                             </a>
                         </li>
 

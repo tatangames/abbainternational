@@ -11,7 +11,6 @@
                             <th>Nombre</th>
                             <th>Imagen</th>
                             <th>Imagen Portada</th>
-                            <th>Visible</th>
                             <th>Opciones</th>
                         </tr>
                         </thead>
@@ -30,15 +29,6 @@
                                     <center><img alt="Imagenes" src="{{ url('storage/archivos/'.$dato->imagenportada) }}" width="100px" height="100px" /></center>
                                 </td>
 
-
-                                <td>
-                                    @if($dato->visible == 1)
-                                        <span class="badge bg-success">Activo</span>
-                                    @else
-                                        <span class="badge bg-danger">Inactivo</span>
-                                    @endif
-                                </td>
-
                                 <td>
                                     <button style="margin: 8px" type="button" class="btn btn-info btn-xs" onclick="vistaEditarPlan({{ $dato->id }})">
                                         <i class="fas fa-edit" title="Editar"></i>&nbsp; Editar
@@ -48,18 +38,8 @@
                                         <i class="fas fa-edit" title="Fechas"></i>&nbsp; Fechas
                                     </button>
 
-                                    @if($dato->visible == 1)
-                                    <button style="margin: 8px" type="button" class="btn btn-danger btn-xs" onclick="preguntaDeshabilitar({{ $dato->id }})">
-                                        <i class="fas fa-edit" title="Deshabilitar"></i>&nbsp; Deshabilitar
-                                    </button>
-                                    @else
-                                    <button style="margin: 8px" type="button" class="btn btn-success btn-xs" onclick="preguntaActivar({{ $dato->id }})">
-                                        <i class="fas fa-edit" title="Activar"></i>&nbsp; Activar
-                                    </button>
-                                    @endif
-
                                     <button style="margin: 8px" type="button" class="btn btn-danger btn-xs" onclick="modalBorrar({{ $dato->id }})">
-                                        <i class="fas fa-trash" title="Ocultar"></i>&nbsp; Ocultar
+                                        <i class="fas fa-trash" title="Borrar"></i>&nbsp; Borrar
                                     </button>
 
 

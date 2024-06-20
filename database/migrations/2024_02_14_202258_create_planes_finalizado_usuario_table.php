@@ -13,10 +13,14 @@ return new class extends Migration
     {
         Schema::create('planes_finalizado_usuario', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('id_planes')->unsigned();
             $table->bigInteger('id_usuario')->unsigned();
 
-            $table->foreign('id_planes')->references('id')->on('planes');
+            // COMO SE PUEDEN BORRAR PLANES, ESTO NO SERA FORANEA
+            // 19/06/2024
+            $table->integer('id_planes');
+
+
+
             $table->foreign('id_usuario')->references('id')->on('usuarios');
         });
     }

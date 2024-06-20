@@ -8,9 +8,7 @@
                             <thead>
                             <tr>
                                 <th style="width: 3%">Fecha Devocional</th>
-                                <th style="width: 6%">Visible</th>
-                                <th style="width: 6%">Texto Personalizado</th>
-                                <th style="width: 6%">Título Personalizado</th>
+                                <th style="width: 6%">Título</th>
                                 <th style="width: 4%">Opciones</th>
                             </tr>
                             </thead>
@@ -20,21 +18,6 @@
                                 <tr>
                                     <td style="width: 3%">{{ $dato->fechaFormat }}</td>
 
-                                    <td style="width: 6%">
-                                        @if($dato->visible == 1)
-                                            <span class="badge bg-success">Activo</span>
-                                        @else
-                                            <span class="badge bg-danger">Inactivo</span>
-                                        @endif
-                                    </td>
-
-                                    <td style="width: 6%">
-                                        @if($dato->texto_personalizado == 1)
-                                            <span class="badge bg-success">Activo</span>
-                                        @else
-                                            <span class="badge bg-danger">Inactivo</span>
-                                        @endif
-                                    </td>
 
                                     <td style="width: 3%">{{ $dato->textoPersonalizado }}</td>
 
@@ -47,17 +30,9 @@
                                             <i class="fas fa-eye" title="Detalle"></i>&nbsp; Detalle
                                         </button>
 
-
-                                        @if($dato->visible == 1)
-                                            <button style="margin: 8px" type="button" class="btn btn-danger btn-xs" onclick="preguntaDeshabilitar({{ $dato->id }})">
-                                                <i class="fas fa-edit" title="Deshabilitar"></i>&nbsp; Deshabilitar
-                                            </button>
-                                        @else
-                                            <button style="margin: 8px" type="button" class="btn btn-success btn-xs" onclick="preguntaActivar({{ $dato->id }})">
-                                                <i class="fas fa-edit" title="Activar"></i>&nbsp; Activar
-                                            </button>
-                                        @endif
-
+                                        <button style="margin: 8px" type="button" class="btn btn-danger btn-xs" onclick="modalBorrar({{ $dato->id }})">
+                                            <i class="fas fa-edit" title="Borrar"></i>&nbsp; Borrar
+                                        </button>
 
                                     </td>
                                 </tr>

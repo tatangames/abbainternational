@@ -10,7 +10,6 @@
                         <tr>
                             <th>Posición</th>
                             <th>Título</th>
-                            <th>Visible</th>
                             <th>Opciones</th>
                         </tr>
                         </thead>
@@ -21,13 +20,6 @@
                                 <td>{{ $dato->posicion }}</td>
                                 <td>{{ $dato->titulo }}</td>
 
-                                <td>
-                                    @if($dato->visible == 1)
-                                        <span class="badge bg-success">Activo</span>
-                                    @else
-                                        <span class="badge bg-danger">Inactivo</span>
-                                    @endif
-                                </td>
 
                                 <td>
                                     <button style="margin: 8px" type="button" class="btn btn-info btn-xs" onclick="informacionEditar({{ $dato->id }})">
@@ -42,23 +34,14 @@
                                         <i class="fas fa-edit" title="Preguntas"></i>&nbsp; Preguntas
                                     </button>
 
-                                    <button style="margin: 8px" type="button" class="btn btn-success btn-xs" onclick="vistaMeditacion({{ $dato->id }})">
-                                        <i class="fas fa-edit" title="Meditacion"></i>&nbsp; Meditación
-                                    </button>
-
                                     <button style="margin: 8px" type="button" class="btn btn-success btn-xs" onclick="vistaBiblias({{ $dato->id }})">
                                         <i class="fas fa-edit" title="Biblia"></i>&nbsp; Biblia
                                     </button>
 
-                                    @if($dato->visible == 1)
-                                        <button style="margin: 8px" type="button" class="btn btn-danger btn-xs" onclick="preguntaDeshabilitar({{ $dato->id }})">
-                                            <i class="fas fa-edit" title="Deshabilitar"></i>&nbsp; Deshabilitar
-                                        </button>
-                                    @else
-                                        <button style="margin: 8px" type="button" class="btn btn-success btn-xs" onclick="preguntaActivar({{ $dato->id }})">
-                                            <i class="fas fa-edit" title="Activar"></i>&nbsp; Activar
-                                        </button>
-                                    @endif
+                                    <button style="margin: 8px" type="button" class="btn btn-danger btn-xs" onclick="modalBorrar({{ $dato->id }})">
+                                        <i class="fas fa-trash" title="Borrar"></i>&nbsp; Borrar
+                                    </button>
+
 
                                 </td>
 

@@ -55,30 +55,12 @@
                                         </div>
                                     </div>
                                 </div>
-
                             </section>
 
-                            <section style="margin-top: 15px">
-
-                                <div class="form-group">
-                                    <label>Texto Personalizado</label>
-                                    <i class="far fa-question-circle" onclick="queEsEsto()"></i>
-                                    <br>
-                                    <label class="switch" style="margin-top:10px">
-                                        <input type="checkbox" id="toggle-personalizado">
-                                        <div class="slider round">
-                                            <span class="on">Activo</span>
-                                            <span class="off">Inactivo</span>
-                                        </div>
-                                    </label>
-                                </div>
-
-
-                            </section>
 
                             <hr><br>
 
-                            <p style="color: red">Los idiomas serán necesarios si se activa Texto Personalizado</p>
+                            <p style="color: red">Los idiomas serán necesarios para los Bloques, ejemplo (Dia 1, Dia 2, etc.)</p>
 
 
                         </div>
@@ -106,8 +88,7 @@
                             </div>
                         </div>
                     </div>
-                    <button type="button" class="btn btn-info btn-sm" onclick="verificarTextoTabla()">Agregar Texto Personalizado</button>
-
+                    <button type="button" class="btn btn-info btn-sm" onclick="verificarTextoTabla()">Agregar Texto</button>
 
                 </section>
             </div>
@@ -146,9 +127,6 @@
     <div class="modal-footer justify-content-between float-right" style="margin-top: 25px; margin-bottom: 30px;">
         <button type="button" class="btn btn-success" onclick="preguntarGuardar()">Guardar Fecha</button>
     </div>
-
-
-
 
 
 
@@ -212,23 +190,6 @@
     </script>
 
     <script>
-
-
-        function queEsEsto(){
-            Swal.fire({
-                title: "Texto Personalizado",
-                text: "El texto (número y fecha) de cada cuadro que aparece en el Devocional se sustituirá, si se activa se debera agregar el texto personalizado",
-                icon: 'question',
-                showCancelButton: false,
-                allowOutsideClick: false,
-                confirmButtonColor: '#28a745',
-                confirmButtonText: 'Aceptar'
-            }).then((result) => {
-                if (result.isConfirmed) {
-
-                }
-            })
-        }
 
 
         function verificarTextoTabla(){
@@ -362,30 +323,23 @@
 
             var fecha = document.getElementById('fecha').value;
             var selectIdioma = document.getElementById("select-idioma");
-            let t = document.getElementById('toggle-personalizado').checked;
-            let togglePersonalizado = t ? 1 : 0;
-
-
             if(fecha === ''){
                 toastr.error('Fecha es Requerida');
                 return;
             }
 
-
             // Verificar que haya ingresado todos los idiomas
             let conteoIdioma = selectIdioma.length;
 
-
             var nRegistro = $('#matriz > tbody >tr').length;
 
-            // verificar que si activo texto personalizado
-            if(togglePersonalizado == 1){
-                if (nRegistro !== conteoIdioma){
 
-                    toastr.error('Idiomas son requeridos');
-                    return;
-                }
+            // TEXTO PERSONALIZADO SIEMPRE SERA REQUERIDO
+            if (nRegistro !== conteoIdioma){
+                toastr.error('Idiomas son requeridos');
+                return;
             }
+
 
             let idplan = {{ $idplan }};
 
@@ -406,7 +360,6 @@
             formData.append('contenedorArray', JSON.stringify(contenedorArray));
             formData.append('fecha', fecha);
             formData.append('idplan', idplan);
-            formData.append('toggle', togglePersonalizado);
 
             openLoading();
 

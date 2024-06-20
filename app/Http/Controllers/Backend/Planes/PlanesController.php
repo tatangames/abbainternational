@@ -34,10 +34,7 @@ class PlanesController extends Controller
     // regresa tabla listado de paises
     public function tablaPlanes(){
 
-        $listado = Planes::where('visiblepanel', 1)
-            ->orderBy('posicion', 'ASC')
-            ->get();
-
+        $listado = Planes::orderBy('posicion', 'ASC')->get();
 
         foreach ($listado as $dato){
 
@@ -395,8 +392,8 @@ class PlanesController extends Controller
     }
 
 
-
-    public function ocultarTotalDevocional(Request $request)
+    // BORRADO TOTAL DEL DEVOCIONAL
+    public function borradoTotalDevocional(Request $request)
     {
         $rules = array(
             'id' => 'required',
@@ -414,12 +411,8 @@ class PlanesController extends Controller
 
             try {
 
-               // SOLO SE OCULTARA
+              // FALTA LOGICA
 
-                Planes::where('id', $request->id)->update([
-                    'visiblepanel' => 0,
-                    'visible' => 0
-                ]);
 
 
                 DB::commit();
@@ -490,7 +483,6 @@ class PlanesController extends Controller
         $regla = array(
             'idplan' => 'required',
             'fecha' => 'required',
-            'toggle' => 'required'
         );
 
         // array: infoIdIdioma, infoTitulo
@@ -511,40 +503,32 @@ class PlanesController extends Controller
                 return ['success' => 1];
             }
 
-
-
             // crear un plan bloque
             $bloque = new PlanesBloques();
             $bloque->id_planes = $request->idplan;
             $bloque->fecha_inicio = $request->fecha;
             $bloque->visible = 0;
-            $bloque->texto_personalizado = $request->toggle;
             $bloque->save();
 
-            if($request->toggle == 1){
 
-                // sus idiomas
-                foreach ($datosContenedor as $filaArray) {
+            // SIEMPRE VENDRAN LOS TEXTOS PERSONALIZADOS
+            foreach ($datosContenedor as $filaArray) {
 
+                // comprobar si existe para actualizar o crear segun idioma nuevo
+                if(PlanesBloquesTextos::where('id_planes_bloques', $bloque->id)
+                    ->where('id_idioma_planes', $filaArray['infoIdIdioma'])
+                    ->first()){
 
-                    // comprobar si existe para actualizar o crear segun idioma nuevo
-                    if(PlanesBloquesTextos::where('id_planes_bloques', $bloque->id)
-                        ->where('id_idioma_planes', $filaArray['infoIdIdioma'])
-                        ->first()){
-
-                        // no registrar porque ya esta registrado
-                    }else{
-                        // como no encontro, se creara
-
-                        $detalle = new PlanesBloquesTextos();
-                        $detalle->id_planes_bloques = $bloque->id;
-                        $detalle->id_idioma_planes = $filaArray['infoIdIdioma'];
-                        $detalle->titulo = $filaArray['infoTitulo'];
-                        $detalle->save();
-                    }
+                    // no registrar porque ya esta registrado
+                }else{
+                    // como no encontro, se creara
+                    $detalle = new PlanesBloquesTextos();
+                    $detalle->id_planes_bloques = $bloque->id;
+                    $detalle->id_idioma_planes = $filaArray['infoIdIdioma'];
+                    $detalle->titulo = $filaArray['infoTitulo'];
+                    $detalle->save();
                 }
             }
-
 
             // completado y actualizado
             DB::commit();
@@ -557,11 +541,10 @@ class PlanesController extends Controller
     }
 
 
-    public function activacionPlanBloque(Request $request)
+    public function borrarRegistroPlanBloque(Request $request)
     {
         $regla = array(
             'idplanbloques' => 'required',
-            'estado' => 'required'
         );
 
         $validar = Validator::make($request->all(), $regla);
@@ -571,14 +554,26 @@ class PlanesController extends Controller
         // VERIFICAR QUE HAYA PLAN BLOQUES DETALLE EN TABLA:
         if(PlanesBlockDetalle::where('id_planes_bloques', $request->idplanbloques)->first()){
 
-            // si hay bloque creado
-            PlanesBloques::where('id', $request->idplanbloques)->update([
-                'visible' => $request->estado,
-            ]);
+            // BORRAR TODOS REGISTRO ASOCIADO
 
+            DB::beginTransaction();
+
+            try {
+
+
+
+
+
+            DB::commit();
             return ['success' => 1];
+
+            }catch(\Throwable $e) {
+                Log::info('error: ' . $e);
+                DB::rollback();
+                return ['success' => 99];
+            }
         }else{
-            return ['success' => 2];
+            return ['success' => 1]; // decir que fue borrado
         }
     }
 
@@ -610,7 +605,6 @@ class PlanesController extends Controller
         $regla = array(
             'idplanbloque' => 'required',
             'fecha' => 'required',
-            'toggle' => 'required'
         );
 
         // array: infoIdBloqueTexto, infoIdIdioma, infoTitulo
@@ -633,10 +627,8 @@ class PlanesController extends Controller
                 return ['success' => 1];
             }
 
-
             PlanesBloques::where('id', $request->idplanbloque)->update([
                 'fecha_inicio' => $request->fecha,
-                'texto_personalizado' => $request->toggle
             ]);
 
             $datosContenedor = json_decode($request->contenedorArray, true);
@@ -739,8 +731,6 @@ class PlanesController extends Controller
             $bloque = new PlanesBlockDetalle();
             $bloque->id_planes_bloques = $request->idplanbloque;
             $bloque->posicion = $nuevaPosicion;
-            $bloque->visible = 0;
-            $bloque->ignorar_pregunta = 1;
             $bloque->redireccionar_web = 0;
             $bloque->url_link = null;
             $bloque->save();
@@ -804,12 +794,11 @@ class PlanesController extends Controller
     }
 
 
-    // Validar que tenga el Devocional como minimo registrado ya
-    public function activacionPlanBloqueDetalle(Request $request)
+    // BORRAR REGISTRO
+    public function borrarRegistroPlanBloqueDetalle(Request $request)
     {
         $regla = array(
-            'idplanbloquedetalle' => 'required',
-            'estado' => 'required'
+            'idplanbloquedetalle' => 'required'
         );
 
         $validar = Validator::make($request->all(), $regla);
@@ -819,14 +808,21 @@ class PlanesController extends Controller
         // VERIFICAR QUE HAYA PLAN BLOQUES DETALLE EN TABLA:
         if(BloqueCuestionarioTextos::where('id_bloque_detalle', $request->idplanbloquedetalle)->first()){
 
-            // si hay bloque creado
-            PlanesBlockDetalle::where('id', $request->idplanbloquedetalle)->update([
-                'visible' => $request->estado,
-            ]);
+            DB::beginTransaction();
 
-            return ['success' => 1];
+            try {
+
+
+                DB::commit();
+                return ['success' => 1];
+
+            }catch(\Throwable $e){
+                Log::info("error: " . $e);
+                DB::rollback();
+                return ['success' => 99];
+            }
         }else{
-            return ['success' => 2];
+            return ['success' => 1];
         }
     }
 
@@ -850,8 +846,6 @@ class PlanesController extends Controller
             $dato->idioma = $infoIdioma->nombre;
         }
 
-
-
         return view('backend.admin.devocional.planes.bloques.bloquedetalle.editar.vistaeditarplanbloquedetalle', compact('infoBloque', 'arrayIdiomas', 'idplanbloquedetalle', 'arrayPlanBlockDetaTextos'));
     }
 
@@ -861,7 +855,6 @@ class PlanesController extends Controller
 
         $regla = array(
             'idplanbloquedetalle' => 'required',
-            'toggle' => 'required',
             'toggleweb' => 'required'
         );
 
@@ -878,11 +871,9 @@ class PlanesController extends Controller
 
             // actualizar toggle
             PlanesBlockDetalle::where('id', $request->idplanbloquedetalle)->update([
-                'ignorar_pregunta' => $request->toggle,
                 'redireccionar_web' => $request->toggleweb,
                 'url_link' => $request->urllink
             ]);
-
 
 
             // TABLA: planes_block_detalle  no hay nada que actualizar
@@ -891,7 +882,6 @@ class PlanesController extends Controller
 
             // sus idiomas
             foreach ($datosContenedor as $filaArray) {
-
 
 
                 $contenidoHtmlConJavascript = "<html>

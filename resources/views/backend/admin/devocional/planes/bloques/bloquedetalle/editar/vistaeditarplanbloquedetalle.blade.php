@@ -31,7 +31,7 @@
 </style>
 
 
-<div id="divcontenedor" style="display: none">
+<div id="divcontenedor">
 
 
     <section class="content" style="margin-top: 20px">
@@ -43,29 +43,6 @@
                 <div class="card-body">
                     <div>
                         <div class="col-md-12">
-
-
-                            <!-- IGNORAR PRIMER CUADRO PARA COMPARTIR -->
-
-
-
-                            <div class="form-group">
-                                <label>Cuando un usuario comparte un Devocional, el Primer Cuadro de texto será ignorado?</label><br>
-                                <label class="switch" style="margin-top:10px">
-                                    <input type="checkbox" id="toggle">
-                                    <div class="slider round">
-                                        <span class="on">Si</span>
-                                        <span class="off">No</span>
-                                    </div>
-                                </label>
-                            </div>
-
-
-                            <hr>
-
-
-
-
 
 
                             <!-- REDIRECCIONAR LINK -->
@@ -91,18 +68,6 @@
                                 <input type="text" maxlength="1000" autocomplete="off" class="form-control" id="urllink" value="{{ $infoBloque->url_link }}" placeholder="URL">
                             </div>
 
-
-
-
-
-
-
-
-
-
-
-                            <hr>
-
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <label class="control-label">Idioma</label>
@@ -113,12 +78,14 @@
                                     </select>
                                 </div>
                             </div>
-                        </div>
-                        <button type="button" class="btn btn-info btn-sm" onclick="verificarIdiomaTabla()">Agregar Idioma</button>
 
+
+                            <button type="button" class="btn btn-info btn-sm" onclick="verificarIdiomaTabla()">Agregar Idioma</button>
                         </div>
+
                     </div>
                 </div>
+
             </div>
         </div>
     </section>
@@ -304,18 +271,6 @@
 
                 });
 
-
-            let ignorar = {{ $infoBloque->ignorar_pregunta }};
-
-
-            if(ignorar === 1){
-                $("#toggle").prop("checked", true);
-            }else{
-                $("#toggle").prop("checked", false);
-            }
-
-
-            // redireccionar pagina web
 
             let redireWeb = {{ $infoBloque->redireccionar_web }};
 
@@ -561,9 +516,6 @@
             }
 
 
-            let t = document.getElementById('toggle').checked;
-            let togglePersonalizado = t ? 1 : 0;
-
             // redireccionamiento web
             let tw = document.getElementById('toggle-link').checked;
             let toggleWeb = tw ? 1 : 0;
@@ -573,7 +525,6 @@
 
             formData.append('contenedorArray', JSON.stringify(contenedorArray));
             formData.append('idplanbloquedetalle', idplanbloquedetalle);
-            formData.append('toggle', togglePersonalizado);
             formData.append('toggleweb', toggleWeb);
             formData.append('urllink', urllink);
 

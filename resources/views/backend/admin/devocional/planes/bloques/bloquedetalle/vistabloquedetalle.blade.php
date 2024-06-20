@@ -116,11 +116,11 @@
         }
 
 
-        function preguntaActivar(idplanbloquedetalle){
+        function modalBorrar(idplanbloquedetalle){
 
             Swal.fire({
-                title: '¿Activar?',
-                text: "",
+                title: '¿Borrar?',
+                text: "Eliminara el registro",
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonColor: '#28a745',
@@ -129,71 +129,31 @@
                 confirmButtonText: 'Si'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    configurarPlan(1, idplanbloquedetalle);
+                    apiBorrar(idplanbloquedetalle);
                 }
             })
         }
 
-
-        function preguntaDeshabilitar(idplanbloquedetalle){
-
-            Swal.fire({
-                title: '¿Deshabilitar?',
-                text: "",
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#28a745',
-                cancelButtonColor: '#d33',
-                cancelButtonText: 'Cancelar',
-                confirmButtonText: 'Si'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    configurarPlan(0, idplanbloquedetalle);
-                }
-            })
-
-        }
-
-
-        function configurarPlan(estado, idplanbloquedetalle){
-
+        function apiBorrar(idplanbloquedetalle){
             let formData = new FormData();
             formData.append('idplanbloquedetalle', idplanbloquedetalle);
-            formData.append('estado', estado);
             openLoading();
 
-            axios.post('/admin/planbloquedetalle/activacion', formData, {
+            axios.post('/admin/planbloquedetalle/borrarregistro', formData, {
             })
                 .then((response) => {
                     closeLoading();
 
                     if(response.data.success === 1){
-
-                        toastr.success('Actualizado');
+                        toastr.success('Borrado');
                         recargar();
                     }
-                    else if(response.data.success === 2){
-
-                        Swal.fire({
-                            title: 'No Activado',
-                            text: "Se requiere crear el Devocional",
-                            icon: 'info',
-                            showCancelButton: false,
-                            confirmButtonColor: '#28a745',
-                            cancelButtonColor: '#d33',
-                            confirmButtonText: 'Si'
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-
-                            }
-                        })
-                    }
                     else{
-                        toastr.error('Error al actualizar');
+                        toastr.error('Error al borrar');
                     }
                 })
                 .catch((error) => {
-                    toastr.error('Error al actualizar');
+                    toastr.error('Error al borrar');
                     closeLoading();
                 });
         }

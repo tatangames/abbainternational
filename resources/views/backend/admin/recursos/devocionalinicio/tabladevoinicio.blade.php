@@ -43,6 +43,9 @@
 <script>
     $(function () {
         $("#tabla").DataTable({
+            columnDefs: [
+                { type: 'date-euro', targets: 0 } // Suponiendo que la columna de fecha es la primera (índice 0)
+            ],
             "paging": true,
             "lengthChange": true,
             "searching": true,

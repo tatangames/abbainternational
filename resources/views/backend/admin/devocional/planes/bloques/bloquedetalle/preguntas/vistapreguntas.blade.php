@@ -102,6 +102,54 @@
             window.location.href="{{ url('/admin/preguntas/vista/editar') }}/" + idbloquepregunta;
         }
 
+        function modalBorrar(id){
+
+            Swal.fire({
+                title: '¿Borrar?',
+                text: 'Esto eliminara las preguntas contestadas por el Usuario, si ya las ha respondido',
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonColor: '#28a745',
+                cancelButtonColor: '#d33',
+                allowOutsideClick: false,
+                confirmButtonText: 'Si',
+                cancelButtonText: 'No'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    apiBorrarPregunta(id);
+                }
+            })
+        }
+
+
+        function apiBorrarPregunta(id){
+
+
+            let formData = new FormData();
+            formData.append('id', id);
+            openLoading();
+
+            axios.post('/admin/preguntas/borrar', formData, {
+            })
+                .then((response) => {
+                    closeLoading();
+
+                    if(response.data.success === 1){
+                        toastr.success('Borrado');
+                        recargar();
+                    }
+                    else {
+                        toastr.error('Error al borrar');
+                    }
+                })
+                .catch((error) => {
+                    toastr.error('Error al borrar');
+                    closeLoading();
+                });
+
+        }
+
+
 
     </script>
 

@@ -70,10 +70,23 @@ Route::middleware('verificarToken')->group(function () {
     Route::post('app/plan/nuevo/seleccionar', [ApiPlanesController::class,'iniciarPlanNuevo']);
 
 
-    // devuelve mis planes que he seleccionado, habra algunos que pasaran a 'completados' pero
-    // se verificaran dinamicamente -> Paginate
-    // SOLO UTILIZADO EN IPHONE POR PAGINATE 18/06/2024
-    Route::post('app/plan/listado/misplanes', [ApiPlanesController::class,'listadoMisPlanes']);
+
+    // MIS PLANES UTILIZADO PARA ANDROID Y IPHONE, YA NO USAR PAGINACION
+    Route::post('app/plan/listado/misplanes', [ApiPlanesController::class,'listadoMisPlanesNoPaginacion']);
+    Route::post('app/buscar/planes/nuevos', [ApiPlanesController::class,'buscarPlanesNoAgregadosNoPaginacion']);
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     // devuelve informacion del plan BLOQUE FECHAS
     Route::post('app/plan/misplanes/informacion/bloque', [ApiPlanesController::class,'informacionBloqueMiPlan']);
@@ -86,11 +99,15 @@ Route::middleware('verificarToken')->group(function () {
     // informacion de preguntas de un bloque detalle
     Route::post('app/plan/misplanes/preguntas/bloque', [ApiPlanesController::class,'informacionPreguntasBloque']);
 
-    // actualizar preguntas
+
+
+    // CREAR / ACTUALIZAR PREGUNTAS PARA ANDROID
     Route::post('app/plan/misplanes/preguntas/usuario/actualizar', [ApiPlanesController::class,'actualizarPreguntasUsuarioPlan']);
 
     // IPHONE
     Route::post('app/plan/misplanes/preguntas/usuario/actualizariphone', [ApiPlanesController::class,'actualizarPreguntasUsuarioPlanIphone']);
+
+
 
 
     // SOLO LO USA IPHONE 18/05/2024
@@ -120,6 +137,13 @@ Route::middleware('verificarToken')->group(function () {
     // informacion de una insignia
     Route::post('app/insignia/individual/informacion', [ApiInicioController::class,'informacionInsigniaIndividual']);
 
+    // obtener listado de niveles de una insignia
+    Route::post('app/insignia/niveles/informacion', [ApiInicioController::class,'listadoNivelesDeInsignia']);
+
+
+
+
+
     // obtener listado de todas las insignias
     Route::post('app/inicio/todos/lasinsignias', [ApiInicioController::class,'listadoTodosLasInsignias']);
 
@@ -138,11 +162,6 @@ Route::middleware('verificarToken')->group(function () {
     Route::post('app/compartir/aplicacion', [ApiInicioController::class,'compartirAplicacion']);
 
     // compartir devocional
-    // AQUI SE UTILIZA EN PANTALLAS BOTON COMPARTIR EN 2
-    // FragmentCuestionarioPreguntasInicioBloque
-    // FragmentPreguntasPlanBloque
-    // Es al llenar todos los input edit text, puede darle al boton compartir
-    // aqui no se mostrara titulo de blockdeta
     Route::post('app/compartir/devocional', [ApiInicioController::class,'compartirDevocional']);
 
     // devuelve textos de preguntas y respuestas para compartir -> One Signal insignia
@@ -192,13 +211,13 @@ Route::middleware('verificarToken')->group(function () {
     // informacion insignia amigo
     Route::post('app/comunidad/informacion/insignias', [ApiComunidadController::class,'informacionInsigniaAmigo']);
 
+
+
     // iniciar plan con amigos
     Route::post('app/comunidadplan/iniciar/plan/amigos', [ApiComunidadController::class,'iniciarPlanConAmigos']);
 
     // iniciar plan con amigos IPHONE
     Route::post('app/comunidadplan/iniciar/plan/amigosiphone', [ApiComunidadController::class,'iniciarPlanConAmigosIphone']);
-
-
 
 
 
@@ -214,14 +233,30 @@ Route::middleware('verificarToken')->group(function () {
 
 
 
-    // listado de planes para ver y ocultar
-    Route::post('app/comunidad/planes/usuarios', [ApiComunidadController::class,'infoPlanesUsuarios']);
 
-    // actualizar planes para ver y ocultar
-    Route::post('app/comunidad/actualizarplanes/ocultos', [ApiComunidadController::class,'actualizarPlanesOcultos']);
 
-    // actualizar planes para ver y ocultar IPHONE
-    Route::post('app/comunidad/actualizarplanes/ocultosiphone', [ApiComunidadController::class,'actualizarPlanesOcultosIphone']);
+
+    // AMIGOS QUE YO HE AGREGADO EN PLAN COMUNIDAD, muestra los planes listado
+    Route::post('app/comunidad/yoagregue/planeslistado', [ApiComunidadController::class,'listadoPlanesYoAgregueComunidad']);
+
+    // LISTADO DE AMIGOS, MAX 5, QUE SE MUESTRAN Y VEO COMO VAN
+    Route::post('app/comunidad/yoagregue/planeslistado/informacion', [ApiComunidadController::class,'listadoPlanesYoAgregueComunidaInformacion']);
+
+    // LISTADO DE AMIGOS QUE ME AGREGARON A UN PLAN
+    Route::post('app/comunidad/mehanagregado/planes/amigos', [ApiComunidadController::class,'listadoAmigosMeHanAgregadoPlan']);
+
+    // HOY QUE YA SE EL USUARIO ME AGREGO UN PLAN, QUIERO SABER EL LISTADO DE PLANES QUE ME AGREGO
+    Route::post('app/comunidad/mehanagregado/planes/listado', [ApiComunidadController::class,'listadoAmigosMeHanAgregadoPlanListado']);
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -247,11 +282,10 @@ Route::middleware('verificarToken')->group(function () {
 
 
 
-    // FIX 30/04/2024  SOLO PARA ANDROID
-    // mis planes sin paginacion
-    Route::post('app/plan/listado/misplanes/nopagination', [ApiPlanesController::class,'listadoMisPlanesNoPaginacion']);
-    Route::post('app/buscar/planes/nuevos/nopagination', [ApiPlanesController::class,'buscarPlanesNoAgregadosNoPaginacion']);
-    Route::post('app/plan/misplanes/completados/nopagination', [ApiPlanesController::class,'listadoMisPlanesCompletadosNoPaginacion']);
+
+
+
+
 
 
 

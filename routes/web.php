@@ -169,17 +169,16 @@ Route::post('/admin/planes/imagenportada/actualizar', [PlanesController::class,'
 
 
 // Eliminacion total de un devocional
-Route::post('/admin/planes/ocultartotal', [PlanesController::class,'ocultarTotalDevocional']);
+Route::post('/admin/planes/borradototal', [PlanesController::class,'borradoTotalDevocional']);
 
 
 
-
-// -> Vista Bloque de plan
+// -> Vista Bloque de plan QUE SON LAS FECHAS
 Route::get('/admin/planesbloques/vista/index/{idplan}', [PlanesController::class,'indexPlanBloque']);
 Route::get('/admin/planesbloques/tabla/index/{idplan}', [PlanesController::class,'tablaPlanBloque']);
 Route::get('/admin/planesbloques/agregar/nuevo/index/{idplan}', [PlanesController::class,'indexNuevoPlanBloque']);
 Route::post('/admin/planesbloques/agregar/nuevo', [PlanesController::class,'registrarPlanesBloques']);
-Route::post('/admin/planesbloques/activacion', [PlanesController::class,'activacionPlanBloque']);
+Route::post('/admin/planesbloques/borrarregistro', [PlanesController::class,'borrarRegistroPlanBloque']);
 
 
 
@@ -195,7 +194,7 @@ Route::get('/admin/planbloquedetalle/tabla/{idplanbloque}', [PlanesController::c
 Route::get('/admin/planbloquedetalle/agregar/nuevo/index/{idplanbloque}', [PlanesController::class,'indexNuevoPlanBloqueDetalle']);
 Route::post('/admin/planbloquedetalle/agregar/nuevo', [PlanesController::class,'registrarPlanesBloquesDetalle']);
 Route::post('/admin/planbloquedetalle/actualizar/posicion', [PlanesController::class,'actualizarPosicionPlanesBlockDetalle']);
-Route::post('/admin/planbloquedetalle/activacion', [PlanesController::class,'activacionPlanBloqueDetalle']);
+Route::post('/admin/planbloquedetalle/borrarregistro', [PlanesController::class,'borrarRegistroPlanBloqueDetalle']);
 
 
 // Editar bloque detalle
@@ -213,6 +212,7 @@ Route::get('/admin/preguntas/tabla/{idplanbloquedetalle}', [PreguntasController:
 Route::get('/admin/preguntas/nuevoregitros/{idplanbloquedetalle}', [PreguntasController::class,'indexNuevasPreguntas']);
 Route::post('/admin/preguntas/registrar/nuevo', [PreguntasController::class,'registrarNuevaPregunta']);
 Route::post('/admin/preguntas/actualizar/posicion', [PreguntasController::class,'actualizarPosicionPreguntas']);
+Route::post('/admin/preguntas/borrar', [PreguntasController::class,'borrarPreguntaCompleta']);
 
 // Preguntas por defecto en registro (18/05/2024)
 Route::post('/admin/preguntas/registrar/nuevodefecto', [PreguntasController::class,'registrarNuevaPreguntaDefecto']);
@@ -341,16 +341,6 @@ Route::post('/admin/bibliacapitulo/bloque/posicion', [BibliaCapituloController::
 Route::post('/admin/bibliacapitulo/informacion/texto', [BibliaCapituloController::class,'busquedaTextoCapitulo']);
 Route::post('/admin/bibliacapitulo/texto/actualizar', [BibliaCapituloController::class,'guardarTextoVersiculo']);
 
-
-
-// --- BIBLIA CAPITULO - VERSICULO ---
-/*Route::get('/admin/bibliacapitulo/versiculo/vista/{idbloqe}', [BibliaCapituloController::class,'vistaCapitulosBloqueVersiculo']);
-Route::get('/admin/bibliacapitulo/versiculo/tabla/{idbloque}', [BibliaCapituloController::class,'tablaCapitulosBloqueVersiculo']);
-Route::post('/admin/bibliacapitulo/versiculo/registrar', [BibliaCapituloController::class,'registrarCapituloBloqueVersiculo']);
-Route::post('/admin/bibliacapitulo/versiculo/informacion', [BibliaCapituloController::class,'informacionCapituloBloqueVersiculo']);
-Route::post('/admin/bibliacapitulo/versiculo/actualizar', [BibliaCapituloController::class,'actualizarCapituloBloqueVersiculo']);
-Route::post('/admin/bibliacapitulo/versiculo/activacion', [BibliaCapituloController::class,'estadoCapituloBloqueVersiculo']);
-Route::post('/admin/bibliacapitulo/versiculo/posicion', [BibliaCapituloController::class,'actualizarPosicionVersiculos']);*/
 
 
 

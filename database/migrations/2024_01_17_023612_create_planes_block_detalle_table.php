@@ -19,10 +19,6 @@ return new class extends Migration
 
             $table->bigInteger('id_planes_bloques')->unsigned();
             $table->integer('posicion');
-            $table->boolean('visible');
-
-            // TRUE: IGNORA EL PRIMER CUADRO PARA COMPARTIR PREGUNTA
-            $table->boolean('ignorar_pregunta');
 
             // redireccionamiento web
             $table->boolean('redireccionar_web');

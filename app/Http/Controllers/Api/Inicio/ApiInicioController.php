@@ -380,18 +380,7 @@ class ApiInicioController extends Controller
 
         $infoRachaAlta = RachaAlta::where('id_usuarios', $userToken->id)->first();
 
-
-        /*$arrayRachaUserDevocional = RachaDias::where('id_usuario', $userToken->id)
-            ->where('fecha', '<=', $fechaFormatHorariaCarbon)
-            ->orderBy('fecha', 'DESC')
-            ->get();*/
-
         $fechaActualH = $this->retornoZonaHorariaUsuarioFormatFecha($userToken->id_iglesia);
-        $fechaActual = Carbon::parse($fechaActualH);
-
-        // DEVOCIONALES REALIZADOS CONCECUTIVOS
-        $devocionalConsecutivos = 0;
-
 
 
         $arrayFechaDevoPorSeguido = PlanesBlockDetaUsuario::where('id_usuario', $userToken->id)
@@ -724,12 +713,7 @@ class ApiInicioController extends Controller
             }
 
 
-
             // ------ INFORMACION DEL HITO DE CADA INSIGNIA ------
-
-            $hito_cuantoFaltan = 0; // Cuantos puntos me faltan para la siguiente nivel de esta insignia
-            $hito_haySiguienteNivel = 0; // Saber si hay un nivel mas por superar
-
 
             // Obtener los niveles ya ganados para evitarlos
             $hito_arrayObtenidos = DB::table('insignias_usuarios_detalle AS indeta')
@@ -749,38 +733,26 @@ class ApiInicioController extends Controller
                 $infoTexto = $this->retornoMensajeHito($idiomaTextos);
 
                 $dato->hitotexto1 = $infoTexto['texto1'];
-                $dato->hitotexto2 = $infoTexto['texto2'];
                 $dato->fechaFormat = $fecha;
             }
 
-            $cualNextLevel = 0;
-            // buscar el siguiente nivel que falta y cuanto me falta
-            if($infoNivelSiguiente = NivelesInsignias::where('id_tipo_insignia', $infoInsignia->id)
-                ->where('nivel', '>', $hito_infoNivelVoy)
-                ->first()){
-
-                $infoConteo = InsigniasUsuariosConteo::where('id_tipo_insignia', $request->idinsignia)->first();
-
-                $cualNextLevel = $infoNivelSiguiente->nivel;
-                $hito_haySiguienteNivel = 1; // Si hay siguiente nivel
-                $hito_cuantoFaltan = $infoNivelSiguiente->nivel - $infoConteo->conteo;
-            }
 
             $arrayHitoOrdenado = $hito_arrayObtenidos->sortByDesc('nivel')->values();
 
 
-            $textoFalta = $this->retornoMensajeHito($idiomaTextos);
-
+            $contadorActual = 0;
+            if($infoContadorActual = InsigniasUsuariosConteo::where('id_usuarios', $userToken->id)
+                ->where('id_tipo_insignia', $request->idinsignia)->first()){
+                $contadorActual = $infoContadorActual->conteo;
+            }
 
             return ['success' => 1,
+
                 'titulo' => $tituloInsignia,
                 'descripcion' => $descripcionInsignia,
                 'imagen' => $infoInsignia->imagen,
                 'nivelvoy' => $hito_infoNivelVoy,
-                'hitocuantofalta' => $hito_cuantoFaltan,
-                'hitohaynextlevel' => $hito_haySiguienteNivel,
-                'cualnextlevel' => $cualNextLevel,
-                'textofalta' => $textoFalta['texto2'],
+                'contador' => $contadorActual,
                 'hitoarray' => $arrayHitoOrdenado
                 ];
 
@@ -788,6 +760,32 @@ class ApiInicioController extends Controller
             return ['success' => 99];
         }
     }
+
+
+    public function listadoNivelesDeInsignia(Request $request)
+    {
+
+        $rules = array(
+            'idtipoinsignia' => 'required'
+        );
+
+        $validator = Validator::make($request->all(), $rules);
+
+        if ( $validator->fails()){
+            return ['success' => 0,
+                'msj' => "validación incorrecta"
+            ];
+        }
+
+        $arrayNiveles = NivelesInsignias::where('id_tipo_insignia', $request->idtipoinsignia)->get();
+
+        return ['success' => 1, 'listado' => $arrayNiveles];
+    }
+
+
+
+
+
 
     private function retornoMensajeHito($idiomaPlan){
 
