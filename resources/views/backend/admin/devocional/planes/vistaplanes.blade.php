@@ -294,7 +294,7 @@
         function borrarRegistro(id){
 
             let formData = new FormData();
-            formData.append('id', id);
+            formData.append('idplan', id);
             openLoading();
 
             axios.post('/admin/planes/borradototal', formData, {

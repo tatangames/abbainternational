@@ -128,7 +128,7 @@
         function apiBorrar(idplanbloques){
 
             let formData = new FormData();
-            formData.append('idplanbloques', idplanbloques);
+            formData.append('idplanbloque', idplanbloques);
             openLoading();
 
             axios.post('/admin/planesbloques/borrarregistro', formData, {

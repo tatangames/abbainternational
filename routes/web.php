@@ -158,7 +158,6 @@ Route::get('/admin/planes/tabla', [PlanesController::class,'tablaPlanes']);
 Route::get('/admin/planes/agregar/nuevo/index', [PlanesController::class,'indexNuevoPlan']);
 Route::post('/admin/planes/agregar/nuevo', [PlanesController::class,'guardarNuevoPlan']);
 Route::post('/admin/planes/actualizar/posicion', [PlanesController::class,'actualizarPosicionPlanes']);
-Route::post('/admin/planes/activacion', [PlanesController::class,'activacionPlan']);
 
 // Editar plan
 Route::get('/admin/planes/vista/editar/index/{idplan}', [PlanesController::class,'indexEditarPlan']);

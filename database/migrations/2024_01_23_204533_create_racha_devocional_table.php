@@ -16,12 +16,13 @@ return new class extends Migration
             $table->id();
 
             $table->bigInteger('id_usuario')->unsigned();
-            $table->bigInteger('id_plan_block_deta')->unsigned();
+
+            // YA NO SERA FORANEA, PORQUE SE PUEDE ELIMINAR PLAN BLOCK DETALLE
+            $table->bigInteger('id_plan_block_deta');
 
             $table->date('fecha');
 
             $table->foreign('id_usuario')->references('id')->on('usuarios');
-            $table->foreign('id_plan_block_deta')->references('id')->on('planes_block_detalle');
         });
     }
 

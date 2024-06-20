@@ -4,13 +4,20 @@ namespace App\Http\Controllers\Backend\Planes;
 
 use App\Http\Controllers\Controller;
 use App\Models\BloqueCuestionarioTextos;
+use App\Models\BloquePreguntas;
+use App\Models\BloquePreguntasTextos;
+use App\Models\BloquePreguntasUsuarios;
 use App\Models\IdiomaPlanes;
+use App\Models\LecturaDia;
 use App\Models\Planes;
+use App\Models\PlanesAmigosDetalle;
 use App\Models\PlanesBlockDetalle;
 use App\Models\PlanesBlockDetaTextos;
+use App\Models\PlanesBlockDetaUsuario;
 use App\Models\PlanesBloques;
 use App\Models\PlanesBloquesTextos;
 use App\Models\PlanesTextos;
+use App\Models\PlanesUsuarios;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -179,32 +186,6 @@ class PlanesController extends Controller
     }
 
 
-    public function activacionPlan(Request $request)
-    {
-        $regla = array(
-            'idplan' => 'required',
-            'estado' => 'required'
-        );
-
-        $validar = Validator::make($request->all(), $regla);
-
-        if ($validar->fails()){ return ['success' => 0];}
-
-        // VERIFICAR QUE HAYA BLOQUES EN TABLA:
-        if(PlanesBloques::where('id_planes', $request->idplan)->first()){
-
-            // si hay bloque creado
-            Planes::where('id', $request->idplan)->update([
-                'visible' => $request->estado,
-            ]);
-
-
-
-            return ['success' => 1];
-        }else{
-            return ['success' => 2];
-        }
-    }
 
 
     public function indexEditarPlan($idplan)
@@ -395,23 +376,89 @@ class PlanesController extends Controller
     // BORRADO TOTAL DEL DEVOCIONAL
     public function borradoTotalDevocional(Request $request)
     {
-        $rules = array(
-            'id' => 'required',
+        $regla = array(
+            'idplan' => 'required'
         );
 
-        $validator = Validator::make($request->all(), $rules);
+        $validar = Validator::make($request->all(), $regla);
 
-        if ($validator->fails()) {
-            return ['success' => 0];
-        }
+        if ($validar->fails()){ return ['success' => 0];}
 
-        if($infoPlan = Planes::where('id', $request->id)->first()){
+        $idplan = $request->idplan;
+
+        if(Planes::where('id', $idplan)->first()){
 
             DB::beginTransaction();
 
             try {
+                $pilaIdBlock = array();
 
-              // FALTA LOGICA
+                // obtener listado de plan bloques del plan
+                $arrayPlanBlock = PlanesBloques::where('id_planes', $idplan)->get();
+                foreach ($arrayPlanBlock as $dato){
+                    array_push($pilaIdBlock, $dato->id);
+                }
+
+
+                $pilaIdBlockDetalle = array();
+                $arrayDatoBlockDetalle = PlanesBlockDetalle::whereIn('id_planes_bloques', $pilaIdBlock)->get();
+
+                foreach ($arrayDatoBlockDetalle as $dato){
+                    array_push($pilaIdBlockDetalle, $dato->id);
+                }
+
+
+                PlanesBlockDetaUsuario::whereIn('id_planes_block_deta', $pilaIdBlockDetalle)->delete();
+                PlanesBlockDetaTextos::whereIn('id_planes_block_detalle', $pilaIdBlockDetalle)->delete();
+                BloqueCuestionarioTextos::whereIn('id_bloque_detalle', $pilaIdBlockDetalle)->delete();
+
+                // obtener listado de preguntas id
+                $arrayPreguntas = BloquePreguntas::whereIn('id_plan_block_detalle', $pilaIdBlockDetalle)->get();
+
+                $pilaIdPreguntas = array();
+                foreach ($arrayPreguntas as $dato){
+                    array_push($pilaIdPreguntas, $dato->id);
+                }
+
+                // borrar bloque pregu usuarios
+                BloquePreguntasUsuarios::whereIn('id_bloque_preguntas', $pilaIdPreguntas)->delete();
+                // borrar bloque pre textos
+                BloquePreguntasTextos::whereIn('id_bloque_preguntas', $pilaIdPreguntas)->delete();
+                // borrar el array de preguntas
+                BloquePreguntas::whereIn('id_plan_block_detalle', $pilaIdBlockDetalle)->delete();
+                // borrar lectura dia
+                LecturaDia::whereIn('id_planes_block_detalle', $pilaIdBlockDetalle)->delete();
+
+                // borrar ya plan block detalle
+                PlanesBlockDetalle::whereIn('id', $pilaIdBlockDetalle)->delete();
+
+
+                // borrar plan bloque textos
+                PlanesBloquesTextos::whereIn('id_planes_bloques', $pilaIdBlock)->delete();
+
+                // borrar ya plan bloque
+                PlanesBloques::whereIn('id', $pilaIdBlock)->delete();
+
+                // borrar planes textos
+                PlanesTextos::where('id_planes', $idplan)->delete();
+
+                // borrar planes comunidad
+                $pilaIdPlanesUsuarios = array();
+                $arrayPlanUsuario = PlanesUsuarios::where('id_planes', $idplan)->get();
+
+                foreach ($arrayPlanUsuario as $dato){
+                    array_push($pilaIdPlanesUsuarios, $dato->id);
+                }
+
+
+                // borrar
+                PlanesAmigosDetalle::whereIn('id_planes_usuarios', $pilaIdPlanesUsuarios)->delete();
+
+                // borrar planes usuarios
+                PlanesUsuarios::where('id_planes', $idplan)->delete();
+
+                // BORRADO FINAL
+                Planes::where('id', $idplan)->delete();
 
 
 
@@ -423,9 +470,7 @@ class PlanesController extends Controller
                 DB::rollback();
                 return ['success' => 99];
             }
-        }
-        else{
-            // decir que fue eliminado
+        }else{
             return ['success' => 1];
         }
     }
@@ -541,39 +586,76 @@ class PlanesController extends Controller
     }
 
 
+    // BORRAR REGISTRO DE PLANES BLOQUES (CONTENEDOR FECHA)
     public function borrarRegistroPlanBloque(Request $request)
     {
         $regla = array(
-            'idplanbloques' => 'required',
+            'idplanbloque' => 'required'
         );
 
         $validar = Validator::make($request->all(), $regla);
 
         if ($validar->fails()){ return ['success' => 0];}
 
-        // VERIFICAR QUE HAYA PLAN BLOQUES DETALLE EN TABLA:
-        if(PlanesBlockDetalle::where('id_planes_bloques', $request->idplanbloques)->first()){
 
-            // BORRAR TODOS REGISTRO ASOCIADO
+        $idplanBloque = $request->idplanbloque;
+
+        if(PlanesBloques::where('id', $idplanBloque)->first()){
 
             DB::beginTransaction();
 
             try {
 
+                $pilaIdBlockDetalle = array();
+                $arrayDatoBlockDetalle = PlanesBlockDetalle::where('id_planes_bloques', $idplanBloque)->get();
+
+                foreach ($arrayDatoBlockDetalle as $dato){
+                    array_push($pilaIdBlockDetalle, $dato->id);
+                }
 
 
+                PlanesBlockDetaUsuario::whereIn('id_planes_block_deta', $pilaIdBlockDetalle)->delete();
+                PlanesBlockDetaTextos::whereIn('id_planes_block_detalle', $pilaIdBlockDetalle)->delete();
+                BloqueCuestionarioTextos::whereIn('id_bloque_detalle', $pilaIdBlockDetalle)->delete();
+
+                // obtener listado de preguntas id
+                $arrayPreguntas = BloquePreguntas::whereIn('id_plan_block_detalle', $pilaIdBlockDetalle)->get();
+
+                $pilaIdPreguntas = array();
+                foreach ($arrayPreguntas as $dato){
+                    array_push($pilaIdPreguntas, $dato->id);
+                }
+
+                // borrar bloque pregu usuarios
+                BloquePreguntasUsuarios::whereIn('id_bloque_preguntas', $pilaIdPreguntas)->delete();
+                // borrar bloque pre textos
+                BloquePreguntasTextos::whereIn('id_bloque_preguntas', $pilaIdPreguntas)->delete();
+                // borrar el array de preguntas
+                BloquePreguntas::whereIn('id_plan_block_detalle', $pilaIdBlockDetalle)->delete();
+                // borrar lectura dia
+                LecturaDia::whereIn('id_planes_block_detalle', $pilaIdBlockDetalle)->delete();
+
+                // borrar ya plan block detalle
+                PlanesBlockDetalle::whereIn('id', $pilaIdBlockDetalle)->delete();
 
 
-            DB::commit();
-            return ['success' => 1];
+                // borrar plan bloque textos
+                PlanesBloquesTextos::where('id_planes_bloques', $idplanBloque)->delete();
 
-            }catch(\Throwable $e) {
-                Log::info('error: ' . $e);
+                // borrar ya plan bloque
+                PlanesBloques::where('id', $idplanBloque)->delete();
+
+
+                DB::commit();
+                return ['success' => 1];
+
+            }catch(\Throwable $e){
+                Log::info("error: " . $e);
                 DB::rollback();
                 return ['success' => 99];
             }
         }else{
-            return ['success' => 1]; // decir que fue borrado
+            return ['success' => 1];
         }
     }
 
@@ -794,7 +876,7 @@ class PlanesController extends Controller
     }
 
 
-    // BORRAR REGISTRO
+    // BORRAR REGISTRO DE PLAN BLOCK DETALLE (ITEM)
     public function borrarRegistroPlanBloqueDetalle(Request $request)
     {
         $regla = array(
@@ -805,12 +887,41 @@ class PlanesController extends Controller
 
         if ($validar->fails()){ return ['success' => 0];}
 
-        // VERIFICAR QUE HAYA PLAN BLOQUES DETALLE EN TABLA:
+
         if(BloqueCuestionarioTextos::where('id_bloque_detalle', $request->idplanbloquedetalle)->first()){
 
             DB::beginTransaction();
 
             try {
+
+                $id = $request->idplanbloquedetalle;
+
+                PlanesBlockDetaUsuario::where('id_planes_block_deta', $id)->delete();
+                PlanesBlockDetaTextos::where('id_planes_block_detalle', $id)->delete();
+                BloqueCuestionarioTextos::where('id_bloque_detalle', $id)->delete();
+
+                // obtener listado de preguntas id
+                $arrayPreguntas = BloquePreguntas::where('id_plan_block_detalle', $id)->get();
+
+                $pilaIdPreguntas = array();
+                foreach ($arrayPreguntas as $dato){
+                    array_push($pilaIdPreguntas, $dato->id);
+                }
+
+                // borrar bloque pregu usuarios
+                BloquePreguntasUsuarios::whereIn('id_bloque_preguntas', $pilaIdPreguntas)->delete();
+                // borrar bloque pre textos
+                BloquePreguntasTextos::whereIn('id_bloque_preguntas', $pilaIdPreguntas)->delete();
+                // borrar el array de preguntas
+                BloquePreguntas::where('id_plan_block_detalle', $id)->delete();
+
+                // borrar lectura dia
+                LecturaDia::where('id_planes_block_detalle', $id)->delete();
+
+
+
+
+                PlanesBlockDetalle::where('id', $id)->delete();
 
 
                 DB::commit();
