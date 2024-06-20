@@ -81,7 +81,7 @@
 
                         <div class="col-md-3">
                             <div class="form-group">
-                                <label class="control-label">Idioma para nuevo Devocional:</label>
+                                <label class="control-label">Idioma:</label>
                                 <select class="form-control" id="select-idioma">
                                     @foreach($arrayIdiomas as $item)
                                         <option value="{{$item->id}}">{{$item->nombre}}</option>

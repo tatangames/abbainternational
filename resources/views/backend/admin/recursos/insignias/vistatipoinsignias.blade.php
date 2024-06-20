@@ -22,10 +22,7 @@
     <div class="container-fluid">
         <div class="row">
             <div class="col-sm-6">
-                <button type="button" onclick="vistaNuevoTipoInsignia()" class="btn btn-primary btn-sm">
-                    <i class="fas fa-plus-square"></i>
-                    Nuevo Tipo Insignia
-                </button>
+
             </div>
 
             <div class="col-sm-6">
