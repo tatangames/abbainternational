@@ -446,7 +446,7 @@ class ApiInicioController extends Controller
         $diaSabado = 0;
 
 
-        $arrayFechaDevo = PlanesBlockDetaUsuario::where('id_usuario', $userToken->id)->get();
+        $arrayFechaDevo = PlanesBlockDetaUsuarioTotal::where('id_usuario', $userToken->id)->get();
 
         foreach ($arrayFechaDevo as $dato){
 
