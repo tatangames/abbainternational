@@ -26,6 +26,7 @@ use App\Models\PlanesAmigosDetalle;
 use App\Models\PlanesBlockDetalle;
 use App\Models\PlanesBlockDetaTextos;
 use App\Models\PlanesBlockDetaUsuario;
+use App\Models\PlanesBlockDetaUsuarioTotal;
 use App\Models\PlanesBloques;
 use App\Models\PlanesBloquesTextos;
 use App\Models\PlanesContenedor;
@@ -583,6 +584,14 @@ class ApiPlanesController extends Controller
                     $detalle->fecha = $fechaCarbon;
                     $detalle->completado = 1;
                     $detalle->save();
+
+
+                    // PARA CONTAR LOS DIAS SEGUIDOS, MAS DESCRIPCION EN TABLA MIGRATE
+                    $regDias = new PlanesBlockDetaUsuarioTotal();
+                    $regDias->id_usuario = $userToken->id;
+                    $regDias->id_planes_block_deta = $request->idblockdeta;
+                    $regDias->fecha = $fechaCarbon;
+                    $regDias->save();
 
                     $primeraVezItem = true;
                 }

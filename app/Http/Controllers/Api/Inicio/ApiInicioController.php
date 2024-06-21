@@ -25,6 +25,7 @@ use App\Models\Planes;
 use App\Models\PlanesBlockDetalle;
 use App\Models\PlanesBlockDetaTextos;
 use App\Models\PlanesBlockDetaUsuario;
+use App\Models\PlanesBlockDetaUsuarioTotal;
 use App\Models\PlanesBloques;
 use App\Models\PlanesBloquesTextos;
 use App\Models\PlanesContenedor;
@@ -381,7 +382,7 @@ class ApiInicioController extends Controller
         $fechaActualH = $this->retornoZonaHorariaUsuarioFormatFecha($userToken->id_iglesia);
 
 
-        $arrayFechaDevoPorSeguido = PlanesBlockDetaUsuario::where('id_usuario', $userToken->id)
+        $arrayFechaDevoPorSeguido = PlanesBlockDetaUsuarioTotal::where('id_usuario', $userToken->id)
             ->where('fecha', '<=', $fechaFormatHorariaCarbon)
             ->select('fecha')
             ->orderBy('fecha', 'DESC')
