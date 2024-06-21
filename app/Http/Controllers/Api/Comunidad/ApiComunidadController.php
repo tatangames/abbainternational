@@ -456,13 +456,15 @@ class ApiComunidadController extends Controller
 
                 $hayInsignias = 0;
 
-                if($insignia_arrayInsignias != null && $insignia_arrayInsignias->isNotEmpty()){
-                    $hayInsignias = 1;
-                }
-
-
 
                 foreach ($insignia_arrayInsignias as $dato){
+                    $hayInsignias = 1;
+
+
+                    $infoTipoInsignia = TipoInsignias::where('id', $dato->id_tipo_insignia)->first();
+                    $dato->imageninsignia = $infoTipoInsignia->imagen;
+
+
 
                     $infoTitulos = $this->retornoTituloInsigniasAppIdioma($dato->id_tipo_insignia, $idiomaTextos);
 
@@ -476,6 +478,7 @@ class ApiComunidadController extends Controller
                         ->join('tipo_insignias AS tipo', 'nil.id_tipo_insignia', '=', 'tipo.id')
                         ->select('nil.nivel', 'nil.id AS idnivelinsignia')
                         ->where('nil.id_tipo_insignia', $dato->id_tipo_insignia)
+                        ->where('indeta.id_usuarios', $infoUsuario->id)
                         ->max('nil.nivel');
 
 
