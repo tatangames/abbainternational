@@ -488,15 +488,15 @@ class PlanesController extends Controller
 
 
                 if($imagenPortada != null){
-                    /*if(Storage::disk('archivos')->exists($imagenPortada)){
+                    if(Storage::disk('archivos')->exists($imagenPortada)){
                         Storage::disk('archivos')->delete($imagenPortada);
-                    }*/
+                    }
                 }
 
                 if($imagenNormal != null){
-                    /*if(Storage::disk('archivos')->exists($imagenNormal)){
+                    if(Storage::disk('archivos')->exists($imagenNormal)){
                         Storage::disk('archivos')->delete($imagenNormal);
-                    }*/
+                    }
                 }
 
 
