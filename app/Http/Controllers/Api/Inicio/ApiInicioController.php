@@ -221,56 +221,18 @@ class ApiInicioController extends Controller
                 $dato->descripcion = $infoTitulos['descripcion'];
 
 
-                // Conocer que nivel voy (ejemplo devuelve 5)
-                /*$datoHitoNivel = DB::table('insignias_usuarios_detalle AS indeta')
-                    ->join('niveles_insignias AS nil', 'indeta.id_niveles_insignias', '=', 'nil.id')
-                    ->join('tipo_insignias AS tipo', 'nil.id_tipo_insignia', '=', 'tipo.id')
-                    ->select('nil.nivel', 'nil.id AS idnivelinsignia')
-                    ->where('nil.id_tipo_insignia', $dato->id_tipo_insignia)
-                    ->max('nil.nivel');*/
+                $datoHitoNivel = DB::table('insignias_usuarios_detalle AS iud')
+                    ->join('niveles_insignias AS ni', 'iud.id_niveles_insignias', '=', 'ni.id')
+                    ->select('ni.nivel', 'ni.id AS idnivelinsignia', 'iud.id_usuarios')
+                    ->where('ni.id_tipo_insignia', $dato->id_tipo_insignia)
+                    ->where('iud.id_usuarios', $userToken->id)
+                    ->max('ni.nivel');
 
-
-                $datoHitoNivel = DB::table('insignias_usuarios_detalle AS indeta')
-                    ->join('niveles_insignias AS nil', 'indeta.id_niveles_insignias', '=', 'nil.id')
-                    ->join('tipo_insignias AS tipo', 'nil.id_tipo_insignia', '=', 'tipo.id')
-                    ->select('nil.nivel', 'nil.id AS idnivelinsignia')
-                    ->where('nil.id_tipo_insignia', $dato->id_tipo_insignia)
-                    ->where('indeta.id_usuarios', $userToken->id_usuario)
-                    ->max('nil.nivel');
-
-                $hito_infoNivelVoy = 1;
 
                 if($datoHitoNivel != null){
                     $dato->nivelvoy = $datoHitoNivel;
-                    $hito_infoNivelVoy = $datoHitoNivel;
                 }else{
                     $dato->nivelvoy = 1;
-                }
-
-
-                // ------ INFORMACION DEL HITO DE CADA INSIGNIA ------
-
-
-
-                // Obtener los niveles ya ganados para evitarlos
-                $hito_arrayObtenidos = DB::table('insignias_usuarios_detalle AS indeta')
-                    ->join('niveles_insignias AS nil', 'indeta.id_niveles_insignias', '=', 'nil.id')
-                    ->join('tipo_insignias AS tipo', 'nil.id_tipo_insignia', '=', 'tipo.id')
-                    ->select('nil.id')
-                    ->where('nil.id_tipo_insignia', $dato->id_tipo_insignia)
-                    ->get();
-
-                $pilaIdYaGanados = array();
-
-                foreach ($hito_arrayObtenidos as $item){
-                    array_push($pilaIdYaGanados, $item->id);
-                }
-
-                // buscar el siguiente nivel que falta y cuanto me falta
-                if($infoNivelSiguiente = NivelesInsignias::where('id_tipo_insignia', $dato->id_tipo_insignia)
-                    ->whereNotIn('id', $pilaIdYaGanados)
-                    ->where('nivel', '>', $hito_infoNivelVoy)
-                    ->first()){
                 }
 
                 $infoInsigniaP = TipoInsignias::where('id', $dato->id_tipo_insignia)->first();
@@ -339,9 +301,6 @@ class ApiInicioController extends Controller
                 'arrayfinalvideo' => $arrayFinalVideo,
                 'arrayfinalimagenes' => $arrayFinalImagenes,
                 'arrayfinalinsignias' => $arrayFinalInsignias,
-
-
-
                 ];
 
 
@@ -603,6 +562,7 @@ class ApiInicioController extends Controller
                     ->join('tipo_insignias AS tipo', 'nil.id_tipo_insignia', '=', 'tipo.id')
                     ->select('nil.nivel', 'nil.id AS idnivelinsignia')
                     ->where('nil.id_tipo_insignia', $dato->id_tipo_insignia)
+                    ->where('indeta.id_usuarios', $userToken->id)
                     ->max('nil.nivel');
 
                 $hito_infoNivelVoy = 0;
