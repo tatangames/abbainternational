@@ -28,6 +28,8 @@ class ApiCorreoController extends Controller
 
     const IDIOMA_ID_5 = 5; // si usted no realizo esta solicitud, puede ignorar este mensaje
 
+    const IDIOMA_ID_6 = 6; // mi caminar con dios
+
 
     // solicitud de codigo de recuperacion de contrasena
     public function enviarCorreoRecuperacion(Request $request){
@@ -41,6 +43,10 @@ class ApiCorreoController extends Controller
         if ( $validator->fails()){
             return ['success' => 0, 'msj' => "validación incorrecta"];
         }
+
+        // EL IDIOMA LO MANDA EL TELEFONOO
+
+
 
         if($info = Usuarios::where('correo', $request->correo)->first()){
 
@@ -62,8 +68,10 @@ class ApiCorreoController extends Controller
                 "hola" => $dataIdioma[self::IDIOMA_ID_2],
                 "se_ha_solicitado" => $dataIdioma[self::IDIOMA_ID_3],
                 "su_codigo_de" => $dataIdioma[self::IDIOMA_ID_4],
-                "si_usted_no_realizo" => $dataIdioma[self::IDIOMA_ID_5]
+                "si_usted_no_realizo" => $dataIdioma[self::IDIOMA_ID_5],
+                "micaminar" => $dataIdioma[self::IDIOMA_ID_6]
             ];
+
 
             Mail::to($request->correo)
                 ->send(new CorreoPasswordMail($dataWeb, $dataIdioma[self::IDIOMA_ID_1]));
@@ -156,6 +164,7 @@ class ApiCorreoController extends Controller
         $msj3 = "";
         $msj4 = "";
         $msj5 = "";
+        $msj6 = ""; // mi caminar con dios
 
         // Buscar en un modelo donde tengo datos
         $datosIdioma = new IdiomaCentral();
@@ -181,6 +190,10 @@ class ApiCorreoController extends Controller
             if(self::IDIOMA_ID_5 == $dato->id){
                 $msj5 = $dato->texto;
             }
+
+            if(self::IDIOMA_ID_6 == $dato->id){
+                $msj6 = $dato->texto;
+            }
         }
 
 
@@ -188,7 +201,8 @@ class ApiCorreoController extends Controller
             self::IDIOMA_ID_2 => $msj2,
             self::IDIOMA_ID_3 => $msj3,
             self::IDIOMA_ID_4 => $msj4,
-            self::IDIOMA_ID_5 => $msj5
+            self::IDIOMA_ID_5 => $msj5,
+            self::IDIOMA_ID_6 => $msj6
         ];
     }
 
