@@ -20,8 +20,6 @@ Route::post('app/login', [ApiLoginController::class,'loginUsuario']);
 // solicitar listado de iglesias segun id departamento
 Route::post('app/solicitar/listado/iglesias', [ApiRegistroController::class,'listadoDeIglesias']);
 
-// registro de usuario
-Route::post('app/registro/usuario', [ApiRegistroController::class,'registroUsuario']);
 
 // Fix 01/05/2024
 // registro de usuario
@@ -151,23 +149,35 @@ Route::middleware('verificarToken')->group(function () {
 
 
 
-
+    /// ******* ONE SIGNAL --- COMPARTIR APLICACION ******
 
     // guardar las veces que comparte aplicacion -> onesignal
     Route::post('app/compartir/aplicacion', [ApiInicioController::class,'compartirAplicacion']);
 
-    // compartir devocional
+
+    /// ******* ONE SIGNAL --- COMPARTIR DEVOCIONAL ******
+    ///
+    // SE UTILIZA EN PANTALLA PREGUNTAS, AL DARLE BOTON COMPARTIR OBTIENE TEXTOS PERO LA PANTALLA
+    // Y SI PASA VALIDACION
+
     Route::post('app/compartir/devocional', [ApiInicioController::class,'compartirDevocional']);
+
+    /// ******* ONE SIGNAL --- COMPARTIR DEVOCIONAL PANTALLA FECHAS ******
 
     // devuelve textos de preguntas y respuestas para compartir -> One Signal insignia
     // utilizado en MisPlanesBloquesFechaActivity
     Route::post('app/plan/misplanes/preguntas/infocompartir', [ApiPlanesController::class,'informacionPreguntasParaCompartir']);
 
 
-    // actualizar el check de cada plan -> onesignal
+
+    /// ******* ONE SIGNAL --- 3 TIPOS NOTIFICACIONES ******
+    ///
     // INSIGNIA RACHA DIA LECTURA
     // INSIGNIA COMPLETAR PLAN
     // INSIGNIA PLANES COMPARTIDOS EN GRUPOS
+
+    // actualizar el check de cada plan -> onesignal
+
     Route::post('app/plan/misplanes/actualizar/check', [ApiPlanesController::class,'actualizarCheckBloqueMiPlan']);
 
 
@@ -185,6 +195,10 @@ Route::middleware('verificarToken')->group(function () {
 
     //*** COMUNIDAD
 
+
+    /// ******* ONE SIGNAL --- NOTIFICACION AL AMIGO DEL CORREO QUE QUIERO DE AMIGO ******
+
+
     // enviar solicitud a un amigo
     Route::post('app/comunidad/enviar/solicitud', [ApiComunidadController::class,'enviarSolicitudAmigo']);
 
@@ -200,13 +214,23 @@ Route::middleware('verificarToken')->group(function () {
     // eliminar una solicitud
     Route::post('app/comunidad/solicitud/eliminar', [ApiComunidadController::class,'eliminarSolicitud']);
 
+
+
+
+
     // aceptar una solicitud que he recibido
     Route::post('app/comunidad/aceptarsolicitud/recibido', [ApiComunidadController::class,'aceptarSolicitudRecibido']);
+
+
+
 
     // informacion insignia amigo
     Route::post('app/comunidad/informacion/insignias', [ApiComunidadController::class,'informacionInsigniaAmigo']);
 
 
+
+
+    /// ******* ONE SIGNAL --- NOTIFICACION AL QUE AGREGUE A MI PLAN COMUNIDAD (MAX 5 AMIGOS) ******
 
     // iniciar plan con amigos
     Route::post('app/comunidadplan/iniciar/plan/amigos', [ApiComunidadController::class,'iniciarPlanConAmigos']);
@@ -277,7 +301,8 @@ Route::middleware('verificarToken')->group(function () {
 
 
 
-
+   // BORRAR NOTIFICACIONES
+    Route::post('app/notificacion/borrarlistado', [ApiPlanesController::class,'borrarListadoNotificaciones']);
 
 
 

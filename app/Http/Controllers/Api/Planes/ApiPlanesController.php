@@ -37,6 +37,7 @@ use App\Models\PlanesUsuarios;
 use App\Models\PlanesUsuariosContinuar;
 use App\Models\RachaDevocional;
 use App\Models\UsuarioNotificaciones;
+use App\Models\Usuarios;
 use App\Models\ZonaHoraria;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -607,15 +608,25 @@ class ApiPlanesController extends Controller
 
 
                 // OBTENER LOS IDENTIFICADORES DE ONE SIGNAL
-                $arrayOneSignal = UsuarioNotificaciones::where('id_usuario', $userToken->id)->get();
-                $pilaOneSignal = array();
+                $infoUsuarioFila = Usuarios::where('id', $userToken->id)->first();
+                $idOneSignalUsuario = $infoUsuarioFila->onesignal;
+
                 $hayIdOne = false;
-                foreach ($arrayOneSignal as $item){
-                    if($item->onesignal != null){
+
+                if($idOneSignalUsuario != null){
+                    if(strlen($idOneSignalUsuario) == 0){
+                        // vacio no hacer nada
+                    }else{
                         $hayIdOne = true;
-                        array_push($pilaOneSignal, $item->onesignal);
                     }
                 }
+
+
+
+
+
+
+
 
 
                 // Rachas / Días lectura y devocional
@@ -688,7 +699,7 @@ class ApiPlanesController extends Controller
 
                                 // como es primera vez, se necesita enviar notificacion
                                 if($permitirNotificacion) {
-                                    dispatch(new EnviarNotificacion($pilaOneSignal, $tiNo, $desNo));
+                                    dispatch(new EnviarNotificacion($idOneSignalUsuario, $tiNo, $desNo));
                                 }
                             }
                         }
@@ -751,7 +762,7 @@ class ApiPlanesController extends Controller
 
                         // como es primera vez, se necesita enviar notificacion
                         if($permitirNotificacion) {
-                            dispatch(new EnviarNotificacion($pilaOneSignal, $tiNo, $desNo));
+                            dispatch(new EnviarNotificacion($idOneSignalUsuario, $tiNo, $desNo));
                         }
                     }
                 }
@@ -898,7 +909,7 @@ class ApiPlanesController extends Controller
                                     $desNo = $datosRaw['descripcion'];
 
                                     if($permitirNotificacion) {
-                                        dispatch(new EnviarNotificacion($pilaOneSignal, $tiNo, $desNo));
+                                        dispatch(new EnviarNotificacion($idOneSignalUsuario, $tiNo, $desNo));
                                     }
 
                                 }
@@ -972,7 +983,7 @@ class ApiPlanesController extends Controller
 
                             // como es primera vez, se necesita enviar notificacion
                             if($permitirNotificacion) {
-                                dispatch(new EnviarNotificacion($pilaOneSignal, $tiNo, $desNo));
+                                dispatch(new EnviarNotificacion($idOneSignalUsuario, $tiNo, $desNo));
                             }
                         }
                     }
@@ -1013,16 +1024,22 @@ class ApiPlanesController extends Controller
 
 
                             // OBTENER PILA ONE SIGNAL DEL USUARIO QUE GANO PUNTOS
+                            $infoUsuarioFila = Usuarios::where('id', $dato->idusuariogana)->first();
+                            $idOneSignalUsuario = $infoUsuarioFila->onesignal;
 
-                            $arrayOneSignal = UsuarioNotificaciones::where('id_usuario', $dato->idusuariogana)->get();
-                            $pilaOneSignal = array();
                             $hayIdOne = false;
-                            foreach ($arrayOneSignal as $item){
-                                if($item->onesignal != null){
+
+                            if($idOneSignalUsuario != null){
+                                if(strlen($idOneSignalUsuario) == 0){
+                                    // vacio no hacer nada
+                                }else{
                                     $hayIdOne = true;
-                                    array_push($pilaOneSignal, $item->onesignal);
                                 }
                             }
+
+
+
+
 
 
                             if(InsigniasUsuarios::where('id_tipo_insignia', $idTipoInsigniaBloque3)
@@ -1088,7 +1105,7 @@ class ApiPlanesController extends Controller
 
                                         // como es primera vez, se necesita enviar notificacion
                                         if($permitirNotificacion) {
-                                            dispatch(new EnviarNotificacion($pilaOneSignal, $tiNo, $desNo));
+                                            dispatch(new EnviarNotificacion($idOneSignalUsuario, $tiNo, $desNo));
                                         }
                                     }
                                 }
@@ -1152,7 +1169,7 @@ class ApiPlanesController extends Controller
 
                                     // como es primera vez, se necesita enviar notificacion
                                     if($permitirNotificacion) {
-                                        dispatch(new EnviarNotificacion($pilaOneSignal, $tiNo, $desNo));
+                                        dispatch(new EnviarNotificacion($idOneSignalUsuario, $tiNo, $desNo));
                                     }
                                 }
                             }
@@ -1779,15 +1796,23 @@ class ApiPlanesController extends Controller
                     $fechaCarbon = $this->retornoZonaHorariaDepaCarbonNow($userToken->id_iglesia);
 
 
-                    $arrayOneSignal = UsuarioNotificaciones::where('id_usuario', $userToken->id)->get();
-                    $pilaOneSignal = array();
+                    $infoUsuarioFila = Usuarios::where('id', $userToken->id)->first();
+                    $idOneSignalUsuario = $infoUsuarioFila->onesignal;
+
                     $hayIdOne = false;
-                    foreach ($arrayOneSignal as $item){
-                        if($item->onesignal != null){
+
+                    if($idOneSignalUsuario != null){
+                        if(strlen($idOneSignalUsuario) == 0){
+                            // vacio no hacer nada
+                        }else{
                             $hayIdOne = true;
-                            array_push($pilaOneSignal, $item->onesignal);
                         }
                     }
+
+
+
+
+
 
 
                     // COMPARTIR DEVOCIONAL
@@ -1853,7 +1878,7 @@ class ApiPlanesController extends Controller
                                 $desNo = $datosRaw['descripcion'];
 
                                 // como es primera vez, se necesita enviar notificacion
-                                dispatch(new EnviarNotificacion($pilaOneSignal, $tiNo, $desNo));
+                                dispatch(new EnviarNotificacion($idOneSignalUsuario, $tiNo, $desNo));
                             }
                         }
 
@@ -1920,7 +1945,7 @@ class ApiPlanesController extends Controller
                             $desNo = $datosRaw['descripcion'];
 
                             // como es primera vez, se necesita enviar notificacion
-                            dispatch(new EnviarNotificacion($pilaOneSignal, $tiNo, $desNo));
+                            dispatch(new EnviarNotificacion($idOneSignalUsuario, $tiNo, $desNo));
                         }
                     }
 
@@ -2129,6 +2154,39 @@ class ApiPlanesController extends Controller
 
 
 
+    public function borrarListadoNotificaciones(Request $request)
+    {
+        $rules = array(
+            'idiomaplan' => 'required',
+        );
+
+        $validator = Validator::make($request->all(), $rules);
+        if ( $validator->fails()){
+            return ['success' => 0, 'msj' => "validación incorrecta"];
+        }
+
+        $tokenApi = $request->header('Authorization');
+
+
+        if ($userToken = JWTAuth::user($tokenApi)) {
+
+            DB::beginTransaction();
+
+            try {
+                NotificacionUsuario::where('id_usuario', $userToken->id)->delete();
+
+                DB::commit();
+                return ['success' => 1];
+            }catch(\Throwable $e){
+                Log::info('error: ' . $e);
+                DB::rollback();
+                return ['success' => 99];
+            }
+
+        }else{
+            return ['success' => 1];
+        }
+    }
 
 
 

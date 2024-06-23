@@ -27,8 +27,6 @@ return new class extends Migration
             $table->date('fecha_nacimiento');
             $table->dateTime('fecha_registro');
 
-            // para que usuario pueda desactivar sus notificaciones
-            $table->boolean('notificacion_general');
 
             // en Comunidad, cuando se envia una solicitud a un amigo
             // el otro telefono recibe notificacion y hay que saber su idioma
@@ -37,6 +35,11 @@ return new class extends Migration
 
             // foto del usuario
             $table->string('imagen', 100)->nullable();
+
+            // 6/22/2024
+            // EL USUARIO AL REGISTRARSE O ABRIR INICIO TAB SE REGISTRA SU IDENTIFICADOR,
+            // AL INICIAR SESION NO SE PEDIRA YA
+            $table->string('onesignal',200)->nullable();
 
 
             $table->foreign('id_iglesia')->references('id')->on('iglesia');

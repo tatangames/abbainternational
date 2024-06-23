@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api\Registro;
 
 use App\Http\Controllers\Controller;
-use App\Models\UsuarioNotificaciones;
 use App\Models\Usuarios;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -23,8 +22,6 @@ class ApiLoginController extends Controller
             'password' => 'required',
         );
 
-        // idonesignal
-
         $validator = Validator::make($request->all(), $rules );
 
         if ( $validator->fails()){
@@ -39,24 +36,6 @@ class ApiLoginController extends Controller
 
                     $token = JWTAuth::fromUser($infoUsuario);
 
-                    $idOneSignal = $request->idonesignal;
-
-                    if($idOneSignal != null){
-                        if(strlen($idOneSignal) == 0){
-                            // vacio no hacer nada
-                        }else{
-
-                            if(UsuarioNotificaciones::where('id_usuario', $infoUsuario->id)
-                                ->where('onesignal', $idOneSignal)->first()){
-                                // no registrar
-                            }else{
-                                $nuevoid = new UsuarioNotificaciones();
-                                $nuevoid->id_usuario = $infoUsuario->id;
-                                $nuevoid->onesignal = $idOneSignal;
-                                $nuevoid->save();
-                            }
-                        }
-                    }
 
                     return ['success' => 1,
                         'id' => strval($infoUsuario->id),

@@ -37,7 +37,6 @@ use App\Models\RachaAlta;
 use App\Models\RachaDevocional;
 use App\Models\RachaDias;
 use App\Models\TipoInsignias;
-use App\Models\UsuarioNotificaciones;
 use App\Models\Usuarios;
 use App\Models\VideosHoy;
 use App\Models\VideosTextos;
@@ -65,6 +64,8 @@ class ApiInicioController extends Controller
             'iduser' => 'required',
         );
 
+       // idonesignal
+
         $validator = Validator::make($request->all(), $rules);
         if ( $validator->fails()){
             return ['success' => 0, 'msj' => "validación incorrecta"];
@@ -82,7 +83,6 @@ class ApiInicioController extends Controller
 
             // Array Final
 
-
             // TODOS LOS BLOQUES DEBERIAN MOSTRARSE
 
             DB::beginTransaction();
@@ -93,6 +93,24 @@ class ApiInicioController extends Controller
                     ->update([
                         'idioma_noti' => $idiomaTextos,
                     ]);
+
+
+                $idOneSignal = $request->idonesignal;
+
+                if($idOneSignal != null){
+                    if(strlen($idOneSignal) == 0){
+                        // vacio no hacer nada
+                    }else{
+
+                        // actualizar nomas
+                        Usuarios::where('id', $userToken->id)->update([
+                            'onesignal' => $idOneSignal,
+                        ]);
+                    }
+                }
+
+
+
 
             // ************** BLOQUE DEVOCIONAL ******************
 
@@ -983,16 +1001,18 @@ class ApiInicioController extends Controller
                 $fechaCarbon = $this->retornoZonaHorariaDepaCarbonNow($userToken->id_iglesia);
 
 
-                $arrayOneSignal = UsuarioNotificaciones::where('id_usuario', $userToken->id)->get();
-                $pilaOneSignal = array();
+                $infoUsuarioFila = Usuarios::where('id', $userToken->id)->first();
+                $idOneSignalUsuario = $infoUsuarioFila->onesignal;
+
                 $hayIdOne = false;
-                foreach ($arrayOneSignal as $item){
-                    if($item->onesignal != null){
+
+                if($idOneSignalUsuario != null){
+                    if(strlen($idOneSignalUsuario) == 0){
+                        // vacio no hacer nada
+                    }else{
                         $hayIdOne = true;
-                        array_push($pilaOneSignal, $item->onesignal);
                     }
                 }
-
 
                 // COMPARTIR APLICACION
                 if(InsigniasUsuarios::where('id_tipo_insignia', $idTipoInsignia)
@@ -1013,7 +1033,6 @@ class ApiInicioController extends Controller
                         ->get();
 
                     $enviarNoti = false;
-
 
 
                     // verificar si ya alcanzo nivel
@@ -1057,7 +1076,7 @@ class ApiInicioController extends Controller
                             $desNo = $datosRaw['descripcion'];
 
                             // como es primera vez, se necesita enviar notificacion
-                            dispatch(new EnviarNotificacion($pilaOneSignal, $tiNo, $desNo));
+                            dispatch(new EnviarNotificacion($idOneSignalUsuario, $tiNo, $desNo));
                         }
                     }
 
@@ -1120,9 +1139,8 @@ class ApiInicioController extends Controller
                         $notiHistorial->save();
 
 
-
                         // como es primera vez, se necesita enviar notificacion
-                        dispatch(new EnviarNotificacion($pilaOneSignal, $tiNo, $desNo));
+                        dispatch(new EnviarNotificacion($idOneSignalUsuario, $tiNo, $desNo));
                     }
                 }
 
@@ -1172,15 +1190,28 @@ class ApiInicioController extends Controller
                 $fechaCarbon = $this->retornoZonaHorariaDepaCarbonNow($userToken->id_iglesia);
 
 
-                $arrayOneSignal = UsuarioNotificaciones::where('id_usuario', $userToken->id)->get();
-                $pilaOneSignal = array();
+
+                $infoUsuarioFila = Usuarios::where('id', $userToken->id)->first();
+                $idOneSignalUsuario = $infoUsuarioFila->onesignal;
+
                 $hayIdOne = false;
-                foreach ($arrayOneSignal as $item){
-                    if($item->onesignal != null){
+
+                if($idOneSignalUsuario != null){
+                    if(strlen($idOneSignalUsuario) == 0){
+                        // vacio no hacer nada
+                    }else{
                         $hayIdOne = true;
-                        array_push($pilaOneSignal, $item->onesignal);
                     }
                 }
+
+
+
+
+
+
+
+
+
 
 
                 // COMPARTIR DEVOCIONAL
@@ -1238,20 +1269,6 @@ class ApiInicioController extends Controller
                         }
                     }
 
-                    if($enviarNoti){
-
-                        if($hayIdOne){
-                            // SUBI DE NIVEL INSIGNIA COMPARTIR DEVOCIONAL
-                            $datosRaw = $this->retornoTitulosNotificaciones(4, $idiomaTexto);
-                            $tiNo = $datosRaw['titulo'];
-                            $desNo = $datosRaw['descripcion'];
-
-
-                            // como es primera vez, se necesita enviar notificacion
-                            dispatch(new EnviarNotificacion($pilaOneSignal, $tiNo, $desNo));
-                        }
-                    }
-
                     // maximo nivel
                     $maxNiveles = NivelesInsignias::where('id_tipo_insignia', $idTipoInsignia)->max('nivel');
 
@@ -1264,6 +1281,28 @@ class ApiInicioController extends Controller
                             ->update(['conteo' => $conteo]);
 
                     }
+
+
+
+
+                    if($enviarNoti){
+
+                        if($hayIdOne){
+                            // SUBI DE NIVEL INSIGNIA COMPARTIR DEVOCIONAL
+                            $datosRaw = $this->retornoTitulosNotificaciones(4, $idiomaTexto);
+                            $tiNo = $datosRaw['titulo'];
+                            $desNo = $datosRaw['descripcion'];
+
+
+                            // como es primera vez, se necesita enviar notificacion
+                            dispatch(new EnviarNotificacion($idOneSignalUsuario, $tiNo, $desNo));
+                        }
+                    }
+
+
+
+
+
 
                 }else{
 
@@ -1314,9 +1353,12 @@ class ApiInicioController extends Controller
                         $desNo = $datosRaw['descripcion'];
 
                         // como es primera vez, se necesita enviar notificacion
-                        dispatch(new EnviarNotificacion($pilaOneSignal, $tiNo, $desNo));
+                        dispatch(new EnviarNotificacion($idOneSignalUsuario, $tiNo, $desNo));
                     }
                 }
+
+
+
 
                 DB::commit();
                 return ['success' => 1];

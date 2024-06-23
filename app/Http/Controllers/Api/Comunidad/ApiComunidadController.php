@@ -113,15 +113,20 @@ class ApiComunidadController extends Controller
                         $notiHistorial->save();
 
 
-                        $arrayOneSignal = UsuarioNotificaciones::where('id_usuario', $infoEncontrado->id)->get();
-                        $pilaOneSignal = array();
+                        // OBTENER LOS IDENTIFICADORES DE ONE SIGNAL
+                        $infoUsuarioFila = Usuarios::where('id', $infoEncontrado->id)->first();
+                        $idOneSignalUsuario = $infoUsuarioFila->onesignal;
+
                         $hayIdOne = false;
-                        foreach ($arrayOneSignal as $item){
-                            if($item->onesignal != null){
+
+                        if($idOneSignalUsuario != null){
+                            if(strlen($idOneSignalUsuario) == 0){
+                                // vacio no hacer nada
+                            }else{
                                 $hayIdOne = true;
-                                array_push($pilaOneSignal, $item->onesignal);
                             }
                         }
+
 
                         if($hayIdOne){
                             // UN AMIGO TE ACABA DE ENVIAR UNA SOLICITUD
@@ -130,7 +135,7 @@ class ApiComunidadController extends Controller
                             $desNo = $datosRaw['descripcion'];
 
                             // como es primera vez, se necesita enviar notificacion
-                            dispatch(new EnviarNotificacion($pilaOneSignal, $tiNo, $desNo));
+                            dispatch(new EnviarNotificacion($idOneSignalUsuario, $tiNo, $desNo));
                         }
 
 
@@ -660,13 +665,17 @@ class ApiComunidadController extends Controller
                     $notiHistorial->fecha = $fechaActual;
                     $notiHistorial->save();
 
-                    $arrayOneSignal = UsuarioNotificaciones::where('id_usuario', $infoUsuario->id)->get();
-                    $pilaOneSignal = array();
+                    // OBTENER LOS IDENTIFICADORES DE ONE SIGNAL
+                    $infoUsuarioFila = Usuarios::where('id', $infoUsuario->id)->first();
+                    $idOneSignalUsuario = $infoUsuarioFila->onesignal;
+
                     $hayIdOne = false;
-                    foreach ($arrayOneSignal as $item){
-                        if($item->onesignal != null){
+
+                    if($idOneSignalUsuario != null){
+                        if(strlen($idOneSignalUsuario) == 0){
+                            // vacio no hacer nada
+                        }else{
                             $hayIdOne = true;
-                            array_push($pilaOneSignal, $item->onesignal);
                         }
                     }
 
@@ -677,7 +686,7 @@ class ApiComunidadController extends Controller
                         $desNo = $datosRaw['descripcion'];
 
                         // como es primera vez, se necesita enviar notificacion
-                        dispatch(new EnviarNotificacion($pilaOneSignal, $tiNo, $desNo));
+                        dispatch(new EnviarNotificacion($idOneSignalUsuario, $tiNo, $desNo));
                     }
 
                     ComunidadSolicitud::where('id', $info->id)->update(['estado' => 1]);
@@ -768,14 +777,16 @@ class ApiComunidadController extends Controller
                         $notiHistorial->save();
 
 
+                        $infoUsuarioFila = Usuarios::where('id', $idusuarioVal)->first();
+                        $idOneSignalUsuario = $infoUsuarioFila->onesignal;
 
-                        $arrayOneSignal = UsuarioNotificaciones::where('id_usuario', $idusuarioVal)->get();
-                        $pilaOneSignal = array();
                         $hayIdOne = false;
-                        foreach ($arrayOneSignal as $item){
-                            if($item->onesignal != null){
+
+                        if($idOneSignalUsuario != null){
+                            if(strlen($idOneSignalUsuario) == 0){
+                                // vacio no hacer nada
+                            }else{
                                 $hayIdOne = true;
-                                array_push($pilaOneSignal, $item->onesignal);
                             }
                         }
 
@@ -783,16 +794,13 @@ class ApiComunidadController extends Controller
 
                             $infoUsuario = Usuarios::where('id', $idusuarioVal)->first();
 
-                            // UN AMIGO TE ACABA DE ENVIAR UNA SOLICITUD
+                            // 13: UN AMIGO TE ACABA DE ENVIAR UNA SOLICITUD
                             $datosRaw = $this->retornoTitulosNotificaciones(13, $infoUsuario->idioma_noti);
                             $tiNo = $datosRaw['titulo'];
                             $desNo = $datosRaw['descripcion'];
 
-                            // como es primera vez, se necesita enviar notificacion
-                            dispatch(new EnviarNotificacion($pilaOneSignal, $tiNo, $desNo));
+                            dispatch(new EnviarNotificacion($idOneSignalUsuario, $tiNo, $desNo));
                         }
-
-
                     }
                 }
 
@@ -859,9 +867,6 @@ class ApiComunidadController extends Controller
 
 
 
-
-
-
                 if ($request->has('datos')) {
 
                     foreach ($request->datos as $dato) {
@@ -869,50 +874,50 @@ class ApiComunidadController extends Controller
                         $clave = $dato['id']; // ID SOLICITUD
                         $idusuarioVal = $dato['estado']; // IDUSUARIO
 
-                            // Registrar
-                            $detalle = new PlanesAmigosDetalle();
-                            $detalle->id_planes_usuarios = $nuevoPlan->id;
-                            $detalle->id_comunidad_solicitud = $clave;
-                            $detalle->id_usuario = $idusuarioVal;
-                            $detalle->save();
+                        // Registrar
+                        $detalle = new PlanesAmigosDetalle();
+                        $detalle->id_planes_usuarios = $nuevoPlan->id;
+                        $detalle->id_comunidad_solicitud = $clave;
+                        $detalle->id_usuario = $idusuarioVal;
+                        $detalle->save();
 
 
 
-                            // NOTIFICACION A USUARIOS QUE FUE UNIDO A UN PLAN GRUPAL
-                            // GUARDARLE HISTORIAL
-                            $notiHistorial = new NotificacionUsuario();
-                            $notiHistorial->id_usuario = $idusuarioVal;
-                            $notiHistorial->id_tipo_notificacion = 13;
-                            $notiHistorial->fecha = $zonaHoraria;
-                            $notiHistorial->save();
+                        // NOTIFICACION A USUARIOS QUE FUE UNIDO A UN PLAN GRUPAL
+                        // GUARDARLE HISTORIAL
+                        $notiHistorial = new NotificacionUsuario();
+                        $notiHistorial->id_usuario = $idusuarioVal;
+                        $notiHistorial->id_tipo_notificacion = 13;
+                        $notiHistorial->fecha = $zonaHoraria;
+                        $notiHistorial->save();
 
 
+                        $infoUsuarioFila = Usuarios::where('id', $idusuarioVal)->first();
+                        $idOneSignalUsuario = $infoUsuarioFila->onesignal;
 
-                            $arrayOneSignal = UsuarioNotificaciones::where('id_usuario', $idusuarioVal)->get();
-                            $pilaOneSignal = array();
-                            $hayIdOne = false;
-                            foreach ($arrayOneSignal as $item){
-                                if($item->onesignal != null){
-                                    $hayIdOne = true;
-                                    array_push($pilaOneSignal, $item->onesignal);
-                                }
+                        $hayIdOne = false;
+
+                        if($idOneSignalUsuario != null){
+                            if(strlen($idOneSignalUsuario) == 0){
+                                // vacio no hacer nada
+                            }else{
+                                $hayIdOne = true;
                             }
-
-                            if($hayIdOne){
-
-                                $infoUsuario = Usuarios::where('id', $idusuarioVal)->first();
-
-                                // UN AMIGO TE ACABA DE ENVIAR UNA SOLICITUD
-                                $datosRaw = $this->retornoTitulosNotificaciones(12, $infoUsuario->idioma_noti);
-                                $tiNo = $datosRaw['titulo'];
-                                $desNo = $datosRaw['descripcion'];
-
-                                // como es primera vez, se necesita enviar notificacion
-                                dispatch(new EnviarNotificacion($pilaOneSignal, $tiNo, $desNo));
-                            }
+                        }
 
 
+                        if($hayIdOne){
 
+                            $infoUsuario = Usuarios::where('id', $idusuarioVal)->first();
+
+                            // 13: UN AMIGO TE ACABA DE ENVIAR UNA SOLICITUD
+                            $datosRaw = $this->retornoTitulosNotificaciones(13, $infoUsuario->idioma_noti);
+                            $tiNo = $datosRaw['titulo'];
+                            $desNo = $datosRaw['descripcion'];
+
+                            // como es primera vez, se necesita enviar notificacion
+                            dispatch(new EnviarNotificacion($idOneSignalUsuario, $tiNo, $desNo));
+                        }
                     }
                 }
 
@@ -1376,12 +1381,16 @@ class ApiComunidadController extends Controller
                 ->select('id', 'nombre', 'apellido', 'correo')
                 ->get();
 
+            $hayinfo = 0;
+
             foreach ($listado as $dato){
+                $hayinfo = 1;
+
                 $dato->nombrecompleto = $dato->nombre . " " . $dato->apellido;
             }
 
 
-            return ['success' => 1, 'listadoplan' => $listado];
+            return ['success' => 1, 'listadoplan' => $listado, 'hayinfo' => $hayinfo];
         }
         else{
             return ['success' => 99];
