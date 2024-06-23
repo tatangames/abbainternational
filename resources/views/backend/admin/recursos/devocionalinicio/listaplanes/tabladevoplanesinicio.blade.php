@@ -39,9 +39,19 @@
 
 <script>
     $(function () {
+
+        // Añadir el tipo de datos personalizado para fechas en formato d-m-y
+        $.fn.dataTable.ext.type.order['date-dmy-pre'] = function (d) {
+            // Divide la fecha por el guion
+            var parts = d.split('-');
+            // Retorna en formato YYYYMMDD
+            return parts[2] + parts[1] + parts[0];
+        };
+
+
         $("#tabla").DataTable({
             columnDefs: [
-                { type: 'date-euro', targets: 0 } // Suponiendo que la columna de fecha es la primera (índice 0)
+                { type: 'date-dmy', targets: 0 } // La columna de fecha es la primera (índice 0)
             ],
             "paging": true,
             "lengthChange": true,
