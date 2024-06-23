@@ -1026,6 +1026,7 @@ class ApiPlanesController extends Controller
                             // OBTENER PILA ONE SIGNAL DEL USUARIO QUE GANO PUNTOS
                             $infoUsuarioFila = Usuarios::where('id', $dato->idusuariogana)->first();
                             $idOneSignalUsuario = $infoUsuarioFila->onesignal;
+                            $idiomaUsuarioNoti = $infoUsuarioFila->idioma_noti;
 
                             $hayIdOne = false;
 
@@ -1099,7 +1100,7 @@ class ApiPlanesController extends Controller
 
                                     if($hayIdOne){
                                         // SUBI DE NIVEL INSIGNIA PLANES FINALIZADOS EN GRUPOS
-                                        $datosRaw = $this->retornoTitulosNotificaciones(10, $idiomaTexto);
+                                        $datosRaw = $this->retornoTitulosNotificaciones(10, $idiomaUsuarioNoti);
                                         $tiNo = $datosRaw['titulo'];
                                         $desNo = $datosRaw['descripcion'];
 
@@ -1154,7 +1155,7 @@ class ApiPlanesController extends Controller
 
                                 if($hayIdOne){
                                     // GANE INSIGNIA PLAN COMPARTIDO EN GRUPO
-                                    $datosRaw = $this->retornoTitulosNotificaciones(9, $idiomaTexto);
+                                    $datosRaw = $this->retornoTitulosNotificaciones(9, $idiomaUsuarioNoti);
                                     $tiNo = $datosRaw['titulo'];
                                     $desNo = $datosRaw['descripcion'];
 
