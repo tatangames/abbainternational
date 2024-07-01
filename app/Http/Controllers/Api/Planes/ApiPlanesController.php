@@ -48,6 +48,11 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use DateTime;
+use Symfony\Component\DomCrawler\Crawler;
+
+
+
+
 
 class ApiPlanesController extends Controller
 {
@@ -1761,6 +1766,9 @@ class ApiPlanesController extends Controller
                         ->get();
 
 
+                    $formatoPreguntaOrdenada = "";
+
+
                     foreach ($arrayBloque as $dato){
 
                         // informacion imagen
@@ -1778,14 +1786,15 @@ class ApiPlanesController extends Controller
                             ->first()){
                             $texto = $detaPre->texto;
                         }
-
                         $dato->texto = $texto;
+
+                        $crawler = new Crawler($titulo);
+                        $textHtml = $crawler->text();
+
+                        $formatoPreguntaOrdenada = $formatoPreguntaOrdenada . $textHtml . "\n R// " . $texto . "\n\n";
                     }
 
-                    $infoBlockDeta = PlanesBlockDetalle::where('id', $request->idblockdeta)->first();
-                    $ignorarpre = $infoBlockDeta->ignorar_pregunta;
                     $descrip = $this->retornoTituloBloquesTextos($idiomaTextos, $request->idblockdeta);
-
 
 
                     // ACTUALIZAR INSIGNIA COMPARTIR DEVOCIONAL
@@ -1809,12 +1818,6 @@ class ApiPlanesController extends Controller
                             $hayIdOne = true;
                         }
                     }
-
-
-
-
-
-
 
                     // COMPARTIR DEVOCIONAL
                     if(InsigniasUsuarios::where('id_tipo_insignia', $idTipoInsignia)
@@ -1956,7 +1959,7 @@ class ApiPlanesController extends Controller
                     return ['success' => 2,
                         'descripcion' => $descrip,
                         'listado' => $arrayBloque,
-                        'ignorarpre' => $ignorarpre
+                        'formatoPregunta' => $formatoPreguntaOrdenada
                     ];
                 }else{
 
@@ -1973,6 +1976,8 @@ class ApiPlanesController extends Controller
             return ['success' => 99];
         }
     }
+
+
 
 
 
