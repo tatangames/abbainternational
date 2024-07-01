@@ -1959,7 +1959,7 @@ class ApiPlanesController extends Controller
                     return ['success' => 2,
                         'descripcion' => $descrip,
                         'listado' => $arrayBloque,
-                        'formatoPregunta' => $formatoPreguntaOrdenada
+                        'formatoPregu' => $formatoPreguntaOrdenada
                     ];
                 }else{
 
