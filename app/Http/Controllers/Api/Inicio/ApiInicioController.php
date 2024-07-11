@@ -325,7 +325,7 @@ class ApiInicioController extends Controller
             }catch(\Throwable $e){
                 Log::info("error" . $e);
                 DB::rollback();
-                return ['success' => 99];
+                return ['success' => 99, 'error' => 'ee' . $e];
             }
 
 
@@ -423,35 +423,68 @@ class ApiInicioController extends Controller
         $diaSabado = 0;
 
 
-        $arrayFechaDevo = PlanesBlockDetaUsuarioTotal::where('id_usuario', $userToken->id)->get();
+        // FILTRAR DE LA FECHA ACTUAL DEL SERVIDOR HACIA ATRAS
+        // DESPUES SE DEBE OBTENER SOLO FECHA DE LA ACTUAL HACIA ATRAS
 
-        foreach ($arrayFechaDevo as $dato){
+        $arrayFechaDevo = PlanesBlockDetaUsuarioTotal::where('id_usuario', $userToken->id)
+            ->whereDate('fecha', '<=', $fechaFormatHorariaCarbon)
+            ->orderBy('fecha', 'DESC')
+            ->take(7)
+            ->get();
 
-            if(Carbon::parse($dato->fecha)->isMonday()){
+        // dias que se restan
+        $fechaModificable = Carbon::parse($fechaFormatHorariaCarbon)->format('y-m-d');
+
+        $fechasEncontradas = [];
+
+        // RECORRER CADA FECHA
+        foreach ($arrayFechaDevo as $dato) {
+
+
+            // por cada fecha, se debe iterar todoo de nuevo
+            foreach ($arrayFechaDevo as $jj){
+                $carbonFecha1 = Carbon::parse($jj->fecha);
+
+                if ($carbonFecha1->equalTo($fechaModificable)) {
+                    // encontro
+                    if (!in_array($jj->fecha, $fechasEncontradas)) {
+                        $fechasEncontradas[] = $jj->fecha;
+                    }
+                }
+            }
+
+            // restar
+            $fechaModificable = Carbon::parse($fechaModificable)->subDay()->format('Y-m-d');
+        }
+
+
+        foreach ($fechasEncontradas as $dato){
+
+            if(Carbon::parse($dato)->isMonday()){
                 $diaLunes = 1;
             }
 
-            if(Carbon::parse($dato->fecha)->isTuesday()){
+            if(Carbon::parse($dato)->isTuesday()){
                 $diaMartes = 1;
             }
 
-            if(Carbon::parse($dato->fecha)->isWednesday()){
+            if(Carbon::parse($dato)->isWednesday()){
                 $diaMiercoles = 1;
             }
 
-            if(Carbon::parse($dato->fecha)->isThursday()){
+            if(Carbon::parse($dato)->isThursday()){
                 $diaJueves = 1;
             }
 
-            if(Carbon::parse($dato->fecha)->isFriday()){
+            if(Carbon::parse($dato)->isFriday()){
                 $diaViernes = 1;
             }
 
-            if(Carbon::parse($dato->fecha)->isSaturday()){
+            if(Carbon::parse($dato)->isSaturday()){
                 $diaSabado = 1;
             }
 
-            if(Carbon::parse($dato->fecha)->isSunday()){
+            if(Carbon::parse($dato)->isSunday()){
                 $diaDomingo = 1;
             }
         }
