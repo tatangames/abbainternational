@@ -71,7 +71,7 @@ class RecursosController extends Controller
             'descripcion' => 'required',
         );
 
-        // imagen
+        // imagen, imagen2
 
         $validator = Validator::make($request->all(), $rules);
 
@@ -91,7 +91,20 @@ class RecursosController extends Controller
             $avatar = $request->file('imagen');
             $upload = Storage::disk('archivos')->put($nombreFoto, \File::get($avatar));
 
-            if ($upload) {
+
+
+            $cadena2 = Str::random(15);
+            $tiempo2 = microtime();
+            $union2 = $cadena2 . $tiempo2;
+            $nombre2 = str_replace(' ', '_', $union2);
+
+            $extension2 = '.' . $request->imagen2->getClientOriginalExtension();
+            $nombreFoto2 = $nombre2 . strtolower($extension2);
+            $avatar2 = $request->file('imagen2');
+            $upload2 = Storage::disk('archivos')->put($nombreFoto2, \File::get($avatar2));
+
+
+            if ($upload && $upload2) {
 
                 if($info = ImagenesDelDia::orderBy('posicion', 'DESC')->first()){
                     $nuevaPosicion = $info->posicion + 1;
@@ -102,6 +115,7 @@ class RecursosController extends Controller
                 $nuevaImagen = new ImagenesDelDia();
                 $nuevaImagen->descripcion = $request->descripcion;
                 $nuevaImagen->imagen = $nombreFoto;
+                $nuevaImagen->imagen_ingles = $nombreFoto2;
                 $nuevaImagen->fecha = Carbon::now('America/El_Salvador');
                 $nuevaImagen->posicion = $nuevaPosicion;
                 $nuevaImagen->save();

@@ -80,7 +80,7 @@
 
                                 <div class="form-group">
                                     <div>
-                                        <label>Imagen</label>
+                                        <label>Imagen Español</label>
                                         <p>Recomendación no superar: 800 x 800 px</p>
                                     </div>
                                     <br>
@@ -88,6 +88,19 @@
                                         <input type="file" style="color:#191818" id="imagen-nuevo" accept="image/jpeg, image/jpg, image/png"/>
                                     </div>
                                 </div>
+
+
+                                <div class="form-group">
+                                    <div>
+                                        <label>Imagen Ingles</label>
+                                        <p>Recomendación no superar: 800 x 800 px</p>
+                                    </div>
+                                    <br>
+                                    <div class="col-md-10">
+                                        <input type="file" style="color:#191818" id="imagen2-nuevo" accept="image/jpeg, image/jpg, image/png"/>
+                                    </div>
+                                </div>
+
 
                             </div>
                         </div>
@@ -139,6 +152,7 @@
 
             var descripcion = document.getElementById('descripcion-nuevo').value;
             var imagen = document.getElementById('imagen-nuevo');
+            var imagen2 = document.getElementById('imagen2-nuevo');
 
             if(descripcion === '') {
                 toastr.error('Descripción es requerido');
@@ -158,7 +172,18 @@
                     return;
                 }
             }else{
-                toastr.error('Imagen es Requerida')
+                toastr.error('Imagen Español es Requerida')
+                return;
+            }
+
+
+            if(imagen2.files && imagen2.files[0]){ // si trae imagen
+                if (!imagen2.files[0].type.match('image/jpeg|image/jpeg|image/png')){
+                    toastr.error('Formato de imagen permitido: .png .jpg .jpeg');
+                    return;
+                }
+            }else{
+                toastr.error('Imagen Ingles es Requerida')
                 return;
             }
 
@@ -167,6 +192,7 @@
 
             var formData = new FormData();
             formData.append('imagen', imagen.files[0]);
+            formData.append('imagen2', imagen2.files[0]);
             formData.append('descripcion', descripcion);
 
             axios.post('/admin/imagendia/nuevo', formData, {

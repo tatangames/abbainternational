@@ -185,9 +185,27 @@ class ApiInicioController extends Controller
             // ************** BLOQUE IMAGENES DEL DIA ******************
 
 
-            $arrayFinalImagenes = ImagenesDelDia::orderBy('posicion', 'ASC')
-                ->take(5)
-                ->get();
+            if($idiomaTextos == 1){ // espanol
+                $arrayFinalImagenes = ImagenesDelDia::orderBy('posicion', 'ASC')
+                    ->take(5)
+                    ->get();
+            }else{
+                // ingles
+                $arrayFinalImagenes = ImagenesDelDia::orderBy('posicion', 'ASC')
+                    ->take(5)
+                    ->get();
+
+                // SOBREESCRIBIENDO DATOS
+                foreach ($arrayFinalImagenes as $dato){
+
+                    $dato->imagen = $dato->imagen_ingles;
+                }
+            }
+
+
+
+
+
             $imagenes_hayimageneshoy = 0; // Seguro para saber si hay imagenes del dia
             $imagenes_mayor5 = 0;
 

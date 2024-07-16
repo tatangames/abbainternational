@@ -10,7 +10,8 @@
                             <th>Posición</th>
                             <th>Fecha Agregado</th>
                             <th>Descripción</th>
-                            <th>Imagen</th>
+                            <th>Imagen Español</th>
+                            <th>Imagen Ingles</th>
                             <th>Opciones</th>
                         </tr>
                         </thead>
@@ -24,6 +25,10 @@
 
                                 <td>
                                     <center><img alt="Imagenes" src="{{ url('storage/archivos/'.$dato->imagen) }}" width="100px" height="100px" /></center>
+                                </td>
+
+                                <td>
+                                    <center><img alt="Imagenes" src="{{ url('storage/archivos/'.$dato->imagen_ingles) }}" width="100px" height="100px" /></center>
                                 </td>
 
                                 <td>

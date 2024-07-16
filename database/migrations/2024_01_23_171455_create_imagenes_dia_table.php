@@ -17,6 +17,10 @@ return new class extends Migration
             $table->string('descripcion', 100)->nullable();
             $table->string('imagen', 100);
             $table->integer('posicion');
+
+            // para idioma ingles, que muestre esta imagen
+            $table->string('imagen_ingles', 100);
+
         });
     }
 
