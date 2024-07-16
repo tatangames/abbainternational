@@ -60,7 +60,7 @@
                                 <div class="row">
                                     <div class="form-group">
                                         <div class="form-group">
-                                            <label class="control-label">Imagen (Ejemplo: 400x400 px)</label>
+                                            <label class="control-label">Imagen (Ejemplo: 1920x1080 px)</label>
                                             <input type="file" class="form-control" style="color:#191818" id="imagen-nuevo" accept="image/jpeg, image/jpg, image/png"/>
                                         </div>
                                     </div>
@@ -69,12 +69,35 @@
                                 <div class="row">
                                     <div class="form-group">
                                         <div class="form-group">
-                                            <label class="control-label">Imagen Portada (Ejemplo: 600x400 px)</label>
+                                            <label class="control-label">Imagen Portada (Ejemplo: 1920x1080 px)</label>
                                             <input type="file" class="form-control" style="color:#191818" id="imagenportada-nuevo" accept="image/jpeg, image/jpg, image/png"/>
                                         </div>
                                     </div>
                                 </div>
                             </section>
+
+                            <br><br>
+
+                            <section style="margin-top: 15px">
+                                <div class="row">
+                                    <div class="form-group">
+                                        <div class="form-group">
+                                            <label class="control-label">Imagen Ingles (Ejemplo: 1920x1080 px)</label>
+                                            <input type="file" class="form-control" style="color:#191818" id="imagen2-nuevo" accept="image/jpeg, image/jpg, image/png"/>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="form-group">
+                                        <div class="form-group">
+                                            <label class="control-label">Imagen Portada Ingles (Ejemplo: 1920x1080 px)</label>
+                                            <input type="file" class="form-control" style="color:#191818" id="imagenportada2-nuevo" accept="image/jpeg, image/jpg, image/png"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+
 
                             <hr><br>
 
@@ -376,10 +399,19 @@
             var imagenPortada = document.getElementById('imagenportada-nuevo');
             var selectIdioma = document.getElementById("select-idioma");
 
+
+            var imagen2 = document.getElementById('imagen2-nuevo');
+            var imagenPortada2 = document.getElementById('imagenportada2-nuevo');
+
+
             if(fecha === ''){
                 toastr.error('Fecha es Requerida');
                 return;
             }
+
+
+            //*************************
+
 
 
             if(imagen.files && imagen.files[0]){ // si trae imagen
@@ -402,6 +434,38 @@
                 toastr.error('Imagen Portada es Requerida')
                 return;
             }
+
+
+
+            //*************************
+
+
+
+            if(imagen2.files && imagen2.files[0]){ // si trae imagen
+                if (!imagen2.files[0].type.match('image/jpeg|image/jpeg|image/png')){
+                    toastr.error('Formato de imagen permitido: .png .jpg .jpeg');
+                    return;
+                }
+            }else{
+                toastr.error('Imagen Ingles es Requerida')
+                return;
+            }
+
+
+            if(imagenPortada2.files && imagenPortada2.files[0]){ // si trae imagen
+                if (!imagenPortada2.files[0].type.match('image/jpeg|image/jpeg|image/png')){
+                    toastr.error('Formato de imagen permitido: .png .jpg .jpeg');
+                    return;
+                }
+            }else{
+                toastr.error('Imagen Portada Ingles es Requerida')
+                return;
+            }
+
+
+
+
+
 
 
             // Verificar que haya ingresado todos los idiomas
@@ -444,6 +508,8 @@
             formData.append('fecha', fecha);
             formData.append('imagen', imagen.files[0]);
             formData.append('imagenportada', imagenPortada.files[0]);
+            formData.append('imagen2', imagen2.files[0]);
+            formData.append('imagenportada2', imagenPortada2.files[0]);
 
             openLoading();
 

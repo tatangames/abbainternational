@@ -63,7 +63,7 @@
 
                             <section style="margin-top: 15px">
 
-                                <label class="control-label">Imagen (Ejemplo: 400x400 px)</label>
+                                <label class="control-label">Imagen (Ejemplo: 1920x1080 px)</label>
                                 <div class="row">
                                     <div class="input-group input-group col-md-4">
                                         <input type="file" class="form-control" style="color:#191818" id="imagen-nuevo" accept="image/jpeg, image/jpg, image/png"/>
@@ -78,7 +78,7 @@
 
 
                             <section style="margin-top: 35px">
-                                <label class="control-label">Imagen Portada (Ejemplo: 600x400 px)</label>
+                                <label class="control-label">Imagen Portada (Ejemplo: 1920x1080 px)</label>
 
                                 <div class="row">
 
@@ -97,6 +97,45 @@
 
 
                             <hr><br>
+
+
+                            <section style="margin-top: 15px">
+
+                                <label class="control-label">Imagen Ingles (Ejemplo: 1920x1080 px)</label>
+                                <div class="row">
+                                    <div class="input-group input-group col-md-4">
+                                        <input type="file" class="form-control" style="color:#191818" id="imagen2-nuevo" accept="image/jpeg, image/jpg, image/png"/>
+
+                                        <span class="input-group-append">
+                                        <button type="button" class="btn btn-info btn-sm" onclick="actualizarImagenIngles()">Actualizar</button>
+                                            </span>
+                                    </div>
+                                </div>
+                            </section>
+
+
+
+                            <section style="margin-top: 35px">
+                                <label class="control-label">Imagen Portada Ingles (Ejemplo: 1920x1080 px)</label>
+
+                                <div class="row">
+
+                                    <div class="input-group input-group col-md-4">
+                                        <input type="file" class="form-control" style="color:#191818" id="imagenportada2-nuevo" accept="image/jpeg, image/jpg, image/png"/>
+
+                                        <span class="input-group-append">
+                                            <button type="button" class="btn btn-info btn-sm" onclick="actualizarImagenPortadaIngles()">Actualizar</button>
+                                            </span>
+                                    </div>
+
+                                </div>
+
+                            </section>
+
+
+                            <hr><br>
+
+
 
                         </div>
                     </div>
@@ -707,6 +746,95 @@
 
 
 
+        // *******************************
+
+
+        // actualizar solo imagen
+        function actualizarImagenIngles(){
+            var imagen = document.getElementById('imagen2-nuevo');
+
+            if(imagen.files && imagen.files[0]){ // si trae imagen
+                if (!imagen.files[0].type.match('image/jpeg|image/jpeg|image/png')){
+                    toastr.error('Formato de imagen permitido: .png .jpg .jpeg');
+                    return;
+                }
+            }else{
+                toastr.error('Imagen Ingles es requerida');
+                return;
+            }
+
+            let idplan = {{ $idplan }};
+
+            let formData = new FormData();
+            formData.append('idplan', idplan);
+            formData.append('imagen', imagen.files[0]);
+
+            openLoading();
+
+            axios.post('/admin/planes/imagen-ingles/actualizar', formData, {
+            })
+                .then((response) => {
+                    closeLoading();
+
+                    if(response.data.success === 1){
+
+                        document.getElementById('imagen2-nuevo').value = "";
+                        toastr.success("Actualizado");
+                    }
+                    else {
+                        toastr.error('Error al actualizar');
+                    }
+                })
+                .catch((error) => {
+                    toastr.error('Error al actualizar');
+                    closeLoading();
+                });
+        }
+
+
+        // actualizar solo imagen portada
+        function actualizarImagenPortadaIngles(){
+            var imagen = document.getElementById('imagenportada2-nuevo');
+
+            if(imagen.files && imagen.files[0]){ // si trae imagen
+                if (!imagen.files[0].type.match('image/jpeg|image/jpeg|image/png')){
+                    toastr.error('Formato de imagen permitido: .png .jpg .jpeg');
+                    return;
+                }
+            }else{
+                toastr.error('Imagen portada Ingles es requerida');
+                return;
+            }
+
+            let idplan = {{ $idplan }};
+
+            let formData = new FormData();
+            formData.append('idplan', idplan);
+            formData.append('imagen', imagen.files[0]);
+
+            openLoading();
+
+            axios.post('/admin/planes/imagenportada-ingles/actualizar', formData, {
+            })
+                .then((response) => {
+                    closeLoading();
+
+                    if(response.data.success === 1){
+
+                        toastr.success("Actualizado");
+
+                        document.getElementById('imagenportada2-nuevo').value = "";
+
+                    }
+                    else {
+                        toastr.error('Error al actualizar');
+                    }
+                })
+                .catch((error) => {
+                    toastr.error('Error al actualizar');
+                    closeLoading();
+                });
+        }
 
 
 

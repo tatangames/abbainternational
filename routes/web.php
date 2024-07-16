@@ -165,6 +165,8 @@ Route::post('/admin/planes/datos/nuevo/idioma', [PlanesController::class,'actual
 Route::post('/admin/planes/datos/actualizar', [PlanesController::class,'actualizarPlanes']); // actualizar todas las filas
 Route::post('/admin/planes/imagen/actualizar', [PlanesController::class,'actualizarImagenPlanes']);
 Route::post('/admin/planes/imagenportada/actualizar', [PlanesController::class,'actualizarImagenPortadaPlanes']);
+Route::post('/admin/planes/imagen-ingles/actualizar', [PlanesController::class,'actualizarImagenInglesPlanes']);
+Route::post('/admin/planes/imagenportada-ingles/actualizar', [PlanesController::class,'actualizarImagenPortadaInglesPlanes']);
 
 
 // Eliminacion total de un devocional

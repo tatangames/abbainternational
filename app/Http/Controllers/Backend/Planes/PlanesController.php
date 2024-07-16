@@ -84,6 +84,9 @@ class PlanesController extends Controller
         // imagen
         // imagenportada
 
+        // imagen2
+        // imagenportada2
+
         // array: infoIdIdioma, infoTitulo, infoSubtitulo, infoDescripcion
 
         $validar = Validator::make($request->all(), $regla);
@@ -102,7 +105,7 @@ class PlanesController extends Controller
         $avatar = $request->file('imagen');
         $upload1 = Storage::disk('archivos')->put($nombreFoto, \File::get($avatar));
 
-    // GUARDAR IMAGEN PORTADA
+        // GUARDAR IMAGEN PORTADA
         $cadenaPortada = Str::random(15);
         $tiempoPortada = microtime();
         $unionPortada = $cadenaPortada . $tiempoPortada;
@@ -113,7 +116,41 @@ class PlanesController extends Controller
         $avatarPortada = $request->file('imagenportada');
         $upload2 = Storage::disk('archivos')->put($nombreFotoPortada, \File::get($avatarPortada));
 
-        if($upload1 && $upload2){
+
+
+
+
+
+
+        // GUARDAR IMAGEN
+        $cadena2 = Str::random(15);
+        $tiempo2 = microtime();
+        $union2 = $cadena2 . $tiempo2;
+        $nombre2 = str_replace(' ', '_', $union2);
+
+        $extension2 = '.' . $request->imagen2->getClientOriginalExtension();
+        $nombreFoto2 = $nombre2 . strtolower($extension2);
+        $avatar2 = $request->file('imagen2');
+        $uploadImagenIngles = Storage::disk('archivos')->put($nombreFoto2, \File::get($avatar2));
+
+        // GUARDAR IMAGEN PORTADA
+        $cadenaPortada2 = Str::random(15);
+        $tiempoPortada2 = microtime();
+        $unionPortada2 = $cadenaPortada2 . $tiempoPortada2;
+        $nombrePortada2 = str_replace(' ', '_', $unionPortada2);
+
+        $extensionPortada2 = '.' . $request->imagenportada2->getClientOriginalExtension();
+        $nombreFotoPortada2 = $nombrePortada2 . strtolower($extensionPortada2);
+        $avatarPortada2 = $request->file('imagenportada2');
+        $uploadPortadaIngles = Storage::disk('archivos')->put($nombreFotoPortada2, \File::get($avatarPortada2));
+
+
+
+
+
+
+
+        if($upload1 && $upload2 && $uploadImagenIngles && $uploadPortadaIngles){
 
             DB::beginTransaction();
             try {
@@ -127,7 +164,10 @@ class PlanesController extends Controller
                 $nuevoPlan = new Planes();
                 $nuevoPlan->imagen = $nombreFoto;
                 $nuevoPlan->imagenportada = $nombreFotoPortada;
-                $nuevoPlan->visible = 0; // falta los bloques
+
+                $nuevoPlan->imagen_ingles = $nombreFoto2;
+                $nuevoPlan->imagenportada_ingles = $nombreFotoPortada2;
+
                 $nuevoPlan->posicion = $nuevaPosicion;
                 $nuevoPlan->fecha = Carbon::now('America/El_Salvador');
                 $nuevoPlan->save();
@@ -373,6 +413,125 @@ class PlanesController extends Controller
             return ['success' => 1];
         }
     }
+
+
+    //*****************************
+
+
+
+    public function actualizarImagenInglesPlanes(Request $request)
+    {
+        $rules = array(
+            'idplan' => 'required',
+        );
+
+        $validator = Validator::make($request->all(), $rules);
+
+        if ($validator->fails()) {
+            return ['success' => 0];
+        }
+
+        if($infoPlan = Planes::where('id', $request->idplan)->first()){
+
+            // siempre viene imagen
+
+            $cadena = Str::random(15);
+            $tiempo = microtime();
+            $union = $cadena . $tiempo;
+            $nombre = str_replace(' ', '_', $union);
+
+            $extension = '.' . $request->imagen->getClientOriginalExtension();
+            $nombreFoto = $nombre . strtolower($extension);
+            $avatar = $request->file('imagen');
+            $upload = Storage::disk('archivos')->put($nombreFoto, \File::get($avatar));
+
+            if($upload){
+
+                $imagenOld = $infoPlan->imagen_ingles;
+
+                if(Storage::disk('archivos')->exists($imagenOld)){
+                    Storage::disk('archivos')->delete($imagenOld);
+                }
+
+                Planes::where('id', $request->idplan)->update([
+                    'imagen_ingles' => $nombreFoto,
+                ]);
+
+                return ['success' => 1];
+            }else{
+                return ['success' => 99];
+            }
+
+        }else{
+            // decir que imagen fue borrada
+            return ['success' => 1];
+        }
+    }
+
+
+    // actualizar solo imagen portada de plan
+    public function actualizarImagenPortadaInglesPlanes(Request $request)
+    {
+        $rules = array(
+            'idplan' => 'required',
+        );
+
+        $validator = Validator::make($request->all(), $rules);
+
+        if ($validator->fails()) {
+            return ['success' => 0];
+        }
+
+        if($infoPlan = Planes::where('id', $request->idplan)->first()){
+
+            // siempre viene imagen
+
+            $cadena = Str::random(15);
+            $tiempo = microtime();
+            $union = $cadena . $tiempo;
+            $nombre = str_replace(' ', '_', $union);
+
+            $extension = '.' . $request->imagen->getClientOriginalExtension();
+            $nombreFoto = $nombre . strtolower($extension);
+            $avatar = $request->file('imagen');
+            $upload = Storage::disk('archivos')->put($nombreFoto, \File::get($avatar));
+
+            if($upload){
+
+                $imagenOld = $infoPlan->imagenportada_ingles;
+
+                if(Storage::disk('archivos')->exists($imagenOld)){
+                    Storage::disk('archivos')->delete($imagenOld);
+                }
+
+                Planes::where('id', $request->idplan)->update([
+                    'imagenportada_ingles' => $nombreFoto,
+                ]);
+
+                return ['success' => 1];
+            }else{
+                return ['success' => 99];
+            }
+
+        }else{
+            // decir que imagen fue borrada
+            return ['success' => 1];
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     // BORRADO TOTAL DEL DEVOCIONAL

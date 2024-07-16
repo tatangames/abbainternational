@@ -7,11 +7,13 @@
                     <table id="table" class="table table-bordered">
                         <thead>
                         <tr>
-                            <th>Posición</th>
-                            <th>Nombre</th>
-                            <th>Imagen</th>
-                            <th>Imagen Portada</th>
-                            <th>Opciones</th>
+                            <th style="width: 5%;">Posición</th>
+                            <th style="width: 5%;">Nombre</th>
+                            <th style="width: 5%;">Imagen</th>
+                            <th style="width: 5%;">Imagen Portada</th>
+                            <th style="width: 5%;">Imagen Ingles</th>
+                            <th style="width: 5%;">Imagen Portada Ingles</th>
+                            <th style="width: 5%;">Opciones</th>
                         </tr>
                         </thead>
                         <tbody id="tablecontents">
@@ -28,6 +30,16 @@
                                 <td>
                                     <center><img alt="Imagenes" src="{{ url('storage/archivos/'.$dato->imagenportada) }}" width="100px" height="100px" /></center>
                                 </td>
+
+
+                                <td>
+                                    <center><img alt="Imagenes" src="{{ url('storage/archivos/'.$dato->imagen_ingles) }}" width="100px" height="100px" /></center>
+                                </td>
+
+                                <td>
+                                    <center><img alt="Imagenes" src="{{ url('storage/archivos/'.$dato->imagenportada_ingles) }}" width="100px" height="100px" /></center>
+                                </td>
+
 
                                 <td>
                                     <button style="margin: 8px" type="button" class="btn btn-info btn-xs" onclick="vistaEditarPlan({{ $dato->id }})">
