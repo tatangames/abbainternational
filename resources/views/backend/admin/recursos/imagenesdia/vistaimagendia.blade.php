@@ -58,7 +58,7 @@
 
 <!-- modal agregar -->
 <div class="modal fade" id="modalAgregar">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
                 <h4 class="modal-title">Nueva Imagen</h4>
@@ -88,6 +88,9 @@
                                         <input type="file" style="color:#191818" id="imagen-nuevo" accept="image/jpeg, image/jpg, image/png"/>
                                     </div>
                                 </div>
+
+
+                                <br><br>
 
 
                                 <div class="form-group">
