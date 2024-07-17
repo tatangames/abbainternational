@@ -181,8 +181,15 @@ class ApiPlanesController extends Controller
                 $descripcion = $infoPlanTextos->descripcion;
             }
 
+            if($idiomaTextos == 1){
+                $imgPortada = $infoPlan->imagenportada;
+            }else{
+                $imgPortada = $infoPlan->imagenportada_ingles;
+            }
+
+
             return ['success' => 1,
-                'imagen' => $infoPlan->imagenportada,
+                'imagen' => $imgPortada,
                 'titulo' => $titulo,
                 'subtitulo' => $subtitulo,
                 'descripcion' => $descripcion
