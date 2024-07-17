@@ -2079,9 +2079,15 @@ class ApiPlanesController extends Controller
                 $dato->subtitulo = $titulosRaw['subtitulo'];
 
                 $infoP = Planes::where('id', $dato->id_planes)->first();
-                $dato->imagen = $infoP->imagen;
-                $dato->imagenportada = $infoP->imagenportada;
                 $dato->idplan = $infoP->id;
+
+                if($idiomaTextos == 1){
+                    $dato->imagen = $infoP->imagen;
+                    $dato->imagenportada = $infoP->imagenportada;
+                }else{
+                    $dato->imagen = $infoP->imagen_ingles;
+                    $dato->imagenportada = $infoP->imagenportada_ingles;
+                }
             }
 
             $hayinfo = 0;
