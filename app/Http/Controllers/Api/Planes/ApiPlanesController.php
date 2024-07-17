@@ -437,8 +437,17 @@ class ApiPlanesController extends Controller
                 $index++;
             }
 
+
+
+            if($idiomaTextos == 1){
+                $imgPortada = $infoPlan->imagenportada;
+            }else{
+                $imgPortada = $infoPlan->imagenportada_ingles;
+            }
+
+
             return ['success' => 1,
-                'portada' => $infoPlan->imagenportada,
+                'portada' => $imgPortada,
                 'listado' => $arrayBloques,
                 ];
         }else{
