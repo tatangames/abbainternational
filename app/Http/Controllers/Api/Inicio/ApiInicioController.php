@@ -571,6 +571,7 @@ class ApiInicioController extends Controller
             'iduser' => 'required',
         );
 
+        // 'idiomaplan' => 'required',
 
         $validator = Validator::make($request->all(), $rules);
         if ( $validator->fails()){
@@ -583,7 +584,27 @@ class ApiInicioController extends Controller
 
         if ($userToken = JWTAuth::user($tokenApi)) {
 
-            $arrayImagenes = ImagenesDelDia::orderBy('posicion', 'ASC')->get();
+            $idiomaTextos = $request->idiomaplan;
+
+
+            if($idiomaTextos != null){
+
+                if($idiomaTextos == 1){ // espanol
+                    $arrayImagenes = ImagenesDelDia::orderBy('posicion', 'ASC')->get();
+                }else{
+                    // ingles
+                    $arrayImagenes = ImagenesDelDia::orderBy('posicion', 'ASC')->get();
+
+                    // SOBREESCRIBIENDO DATOS
+                    foreach ($arrayImagenes as $dato){
+
+                        $dato->imagen = $dato->imagen_ingles;
+                    }
+                }
+            }else{
+
+                $arrayImagenes = ImagenesDelDia::orderBy('posicion', 'ASC')->get();
+            }
 
             return ['success' => 1,
                 'arrayfinalimagenes' => $arrayImagenes];

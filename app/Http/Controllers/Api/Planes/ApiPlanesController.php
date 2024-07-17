@@ -2146,6 +2146,13 @@ class ApiPlanesController extends Controller
                 $arrayRaw = $this->retornoTituloPlan($idiomaTextos, $dato->id);
                 $dato->titulo = $arrayRaw['titulo'];
                 $dato->subtitulo = $arrayRaw['subtitulo'];
+
+
+                // modificar la imagen y la portada segun idioma
+                if($idiomaTextos == 2){
+                    $dato->imagen = $dato->imagen_ingles;
+                    $dato->imagenportada = $dato->imagenportada_ingles;
+                }
             }
 
             return [
