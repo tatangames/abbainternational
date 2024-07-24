@@ -1091,6 +1091,9 @@ class PlanesController extends Controller
     // BORRAR REGISTRO DE PLAN BLOCK DETALLE (ITEM)
     public function borrarRegistroPlanBloqueDetalle(Request $request)
     {
+
+
+
         $regla = array(
             'idplanbloquedetalle' => 'required'
         );
@@ -1100,7 +1103,7 @@ class PlanesController extends Controller
         if ($validar->fails()){ return ['success' => 0];}
 
 
-        if(BloqueCuestionarioTextos::where('id_bloque_detalle', $request->idplanbloquedetalle)->first()){
+        if(PlanesBlockDetalle::where('id', $request->idplanbloquedetalle)->first()){
 
             DB::beginTransaction();
 
@@ -1144,6 +1147,9 @@ class PlanesController extends Controller
 
                 DevocionalCapitulo::whereIn('id_devocional_biblia', $pilaIdDevoBiblia)->delete();
                 DevocionalBiblia::where('id_bloque_detalle', $id)->delete();
+
+
+
 
 
                 PlanesBlockDetalle::where('id', $id)->delete();
