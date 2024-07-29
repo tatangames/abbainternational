@@ -343,9 +343,12 @@ Route::post('/admin/bibliacapitulo/informacion/texto', [BibliaCapituloController
 Route::post('/admin/bibliacapitulo/texto/actualizar', [BibliaCapituloController::class,'guardarTextoVersiculo']);
 
 
-
-
-
+// --- REDES SOCIALES ---
+Route::get('/admin/redessociales/vista', [RecursosController::class,'vistaRedesSociales'])->name('admin.redes.sociales');
+Route::get('/admin/redessociales/tabla', [RecursosController::class,'tablaRedesSociales']);
+Route::post('/admin/redessociales/posicion', [RecursosController::class,'posicionesRedesSociales']);
+Route::post('/admin/redessociales/nuevo', [RecursosController::class,'nuevaRedSocial']);
+Route::post('/admin/redessociales/borrar', [RecursosController::class,'borrarRedSocial']);
 
 
 

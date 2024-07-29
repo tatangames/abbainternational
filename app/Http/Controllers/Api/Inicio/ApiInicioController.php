@@ -36,6 +36,7 @@ use App\Models\PlanesUsuariosContinuar;
 use App\Models\RachaAlta;
 use App\Models\RachaDevocional;
 use App\Models\RachaDias;
+use App\Models\RedesSociales;
 use App\Models\TipoInsignias;
 use App\Models\Usuarios;
 use App\Models\VideosHoy;
@@ -305,6 +306,15 @@ class ApiInicioController extends Controller
             $urlapple = "https://apps.apple.com/sv/app/mi-caminar-con-dios/id6480132659";
 
 
+            // *** BLOQUE DE REDES SOCIALES ****
+            $hayRedes = 0;
+            $arrayRedesSociales = RedesSociales::orderBy('posicion', 'ASC')->get();
+            if($arrayRedesSociales != null && $arrayRedesSociales->isNotEmpty()){
+                $hayRedes = 1;
+            }
+
+
+
             // guardar modificaciones
             DB::commit();
 
@@ -337,6 +347,10 @@ class ApiInicioController extends Controller
                 'arrayfinalvideo' => $arrayFinalVideo,
                 'arrayfinalimagenes' => $arrayFinalImagenes,
                 'arrayfinalinsignias' => $arrayFinalInsignias,
+
+                'arrayredes' => $arrayRedesSociales,
+                'hayredes' => $hayRedes
+
                 ];
 
 
