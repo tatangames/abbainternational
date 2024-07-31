@@ -749,7 +749,6 @@ class PlanesController extends Controller
             $bloque = new PlanesBloques();
             $bloque->id_planes = $request->idplan;
             $bloque->fecha_inicio = $request->fecha;
-            $bloque->visible = 0;
             $bloque->save();
 
 
