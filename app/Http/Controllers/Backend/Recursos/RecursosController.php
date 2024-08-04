@@ -11,6 +11,7 @@ use App\Models\ImagenPreguntas;
 use App\Models\NotificacionTextos;
 use App\Models\NotificacionUsuario;
 use App\Models\Planes;
+use App\Models\RecursosWeb;
 use App\Models\RedesSociales;
 use App\Models\TipoNotificacion;
 use App\Models\TipoVideo;
@@ -1032,6 +1033,220 @@ class RecursosController extends Controller
         }
     }
 
+
+
+
+
+
+
+    // ***********************************************************************************
+
+    public function vistaRecursosWeb()
+    {
+        return view('backend.admin.recursos.recursosweb.vistarecursosweb');
+    }
+
+    public function tablaRecursosWeb()
+    {
+        $listado = RecursosWeb::orderBy('posicion', 'ASC')->get();
+
+        return view ('backend.admin.recursos.recursosweb.tablarecursosweb', compact('listado'));
+    }
+
+    public function posicionesRecursosWeb(Request $request)
+    {
+        $tasks = RecursosWeb::all();
+
+        foreach ($tasks as $task) {
+            $id = $task->id;
+
+            foreach ($request->order as $order) {
+                if ($order['id'] == $id) {
+                    $task->update(['posicion' => $order['posicion']]);
+                }
+            }
+        }
+
+        return ['success' => 1];
+    }
+
+
+
+    public function nuevaRecursosWeb(Request $request)
+    {
+        $rules = array(
+            'nombre' => 'required',
+            'link' => 'required',
+        );
+
+        // imagen
+
+        $validator = Validator::make($request->all(), $rules);
+
+        if ($validator->fails()) {
+            return ['success' => 0];
+        }
+
+        if ($request->hasFile('imagen')) {
+
+            $cadena = Str::random(15);
+            $tiempo = microtime();
+            $union = $cadena . $tiempo;
+            $nombre = str_replace(' ', '_', $union);
+
+            $extension = '.' . $request->imagen->getClientOriginalExtension();
+            $nombreFoto = $nombre . strtolower($extension);
+            $avatar = $request->file('imagen');
+            $upload = Storage::disk('archivos')->put($nombreFoto, \File::get($avatar));
+
+
+            if ($upload) {
+
+                if($info = RecursosWeb::orderBy('posicion', 'DESC')->first()){
+                    $nuevaPosicion = $info->posicion + 1;
+                }else{
+                    $nuevaPosicion = 1;
+                }
+
+                $registro = new RecursosWeb();
+                $registro->nombre = $request->nombre;
+                $registro->link = $request->link;
+                $registro->imagen = $nombreFoto;
+                $registro->posicion = $nuevaPosicion;
+                $registro->save();
+
+                return ['success' => 1];
+
+            } else {
+                // error al subir imagen
+                return ['success' => 99];
+            }
+        } else {
+            // imagen no encontrada
+            return ['success' => 99];
+        }
+    }
+
+
+    public function borrarRecursosWeb(Request $request)
+    {
+        $rules = array(
+            'id' => 'required',
+        );
+
+        $validator = Validator::make($request->all(), $rules);
+
+        if ($validator->fails()) {
+            return ['success' => 0];
+        }
+
+        if($info = RecursosWeb::where('id', $request->id)->first()){
+
+            $imagenOld = $info->imagen;
+
+            if(Storage::disk('archivos')->exists($imagenOld)){
+                Storage::disk('archivos')->delete($imagenOld);
+            }
+
+            RecursosWeb::where('id', $request->id)->delete();
+
+            // imagen fue borrada
+            return ['success' => 1];
+        }else{
+            // decir que imagen fue borrada
+            return ['success' => 1];
+        }
+    }
+
+
+
+    public function informacionRecursoWeb(Request $request)
+    {
+
+        $rules = array(
+            'id' => 'required',
+        );
+
+        $validator = Validator::make($request->all(), $rules);
+        if ( $validator->fails()){
+            return ['success' => 0];
+        }
+
+
+        if($lista = RecursosWeb::where('id', $request->id)->first()){
+
+            return ['success' => 1, 'info' => $lista];
+        }else{
+            return ['success' => 2];
+        }
+    }
+
+
+    public function actualizarRecursosWeb(Request $request)
+    {
+
+        $rules = array(
+            'id' => 'required',
+            'nombre' => 'required',
+            'link' => 'required'
+        );
+
+        // imagen
+
+        $validator = Validator::make($request->all(), $rules);
+        if ( $validator->fails()){
+            return ['success' => 0];
+        }
+
+
+        if($infoRecurso = RecursosWeb::where('id', $request->id)->first()){
+
+            if($request->file('imagen')){
+
+                $cadena = Str::random(15);
+                $tiempo = microtime();
+                $union = $cadena . $tiempo;
+                $nombre = str_replace(' ', '_', $union);
+
+                $extension = '.' . $request->imagen->getClientOriginalExtension();
+                $nombreFoto = $nombre . strtolower($extension);
+                $avatar = $request->file('imagen');
+                $upload = Storage::disk('archivos')->put($nombreFoto, \File::get($avatar));
+
+                if($upload){
+
+                    $imagenOld = $infoRecurso->imagen;
+
+                    if(Storage::disk('archivos')->exists($imagenOld)){
+                        Storage::disk('archivos')->delete($imagenOld);
+                    }
+
+                    RecursosWeb::where('id', $request->id)->update([
+                        'nombre' => $request->nombre,
+                        'imagen' => $nombreFoto,
+                        'link' => $request->link
+                    ]);
+
+                    return ['success' => 1];
+                }else{
+                    return ['success' => 99];
+                }
+            }else{
+                // no trae imagen
+
+                RecursosWeb::where('id', $request->id)->update([
+                    'nombre' => $request->nombre,
+                    'link' => $request->link
+                ]);
+
+                return ['success' => 1];
+            }
+
+        }else{
+            // id no encontrado
+            return ['success' => 99];
+        }
+    }
 
 
 

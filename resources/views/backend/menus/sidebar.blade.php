@@ -261,10 +261,18 @@
                                 <p>Listado</p>
                             </a>
                         </li>
-
-
                     </ul>
                 </li>
+
+                <li class="nav-item">
+                    <a href="{{ route('admin.recursos.web') }}" target="frameprincipal" class="nav-link">
+                        <i class="far fa-circle nav-icon"></i>
+                        <p>Recursos</p>
+                    </a>
+                </li>
+
+
+
 
             </ul>
         </nav>

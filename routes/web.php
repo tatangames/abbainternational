@@ -350,6 +350,14 @@ Route::post('/admin/redessociales/posicion', [RecursosController::class,'posicio
 Route::post('/admin/redessociales/nuevo', [RecursosController::class,'nuevaRedSocial']);
 Route::post('/admin/redessociales/borrar', [RecursosController::class,'borrarRedSocial']);
 
+// --- RECURSOS ---
+Route::get('/admin/recursosweb/vista', [RecursosController::class,'vistaRecursosWeb'])->name('admin.recursos.web');
+Route::get('/admin/recursosweb/tabla', [RecursosController::class,'tablaRecursosWeb']);
+Route::post('/admin/recursosweb/posicion', [RecursosController::class,'posicionesRecursosWeb']);
+Route::post('/admin/recursosweb/nuevo', [RecursosController::class,'nuevaRecursosWeb']);
+Route::post('/admin/recursosweb/borrar', [RecursosController::class,'borrarRecursosWeb']);
+Route::post('/admin/recursosweb/informacion', [RecursosController::class,'informacionRecursoWeb']);
+Route::post('/admin/recursosweb/editar', [RecursosController::class,'actualizarRecursosWeb']);
 
 
 
