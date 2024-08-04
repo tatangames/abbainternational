@@ -36,6 +36,7 @@ use App\Models\PlanesUsuariosContinuar;
 use App\Models\RachaAlta;
 use App\Models\RachaDevocional;
 use App\Models\RachaDias;
+use App\Models\RecursosWeb;
 use App\Models\RedesSociales;
 use App\Models\TipoInsignias;
 use App\Models\Usuarios;
@@ -314,6 +315,13 @@ class ApiInicioController extends Controller
             }
 
 
+            // *** BLOQUE DE RECURSOS ****
+                $hayRecursos = 0;
+                $arrayRecursosWeb = RecursosWeb::orderBy('posicion', 'ASC')->get();
+                if($arrayRecursosWeb != null && $arrayRecursosWeb->isNotEmpty()){
+                    $hayRecursos = 1;
+                }
+
 
             // guardar modificaciones
             DB::commit();
@@ -349,8 +357,9 @@ class ApiInicioController extends Controller
                 'arrayfinalinsignias' => $arrayFinalInsignias,
 
                 'arrayredes' => $arrayRedesSociales,
-                'hayredes' => $hayRedes
-
+                'hayredes' => $hayRedes,
+                'arrayrecursos' => $arrayRecursosWeb,
+                'hayrecursos' => $hayRecursos
                 ];
 
 
