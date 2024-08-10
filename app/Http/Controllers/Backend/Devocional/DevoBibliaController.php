@@ -257,7 +257,6 @@ class DevoBibliaController extends Controller
 
     public function registrarCapitulo(Request $request)
     {
-        Log::info($request->all());
 
 
         $rules = array(
