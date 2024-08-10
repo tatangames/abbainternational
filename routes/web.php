@@ -18,6 +18,7 @@ use App\Http\Controllers\Backend\Recursos\InsigniasController;
 use App\Http\Controllers\Backend\Biblias\BibliasController;
 use App\Http\Controllers\Backend\Biblias\BibliaCapituloController;
 use App\Http\Controllers\Backend\Devocional\DevoBibliaController;
+use App\Http\Controllers\Backend\Estadisticas\EstadisticasController;
 
 
 Route::get('/', [LoginController::class,'index'])->name('login');
@@ -379,7 +380,7 @@ Route::post('/admin/devobiblia/borrar/fila', [DevoBibliaController::class,'borra
 
 
 
-
-
+// --- ESTADISTICAS ---
+Route::get('/admin/estadisticas/vista', [EstadisticasController::class,'indexEstadisticas'])->name('admin.estadisticas.web');
 
 
