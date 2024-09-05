@@ -8,7 +8,7 @@
                         <thead>
                         <tr>
                             <th>Posición</th>
-                            <th>Título</th>
+                            <th>Título (Español)</th>
                             <th>Estado</th>
                             <th>Opciones</th>
                         </tr>
@@ -30,7 +30,7 @@
                                 </td>
 
                                 <td>
-                                    <button type="button" class="btn btn-info btn-xs" onclick="informacionBiblia({{ $dato->id }})">
+                                    <button type="button" class="btn btn-info btn-xs" onclick="editarBiblia({{ $dato->id }})">
                                         <i class="fas fa-edit" title="Editar"></i>&nbsp; Editar
                                     </button>
 

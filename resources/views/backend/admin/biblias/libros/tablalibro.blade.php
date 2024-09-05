@@ -30,7 +30,7 @@
 
                                 <td>{{ $dato->titulo }}</td>
                                 <td>
-                                    <button type="button" class="btn btn-info btn-xs" onclick="informacionEditar({{ $dato->id }})">
+                                    <button type="button" class="btn btn-info btn-xs" onclick="editarLibro({{ $dato->id }})">
                                         <i class="fas fa-edit" title="Editar"></i>&nbsp; Editar
                                     </button>
 

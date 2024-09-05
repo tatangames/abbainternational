@@ -10,13 +10,16 @@ use App\Models\BibliaCapitulosTextos;
 use App\Models\BibliasTextos;
 use App\Models\BibliaVersiculo;
 use App\Models\BibliaVersiculoBloque;
+use App\Models\IdiomaPlanes;
 use App\Models\Versiculo;
 use App\Models\VersiculoRefran;
 use App\Models\VersiculoTextos;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 class BibliaCapituloController extends Controller
 {
@@ -27,9 +30,7 @@ class BibliaCapituloController extends Controller
 
     public function vistaLibro($idbiblia){
 
-        $nombre = $this->retornoTituloBiblia($idbiblia);
-
-        return view('backend.admin.biblias.libros.vistalibro', compact('idbiblia', 'nombre'));
+        return view('backend.admin.biblias.libros.vistalibro', compact('idbiblia'));
     }
 
     public function tablaLibro($idbiblia){
@@ -49,70 +50,15 @@ class BibliaCapituloController extends Controller
 
     private function retornoTituloCapituloBiblia($idcapitulo){
 
-        $datos = BibliaCapitulosTextos::where('id_biblia_capitulo', $idcapitulo)
+        $titulo = "";
+        if($datos = BibliaCapitulosTextos::where('id_biblia_capitulo', $idcapitulo)
             ->where('id_idioma_planes', 1)
-            ->first();
-
-        return $datos->titulo;
-    }
-
-    private function retornoTituloBiblia($idbiblia){
-
-        $datos = BibliasTextos::where('id_biblias', $idbiblia)
-            ->where('id_idioma_planes', 1)
-            ->first();
-
-        return $datos->titulo;
-    }
-
-
-    public function registrarLibro(Request $request){
-
-        $rules = array(
-            'titulo' => 'required',
-            'idbiblia' => 'required',
-
-        );
-
-        $validator = Validator::make($request->all(), $rules);
-
-        if ($validator->fails()) {
-            return ['success' => 0];
+            ->first()){
+            $titulo = $datos->titulo;
         }
 
-        DB::beginTransaction();
-
-        try {
-
-            if($info = BibliaCapitulos::where('id_biblias', $request->idbiblia)
-                ->orderBy('posicion', 'DESC')->first()){
-                $nuevaPosicion = $info->posicion + 1;
-            }else{
-                $nuevaPosicion = 1;
-            }
-
-            $nuevo = new BibliaCapitulos();
-            $nuevo->id_biblias = $request->idbiblia;
-            $nuevo->visible = 0;
-            $nuevo->posicion = $nuevaPosicion;
-            $nuevo->save();
-
-            $detalle = new BibliaCapitulosTextos();
-            $detalle->id_biblia_capitulo = $nuevo->id;
-            $detalle->id_idioma_planes = 1;
-            $detalle->titulo = $request->titulo;
-            $detalle->save();
-
-            // completado y actualizado
-            DB::commit();
-            return ['success' => 1];
-        }catch(\Throwable $e){
-            Log::info('error: ' . $e);
-            DB::rollback();
-            return ['success' => 99];
-        }
+        return $titulo;
     }
-
 
     public function actualizarPosicionBibliaLibros(Request $request){
 
@@ -129,52 +75,6 @@ class BibliaCapituloController extends Controller
         }
         return ['success' => 1];
     }
-
-
-    public function informacionLibro(Request $request)
-    {
-        $rules = array(
-            'id' => 'required',
-        );
-
-        $validator = Validator::make($request->all(), $rules);
-        if ( $validator->fails()){
-            return ['success' => 0];
-        }
-
-
-        if($lista = BibliaCapitulos::where('id', $request->id)->first()){
-
-            $titulo = $this->retornoTituloCapituloBiblia($lista->id);
-
-            return ['success' => 1, 'titulo' => $titulo];
-        }else{
-            return ['success' => 2];
-        }
-    }
-
-
-    public function actualizarLibro(Request $request)
-    {
-        $rules = array(
-            'idcapitulo' => 'required',
-            'titulo' => 'required',
-        );
-
-        $validator = Validator::make($request->all(), $rules);
-
-        if ($validator->fails()) { return ['success' => 0]; }
-
-        // actualizar texto espanol
-        BibliaCapitulosTextos::where('id_biblia_capitulo', $request->idcapitulo)
-            ->where('id_idioma_planes', 1)
-            ->update([
-                'titulo' => $request->titulo,
-            ]);
-
-        return ['success' => 1];
-    }
-
 
 
     public function estadoLibro(Request $request)
@@ -200,11 +100,165 @@ class BibliaCapituloController extends Controller
 
 
 
+    public function vistaBibliaLibro($id)
+    {
+        $arrayIdiomas = IdiomaPlanes::orderBy('id', 'ASC')->get();
+        return view('backend.admin.biblias.libros.nuevolibro', compact('id', 'arrayIdiomas'));
+    }
 
-    // -------------------------------------------------------------------------
+
+    public function registrarLibro(Request $request)
+    {
+        $regla = array(
+            'id' => 'required', // idbiblia
+        );
+
+        $validar = Validator::make($request->all(), $regla);
+
+        if ($validar->fails()){ return ['success' => 0];}
+
+
+        // array: infoIdIdioma, infoTitulo
+
+            DB::beginTransaction();
+
+            try {
+
+                if($info = BibliaCapitulos::where('id_biblias', $request->id)->orderBy('posicion', 'DESC')->first()){
+                    $nuevaPosicion = $info->posicion + 1;
+                }else{
+                    $nuevaPosicion = 1;
+                }
+
+                $registro = new BibliaCapitulos();
+                $registro->id_biblias = $request->id;
+                $registro->visible = 0;
+                $registro->posicion = $nuevaPosicion;
+                $registro->save();
+
+                $datosContenedor = json_decode($request->contenedorArray, true);
+
+                // VACIO
+                if (empty($datosContenedor)) {
+                    return ['success' => 99];
+                }
+
+                foreach ($datosContenedor as $filaArray) {
+
+                    $detalle = new BibliaCapitulosTextos();
+                    $detalle->id_biblia_capitulo = $registro->id;
+                    $detalle->id_idioma_planes = $filaArray['infoIdIdioma'];
+                    $detalle->titulo = $filaArray['infoTitulo'];
+                    $detalle->save();
+                }
+
+                // completado
+                DB::commit();
+                return ['success' => 1];
+            }catch(\Throwable $e){
+                Log::info('error: ' . $e);
+                DB::rollback();
+                return ['success' => 99];
+            }
+
+    }
+
+
+
+    public function vistaEditarBibliaLibro($id)
+    {
+        // id: biblia_capitulos
+        $arrayIdiomas = IdiomaPlanes::orderBy('id', 'ASC')->get();
+
+        $contador = 0;
+        $listado = BibliaCapitulosTextos::where('id_biblia_capitulo', $id)->get();
+        foreach ($listado as $dato){
+            $contador++;
+            $dato->contador = $contador;
+
+            $infoIdioma = IdiomaPlanes::where('id', $dato->id_idioma_planes)->first();
+            $dato->idioma = $infoIdioma->nombre;
+        }
+
+        return view('backend.admin.biblias.libros.editarlibro', compact('id', 'arrayIdiomas', 'listado'));
+    }
+
+
+    public function actualizarBibliaLibro(Request $request)
+    {
+        $regla = array(
+            'id' => 'required', // id biblia_capitulos
+        );
+
+        // array: infoIdPlanTexto, infoIdIdioma, infoTitulo,
+
+        $validar = Validator::make($request->all(), $regla);
+
+        if ($validar->fails()){ return ['success' => 0];}
+
+        DB::beginTransaction();
+
+        try {
+
+            $datosContenedor = json_decode($request->contenedorArray, true);
+
+            // sus idiomas
+            foreach ($datosContenedor as $filaArray) {
+
+                // comprobar si existe para actualizar o crear segun idioma nuevo
+                if($infoPlanTexto = BibliaCapitulosTextos::where('id', $filaArray['infoIdPlanTexto'])->first()){
+
+                    // actualizar
+                    BibliaCapitulosTextos::where('id', $infoPlanTexto->id)->update([
+                        'titulo' => $filaArray['infoTitulo'],
+                    ]);
+
+                }else{
+
+                    // como no encontro, se creara
+
+                    $detalle = new BibliaCapitulosTextos();
+                    $detalle->id_biblia_capitulo = $request->id;
+                    $detalle->id_idioma_planes = $filaArray['infoIdIdioma'];
+                    $detalle->titulo = $filaArray['infoTitulo'];
+                    $detalle->save();
+                }
+            }
+
+            // completado y actualizado
+            DB::commit();
+            return ['success' => 1];
+        }catch(\Throwable $e){
+            Log::info('error: ' . $e);
+            DB::rollback();
+            return ['success' => 99];
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // ----------------------PARTE DE CAPITULOS ---------------------------------------------------
 
     public function vistaCapitulosBloque($idcapitulo)
     {
+
+        // id: biblia_capitulos
 
         return view('backend.admin.biblias.capitulos.vistacapitulobiblia', compact('idcapitulo'));
     }
@@ -307,25 +361,6 @@ class BibliaCapituloController extends Controller
     }
 
 
-    public function actualizarCapituloBloque(Request $request)
-    {
-        $rules = array(
-            'idbloque' => 'required',
-            'titulo' => 'required',
-        );
-
-        $validator = Validator::make($request->all(), $rules);
-
-        if ($validator->fails()) { return ['success' => 0]; }
-
-        BibliaCapituloBlockTexto::where('id_biblia_capitulo_block', $request->idbloque)
-            ->where('id_idioma_planes', 1)
-            ->update([
-                'titulo' => $request->titulo,
-            ]);
-
-        return ['success' => 1];
-    }
 
 
     public function estadoCapituloBloque(Request $request)
@@ -367,76 +402,62 @@ class BibliaCapituloController extends Controller
 
 
 
-// -------------------------------------------------------------------------
-
-    public function vistaCapitulosBloqueVersiculo($idbloque)
+    public function vistaCapitulo($id)
     {
-        return view('backend.admin.biblias.capitulos.versiculos.vistaversiculo', compact('idbloque'));
-    }
+        // biblia_capitulos
 
-    public function tablaCapitulosBloqueVersiculo($idbloque)
-    {
-        $listado = Versiculo::where('id_capitulo_block', $idbloque)
-            ->orderBy('posicion', 'ASC')
-            ->get();
-
-        foreach ($listado as $dato){
-
-            $titulo = $this->retornoTituloVersiculo($dato->id);
-            $dato->titulo = $titulo;
-        }
-
-        return view('backend.admin.biblias.capitulos.versiculos.tablaversiculo', compact('listado'));
-    }
-
-    private function retornoTituloVersiculo($idversiculo){
-        $datos = VersiculoTextos::where('id_versiculo', $idversiculo)
-            ->where('id_idioma_planes', 1)
-            ->first();
-
-        return $datos->titulo;
+        $arrayIdiomas = IdiomaPlanes::orderBy('id', 'ASC')->get();
+        return view('backend.admin.biblias.capitulos.nuevocapitulo', compact('id', 'arrayIdiomas'));
     }
 
 
-    public function registrarCapituloBloqueVersiculo(Request $request)
+    public function registrarCapitulo(Request $request)
     {
-        $rules = array(
-            'idbloque' => 'required',
-            'titulo' => 'required',
+        $regla = array(
+            'id' => 'required', // id: biblia_capitulos
         );
 
-        $validator = Validator::make($request->all(), $rules);
+        $validar = Validator::make($request->all(), $regla);
 
-        if ($validator->fails()) {
-            return ['success' => 0];
-        }
+        if ($validar->fails()){ return ['success' => 0];}
+
+
+        // array: infoIdIdioma, infoTitulo
 
         DB::beginTransaction();
 
         try {
 
-            if($info = Versiculo::where('id_capitulo_block', $request->idbloque)
-                ->orderBy('posicion', 'DESC')
-                ->first()){
+            if($info = BibliaCapituloBloque::where('id_biblia_capitulo', $request->id)->orderBy('posicion', 'DESC')->first()){
                 $nuevaPosicion = $info->posicion + 1;
             }else{
                 $nuevaPosicion = 1;
             }
 
+            $registro = new BibliaCapituloBloque();
+            $registro->id_biblia_capitulo = $request->id;
+            $registro->visible = 0;
+            $registro->posicion = $nuevaPosicion;
+            $registro->save();
 
-            $nuevo = new Versiculo();
-            $nuevo->id_capitulo_block = $request->idbloque;
-            $nuevo->posicion = $nuevaPosicion;
-            $nuevo->visible = 0;
-            $nuevo->save();
+            $datosContenedor = json_decode($request->contenedorArray, true);
 
-            // guardar el idioma
-            $detalle = new VersiculoTextos();
-            $detalle->id_versiculo = $nuevo->id;
-            $detalle->id_idioma_planes = 1;
-            $detalle->titulo = $request->titulo;
-            $detalle->save();
+            // VACIO
+            if (empty($datosContenedor)) {
+                return ['success' => 99];
+            }
 
+            foreach ($datosContenedor as $filaArray) {
+
+                $detalle = new BibliaCapituloBlockTexto();
+                $detalle->id_biblia_capitulo_block = $registro->id;
+                $detalle->id_idioma_planes = $filaArray['infoIdIdioma'];
+                $detalle->titulo = $filaArray['infoTitulo'];
+                $detalle->textocapitulo = null;
+                $detalle->save();
+            }
+
+            // completado
             DB::commit();
             return ['success' => 1];
         }catch(\Throwable $e){
@@ -447,68 +468,162 @@ class BibliaCapituloController extends Controller
     }
 
 
-    public function informacionCapituloBloqueVersiculo(Request $request)
+    public function vistaEditarCapitulo($id)
     {
-        $rules = array(
-            'id' => 'required',
-        );
+        // id: biblia_capitulo_bloque
+        $arrayIdiomas = IdiomaPlanes::orderBy('id', 'ASC')->get();
 
-        $validator = Validator::make($request->all(), $rules);
-        if ( $validator->fails()){
-            return ['success' => 0];
+        $contador = 0;
+        $listado = BibliaCapituloBlockTexto::where('id_biblia_capitulo_block', $id)->get();
+        foreach ($listado as $dato){
+            $contador++;
+            $dato->contador = $contador;
+
+            $infoIdioma = IdiomaPlanes::where('id', $dato->id_idioma_planes)->first();
+            $dato->idioma = $infoIdioma->nombre;
         }
 
-        if($lista = Versiculo::where('id', $request->id)->first()){
-
-            $titulo = $this->retornoTituloVersiculo($lista->id);
-
-            return ['success' => 1, 'info' => $lista, 'titulo' => $titulo];
-        }else{
-            return ['success' => 2];
-        }
+        return view('backend.admin.biblias.capitulos.editarcapitulo', compact('id', 'arrayIdiomas', 'listado'));
     }
 
 
-    public function actualizarCapituloBloqueVersiculo(Request $request)
-    {
-        $rules = array(
-            'idversiculo' => 'required',
-            'titulo' => 'required',
-        );
-
-        $validator = Validator::make($request->all(), $rules);
-
-        if ($validator->fails()) { return ['success' => 0]; }
-
-        VersiculoTextos::where('id_versiculo', $request->idversiculo)
-            ->where('id_idioma_planes', 1)
-            ->update([
-                'titulo' => $request->titulo,
-            ]);
-
-        return ['success' => 1];
-    }
-
-
-    public function estadoCapituloBloqueVersiculo(Request $request)
+    public function actualizarCapitulo(Request $request)
     {
         $regla = array(
-            'idbloque' => 'required',
-            'estado' => 'required'
+            'id' => 'required', // id biblia_capitulo_bloque
         );
+
+        // array: infoIdPlanTexto, infoIdIdioma, infoTitulo,
 
         $validar = Validator::make($request->all(), $regla);
 
         if ($validar->fails()){ return ['success' => 0];}
 
+        DB::beginTransaction();
 
-        Versiculo::where('id', $request->idbloque)->update([
-            'visible' => $request->estado,
-        ]);
+        try {
 
+            $datosContenedor = json_decode($request->contenedorArray, true);
 
-        return ['success' => 1];
+            // sus idiomas
+            foreach ($datosContenedor as $filaArray) {
+
+                // comprobar si existe para actualizar o crear segun idioma nuevo
+                if($infoPlanTexto = BibliaCapituloBlockTexto::where('id', $filaArray['infoIdPlanTexto'])->first()){
+
+                    // actualizar
+                    BibliaCapituloBlockTexto::where('id', $infoPlanTexto->id)->update([
+                        'titulo' => $filaArray['infoTitulo'],
+                    ]);
+
+                }else{
+
+                    // como no encontro, se creara
+
+                    $detalle = new BibliaCapituloBlockTexto();
+                    $detalle->id_biblia_capitulo_block = $request->id;
+                    $detalle->id_idioma_planes = $filaArray['infoIdIdioma'];
+                    $detalle->titulo = $filaArray['infoTitulo'];
+                    $detalle->save();
+                }
+            }
+
+            // completado y actualizado
+            DB::commit();
+            return ['success' => 1];
+        }catch(\Throwable $e){
+            Log::info('error: ' . $e);
+            DB::rollback();
+            return ['success' => 99];
+        }
     }
+
+
+    public function idiomasDisponibleVersiculo(Request $request){
+
+        $regla = array(
+            'id' => 'required', // id biblia_capitulo_bloque
+        );
+
+        // array: infoIdPlanTexto, infoIdIdioma, infoTitulo,
+
+        $validar = Validator::make($request->all(), $regla);
+        if ($validar->fails()){ return ['success' => 0];}
+
+
+        $listado = BibliaCapituloBlockTexto::where('id_biblia_capitulo_block', $request->id)->get();
+
+        foreach ($listado as $dato){
+            $infoIdioma = IdiomaPlanes::where('id', $dato->id_idioma_planes)->first();
+            $dato->idioma = $infoIdioma->nombre;
+            $dato->ididioma = $infoIdioma->id;
+        }
+
+        return ['success' => 1, 'listado' => $listado];
+    }
+
+
+    public function buscarTextoVersiculoIdioma(Request $request)
+    {
+        $regla = array(
+            'id' => 'required', // id biblia_capitulo_bloque
+            'idioma' => 'required'
+        );
+
+        // array: infoIdPlanTexto, infoIdIdioma, infoTitulo,
+
+        $validar = Validator::make($request->all(), $regla);
+        if ($validar->fails()){ return ['success' => 0];}
+
+        if($info = BibliaCapituloBlockTexto::where('id_biblia_capitulo_block', $request->id)
+            ->where('id_idioma_planes', $request->idioma)
+            ->first()){
+
+            $texto = $info->textocapitulo;
+
+            return ['success' => 1, 'texto' => $texto];
+        }else{
+            return ['success' => 99];
+        }
+    }
+
+    public function actualizarVersiculo(Request $request)
+    {
+        $regla = array(
+            'id' => 'required', // id biblia_capitulo_bloque
+            'idioma' => 'required',
+            'versiculo' => 'required'
+        );
+
+        // array: infoIdPlanTexto, infoIdIdioma, infoTitulo,
+
+        $validar = Validator::make($request->all(), $regla);
+        if ($validar->fails()){ return ['success' => 0];}
+
+        if($info = BibliaCapituloBlockTexto::where('id_biblia_capitulo_block', $request->id)
+            ->where('id_idioma_planes', $request->idioma)
+            ->first()){
+
+            BibliaCapituloBlockTexto::where('id', $info->id)
+                ->update(['textocapitulo' => $request->versiculo]);
+
+            return ['success' => 1];
+        }else{
+            return ['success' => 99];
+        }
+    }
+
+
+
+// -------------------------------------------------------------------------
+
+
+
+
+
+
+
+
 
 
 

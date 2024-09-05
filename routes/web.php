@@ -162,7 +162,6 @@ Route::post('/admin/planes/actualizar/posicion', [PlanesController::class,'actua
 
 // Editar plan
 Route::get('/admin/planes/vista/editar/index/{idplan}', [PlanesController::class,'indexEditarPlan']);
-Route::post('/admin/planes/datos/nuevo/idioma', [PlanesController::class,'actualizarPlanesIdiomaNuevo']); // agregar nuevo idioma
 Route::post('/admin/planes/datos/actualizar', [PlanesController::class,'actualizarPlanes']); // actualizar todas las filas
 Route::post('/admin/planes/imagen/actualizar', [PlanesController::class,'actualizarImagenPlanes']);
 Route::post('/admin/planes/imagenportada/actualizar', [PlanesController::class,'actualizarImagenPortadaPlanes']);
@@ -313,30 +312,51 @@ Route::post('/admin/notificacion/actualizar/textos', [RecursosController::class,
 Route::get('/admin/biblia/vista', [BibliasController::class,'vistaBiblias'])->name('admin.biblias');
 Route::get('/admin/biblia/tabla', [BibliasController::class,'tablaBiblias']);
 Route::post('/admin/biblia/registrar', [BibliasController::class,'registrarBiblia']);
-Route::post('/admin/biblia/informacion', [BibliasController::class,'informacionBiblia']);
-Route::post('/admin/biblia/actualizar', [BibliasController::class,'actualizarBiblia']);
 Route::post('/admin/biblia/activacion', [BibliasController::class,'estadoBiblia']);
 Route::post('/admin/biblias/actualizar/posicion', [BibliasController::class,'actualizarPosicionBiblias']);
+
+Route::get('/admin/biblia/nuevo/index', [BibliasController::class,'vistaNuevaBiblia']);
+Route::get('/admin/biblia/vista/editar/{id}', [BibliasController::class,'vistaEditarBiblia']);
+Route::post('/admin/biblia/actualizar/imagen', [BibliasController::class,'actualizarBibliaImagen']);
+Route::post('/admin/biblia/actualizar/datos', [BibliasController::class,'actualizarDatosBiblia']);
+
+
 
 
 // --- BIBLIAS LIBROS ---
 Route::get('/admin/biblialibro/vista/{idbiblia}', [BibliaCapituloController::class,'vistaLibro']);
 Route::get('/admin/biblialibro/tabla/{idbiblia}', [BibliaCapituloController::class,'tablaLibro']);
-Route::post('/admin/biblialibro/registrar', [BibliaCapituloController::class,'registrarLibro']);
 Route::post('/admin/biblialibro/posicion', [BibliaCapituloController::class,'actualizarPosicionBibliaLibros']);
-Route::post('/admin/biblialibro/informacion', [BibliaCapituloController::class,'informacionLibro']);
 Route::post('/admin/biblialibro/actualizar', [BibliaCapituloController::class,'actualizarLibro']);
 Route::post('/admin/biblialibro/activacion', [BibliaCapituloController::class,'estadoLibro']);
+
+Route::get('/admin/biblialibro/nuevo/index/{id}', [BibliaCapituloController::class,'vistaBibliaLibro']);
+Route::post('/admin/biblialibro/registrar', [BibliaCapituloController::class,'registrarLibro']);
+Route::get('/admin/biblialibro/vista/editar/{id}', [BibliaCapituloController::class,'vistaEditarBibliaLibro']);
+Route::post('/admin/biblialibro/actualizar/datos', [BibliaCapituloController::class,'actualizarBibliaLibro']);
+
+
 
 
 // --- BIBLIA CAPITULOS - BLOQUES ---
 Route::get('/admin/bibliacapitulo/bloque/vista/{idcapitulo}', [BibliaCapituloController::class,'vistaCapitulosBloque']);
 Route::get('/admin/bibliacapitulo/bloque/tabla/{idcapitulo}', [BibliaCapituloController::class,'tablaCapitulosBloque']);
-Route::post('/admin/bibliacapitulo/bloque/registrar', [BibliaCapituloController::class,'registrarCapituloBloque']);
-Route::post('/admin/bibliacapitulo/bloque/informacion', [BibliaCapituloController::class,'informacionCapituloBloque']);
-Route::post('/admin/bibliacapitulo/bloque/actualizar', [BibliaCapituloController::class,'actualizarCapituloBloque']);
 Route::post('/admin/bibliacapitulo/bloque/activacion', [BibliaCapituloController::class,'estadoCapituloBloque']);
 Route::post('/admin/bibliacapitulo/bloque/posicion', [BibliaCapituloController::class,'actualizarPosicionBibliaCapitulosBloque']);
+
+Route::get('/admin/capitulo/nuevo/index/{id}', [BibliaCapituloController::class,'vistaCapitulo']);
+Route::post('/admin/capitulo/registrar', [BibliaCapituloController::class,'registrarCapitulo']);
+Route::get('/admin/capitulo/vista/editar/{id}', [BibliaCapituloController::class,'vistaEditarCapitulo']);
+Route::post('/admin/capitulo/actualizar/datos', [BibliaCapituloController::class,'actualizarCapitulo']);
+
+// para el versiculo
+// buscar idiomas disponible que tiene el capitulo
+Route::post('/admin/capitulo/idiomas/disponibles', [BibliaCapituloController::class,'idiomasDisponibleVersiculo']);
+Route::post('/admin/capitulo/idiomas/versiculo', [BibliaCapituloController::class,'buscarTextoVersiculoIdioma']);
+Route::post('/admin/capitulo/idiomas/versiculoactualizar', [BibliaCapituloController::class,'actualizarVersiculo']);
+
+
+
 
 
 // --- BUSQUEDA TEXTO CAPITULO ---

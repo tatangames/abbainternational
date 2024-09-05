@@ -778,6 +778,9 @@ class ApiInicioController extends Controller
                 ->where('indeta.id_usuarios', $userToken->id)
                 ->max('nil.nivel');
 
+            $filaNivelInsiginia = NivelesInsignias::where('id_tipo_insignia', $infoInsignia->id)
+                ->where('nivel', $datoHitoNivel)->first();
+
             $hito_infoNivelVoy = 1;
 
             if($datoHitoNivel != null){
@@ -791,7 +794,7 @@ class ApiInicioController extends Controller
             $hito_arrayObtenidos = DB::table('insignias_usuarios_detalle AS indeta')
                 ->join('niveles_insignias AS nil', 'indeta.id_niveles_insignias', '=', 'nil.id')
                 ->join('tipo_insignias AS tipo', 'nil.id_tipo_insignia', '=', 'tipo.id')
-                ->select('nil.id', 'indeta.fecha', 'nil.nivel')
+                ->select('nil.id', 'indeta.fecha', 'nil.nivel','nil.niveltexto')
                 ->where('nil.id_tipo_insignia', $infoInsignia->id)
                 ->where('indeta.id_usuarios', $userToken->id)
                 ->orderBy('indeta.fecha', 'DESC')
@@ -824,6 +827,7 @@ class ApiInicioController extends Controller
                 'descripcion' => $descripcionInsignia,
                 'imagen' => $infoInsignia->imagen,
                 'nivelvoy' => $hito_infoNivelVoy,
+                'niveltexto' => $filaNivelInsiginia->niveltexto,
                 'contador' => $contadorActual,
                 'hitoarray' => $arrayHitoOrdenado
                 ];

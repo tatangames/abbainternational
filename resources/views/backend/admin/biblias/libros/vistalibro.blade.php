@@ -20,13 +20,8 @@
 
 <section class="content-header">
     <div class="container-fluid">
-
         <div class="col-sm-6">
-            <p style="font-weight: bold">Biblia: {{ $nombre }}</p>
-        </div>
-
-        <div class="col-sm-6">
-            <button type="button" onclick="nuevoCapitulo()" class="btn btn-primary btn-sm">
+            <button type="button" onclick="nuevoLibro()" class="btn btn-primary btn-sm">
                 <i class="fas fa-plus-square"></i>
                 Nuevo Libro
             </button>
@@ -52,77 +47,6 @@
         </div>
     </div>
 </section>
-
-
-<div class="modal fade" id="modalAgregar">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">Nuevo Libro</h4>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form id="formulario-nuevo">
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-12">
-
-                                <div class="form-group">
-                                    <label>Título</label>
-                                    <input type="text" maxlength="50" autocomplete="off" class="form-control" id="titulo-nuevo" placeholder="Título">
-                                </div>
-
-                            </div>
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer justify-content-between">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
-                <button type="button" class="btn btn-success" onclick="registrar()">Guardar</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-
-<!-- modal editar-->
-<div class="modal fade" id="modalEditar" >
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">Editar</h4>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form id="formulario-editar">
-                    <div class="card-body">
-                        <div class="col-md-12">
-
-                            <div class="form-group">
-                                <label>Título</label>
-                                <input type="hidden" id="id-editar">
-                                <input type="text" maxlength="50" autocomplete="off" class="form-control" id="titulo-editar">
-                            </div>
-
-
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer justify-content-between">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
-                <button type="button" class="btn btn-success" onclick="editar()">Actualizar</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 
 
 @extends('backend.menus.footerjs')
@@ -153,112 +77,14 @@
             $('#tablaDatatable').load(ruta);
         }
 
-        function nuevoCapitulo(){
-            document.getElementById("formulario-nuevo").reset();
-            $('#modalAgregar').modal('show');
+        function nuevoLibro(){
+            var id = {{ $idbiblia }};
+            window.location.href="{{ url('/admin/biblialibro/nuevo/index') }}/" + id;
         }
 
-
-        function registrar(){
-
-            var titulo = document.getElementById('titulo-nuevo').value;
-
-            if(titulo === '') {
-                toastr.error('Título es requerido');
-                return;
-            }
-
-            openLoading();
-
-            let idbiblia = {{ $idbiblia }};
-
-            var formData = new FormData();
-            formData.append('titulo', titulo);
-            formData.append('idbiblia', idbiblia);
-
-            axios.post('/admin/biblialibro/registrar', formData, {
-            })
-                .then((response) => {
-                    closeLoading();
-                    if (response.data.success === 1) {
-                        $('#modalAgregar').modal('hide');
-                        toastr.success('Registrado correctamente');
-                        recargar();
-                    }
-                    else {
-                        toastr.error('Error al guardar');
-                    }
-                })
-                .catch((error) => {
-                    closeLoading();
-                    toastr.error('Error al guardar');
-                });
+        function editarLibro(id){
+            window.location.href="{{ url('/admin/biblialibro/vista/editar') }}/" + id;
         }
-
-
-
-
-        function informacionEditar(id){
-
-            openLoading();
-            document.getElementById("formulario-editar").reset();
-
-            axios.post('/admin/biblialibro/informacion',{
-                'id': id
-            })
-                .then((response) => {
-                    closeLoading();
-                    if(response.data.success === 1){
-                        $('#modalEditar').modal('show');
-                        $('#id-editar').val(id);
-                        $('#titulo-editar').val(response.data.titulo);
-
-                    }else{
-                        toastr.error('Información no encontrada');
-                    }
-                })
-                .catch((error) => {
-                    closeLoading();
-                    toastr.error('Información no encontrada');
-                });
-        }
-
-        function editar(){
-
-            var id = document.getElementById('id-editar').value;
-            var titulo = document.getElementById('titulo-editar').value;
-
-            if(titulo === '') {
-                toastr.error('Título es requerido');
-                return;
-            }
-
-            openLoading();
-
-            var formData = new FormData();
-            formData.append('titulo', titulo);
-            formData.append('idcapitulo', id);
-
-            axios.post('/admin/biblialibro/actualizar', formData, {
-            })
-                .then((response) => {
-                    closeLoading();
-                    if (response.data.success === 1) {
-                        $('#modalEditar').modal('hide');
-                        toastr.success('Actualizado correctamente');
-                        recargar();
-                    }
-                    else {
-                        toastr.error('Error al guardar');
-                    }
-                })
-                .catch((error) => {
-                    closeLoading();
-                    toastr.error('Error al guardar');
-                });
-        }
-
-
 
         function preguntaActivar(idcapitulo){
 
