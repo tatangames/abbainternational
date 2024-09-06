@@ -23,10 +23,11 @@ class ApiBibliaController extends Controller
 
         $rules = array(
             'iduser' => 'required',
+            'idioma' => 'required'
         );
 
-
         $validator = Validator::make($request->all(), $rules);
+
         if ( $validator->fails()){
             return ['success' => 0,
                 'msj' => "validación incorrecta"
@@ -38,19 +39,16 @@ class ApiBibliaController extends Controller
         if ($userToken = JWTAuth::user($tokenApi)) {
 
             $listado = Biblias::where('visible', 1)
-                ->orderBy('posicion', 'ASC')->get();
+                ->orderBy('posicion', 'ASC')
+                ->get();
 
-            $hayinfo = 0;
             foreach ($listado as $dato){
-                $hayinfo = 1;
 
-                $titulo = $this->retornoTituloBiblia($dato->id);
+                $titulo = $this->retornoTituloBiblia($dato->id, $request->idioma);
                 $dato->titulo = $titulo;
             }
 
-            return ['success' => 1,
-                'hayinfo' => $hayinfo,
-                'listado' => $listado];
+            return ['success' => 1, 'listado' => $listado];
         }
         else{
             return ['success' => 99];
@@ -58,18 +56,17 @@ class ApiBibliaController extends Controller
     }
 
 
+    private function retornoTituloBiblia($idbiblia, $ididioma){
 
+        $titulo = "";
+        if($datos = BibliasTextos::where('id_biblias', $idbiblia)
+            ->where('id_idioma_planes', $ididioma)
+            ->first()){
+            $titulo = $datos->titulo;
+        }
 
-    // defecto español
-    private function retornoTituloBiblia($idbiblia){
-
-        $datos = BibliasTextos::where('id_biblias', $idbiblia)
-            ->where('id_idioma_planes', 1)
-            ->first();
-
-        return $datos->titulo;
+        return $titulo;
     }
-
 
 
     public function listadoBibliasCapitulos(Request $request){
@@ -104,7 +101,7 @@ class ApiBibliaController extends Controller
             foreach ($arrayCapitulos as $dato){
                 array_push($resultsBloque, $dato);
 
-                $raw = $this->retornoTituloCapitulo($dato->id);
+                $raw = $this->retornoTituloCapitulo($dato->id, $idiomaTextos);
                 $dato->titulo = $raw;
 
 
@@ -114,7 +111,7 @@ class ApiBibliaController extends Controller
                     ->get();
 
                 foreach ($arrayBloques as $fila){
-                    $titulo = $this->retornoTituloCapituloBoque($fila->id);
+                    $titulo = $this->retornoTituloCapituloBoque($fila->id, $idiomaTextos);
                     $fila->titulo = $titulo;
                 }
 
@@ -132,37 +129,33 @@ class ApiBibliaController extends Controller
 
 
 
-    private function retornoTituloCapitulo($idcapitulo)
+    private function retornoTituloCapitulo($idcapitulo, $idioma)
     {
-        $datos = BibliaCapitulosTextos::where('id_biblia_capitulo', $idcapitulo)
-            ->where('id_idioma_planes', 1)
-            ->first();
+        $titulo = "";
+        if($datos = BibliaCapitulosTextos::where('id_biblia_capitulo', $idcapitulo)
+            ->where('id_idioma_planes', $idioma)
+            ->first()){
+            $titulo = $datos->titulo;
+        }
 
-        return $datos->titulo;
+        return $titulo;
     }
 
 
     // TITULO CAPITULO BLOQUE
-    private function retornoTituloCapituloBoque($idcapiblock){
+    private function retornoTituloCapituloBoque($idcapiblock, $idioma){
 
-        $datos = BibliaCapituloBlockTexto::where('id_biblia_capitulo_block', $idcapiblock)
-            ->where('id_idioma_planes', 1)
-            ->first();
+        $titulo = "";
+        if($datos = BibliaCapituloBlockTexto::where('id_biblia_capitulo_block', $idcapiblock)
+            ->where('id_idioma_planes', $idioma)
+            ->first()){
+            $titulo = $datos->titulo;
+        }
 
-        return $datos->titulo;
+        return $titulo;
     }
 
 
-
-    // TITULO DE VERSICULO
-    private function retornoTituloVersiculo($idversiculo){
-
-        $datos = VersiculoTextos::where('id_versiculo', $idversiculo)
-            ->where('id_idioma_planes', 1)
-            ->first();
-
-        return $datos->titulo;
-    }
 
 
 
@@ -173,7 +166,6 @@ class ApiBibliaController extends Controller
             'iduser' => 'required',
             'idcapitulo' => 'required'
         );
-
 
         $validator = Validator::make($request->all(), $rules);
         if ( $validator->fails()){
@@ -187,9 +179,12 @@ class ApiBibliaController extends Controller
 
         if ($userToken = JWTAuth::user($tokenApi)) {
 
-            $infoCapiBlockTexto = BibliaCapituloBlockTexto::where('id_biblia_capitulo_block', $request->idcapitulo)
-                ->where('id_idioma_planes', 1) // defecto espanol
-                ->first();
+            $texto = "";
+            if($info = BibliaCapituloBlockTexto::where('id_biblia_capitulo_block', $request->idcapitulo)
+                ->where('id_idioma_planes', $idiomaTextos)
+                ->first()){
+                $texto = $info->textocapitulo;
+            }
 
             $contenidoHtml = "<html>
                     <head>
@@ -200,7 +195,6 @@ class ApiBibliaController extends Controller
 
             $datosFuentes = new FuentesCssLetra();
             $contenidoHtml .= $datosFuentes->retornaFuentesCss();
-
 
 
             $contenidoHtml .= "
@@ -216,19 +210,10 @@ class ApiBibliaController extends Controller
                     </head>
                     <body>";
 
-
-
-                $contenidoHtml .= "$infoCapiBlockTexto->textocapitulo";
-
-
+                $contenidoHtml .= "$texto";
 
             $contenidoHtml .= "</div></body>
                     </html>";
-
-
-
-
-
 
             return ['success' => 1,
                 'contenido' => $contenidoHtml];

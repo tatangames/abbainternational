@@ -315,7 +315,8 @@
                             varGlobalEditorEditar.setData(texto);
                         }
 
-                        $('#modalDatosEditados').modal('show');
+                        $('#modalDatosEditados').css('overflow-y', 'auto');
+                        $('#modalDatosEditados').modal({backdrop: 'static', keyboard: false})
                     }
                     else{
                         toastr.error('Error al buscar');
