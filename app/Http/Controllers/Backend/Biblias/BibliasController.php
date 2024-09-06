@@ -13,7 +13,6 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
-use function Symfony\Component\Translation\t;
 
 class BibliasController extends Controller
 {
@@ -188,9 +187,12 @@ class BibliasController extends Controller
 
                 $imagenOld = $infoBiblia->imagen;
 
-                if(Storage::disk('archivos')->exists($imagenOld)){
-                    Storage::disk('archivos')->delete($imagenOld);
+                if($imagenOld != null){
+                    if(Storage::disk('archivos')->exists($imagenOld)){
+                        Storage::disk('archivos')->delete($imagenOld);
+                    }
                 }
+
 
                 Biblias::where('id', $request->id)->update([
                     'imagen' => $nombreFoto,
