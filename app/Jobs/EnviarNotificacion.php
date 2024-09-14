@@ -10,6 +10,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use OneSignal;
+use Exception;
 
 class EnviarNotificacion implements ShouldQueue
 {
@@ -41,20 +42,26 @@ class EnviarNotificacion implements ShouldQueue
 
         $AppId = config('googleapi.IdApp_Cliente');
 
-        $contents = array(
-            "en" => $mensajeNoti
-        );
+        try {
 
-        $params = array(
-            'app_id' => $AppId,
-            'contents' => $contents,
-            'include_player_ids' => is_array($this->arrayOnesignal) ? $this->arrayOnesignal : array($this->arrayOnesignal)
-        );
+            $contents = array(
+                "en" => $mensajeNoti
+            );
 
-        $params['headings'] = array(
-            "en" => $tituloNoti
-        );
+            $params = array(
+                'app_id' => $AppId,
+                'contents' => $contents,
+                'include_player_ids' => is_array($this->arrayOnesignal) ? $this->arrayOnesignal : array($this->arrayOnesignal)
+            );
 
-        OneSignal::sendNotificationCustom($params);
+            $params['headings'] = array(
+                "en" => $tituloNoti
+            );
+
+            OneSignal::sendNotificationCustom($params);
+
+        } catch (\Exception $e) {
+            Log::info("Error al enviar la notificación");
+        }
     }
 }

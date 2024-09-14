@@ -58,8 +58,6 @@ Route::middleware('verificarToken')->group(function () {
     // *****************************************************************
 
 
-    // buscar planes que no esten agregados a mi usuario -> Paginate
-    Route::post('app/buscar/planes/nuevos', [ApiPlanesController::class,'buscarPlanesNoAgregados']);
 
     // ver informacion de un plan para poder seleccionarlo
     Route::post('app/plan/seleccionado/informacion', [ApiPlanesController::class,'informacionPlanSeleccionado']);
@@ -99,11 +97,46 @@ Route::middleware('verificarToken')->group(function () {
 
 
 
+
+
+
+
+
+
+
+
+    //***************************************  RUTAS QUE SE VAN A BORRAR EL 01/01/2025 ****************************
+    // TAMBIEN BORRAR SU CONTENIDO
+
+    /// ******* ONE SIGNAL --- 3 TIPOS NOTIFICACIONES ******
+    ///
+    // INSIGNIA RACHA DIA LECTURA
+    // INSIGNIA COMPLETAR PLAN
+    // INSIGNIA PLANES COMPARTIDOS EN GRUPOS
+
+    // actualizar el check de cada plan -> onesignal
+
+    Route::post('app/plan/misplanes/actualizar/check', [ApiPlanesController::class,'actualizarCheckBloqueMiPlan']);
+
     // CREAR / ACTUALIZAR PREGUNTAS PARA ANDROID
     Route::post('app/plan/misplanes/preguntas/usuario/actualizar', [ApiPlanesController::class,'actualizarPreguntasUsuarioPlan']);
 
     // IPHONE
     Route::post('app/plan/misplanes/preguntas/usuario/actualizariphone', [ApiPlanesController::class,'actualizarPreguntasUsuarioPlanIphone']);
+
+
+
+
+    // NUEVAS RUTAS PORQUE SE QUITARA EL CHECK MANUAL
+
+    // CREAR / ACTUALIZAR PREGUNTAS PARA ANDROID Y IPHONE
+    Route::post('app/plan/misplanes/preguntas/usuario/actualizar/v2', [ApiPlanesController::class,'actualizarCheckBloqueMiPlanVersion2']);
+
+
+
+
+
+
 
 
 
@@ -170,15 +203,6 @@ Route::middleware('verificarToken')->group(function () {
 
 
 
-    /// ******* ONE SIGNAL --- 3 TIPOS NOTIFICACIONES ******
-    ///
-    // INSIGNIA RACHA DIA LECTURA
-    // INSIGNIA COMPLETAR PLAN
-    // INSIGNIA PLANES COMPARTIDOS EN GRUPOS
-
-    // actualizar el check de cada plan -> onesignal
-
-    Route::post('app/plan/misplanes/actualizar/check', [ApiPlanesController::class,'actualizarCheckBloqueMiPlan']);
 
 
     // Listado notificaciones para el usuario -> Paginate

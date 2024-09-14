@@ -261,11 +261,19 @@ class ApiInicioController extends Controller
 
                 $datoHitoNivel = DB::table('insignias_usuarios_detalle AS iud')
                     ->join('niveles_insignias AS ni', 'iud.id_niveles_insignias', '=', 'ni.id')
-                    ->select('ni.nivel', 'ni.id AS idnivelinsignia', 'iud.id_usuarios')
+                    ->select('ni.nivel', 'ni.id AS idnivelinsignia', 'iud.id_usuarios', 'ni.niveltexto')
                     ->where('ni.id_tipo_insignia', $dato->id_tipo_insignia)
                     ->where('iud.id_usuarios', $userToken->id)
                     ->max('ni.nivel');
 
+                // NIVEL TEXTO
+                $nivelTexto = "";
+                if($texto = NivelesInsignias::where('id_tipo_insignia',$dato->id_tipo_insignia)
+                    ->where('nivel', $datoHitoNivel)
+                    ->first()){
+                    $nivelTexto = $texto->niveltexto;
+                }
+                $dato->niveltexto = $nivelTexto;
 
                 if($datoHitoNivel != null){
                     $dato->nivelvoy = $datoHitoNivel;
